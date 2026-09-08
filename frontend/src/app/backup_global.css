@@ -1,0 +1,412 @@
+main {
+    padding-top: 45px; /* Adjust this if your desktop header gets thicker/thinner */
+  }
+  
+  /* 🌟 Mobile-specific spacing fix */
+  @media (max-width: 991px) {
+    main {
+      padding-top: 40px; /* Reduces the gap specifically for mobile */
+    }
+  }
+  
+  .dashboard-container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+  }
+  
+  /* Ensure consistent height for all cards */
+  .dashboard-card-link {
+    text-decoration: none;
+    height: 100%; /* Ensure the card link stretches fully */
+  }
+  
+  .dashboard-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensure spacing within the card */
+    align-items: center;
+    height: 100%; /* Make all cards the same height */
+    transition: background 0.5s ease, transform 0.3s ease;
+  }
+  
+  .dashboard-card:hover {
+    background: linear-gradient(to bottom, #f9bd5f, #f5a623);
+    color: white;
+    transform: scale(1.05);
+  }
+  
+  /* Icon Styling */
+  .dashboard-icon {
+    color: var(--card-color);
+    margin-bottom: 1rem;
+    transition: color 0.5s ease;
+  }
+  
+  /* Title Styling */
+  .dashboard-card-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--card-color);
+    transition: color 0.5s ease;
+  }
+  
+  /* Text Styling */
+  .dashboard-card-text {
+    font-size: 1rem;
+    text-align: center;
+    color: #333;
+    transition: color 0.5s ease;
+  }
+  
+  /* Hover Effects */
+  .dashboard-card:hover .dashboard-card-title,
+  .dashboard-card:hover .dashboard-icon {
+    color: white;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure the layout takes up the full height of the viewport */
+  body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* font-family: var(--font-poppins), sans-serif; */
+    font-family: var(--dynamic-paragraph-font) !important;
+  }
+  
+  .footer_wrapper {
+    background-color: #f8f9fa; /* Light grey background */
+    padding: 1.5rem 0;
+  }
+  
+  /* Wrapper to make sure the footer sticks to the bottom */
+  .page-container {
+    min-height: 100vh; /* Full height */
+    display: flex;
+    flex-direction: column; /* Column layout */
+  }
+  
+  .page-content {
+    flex: 1; /* Take up remaining space */
+  }
+  
+  .footer_copyright {
+    background-color: #ececec; /* Light background for copyright */
+    padding: 10px 0;
+  }
+  
+  /* UPDATED: Use var(--font-great-vibes) */
+  .font_stylish {
+    /* font-family: var(--font-great-vibes), cursive;  */
+    font-family: var(--dynamic-paragraph-font) !important;
+    font-size: 60px;
+    font-weight: 400 !important;
+  }
+  
+  /* ==========================================================================
+   PREMIUM GLOBAL LINKS & HOVER EFFECTS
+   ========================================================================== */
+  a {
+    color: inherit; /* Inherits text color by default so navbars/buttons don't break */
+    text-decoration: none !important;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Targeted text links (CMS paragraphs, descriptions) to get the Orange branding */
+  p a, .ck-content a, .team_description a {
+    color: #ff914d !important;
+    font-weight: 500;
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Modern sliding underline reveal effect on hover */
+  p a::after, .ck-content a::after, .team_description a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #ff914d;
+    transition: width 0.3s ease-in-out;
+  }
+  
+  p a:hover::after, .ck-content a:hover::after, .team_description a:hover::after {
+    width: 100%;
+  }
+  
+  p a:hover, .ck-content a:hover, .team_description a:hover {
+    color: #e67d3e !important; /* Slightly darker orange on hover for depth */
+  }
+  
+  /* ==========================================================================
+   Responsive Image & Aspect Ratio Locks (CMS Requirement)
+   ========================================================================== */
+  /* ==========================================================================
+   CMS HEADING FIXES (Restores distinct sizes for H1 - H6)
+   ========================================================================== */
+  
+  /* 1. Define the Bridge Variables (Defaults to Poppins if CMS fails) */
+  :root {
+    --dynamic-heading-font: var(--font-poppins), sans-serif;
+    --dynamic-paragraph-font: var(--font-poppins), sans-serif;
+  }
+  
+  /* 2. Apply to Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--dynamic-heading-font) !important;
+    color: #171717;
+    margin-bottom: 0.5em;
+  }
+  
+  h1 { font-size: 3rem !important; font-weight: 700 !important; line-height: 1.2; }
+  h2 { font-size: 2.5rem !important; font-weight: 600 !important; line-height: 1.25; }
+  h3 { font-size: 2rem !important; font-weight: 600 !important; line-height: 1.3; }
+  h4 { font-size: 1.5rem !important; font-weight: 600 !important; line-height: 1.35; }
+  h5 { font-size: 1.25rem !important; font-weight: 600 !important; line-height: 1.4; }
+  h6 { font-size: 1rem !important; font-weight: 600 !important; line-height: 1.4; }
+  
+  /* 3. Apply to Paragraphs */
+  p {
+    font-family: var(--dynamic-paragraph-font) !important;
+    font-weight: 400 !important;
+    font-size: 15px;
+    color: rgb(0, 0, 0);
+  }
+  /* 1. Global Image Reset: Prevents any image from exceeding its container */
+  img, video, iframe {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* 2. CKEditor Content Responsiveness */
+  /* Overrides hardcoded inline widths/heights added by the rich text editor */
+  .ck-content img,
+  .ck-content figure,
+  .ck-content figure.image img {
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain; /* Prevents aspect ratio distortion */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .ck-content table,
+  .details table,
+  .team_description table {
+    width: 100%;
+    max-width: 100%;
+    margin: 1.5rem 0;
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .ck-content th,
+  .ck-content td,
+  .details th,
+  .details td,
+  .team_description th,
+  .team_description td {
+    min-width: 140px;
+    padding: 0.85rem 1rem;
+    border: 1px solid #d7d7d7;
+    text-align: left;
+    vertical-align: top;
+    white-space: normal;
+  }
+  
+  .ck-content thead th,
+  .details thead th,
+  .team_description thead th {
+    background: #f5f5f5;
+    font-weight: 600;
+  }
+  
+  .ck-content figure.table,
+  .details figure.table,
+  .team_description figure.table,
+  .ck-content .raw-html-embed,
+  .details .raw-html-embed,
+  .team_description .raw-html-embed {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* 3. Utility Classes for Aspect Ratio Locks */
+  /* Use these classes on image wrappers to lock proportions across all devices */
+  .aspect-ratio-16-9 {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .aspect-ratio-4-3 {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .aspect-ratio-1-1 {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  /* 4. Object Fit Utilities */
+  /* Applied directly to images inside aspect-ratio wrappers to prevent stretching */
+  .img-cover {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Fills container, crops overflow, no stretch */
+    object-position: center;
+  }
+  
+  .img-contain {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important; /* Shows full image, adds letterbox, no stretch */
+    object-position: center;
+  }
+  
+  .responsive-media {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .responsive-media-contain {
+    object-fit: contain;
+  }
+  
+  .responsive-media-cover {
+    object-fit: cover;
+  }
+  
+  @media (max-width: 991px) {
+    .offerimg,
+    .wallpaperclass,
+    .Project_img,
+    .resi_img,
+    .bhkimg,
+    .detail_gal_img,
+    .detail_gal_img2,
+    .aboout_img,
+    .aboout_img_landing2,
+    .celebrate_img,
+    .interior_img2,
+    .residential_imgs {
+      height: auto !important;
+    }
+  
+    .services_img,
+    .how_itwork_img {
+      width: 100%;
+      max-width: 100%;
+      height: auto !important;
+    }
+  
+    .team_img {
+      height: 100% !important;
+    }
+  
+    .imgboxteam {
+      width: min(200px, 65vw) !important;
+      height: min(200px, 65vw) !important;
+    }
+  
+    .blog_cards {
+      height: auto !important;
+    }
+  }
+  
+  /* =========================================
+     DARK THEME CMS OVERRIDE (From previous fix)
+     Forces white text on dark backgrounds 
+  ========================================= */
+  .theme-dark-bg p,
+  .theme-dark-bg span,
+  .theme-dark-bg div,
+  .theme-dark-bg strong,
+  .theme-dark-bg li {
+    color: #ffffff !important;
+  }
+  
+  
+  
+  /* Policy Links in Footer */
+  .footer-policy-link {
+    color: #ff0000 !important; /* Initial red color */
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+  }
+  
+  .footer-policy-link:hover {
+    color: #000000 !important; /* Changes to white on hover (adjust as needed) */
+    text-decoration: underline;
+    transform: translateY(-2px); /* Slight lift effect */
+    display: inline-block;
+  }
+  
+  
+  /* ==========================================================================
+     WHY CHOOSE US - INFINITE SCROLL MARQUEE
+     ========================================================================== */
+     .why-choose-marquee {
+      overflow: hidden;
+      width: 100%;
+      display: flex;
+      padding: 1rem 0; /* Ensures box-shadows don't get clipped */
+    }
+    
+    .why-choose-track {
+      display: flex;
+      width: max-content;
+      animation: scrollMarquee 30s linear infinite;
+    }
+    
+    /* Pause the animation when the user hovers over the cards */
+    .why-choose-track:hover {
+      animation-play-state: paused;
+    }
+    
+    .why-choose-set {
+      display: flex;
+      gap: 1.5rem;
+      padding-right: 1.5rem; /* Matches the gap to ensure a seamless loop */
+    }
+    
+    @keyframes scrollMarquee {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
