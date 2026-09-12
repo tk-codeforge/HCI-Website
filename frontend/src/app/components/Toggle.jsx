@@ -250,10 +250,11 @@ const Toggle = () => {
                   <div className="col-lg-3 mobile-menu-column">
                     <h5 className="stylish-section-title">Experience Center</h5>
                     <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
+                      <li><a href="/experience-center-new-delhi/" className="offcanvas_anchor" onClick={closeSidebar}>New Delhi Experience Center</a></li>
                       <li><a href="/experience-center/" className="offcanvas_anchor" onClick={closeSidebar}>Noida Experience Center</a></li>
-                      <li><a href="/experience-center-gurugram/" className="offcanvas_anchor" onClick={closeSidebar}>Gurugram Experience Center</a></li>
-                      <li><a href="/experience-center-faridabad/" className="offcanvas_anchor" onClick={closeSidebar}>Faridabad Experience Center</a></li>
                       <li><a href="/experience-center-noida-extension/" className="offcanvas_anchor" onClick={closeSidebar}>Noida Extension Experience Center</a></li>
+                      <li><a href="/experience-center-gurugram/" className="offcanvas_anchor" onClick={closeSidebar}>Gurgaon Extension Experience Center</a></li>
+                      <li><a href="/experience-center-faridabad/" className="offcanvas_anchor" onClick={closeSidebar}>Faridabad Experience Center</a></li>
                     </ul>
                   </div>
 

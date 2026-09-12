@@ -106,9 +106,9 @@ export default async function ServicesDetail({ params }) {
       <main>
         <BackgroundImageWithHeading
           sectionBgImages={"contact_wrapper services"}
-          sectionBgHeading={pageData?.main_title}
+          sectionBgHeading={pageData?.banner_title || pageData?.main_title}
           secBgHeadingClass="sec_bgheading_lass"
-          sectionBgDescription=""
+          sectionBgDescription={pageData?.banner_subtitle || ""}
           secBgDesClass={"text-center bg-transparent"}
         />
         <section className="my-5 mb-0">

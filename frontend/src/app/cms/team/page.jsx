@@ -22,6 +22,11 @@ const CmsHowItsWorks = () => {
     });
     const [selectedId, setSelectedId] = useState(null);
 
+    const [pageMediaId, setPageMediaId] = useState(null);
+const [teamMediaItems, setTeamMediaItems] = useState([]);
+const [newImageFile, setNewImageFile] = useState(null);
+const [newVideoFile, setNewVideoFile] = useState(null);
+
     const fetchContentManagerPages = useCallback(async () => {
         try {
             const response = await api.get('/cms-content/team', {
@@ -42,9 +47,25 @@ const CmsHowItsWorks = () => {
         }
     }, [authToken]);
 
+    const fetchTeamPageMedia = useCallback(async () => {
+    try {
+        const response = await api.get('/cms-content/team_page_media', {
+            headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (response.data) {
+            const record = Array.isArray(response.data) ? response.data[0] : response.data;
+            setPageMediaId(record?.id || null);
+            setTeamMediaItems(record?.json_content?.items || []);
+        }
+    } catch (err) {
+        console.error("Failed to fetch team page media:", err);
+    }
+}, [authToken]);
+
     useEffect(() => {
         fetchContentManagerPages();
-    }, [fetchContentManagerPages]);
+        fetchTeamPageMedia();
+    }, [fetchContentManagerPages, fetchTeamPageMedia]);
 
     // Handle input change for text fields and image
     const handleInputChange = (e) => {
@@ -100,6 +121,83 @@ const CmsHowItsWorks = () => {
             console.error("Error:", error);
         }
     };
+
+    const handleAddImage = async (e) => {
+    e.preventDefault();
+    if (!newImageFile) {
+        toast.error("Please select an image to add.");
+        return;
+    }
+    const formDataToSend = new FormData();
+    formDataToSend.append("action", "add");
+    formDataToSend.append("image", newImageFile);
+
+    try {
+        const response = await api.patch(`/cms-content/update-team-page-media/${pageMediaId}`, formDataToSend, {
+            headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${authToken}` },
+        });
+        if (response.status === 200) {
+            toast.success("Image added successfully.");
+            setNewImageFile(null);
+            e.target.reset();
+            fetchTeamPageMedia();
+        }
+    } catch (error) {
+        toast.error(error.message ?? "Error adding image.");
+    }
+};
+
+const handleAddVideo = async (e) => {
+    e.preventDefault();
+    if (!newVideoFile) {
+        toast.error("Please select a video to add.");
+        return;
+    }
+    const formDataToSend = new FormData();
+    formDataToSend.append("action", "add");
+    formDataToSend.append("video", newVideoFile);
+
+    try {
+        const response = await api.patch(`/cms-content/update-team-page-media/${pageMediaId}`, formDataToSend, {
+            headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${authToken}` },
+        });
+        if (response.status === 200) {
+            toast.success("Video added successfully.");
+            setNewVideoFile(null);
+            e.target.reset();
+            fetchTeamPageMedia();
+        }
+    } catch (error) {
+        toast.error(error.message ?? "Error adding video.");
+    }
+};
+
+const handleDeleteMedia = async (index) => {
+    if (!window.confirm("Are you sure you want to delete this media item?")) return;
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("action", "delete");
+    formDataToSend.append("item_index", index);
+
+    try {
+        const response = await api.patch(
+            `/cms-content/update-team-page-media/${pageMediaId}`,
+            formDataToSend,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            }
+        );
+        if (response.status === 200) {
+            toast.success("Media deleted successfully.");
+            fetchTeamPageMedia();
+        }
+    } catch (error) {
+        toast.error(error.message ?? "Error deleting media.");
+    }
+};
 
     const handleAddSubmit = async (e) => {
         e.preventDefault();
@@ -240,6 +338,205 @@ const CmsHowItsWorks = () => {
                     </div>
                 )}
             </div>
+
+            <div className="container my-5">
+    <h3 className="mb-3">Team Page - Videos & Images</h3>
+
+    {/* Existing media list */}
+    {/* <div className="row g-3 mb-4">
+        {teamMediaItems.length === 0 && (
+            <p className="text-muted">No media added yet. Fallback video/image will be shown on the site.</p>
+        )} */}
+        {/* {teamMediaItems.map((item, idx) => (
+            <div className="col-md-4" key={idx}>
+                <div className="card p-2">
+                    {item.image && (
+                        <img src={item.image} alt="Team media" height="120" style={{ objectFit: "cover" }} />
+                    )}
+                    {item.video && (
+                        <div className="small text-muted mt-1">Video: {item.video.split('/').pop()}</div>
+                    )}
+                    <button
+                        className="btn btn-danger btn-sm mt-2"
+                        onClick={() => handleDeleteMedia(idx)}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        ))} */}
+        {/* {teamMediaItems.map((item, idx) => (
+    <div className="col-md-4" key={idx}>
+        <div className="card p-2">
+            {item.type === 'image' && (
+                <img src={item.url} alt="Team media" height="120" style={{ objectFit: "cover" }} />
+            )}
+            {item.type === 'video' && (
+                <div className="small text-muted mt-1">Video: {item.url?.split('/').pop()}</div>
+            )}
+            <button className="btn btn-danger btn-sm mt-2" onClick={() => handleDeleteMedia(idx)}>
+                Delete
+            </button>
+        </div>
+    </div>
+))}
+    </div> */}
+
+    {/* Add new media form */}
+    {/* <form onSubmit={handleAddMedia} className="row align-items-end">
+        <div className="mb-3 col-md-5">
+            <label className="form-label">Add Image</label>
+            <input
+                type="file"
+                className="form-control"
+                name="image"
+                accept="image/*"
+                onChange={handleNewMediaChange}
+            />
+        </div>
+        <div className="mb-3 col-md-5">
+            <label className="form-label">Add Video</label>
+            <input
+                type="file"
+                className="form-control"
+                name="video"
+                accept="video/*"
+                onChange={handleNewMediaChange}
+            />
+        </div>
+        <div className="mb-3 col-md-2">
+            <button className="btn btn-primary w-100" type="submit">
+                Add
+            </button>
+        </div>
+    </form> */}
+
+    {/* <div className="row">
+    <div className="col-md-6 mb-4">
+        <h5>Add Video</h5>
+        <form onSubmit={handleAddVideo}>
+            <div className="mb-3">
+                <input
+                    type="file"
+                    className="form-control"
+                    accept="video/*"
+                    onChange={(e) => setNewVideoFile(e.target.files[0] || null)}
+                />
+            </div>
+            <button className="btn btn-primary" type="submit">Save Video</button>
+        </form>
+    </div>
+    <div className="col-md-6 mb-4">
+        <h5>Add Image</h5>
+        <form onSubmit={handleAddImage}>
+            <div className="mb-3">
+                <input
+                    type="file"
+                    className="form-control"
+                    accept="image/*"
+                    onChange={(e) => setNewImageFile(e.target.files[0] || null)}
+                />
+            </div>
+            <button className="btn btn-primary" type="submit">Save Image</button>
+        </form>
+    </div>
+</div> */}
+
+{teamMediaItems.length === 0 && (
+        <p className="text-muted">No media added yet. Fallback video/image will be shown on the site.</p>
+    )}
+
+    {/* --- 1. VIDEOS GROUP --- */}
+    {teamMediaItems.some((item) => item.type === 'video') && (
+        <div className="mb-5">
+            <h5 className="border-bottom pb-2 text-primary">Videos</h5>
+            <div className="row g-3">
+                {teamMediaItems.map((item, idx) => {
+                    if (item.type !== 'video') return null;
+                    return (
+                        <div className="col-md-4" key={idx}>
+                            <div className="card p-2 h-100 justify-content-between shadow-sm">
+                                <video
+                                    src={item.url}
+                                    controls
+                                    muted
+                                    preload="metadata"
+                                    height="160"
+                                    style={{ objectFit: "cover", width: "100%", borderRadius: "6px" }}
+                                />
+                                <div className="small text-muted mt-2 text-truncate" title={item.url}>
+                                    {item.url?.split('/').pop()}
+                                </div>
+                                <button className="btn btn-danger btn-sm mt-2 w-100" onClick={() => handleDeleteMedia(idx)}>
+                                    Delete Video
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    )}
+
+    {/* --- 2. IMAGES GROUP --- */}
+    {teamMediaItems.some((item) => item.type === 'image') && (
+        <div className="mb-5">
+            <h5 className="border-bottom pb-2 text-primary">Images</h5>
+            <div className="row g-3">
+                {teamMediaItems.map((item, idx) => {
+                    if (item.type !== 'image') return null;
+                    return (
+                        <div className="col-md-4" key={idx}>
+                            <div className="card p-2 h-100 justify-content-between shadow-sm">
+                                <img
+                                    src={item.url}
+                                    alt="Team media"
+                                    height="160"
+                                    style={{ objectFit: "cover", width: "100%", borderRadius: "6px" }}
+                                />
+                                <button className="btn btn-danger btn-sm mt-2 w-100" onClick={() => handleDeleteMedia(idx)}>
+                                    Delete Image
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    )}
+
+    {/* Upload Forms */}
+    <div className="row pt-3 border-top">
+        <div className="col-md-6 mb-4">
+            <h5>Add Video</h5>
+            <form onSubmit={handleAddVideo}>
+                <div className="mb-3">
+                    <input
+                        type="file"
+                        className="form-control"
+                        accept="video/*"
+                        onChange={(e) => setNewVideoFile(e.target.files[0] || null)}
+                    />
+                </div>
+                <button className="btn btn-primary" type="submit">Save Video</button>
+            </form>
+        </div>
+        <div className="col-md-6 mb-4">
+            <h5>Add Image</h5>
+            <form onSubmit={handleAddImage}>
+                <div className="mb-3">
+                    <input
+                        type="file"
+                        className="form-control"
+                        accept="image/*"
+                        onChange={(e) => setNewImageFile(e.target.files[0] || null)}
+                    />
+                </div>
+                <button className="btn btn-primary" type="submit">Save Image</button>
+            </form>
+        </div>
+    </div>
+</div>
 
             <div className="modal fade" id="addNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">

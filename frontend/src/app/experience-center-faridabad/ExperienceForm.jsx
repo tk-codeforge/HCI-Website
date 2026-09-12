@@ -110,7 +110,7 @@ const ExperienceForm = () => {
   return (
     <div className="text-white form_experience_center mx-0">
       <form onSubmit={handleSubmit}>
-        <h5 className="text-center">Design for Every Budget</h5>
+        <h5 className="text-center text-white">Design for Every Budget</h5>
         <p className="mb-4 text-center text-white">
           Get Your Dream house today. Let Our experts help you.
         </p>

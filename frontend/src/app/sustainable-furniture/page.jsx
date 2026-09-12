@@ -130,6 +130,47 @@ async function getHeadingDescriptionData() {
     return null;
   }
 }
+
+// --- FALLBACK: used if the CMS has no cards yet, or the fetch fails ---
+const FALLBACK_FURNITURE_CARDS = [
+  {
+    image: "/images/sustainable-furniture/rattan.jpg",
+    title: "Rattan",
+    description:
+      "Rattan offers a blend of timeless style and natural warmth, perfect for enhancing any space with its unique, sustainable charm",
+    buttonText: "View More",
+    buttonLink: "/rattan",
+  },
+  {
+    image: "/images/sustainable-furniture/reclaimed-wood.jpg",
+    title: "Reclaimed Wood",
+    description:
+      "Bring warmth and character to your space with reclaimed wood, offering a unique, sustainable touch to any design.",
+    buttonText: "View More",
+    buttonLink: "/reclaimed-wood",
+  },
+];
+
+// --- HELPER: Fetch Furniture Cards ---
+async function getSustainableFurnitureCards() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(`${baseURL}/cms-content/sustainable_furniture`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) return FALLBACK_FURNITURE_CARDS;
+
+    const record = await res.json();
+    const data = Array.isArray(record) ? record[0] : record;
+    const cards = data?.json_content?.cards;
+
+    return Array.isArray(cards) && cards.length > 0 ? cards : FALLBACK_FURNITURE_CARDS;
+  } catch (err) {
+    console.error("Furniture Cards Fetch Error:", err);
+    return FALLBACK_FURNITURE_CARDS;
+  }
+}
 // --- DYNAMIC METADATA GENERATION ---
 export async function generateMetadata() {
   const seoData = await getSeoData();
@@ -157,7 +198,11 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function SustainableFurniture() {
-    const headingData = await getHeadingDescriptionData();
+    // const headingData = await getHeadingDescriptionData();
+    const [headingData, furnitureCards] = await Promise.all([
+  getHeadingDescriptionData(),
+  getSustainableFurnitureCards(),
+]);
 
   const HeadingTag = headingData?.headingTag || "h1";
   const headingText = headingData?.headingText || "Sustainable Furniture";
@@ -191,7 +236,7 @@ export default async function SustainableFurniture() {
   ${headingData?.descriptionFontSize ? `#sustainable-furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
 `}</style>
           </div>
-          <div className="row g-4 mx-0">
+          {/* <div className="row g-4 mx-0">
             <div className="col-lg-6 col-md-6 col-12">
               <WallpaperCard
                 linkTagWallpaper="/rattan"
@@ -220,7 +265,26 @@ export default async function SustainableFurniture() {
                 btnHrefWallpaper="/reclaimed-wood"
               />
             </div>
-          </div>
+          </div> */}
+
+          <div className="row g-4 mx-0">
+  {furnitureCards.map((card, index) => (
+    <div className="col-lg-6 col-md-6 col-12" key={card.buttonLink || index}>
+      <WallpaperCard
+        linkTagWallpaper={card.buttonLink}
+        wallpaperCard="wallpapercard"
+        imgWallpaper={card.image}
+        wallpaperImgClass="wallpaperclass"
+        altWallpaper={card.title}
+        portfolioTitle={card.title}
+        wallpaperDescriptiion={card.description}
+        descriptionClass="team_description mb-0"
+        textBtnWallpaper={card.buttonText}
+        btnHrefWallpaper={card.buttonLink}
+      />
+    </div>
+  ))}
+</div>
         </section>
         <hr />
       </main>

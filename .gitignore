@@ -32,3 +32,5 @@ pnpm-debug.log*
 Thumbs.db
 
 **/.git_backup/
+
+backend/src/config/index.ts

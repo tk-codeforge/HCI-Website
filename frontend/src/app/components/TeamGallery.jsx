@@ -4,7 +4,7 @@ import { defaultAltText } from "@/utils/helper";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const TeamGallery = () => {
+const TeamGallery = ({ galleryImage, showFallback = true  }) => {
   // const teamdata = [
   //   {
   //     imgs: "/images/team/mansi-mam.webp",
@@ -93,7 +93,16 @@ useEffect(() => {
     <div>
       <section className="my-5">
         <div className="container">
-          <img src="images/teams.jpeg" className="img-thumbnail responsive-media" alt="Team gallery" loading="lazy" decoding="async" /> 
+          {(galleryImage || showFallback) && (
+          <img 
+            src={galleryImage} 
+            className="img-thumbnail responsive-media" 
+            alt="Team gallery" 
+            loading="lazy" 
+            decoding="async" 
+          /> 
+)}
+          {/* <img src="images/teams.jpeg" className="img-thumbnail responsive-media" alt="Team gallery" loading="lazy" decoding="async" />  */}
           {/* <div className="row">
      
             {teamDataList&&teamDataList?.map((teamItem, index) => {

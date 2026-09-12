@@ -779,7 +779,7 @@ select.form-select.form-control {
 
 .career_page_banner {
   height: 50vh;
-  background-image: url(../images/services/career_page_banner.jpg) !important;
+  background-image: url(../images/services/career_page_banner.jpg);
 }
 
 .career_form_banner {
@@ -794,7 +794,7 @@ select.form-select.form-control {
 
 .faq_banner {
   height: 50vh;
-  background-image: url(../images/services/faq_banner.jpg) !important;
+  background-image: url(../images/services/faq_banner.jpg);
 }
 
 .privacy_policy_banner {
@@ -1145,7 +1145,7 @@ label.form-check-label {
 }
 .secbgbesclass {
   color: #fff;
-  font-size: 14px;
+  font-size: 14px !important;
   border-left: 10px solid #ff914d;
   height: 80px;
   padding-left: 10px;
@@ -1694,18 +1694,17 @@ display: none;
     font-size: 35px !important;
   }
 
-  main {
+  /* main {
     padding-top:100px  !important;
-}
+} */
 
 .home_video_banner {
   height: auto !important; 
 }
 
   /* .rotate_div {
-
+    top: 40px;
   } */
-  /* top: 40px; */
  
 
 }
@@ -1906,10 +1905,8 @@ display: none;
     font-size: 35px !important;
   }
   /* .rotate_div {
-    
+    top: 40px;
   } */
-/* top: 40px; */
-
   .desig_gal_bg1,
   .portfoliobg1 {
     height: 340px !important;
@@ -2047,13 +2044,6 @@ display: none;
     font-family: poppins-bold;
     letter-spacing: 2px;
   }
-}
-
-/* Add this base class for desktop outside media queries */
-.font_stylish {
-  font-family: var(--font-outfit), sans-serif; 
-  font-size: 50px; 
-  font-weight: 600;
 }
 .row_bill {
   background-color: #fde5f678;

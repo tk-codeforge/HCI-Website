@@ -57,6 +57,17 @@ async function getBannerData() {
   }
 }
 
+async function getTeamPageMedia() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(`${baseURL}/cms-content/team_page_media`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    return null;
+  }
+}
+
 // --- DYNAMIC METADATA GENERATION ---
 export async function generateMetadata() {
   const seoData = await getSeoData();
@@ -87,6 +98,10 @@ export default async function TeamGallerys() {
   const bannerRecord = await getBannerData();
 const bgHeading = bannerRecord?.banner_heading || "Teams";
 const bgDescription = bannerRecord?.banner_description || "Great design starts with great people—meet our passionate designers, planners, and innovators who turn ideas into beautiful interiors and dreams into reality.";
+
+const teamPageMedia = await getTeamPageMedia();
+const teamMediaItems = teamPageMedia?.json_content?.items || [];
+const hasMedia = teamMediaItems.length > 0;
   return (
     <MainLayout>
       <main>
@@ -100,7 +115,7 @@ const bgDescription = bannerRecord?.banner_description || "Great design starts w
         /> */}
 
         <BackgroundImageRow
-          sectionBgImages={"contact_wrapper design_gallery_banner"}
+          sectionBgImages={"contact_wrapper teamsImage"}
           sectionBgHeading={bgHeading}
           secBgHeadingClass="sec_bgheading_lass"
           sectionBgDescription={bgDescription}
@@ -111,9 +126,23 @@ descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
 sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
   sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
         />
+        <style dangerouslySetInnerHTML={{__html: `
+  .team-media-image {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    display: block;
+  }
+  @media (max-width: 768px) {
+    .team-media-image {
+      height: auto;
+      aspect-ratio: 16 / 9;
+    }
+  }
+`}} />
 
         {/* 2. CLEAR VIDEO SECTION (No dark overlays, no blurry stretching) */}
-        <section className="container my-5">
+        {/* <section className="container my-5">
           <div 
             className="video-container shadow-lg" 
             style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
@@ -127,14 +156,176 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               controls // Adds play/pause buttons for the user
               style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
             >
-              <source src="/team.MP4" type="video/mp4" />
+              <source src={teamVideoSrc} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
-        </section>
+        </section> */}
+
+        {/* 2. CLEAR VIDEO/IMAGE SECTION (No dark overlays, no blurry stretching) */}
+{/* <section className="container my-5"> */}
+  {/* {hasMedia ? (
+    <div className="row g-4"> */}
+      {/* {teamMediaItems.map((item, idx) => (
+        <div className="col-md-6" key={idx}>
+          {item.video ? (
+            <div
+              className="video-container shadow-lg"
+              style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
+            >
+              <video
+                width="100%"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
+              >
+                <source src={item.video} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          ) : item.image ? (
+            <img
+              src={item.image}
+              alt="Team media"
+              className="img-fluid rounded-3 shadow-lg"
+              style={{ width: "100%", maxHeight: "70vh", objectFit: "cover" }}
+            />
+          ) : null}
+        </div>
+      ))} */}
+
+      {/* {teamMediaItems.map((item, idx) => (
+  <div className="col-md-6" key={idx}>
+    {item.type === 'video' ? (
+      <div
+        className="video-container shadow-lg"
+        style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
+      >
+        <video
+          width="100%"
+          autoPlay
+          loop
+          muted
+          playsInline
+          controls
+          style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
+        >
+          <source src={item.url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    ) : item.type === 'image' ? (
+      <img
+        src={item.url}
+        alt="Team media"
+        className="img-fluid rounded-3 shadow-lg"
+        style={{ width: "100%", maxHeight: "70vh", objectFit: "cover" }}
+      />
+    ) : null}
+  </div>
+))}
+    </div>
+  ) : (
+    <div
+      className="video-container shadow-lg"
+      style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
+    >
+      <video
+        width="100%"
+        autoPlay
+        loop
+        muted
+        playsInline
+        controls
+        style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
+      >
+        <source src="/team.MP4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  )}
+</section> */}
+
+<section className="container my-5">
+  {teamMediaItems
+    .filter((item) => item.type === 'video')
+    .map((item, idx) => (
+      <div
+        key={`video-${idx}`}
+        className="video-container shadow-lg mb-4 w-100"
+        style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
+      >
+        <video
+          width="100%"
+          autoPlay
+          loop
+          muted
+          playsInline
+          controls
+          style={{ display: "block", width: "100%", maxHeight: "70vh", objectFit: "contain" }}
+        >
+          <source src={item.url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    ))}
+
+  {/* {teamMediaItems
+    .filter((item) => item.type === 'image')
+    .map((item, idx) => (
+      <div key={`image-${idx}`} className="mb-4 w-100">
+        <img
+          src={item.url}
+          alt="Team media"
+          className="rounded-3 shadow-lg"
+          style={{ display: "block", width: "100%", maxHeight: "80vh", objectFit: "cover" }}
+        />
+      </div>
+    ))} */}
+
+    {teamMediaItems
+  .filter((item) => item.type === 'image')
+  .map((item, idx) => (
+    <div key={`image-${idx}`} className="mb-4">
+      <img
+        src={item.url}
+        alt="Team media"
+        className="img-thumbnail team-media-image"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  ))}
+
+  {!hasMedia && (
+    <div
+      className="video-container shadow-lg w-100"
+      style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
+    >
+      <video
+        width="100%"
+        autoPlay
+        loop
+        muted
+        playsInline
+        controls
+        style={{ display: "block", width: "100%", maxHeight: "70vh", objectFit: "contain" }}
+      >
+        <source src="/team.MP4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  )}
+</section>
 
         {/* 3. TEAM GALLERY */}
-        <TeamGallery />
+        <TeamGallery 
+  galleryImage={hasMedia ? null : "images/teams.jpeg"} 
+  showFallback={!hasMedia} 
+/>
       </main>
     </MainLayout>
   );

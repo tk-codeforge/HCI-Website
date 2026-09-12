@@ -178,4 +178,20 @@ async updateWithImage(
     ensureCmsDeletePermission(req.user);
     return this.cmsContentService.remove(+id);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+@Patch('update-team-page-media/:id')
+@UseInterceptors(FileFieldsInterceptor([
+  { name: 'image', maxCount: 1 },
+  { name: 'video', maxCount: 1 },
+]))
+async updateTeamPageMedia(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() dto: any,
+  @UploadedFiles() files: { image?: Express.Multer.File[], video?: Express.Multer.File[] },
+) {
+  const imagePath = files?.image?.[0]?.filename || null;
+  const videoPath = files?.video?.[0]?.filename || null;
+  return this.cmsContentService.updateTeamPageMedia(id, dto, imagePath, videoPath);
+}
 }

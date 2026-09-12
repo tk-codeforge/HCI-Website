@@ -27,7 +27,6 @@ const HEADING_DEFS = [
     tag: "h2",
     hasSpan: false,
     hasHeading: true,
-    note: "Rendered inside the CounterRow component on the home page.",
   },
   {
     key: "blogs",

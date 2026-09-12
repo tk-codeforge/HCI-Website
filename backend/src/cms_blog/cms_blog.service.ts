@@ -166,7 +166,7 @@ export class CmsBlogService {
 
   async findOneBySlug(slug: string) {
   const blog = await this.cmsBlogRepository.createQueryBuilder('blog')
-    .where("blog.seo_content ->> 'slug' = :slug", { slug })
+    .where("blog.seo_content ->> '$.slug' = :slug", { slug })
     .andWhere('blog.status = :status', { status: CmsStatus.Published })
     .getOne();
 

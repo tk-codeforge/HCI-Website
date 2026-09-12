@@ -8,14 +8,15 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
 // You can add more pages here later if you want to manage other banners
 const PAGE_DEFS = [
-  { key: "design_idea", label: "Design Idea Banner" },
+  { key: "design_idea", label: "Design Idea Page Banner" },
   { key: "award_gallery", label: "Awards Page Banner" },
-  { key: "award_galleries", label: "Award Gallery Banner" },
+  { key: "award_galleries", label: "Award Gallery Page Banner" },
   { key: "team", label: "Team Page Banner" },
   { key: "terms_and_condition", label: "Terms & Condition Page Banner" },
   { key: "privacy_policy", label: "Privacy Policy Page Banner" },
   { key: "cancellation_policy", label: "Cancellation Policy Page Banner" },
   { key: "refer_and_earn", label: "Refer and Earn Page Banner" }, 
+  { key: "faq", label: "FAQ Page Banner" },
 ];
 
 const HEADING_TAG_OPTIONS = ["h1", "h2", "h3", "h4", "h5", "h6"];

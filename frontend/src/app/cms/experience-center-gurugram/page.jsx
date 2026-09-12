@@ -202,6 +202,43 @@ const CmsExperienceCenter = () => {
         }
     };
 
+    const handleAddSubmitVideo = async (e) => {
+    e.preventDefault();
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("page_type", "experience_center_gurugram_video");
+    formDataToSend.append("title", formData.title);
+    formDataToSend.append("description", formData.description);
+    if (formData.image) {
+        formDataToSend.append("image", formData.image);
+    }
+
+    try {
+        const response = await api.post(`/cms-parent-child`, formDataToSend, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.status === 201) {
+            fetchContentManagerPagesVideo();
+            toast.success("Video added successfully.");
+            setFormData({
+                title: "",
+                description: "",
+                image: null,
+            });
+            document.getElementById('addNewpageModalVideoClose').click();
+        } else {
+            toast.error("Error submitting form. Please try again.");
+        }
+    } catch (error) {
+        toast.error(error.response?.data?.message ?? "Error fetching data. Please try again.");
+        console.error("Error:", error);
+    }
+};
+
     // Set form data when edit button is clicked
     const handleEditClick = (item) => {
         console.log("edit item here",item);
@@ -249,8 +286,53 @@ const CmsExperienceCenter = () => {
         setSelectedId(id);
     }
 
+const handleDeleteParent = async (id) => {
+    const confirmDelete = window.confirm(
+        "This will permanently delete this image and all of its child images. Continue?"
+    );
+    if (!confirmDelete) return;
 
+    try {
+        const response = await api.delete(`/cms-parent-child/${id}`, {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
 
+        if (response.status === 200 || response.status === 204) {
+            toast.success("Deleted successfully.");
+            fetchContentManagerPages();
+        } else {
+            toast.error("Error deleting item. Please try again.");
+        }
+    } catch (error) {
+        toast.error(error.response?.data?.message ?? "Error deleting item. Please try again.");
+        console.error("Error:", error);
+    }
+};
+
+const handleDeleteVideo = async (id) => {
+    const confirmDelete = window.confirm("This will permanently delete this video. Continue?");
+    if (!confirmDelete) return;
+
+    try {
+        const response = await api.delete(`/cms-parent-child/${id}`, {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.status === 200 || response.status === 204) {
+            toast.success("Deleted successfully.");
+            fetchContentManagerPagesVideo();
+        } else {
+            toast.error("Error deleting video. Please try again.");
+        }
+    } catch (error) {
+        toast.error(error.response?.data?.message ?? "Error deleting video. Please try again.");
+        console.error("Error:", error);
+    }
+};
 
     return (
         <AuthMainLayout>
@@ -301,6 +383,9 @@ const CmsExperienceCenter = () => {
                                             <button onClick={() => handleEditClick(item)} type="button" className="read_morebtn" data-bs-toggle="modal" data-bs-target="#editNewpageModal">
                                                 Edit
                                             </button>
+                                             <button onClick={() => handleDeleteParent(item.id)} type="button" className="btn btn-danger">
+        Delete
+    </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -465,6 +550,19 @@ const CmsExperienceCenter = () => {
             <div className="container my-5">
                 <h1 className="mb-4 text-center">Experience Center Video</h1>
                  
+                 {(!pagesListVideo || pagesListVideo.length === 0) && (
+        <div className="d-flex justify-content-end mb-3">
+            <button
+                onClick={() => setFormData({ title: "", description: "", image: null })}
+                type="button"
+                className="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#addNewpageModalVideo"
+            >
+                Add New Video
+            </button>
+        </div>
+    )}
                 {loading ? (
                     <div className="text-center">Loading...</div>
                 ) : (
@@ -495,6 +593,9 @@ const CmsExperienceCenter = () => {
                                             <button onClick={() => handleEditClick(item)} type="button" className="read_morebtn" data-bs-toggle="modal" data-bs-target="#editNewpageModalVideo">
                                                 Edit
                                             </button>
+                                            <button onClick={() => handleDeleteVideo(item.id)} type="button" className="btn btn-danger">
+        Delete
+    </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -503,7 +604,51 @@ const CmsExperienceCenter = () => {
                     </div>
                 )}
             </div>
+<div className="modal fade" id="addNewpageModalVideo" tabIndex="-1" aria-labelledby="addNewpageModalVideoLabel" aria-hidden="true">
+    <div className="modal-dialog">
+        <div className="modal-content">
+            <div className="modal-header">
+                <h1 className="modal-title fs-5" id="addNewpageModalVideoLabel">Add New Video</h1>
+                <button type="button" className="btn-close" id="addNewpageModalVideoClose" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form onSubmit={handleAddSubmitVideo}>
+                <div className="modal-body row">
 
+                    <div className="mb-3 col-md-12">
+                        <label htmlFor="title" className="form-label">Title</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            name="title"
+                            placeholder="Title"
+                            value={formData.title}
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3 col-md-12">
+                        <label className="form-label">Video</label>
+                        <input
+                            type="file"
+                            className="form-control"
+                            name="image"
+                            accept="*"
+                            onChange={handleInputChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="m-auto mt-2 col-12 d-flex justify-content-center">
+                        <button className="px-5 read_morebtn" type="submit">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
             <div className="modal fade" id="editNewpageModalVideo" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">

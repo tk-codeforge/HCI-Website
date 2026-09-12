@@ -22,6 +22,9 @@ export enum PageType {
     // 🌟 NEW: Added Noida Extension
     EXPERIENCE_CENTER_NOIDA_EXTENSION = 'experience_center_noida_extension',
     EXPERIENCE_CENTER_NOIDA_EXTENSION_VIDEO = 'experience_center_noida_extension_video',
+
+    EXPERIENCE_CENTER_NEW_DELHI = 'experience_center_new_delhi',
+    EXPERIENCE_CENTER_NEW_DELHI_VIDEO = 'experience_center_new_delhi_video',
     
     PRODUCT = 'product',
 }

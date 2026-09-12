@@ -270,6 +270,7 @@ function AuthSidebar() {
                         <Link href="/cms/manage-heading-and-description" className={`sub-menu-link ${isActive('/cms/manage-heading-and-description')}`}>Heading & Description Management</Link>
                         <Link href="/cms/product" className={`sub-menu-link ${isActive('/cms/product')}`}>Main Products</Link>
                         <Link href="/cms/designer-choice" className={`sub-menu-link ${isActive('/cms/designer-choice')}`}>{`Designer's Choice`}</Link>
+                        <Link href="/cms/sustainable-furniture" className={`sub-menu-link ${isActive('/cms/sustainable-furniture')}`}>Sustainable Furniture</Link>
                         <Link href="/cms/exclusive-design/furniture" className={`sub-menu-link ${isActive('/cms/exclusive-design/furniture')}`}>Furniture</Link>
                         <Link href="/cms/exclusive-design/space_saving_furniture" className={`sub-menu-link ${isActive('/cms/exclusive-design/space_saving_furniture')}`}>Space Saving</Link>
                         <Link href="/cms/exclusive-design/sustainable_furniture_rattan" className={`sub-menu-link ${isActive('/cms/exclusive-design/sustainable_furniture_rattan')}`}>Rattan</Link>
@@ -288,7 +289,7 @@ function AuthSidebar() {
                     <div className="sub-menu">
                         <Link href="/cms/about-us" className={`sub-menu-link ${isActive('/cms/about-us')}`}>About Us</Link>
                         {/* <Link href="/cms/about-us-slider" className={`sub-menu-link ${isActive('/cms/about-us-slider')}`}>About Us Slider</Link> */}
-                        <Link href="/cms/team" className={`sub-menu-link ${isActive('/cms/team')}`}>Team Members</Link>
+                        <Link href="/cms/team" className={`sub-menu-link ${isActive('/cms/team')}`}>Team</Link>
                         <Link href="/cms/blog" className={`sub-menu-link ${isActive('/cms/blog')}`}>Blogs</Link>
                         <Link href="/cms/what-we-offer" className={`sub-menu-link ${isActive('/cms/what-we-offer')}`}>Redirects What We Offer</Link>
                         <Link href="/cms/how-its-works" className={`sub-menu-link ${isActive('/cms/how-its-works')}`}>How It Works</Link>
@@ -311,6 +312,7 @@ function AuthSidebar() {
                         <Link href="/cms/experience-center-gurugram" className={`sub-menu-link ${isActive('/cms/experience-center-gurugram')}`}>Gurugram Center</Link>
                         <Link href="/cms/experience-center-faridabad" className={`sub-menu-link ${isActive('/cms/experience-center-faridabad')}`}>Faridabad Center</Link>
                         <Link href="/cms/experience-center-noida-extension" className={`sub-menu-link ${isActive('/cms/experience-center-noida-extension')}`}>Noida Extension Center</Link>
+                        <Link href="/cms/experience-center-new-delhi" className={`sub-menu-link ${isActive('/cms/experience-center-new-delhi')}`}>New Delhi Center</Link>
                     </div>
                 )}
 

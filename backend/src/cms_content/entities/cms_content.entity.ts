@@ -42,6 +42,8 @@ export enum PageType {
     FOOTER_PROFILES = 'footer_profiles',
     FOOTER_PAGE_RULES = 'footer_page_rules',
     CONTACT_PAGE = 'contact_page',
+    TEAM_PAGE_MEDIA = 'team_page_media',
+    SUSTAINABLE_FURNITURE = 'sustainable_furniture',
  }
 
 @Entity('cms_content')

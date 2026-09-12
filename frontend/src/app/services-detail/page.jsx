@@ -1011,9 +1011,9 @@ const ServicesDetailPage = async ({ searchParams }) => {
             fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
           />
           <div className="container hero-content font-poppins">
-            <div className="hero-badge"><FaMapMarkerAlt className="me-2" /> High Creation Interior in {displayCity}</div>
+            <div className="hero-badge"><FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior in ${displayCity}`}</div>
             <h1 className="hero-main-title fw-bold mb-3 font-outfit text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}>
-              {pageData?.main_title || `Interior Designers in ${displayCity}`}
+              {pageData?.banner_title || pageData?.main_title || `Interior Designers in ${displayCity}`}
             </h1>
           </div>
         </div>
@@ -1028,9 +1028,9 @@ const ServicesDetailPage = async ({ searchParams }) => {
                 
                  {/* --- LENGTHY CONTENT --- */}
                  <div className="premium-card mb-4">
-                  <h2 className="font-outfit fw-bold h3 mb-4 text-dark">
+                  {/* <h2 className="font-outfit fw-bold h3 mb-4 text-dark">
                      Interior Designer In {displayCity}
-                  </h2>
+                  </h2> */}
                   <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeDescription }} />
                 </div>
 

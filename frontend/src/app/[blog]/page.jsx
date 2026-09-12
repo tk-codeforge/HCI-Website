@@ -2130,8 +2130,8 @@ const DynamicRootPage = async ({ params }) => {
                               <img 
                                 src={blog.image || "/images/default.jpg"} 
                                 alt={blog.title} 
-                                className="rounded object-fit-cover shadow-sm flex-shrink-0" 
-                                style={{ width: "70px", height: "70px" }} 
+                                className="rounded shadow-sm flex-shrink-0" 
+                                style={{ width: "70px", height: "70px", objectFit: "inherit" }} 
                               />
                               <div>
                                 <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px', lineHeight: '1.4' }}>
@@ -2196,9 +2196,9 @@ const DynamicRootPage = async ({ params }) => {
                   {/* <div className="dual-sticky-wrapper"> */}
                     
                     <div className="premium-card mb-4">
-                      <h2 className="font-outfit fw-bold h3 mb-4 text-dark">
+                      {/* <h2 className="font-outfit fw-bold h3 mb-4 text-dark">
                          {displayCity}
-                      </h2>
+                      </h2> */}
                       <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeContent }} />
                     </div>
 

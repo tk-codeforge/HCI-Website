@@ -51,5 +51,3 @@ Thumbs.db
 /public/images1/
 # Environment variables
 .env
-
-*.zip

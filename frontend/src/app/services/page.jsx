@@ -148,16 +148,16 @@ if (!hasCustomContent && rawPageDataList && Array.isArray(rawPageDataList)) {
 }
 
   // Strict Fallback Order matching your exact code requirements
-  const fallbackImages = [
-    "/images/services/1-min.png", // 0: Noida
-    "/images/services/2-min.png", // 1: Ghaziabad
-    "/images/services/3-min.png", // 2: Greater Noida
-    "/images/services/4-min.png", // 3: Delhi
-    "/images/services/5-min.png", // 4: Dwarka
-    "/images/services/6-min.png", // 5: Faridabad
-    "/images/services/8-min.png", // 6: Gurugram
-    "/images/services/7-min.png", // 7: Manesar
-  ];
+  // const fallbackImages = [
+  //   "/images/services/1-min.png", // 0: Noida
+  //   "/images/services/2-min.png", // 1: Ghaziabad
+  //   "/images/services/3-min.png", // 2: Greater Noida
+  //   "/images/services/4-min.png", // 3: Delhi
+  //   "/images/services/5-min.png", // 4: Dwarka
+  //   "/images/services/6-min.png", // 5: Faridabad
+  //   "/images/services/8-min.png", // 6: Gurugram
+  //   "/images/services/7-min.png", // 7: Manesar
+  // ];
 
   const activeItems = hasCustomContent ? customServices : pageDataList;
 
@@ -321,7 +321,7 @@ const hasCustomBanner =
           {activeItems && activeItems.length > 0 ? (
             activeItems.map((item, index) => {
               // Strictly enforce fallback images matching index order (0 -> 1-min.png for Noida, etc.)
-              const fallbackImg = fallbackImages[index] || fallbackImages[index % fallbackImages.length];
+              // const fallbackImg = fallbackImages[index] || fallbackImages[index % fallbackImages.length];
               const isEven = index % 2 === 0;
 
               let targetLink = item?.button_url || item?.buttonLink;
@@ -340,9 +340,10 @@ const hasCustomBanner =
                 ? (item?.description || "") 
                 : (item?.main_description || "");
 
-              const itemImage = hasCustomContent 
-                ? (item?.image || fallbackImg) 
-                : (fallbackImg); // Enforces strict array fallback order for cities
+              // const itemImage = hasCustomContent 
+              //   ? (item?.image || fallbackImg) 
+              //   : (fallbackImg); // Enforces strict array fallback order for cities
+              const itemImage = item?.image || null;
 
               const btnText = item?.button_text || item?.buttonText || "Read More";
 
@@ -351,7 +352,7 @@ const hasCustomBanner =
                   <div className="row g-5 align-items-center">
                     
                     {/* IMAGE COLUMN */}
-                    <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
+                    {/* <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
                       <div className="service-img-wrapper">
                         <Image 
                           src={itemImage} 
@@ -360,6 +361,24 @@ const hasCustomBanner =
                           sizes="(max-width: 768px) 100vw, 50vw"
                           style={{ objectFit: 'cover' }}
                         />
+                      </div>
+                    </div> */}
+
+                                        <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
+                      <div className="service-img-wrapper">
+                        {itemImage ? (
+                          <Image 
+                            src={itemImage} 
+                            alt={titleText || defaultAltText}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            style={{ objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
+                            No image
+                          </div>
+                        )}
                       </div>
                     </div>
 

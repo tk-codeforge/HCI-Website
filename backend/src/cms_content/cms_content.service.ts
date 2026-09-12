@@ -300,6 +300,25 @@ export class CmsContentService {
         case 'footer_content' as any:
           contentData.json_content = this.cleanFooterContent(contentData.json_content);
           break;
+
+          case PageType.TEAM_PAGE_MEDIA:
+  if (jsonContent && Array.isArray(jsonContent.items)) {
+    jsonContent.items.forEach((item) => {
+      item.url = this.normalizeImageUrl(item?.url, baseUrl);
+    });
+  }
+  contentData.json_content = jsonContent;
+  break;
+
+  case PageType.SUSTAINABLE_FURNITURE:
+          if (jsonContent?.cards && Array.isArray(jsonContent.cards)) {
+            jsonContent.cards.forEach((card) => {
+              card.image = this.normalizeImageUrl(card?.image, baseUrl);
+            });
+          }
+          contentData.json_content = jsonContent;
+          break;
+
         default:
           contentData.json_content = jsonContent;
       }
@@ -424,31 +443,61 @@ export class CmsContentService {
 
         const iconIndices = this.extractIndices(updateCmsContentDto?.icon_indices);
 
-        if (Array.isArray(jsonContent.services)) {
-          jsonContent.services.forEach((service, index) => {
-            const fileSlot = iconIndices.indexOf(index);
-            if (fileSlot !== -1 && icons && icons[fileSlot]) {
-              service.image = basename(icons[fileSlot].filename);
-            } else if (existingJsonContent?.services?.[index]?.image) {
-              service.image = basename(existingJsonContent.services[index].image);
-            } else if (service.image) {
-              service.image = basename(service.image);
-            }
-          });
-        }
+        // if (Array.isArray(jsonContent.services)) {
+        //   jsonContent.services.forEach((service, index) => {
+        //     const fileSlot = iconIndices.indexOf(index);
+        //     if (fileSlot !== -1 && icons && icons[fileSlot]) {
+        //       service.image = basename(icons[fileSlot].filename);
+        //     } else if (existingJsonContent?.services?.[index]?.image) {
+        //       service.image = basename(existingJsonContent.services[index].image);
+        //     } else if (service.image) {
+        //       service.image = basename(service.image);
+        //     }
+        //   });
+        // }
 
-        if (Array.isArray(jsonContent.blocks)) {
-          jsonContent.blocks.forEach((block, index) => {
-            const fileSlot = iconIndices.indexOf(index);
-            if (fileSlot !== -1 && icons && icons[fileSlot]) {
-              block.image = basename(icons[fileSlot].filename);
-            } else if (existingJsonContent?.blocks?.[index]?.image) {
-              block.image = basename(existingJsonContent.blocks[index].image);
-            } else if (block.image) {
-              block.image = basename(block.image);
-            }
-          });
-        }
+        // if (Array.isArray(jsonContent.blocks)) {
+        //   jsonContent.blocks.forEach((block, index) => {
+        //     const fileSlot = iconIndices.indexOf(index);
+        //     if (fileSlot !== -1 && icons && icons[fileSlot]) {
+        //       block.image = basename(icons[fileSlot].filename);
+        //     } else if (existingJsonContent?.blocks?.[index]?.image) {
+        //       block.image = basename(existingJsonContent.blocks[index].image);
+        //     } else if (block.image) {
+        //       block.image = basename(block.image);
+        //     }
+        //   });
+        // }
+
+        if (Array.isArray(jsonContent.services)) {
+  jsonContent.services.forEach((service, index) => {
+    const fileSlot = iconIndices.indexOf(index);
+    if (fileSlot !== -1 && icons && icons[fileSlot]) {
+      service.image = basename(icons[fileSlot].filename);
+    } else if (service.image) {
+      service.image = basename(service.image);
+    } else if (existingJsonContent?.services?.[index]?.image) {
+      service.image = basename(existingJsonContent.services[index].image);
+    } else {
+      service.image = "";
+    }
+  });
+}
+
+if (Array.isArray(jsonContent.blocks)) {
+  jsonContent.blocks.forEach((block, index) => {
+    const fileSlot = iconIndices.indexOf(index);
+    if (fileSlot !== -1 && icons && icons[fileSlot]) {
+      block.image = basename(icons[fileSlot].filename);
+    } else if (block.image) {
+      block.image = basename(block.image);
+    } else if (existingJsonContent?.blocks?.[index]?.image) {
+      block.image = basename(existingJsonContent.blocks[index].image);
+    } else {
+      block.image = "";
+    }
+  });
+}
 
         return this.cmsContentRepository.update(id, { json_content: jsonContent });
       }
@@ -604,6 +653,34 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
       case PageType.NAVBAR_SERVING_AREA: {
         return this.cmsContentRepository.update(id, { json_content: jsonContent });
       }
+
+      case PageType.SUSTAINABLE_FURNITURE: {
+        // Prevent wiping out cards if the frontend accidentally sends a missing payload
+        if (!jsonContent.cards && existingJsonContent?.cards) {
+          jsonContent.cards = existingJsonContent.cards;
+        }
+
+        // Extract the array of indices matching the uploaded files
+        const iconIndices = this.extractIndices(updateCmsContentDto?.icon_indices);
+
+        if (Array.isArray(jsonContent.cards)) {
+          jsonContent.cards.forEach((card, index) => {
+            const fileSlot = iconIndices.indexOf(index);
+            
+            if (fileSlot !== -1 && icons && icons[fileSlot]) {
+                // If a new image was uploaded for this card, save the new filename
+                card.image = basename(icons[fileSlot].filename);
+            } else if (existingJsonContent?.cards?.[index]?.image) {
+                // Otherwise, preserve the existing image filename
+                card.image = basename(existingJsonContent.cards[index].image);
+            } else if (card.image) {
+                card.image = basename(card.image);
+            }
+          });
+        }
+        
+        return this.cmsContentRepository.update(id, { json_content: jsonContent });
+      }
       
       default:
         return this.update(id, updateCmsContentDto);
@@ -726,6 +803,33 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
       throw new BadRequestException('Error updating content: ' + errorMessage);
     }
   }
+
+  async updateTeamPageMedia(id: number, dto: any, imagePath: string, videoPath: string) {
+  const existingContent = await this.cmsContentRepository.findOne({ where: { id } });
+  if (!existingContent) throw new NotFoundException(`Content with id ${id} not found`);
+
+  let jsonContent = this.parseJsonData(existingContent.json_content, { items: [] });
+  if (!Array.isArray(jsonContent.items)) jsonContent.items = [];
+
+  const action = dto?.action || 'add';
+  const itemIndex = parseInt(dto?.item_index, 10);
+
+  if (action === 'add') {
+    if (imagePath) jsonContent.items.push({ type: 'image', url: basename(imagePath) });
+  if (videoPath) jsonContent.items.push({ type: 'video', url: basename(videoPath) });
+  } else if (action === 'delete') {
+    if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
+      jsonContent.items.splice(itemIndex, 1);
+    }
+  } else if (action === 'update') {
+    if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
+      if (imagePath) jsonContent.items[itemIndex].image = basename(imagePath);
+      if (videoPath) jsonContent.items[itemIndex].video = basename(videoPath);
+    }
+  }
+
+  return this.cmsContentRepository.update(id, { json_content: jsonContent });
+}
 
   async updateEstimateCards(id: number, dto: any, imagePath: string) {
     const existingContent = await this.cmsContentRepository.findOne({ where: { id } });

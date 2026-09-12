@@ -124,11 +124,12 @@ const Header = () => {
                    Experience Center
                   </a>
                   <ul className={`dropdown-menu border-0 shadow-sm ${activeDropdown === 'experience' ? 'show' : ''}`}>
+                    <li><a className="dropdown-item py-2" href="/experience-center-new-delhi/">Experience Center New Delhi</a></li>
                     <li><a className="dropdown-item py-2" href="/experience-center/">Experience Center Noida</a></li>
-                    <li><a className="dropdown-item py-2" href="/experience-center-gurugram/">Experience Center Gurugram</a></li>
                   
-                    <li><a className="dropdown-item py-2" href="/experience-center-faridabad/">Experience Center Faridabad</a></li>
                     <li><a className="dropdown-item py-2" href="/experience-center-noida-extension/">Experience Center Noida Extension</a></li>
+                    <li><a className="dropdown-item py-2" href="/experience-center-gurugram/">Experience Center Gurgaon</a></li>
+                    <li><a className="dropdown-item py-2" href="/experience-center-faridabad/">Experience Center Faridabad</a></li>
                   </ul>
                 </li>
 
