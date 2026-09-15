@@ -4,35 +4,117 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { FaImage, FaSave } from "react-icons/fa";
+import { FaImage, FaSave, FaPlus, FaTrash, FaGripVertical } from "react-icons/fa";
 
 import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
-import { getCmsAccess } from "@/utils/cmsAccess";
 
 const CKEditorComponent = dynamic(
   () => import("@/app/components/CKEditorComponent"),
   { ssr: false }
 );
 
+const DEFAULT_CATEGORIES = [
+  { enabled: true, title: "Modular / Wooden Work", duration: "10 Years" },
+  { enabled: true, title: "Loose Furniture", duration: "5 Years" },
+  { enabled: true, title: "Hardware", duration: "3 + 7 Years" },
+];
+
 const DEFAULT_FORM = {
   title: "Warranty",
-  status: "Draft",
+  status: "Published",
   content: "",
   slug: "warranty",
   meta_title: "Warranty | High Creation Interior",
   meta_description:
-    "Warranty information and coverage from High Creation Interior.",
-  meta_keywords: "warranty, high creation interior, interior warranty",
+    "Warranty assurance, product-specific warranty periods, exclusions and claim process from High Creation Interior.",
+  meta_keywords:
+    "HCI warranty, High Creation Interior warranty, interior warranty",
   canonical_url: "https://hcinterior.in/warranty",
   banner_heading: "Warranty",
-  banner_description: "Our warranty coverage and commitment to quality",
+  banner_description:
+    "Our commitment to quality and reliable interior solutions",
   banner_heading_tag: "h1",
   banner_description_font_size: 16,
   banner_image: "",
+  hero: {
+    enabled: true,
+    eyebrow: "OUR WARRANTY COMMITMENT",
+    heading: "Quality backed by clear warranty terms.",
+    description:
+      "Understand your applicable warranty coverage, conditions and claim process.",
+  },
+  summary: {
+    enabled: true,
+    heading: "Warranty at a glance",
+    subheading:
+      "Coverage varies by product, material, workmanship and applicable documentation.",
+  },
+  categories: DEFAULT_CATEGORIES,
+  process: {
+    enabled: true,
+    eyebrow: "WARRANTY CLAIMS",
+    heading: "A clear process when you need support",
+    description:
+      "Please follow the applicable warranty terms and project documentation when raising a claim.",
+    steps: [
+      {
+        number: "01",
+        title: "Report the issue",
+        description:
+          "Notify High Creation Interior within the applicable claim period.",
+      },
+      {
+        number: "02",
+        title: "Share details",
+        description:
+          "Provide the relevant invoice, work order, customer ID and supporting information.",
+      },
+      {
+        number: "03",
+        title: "Inspection",
+        description:
+          "Our team may inspect the product or completed work to assess warranty applicability.",
+      },
+      {
+        number: "04",
+        title: "Resolution",
+        description:
+          "Covered issues may be repaired, replaced or rectified according to the applicable terms.",
+      },
+    ],
+  },
+  supportForm: {
+    enabled: true,
+    eyebrow: "WARRANTY SUPPORT",
+    heading: "Need help with a warranty concern?",
+    description:
+      "Share your details and our team can guide you to the appropriate next step.",
+    submitLabel: "SUBMIT REQUEST",
+  },
+  cta: {
+    enabled: true,
+    heading: "Need help with your project?",
+    description:
+      "Connect with the High Creation Interior team for support and assistance.",
+    buttonText: "Contact HCI",
+    buttonUrl: "/contact",
+  },
 };
 
-const normalizePageSeo = (seo = {}) => ({
+const normalizeJson = (value) => {
+  if (!value) return {};
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return {};
+    }
+  }
+  return value;
+};
+
+const normalizeSeo = (seo = {}) => ({
   slug: seo.slug || DEFAULT_FORM.slug,
   meta_title: seo.meta_title || DEFAULT_FORM.meta_title,
   meta_description: seo.meta_description || DEFAULT_FORM.meta_description,
@@ -41,16 +123,18 @@ const normalizePageSeo = (seo = {}) => ({
 });
 
 export default function CmsWarranty() {
-  const user = useSelector((state) => state.auth.user);
-  const authToken = useSelector((state) => state.auth.authToken) || user?.token;
-  const { canPublish } = getCmsAccess(user);
+  const authToken = useSelector((state) => 
+  state.auth.authToken || state.auth.user?.token
+);
 
   const [formData, setFormData] = useState(DEFAULT_FORM);
   const [pageId, setPageId] = useState(null);
+  const [legacyPageId, setLegacyPageId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [bannerImageFile, setBannerImageFile] = useState(null);
   const [bannerPreview, setBannerPreview] = useState("");
+  const [activeTab, setActiveTab] = useState("content");
 
   const authConfig = useMemo(
     () => ({
@@ -63,38 +147,98 @@ export default function CmsWarranty() {
 
   const loadWarranty = useCallback(async () => {
     setLoading(true);
+
     try {
-      const [pagesResponse, bannerResponse] = await Promise.all([
-        api.get("/cms-basic-pages/all", authConfig),
-        api.get("/cms-gallery-design/manage-banner?key=warranty", authConfig).catch(
-          () => null
-        ),
-      ]);
+      const [contentResponse, pagesResponse, bannerResponse] =
+        await Promise.all([
+          api
+            .get("/cms-content/warranty", authConfig)
+            .catch(() => null),
+          api
+            .get("/cms-basic-pages/all", authConfig)
+            .catch(() => null),
+          api
+            .get(
+              "/cms-gallery-design/manage-banner?key=warranty",
+              authConfig
+            )
+            .catch(() => null),
+        ]);
 
-      const pages = Array.isArray(pagesResponse.data) ? pagesResponse.data : [];
-      const page = pages.find(
-        (item) => item?.seo_content?.slug === DEFAULT_FORM.slug
-      );
+      const cmsRecord = contentResponse?.data || null;
+      const pages = Array.isArray(pagesResponse?.data)
+        ? pagesResponse.data
+        : [];
+
+      const legacyPage =
+        pages.find(
+          (item) => item?.seo_content?.slug === DEFAULT_FORM.slug
+        ) || null;
+
+      const source = cmsRecord?.json_content
+        ? normalizeJson(cmsRecord.json_content)
+        : legacyPage
+          ? {
+              ...DEFAULT_FORM,
+              content: legacyPage.content || "",
+              ...normalizeSeo(legacyPage.seo_content),
+              status: legacyPage.status || "Draft",
+            }
+          : DEFAULT_FORM;
+
       const banner = bannerResponse?.data || null;
-      const seo = normalizePageSeo(page?.seo_content);
 
-      setPageId(page?.id || null);
+      setPageId(cmsRecord?.id || null);
+      setLegacyPageId(legacyPage?.id || null);
+
       setFormData({
         ...DEFAULT_FORM,
-        title: page?.title || DEFAULT_FORM.title,
-        status: page?.status || DEFAULT_FORM.status,
-        content: page?.content || "",
-        ...seo,
-        banner_heading: banner?.banner_heading || DEFAULT_FORM.banner_heading,
+        ...source,
+        content: source.html || source.content || "",
+        ...normalizeSeo(source.seo || legacyPage?.seo_content),
+        hero: {
+          ...DEFAULT_FORM.hero,
+          ...(source.hero || {}),
+        },
+        summary: {
+          ...DEFAULT_FORM.summary,
+          ...(source.summary || {}),
+        },
+        categories:
+          Array.isArray(source.categories) && source.categories.length
+            ? source.categories
+            : DEFAULT_CATEGORIES,
+        process: {
+          ...DEFAULT_FORM.process,
+          ...(source.process || {}),
+          steps:
+            Array.isArray(source.process?.steps) &&
+            source.process.steps.length
+              ? source.process.steps
+              : DEFAULT_FORM.process.steps,
+        },
+        supportForm: {
+          ...DEFAULT_FORM.supportForm,
+          ...(source.supportForm || {}),
+        },
+        cta: {
+          ...DEFAULT_FORM.cta,
+          ...(source.cta || {}),
+        },
+        banner_heading:
+          banner?.banner_heading || DEFAULT_FORM.banner_heading,
         banner_description:
-          banner?.banner_description || DEFAULT_FORM.banner_description,
+          banner?.banner_description ||
+          DEFAULT_FORM.banner_description,
         banner_heading_tag:
-          banner?.banner_heading_tag || DEFAULT_FORM.banner_heading_tag,
+          banner?.banner_heading_tag ||
+          DEFAULT_FORM.banner_heading_tag,
         banner_description_font_size:
           Number(banner?.banner_description_font_size) ||
           DEFAULT_FORM.banner_description_font_size,
         banner_image: banner?.banner_image || "",
       });
+
       setBannerPreview(banner?.banner_image || "");
       setBannerImageFile(null);
     } catch (error) {
@@ -118,7 +262,20 @@ export default function CmsWarranty() {
   }, [bannerPreview]);
 
   const setField = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const updateNested = (section, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value,
+      },
+    }));
   };
 
   const handleBannerImageChange = (event) => {
@@ -126,7 +283,7 @@ export default function CmsWarranty() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file.");
+      toast.error("Please select a valid image.");
       return;
     }
 
@@ -139,40 +296,135 @@ export default function CmsWarranty() {
     setBannerPreview(URL.createObjectURL(file));
   };
 
-  const persistPage = async () => {
-    const nextStatus = canPublish ? formData.status : "Draft";
+  const updateCategory = (index, field, value) => {
+    setFormData((prev) => {
+      const categories = [...prev.categories];
+      categories[index] = {
+        ...categories[index],
+        [field]: value,
+      };
 
-    const payload = {
-      title: formData.title.trim(),
-      content: formData.content || "",
-      status: nextStatus,
-      faqs: [],
-      accordions: [],
-      seo_content: {
-        slug: DEFAULT_FORM.slug,
-        meta_title: formData.meta_title.trim(),
-        meta_description: formData.meta_description.trim(),
-        meta_keywords: formData.meta_keywords.trim(),
-        canonical_url: formData.canonical_url.trim(),
+      return {
+        ...prev,
+        categories,
+      };
+    });
+  };
+
+  const addCategory = () => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: [
+        ...prev.categories,
+        {
+          enabled: true,
+          title: "New Warranty Category",
+          duration: "1 Year",
+        },
+      ],
+    }));
+  };
+
+  const removeCategory = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((_, itemIndex) => itemIndex !== index),
+    }));
+  };
+
+  const updateStep = (index, field, value) => {
+    setFormData((prev) => {
+      const steps = [...prev.process.steps];
+      steps[index] = {
+        ...steps[index],
+        [field]: value,
+      };
+
+      return {
+        ...prev,
+        process: {
+          ...prev.process,
+          steps,
+        },
+      };
+    });
+  };
+
+  const addStep = () => {
+    setFormData((prev) => ({
+      ...prev,
+      process: {
+        ...prev.process,
+        steps: [
+          ...prev.process.steps,
+          {
+            number: String(prev.process.steps.length + 1).padStart(2, "0"),
+            title: "New Step",
+            description: "",
+          },
+        ],
       },
+    }));
+  };
+
+  const removeStep = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      process: {
+        ...prev.process,
+        steps: prev.process.steps.filter(
+          (_, itemIndex) => itemIndex !== index
+        ),
+      },
+    }));
+  };
+
+  const persistContent = async () => {
+    if (!pageId) {
+      throw new Error(
+        "Warranty CMS record is missing. Run the Warranty CMS migration before saving."
+      );
+    }
+
+    const jsonContent = {
+      html: formData.content || "",
+      hero: formData.hero,
+      summary: formData.summary,
+      categories: formData.categories,
+      process: formData.process,
+      supportForm: formData.supportForm,
+      cta: formData.cta,
     };
 
-    if (!payload.title) {
-      throw new Error("Page title is required.");
-    }
+    const payload = new FormData();
+    payload.append("json_content", JSON.stringify(jsonContent));
 
-    if (pageId) {
-      return api.patch(`/cms-basic-pages/${pageId}`, payload, authConfig);
-    }
-
-    return api.post("/cms-basic-pages", payload, authConfig);
+    return api.patch(
+      `/cms-content/update-with-image/${pageId}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
+    );
   };
 
   const persistBanner = async () => {
     const payload = new FormData();
-    payload.append("banner_heading", formData.banner_heading.trim());
-    payload.append("banner_description", formData.banner_description.trim());
-    payload.append("banner_heading_tag", formData.banner_heading_tag);
+
+    payload.append(
+      "banner_heading",
+      formData.banner_heading.trim()
+    );
+    payload.append(
+      "banner_description",
+      formData.banner_description.trim()
+    );
+    payload.append(
+      "banner_heading_tag",
+      formData.banner_heading_tag
+    );
     payload.append(
       "banner_description_font_size",
       String(formData.banner_description_font_size || 16)
@@ -186,32 +438,36 @@ export default function CmsWarranty() {
     return api.patch(
       "/cms-gallery-design/manage-banner?key=warranty",
       payload,
-      authToken
-        ? { headers: { Authorization: `Bearer ${authToken}` } }
-        : undefined
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      }
     );
   };
 
   const handleSave = async (event) => {
     event.preventDefault();
+
     if (saving) return;
 
+    if (!formData.content.trim()) {
+      toast.error("Main Warranty content cannot be empty.");
+      setActiveTab("content");
+      return;
+    }
+
     setSaving(true);
+
     try {
-      const pageResponse = await persistPage();
-      const persistedPage = pageResponse?.data;
-
-      // If the page was newly created, keep the returned id so the next save is an update.
-      if (!pageId && persistedPage?.id) {
-        setPageId(persistedPage.id);
-      }
-
+      await persistContent();
       await persistBanner();
 
       toast.success("Warranty page saved successfully.");
       await loadWarranty();
     } catch (error) {
       console.error("Warranty CMS save error:", error);
+
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
@@ -222,14 +478,260 @@ export default function CmsWarranty() {
     }
   };
 
+  const renderCategoryEditor = () => (
+    <div className="row g-3">
+      {formData.categories.map((category, index) => (
+        <div className="col-xl-6" key={`${category.title}-${index}`}>
+          <div className="border rounded-3 p-3 h-100 bg-white">
+            <div className="d-flex align-items-center justify-content-between mb-3">
+              <div className="d-flex align-items-center gap-2">
+                <FaGripVertical className="text-muted" />
+                <strong>Category #{index + 1}</strong>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => removeCategory(index)}
+                aria-label={`Remove category ${index + 1}`}
+              >
+                <FaTrash />
+              </button>
+            </div>
+
+            <div className="form-check form-switch mb-3">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                checked={category.enabled !== false}
+                onChange={(event) =>
+                  updateCategory(
+                    index,
+                    "enabled",
+                    event.target.checked
+                  )
+                }
+              />
+              <label className="form-check-label">
+                Show on public page
+              </label>
+            </div>
+
+            <label className="form-label fw-semibold">
+              Category Name
+            </label>
+            <input
+              className="form-control mb-3"
+              value={category.title || ""}
+              onChange={(event) =>
+                updateCategory(
+                  index,
+                  "title",
+                  event.target.value
+                )
+              }
+            />
+
+            <label className="form-label fw-semibold">
+              Warranty Duration
+            </label>
+            <input
+              className="form-control"
+              value={category.duration || ""}
+              onChange={(event) =>
+                updateCategory(
+                  index,
+                  "duration",
+                  event.target.value
+                )
+              }
+            />
+          </div>
+        </div>
+      ))}
+
+      <div className="col-12">
+        <button
+          type="button"
+          className="btn btn-outline-primary"
+          onClick={addCategory}
+        >
+          <FaPlus className="me-2" />
+          Add Warranty Category
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderProcessEditor = () => (
+    <div>
+      <div className="row g-3 mb-4">
+        <div className="col-12">
+          <div className="form-check form-switch">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              checked={formData.process.enabled !== false}
+              onChange={(event) =>
+                updateNested(
+                  "process",
+                  "enabled",
+                  event.target.checked
+                )
+              }
+            />
+            <label className="form-check-label fw-semibold">
+              Show claim process
+            </label>
+          </div>
+        </div>
+
+        <div className="col-lg-4">
+          <label className="form-label fw-semibold">Eyebrow</label>
+          <input
+            className="form-control"
+            value={formData.process.eyebrow || ""}
+            onChange={(event) =>
+              updateNested(
+                "process",
+                "eyebrow",
+                event.target.value
+              )
+            }
+          />
+        </div>
+
+        <div className="col-lg-8">
+          <label className="form-label fw-semibold">
+            Heading
+          </label>
+          <input
+            className="form-control"
+            value={formData.process.heading || ""}
+            onChange={(event) =>
+              updateNested(
+                "process",
+                "heading",
+                event.target.value
+              )
+            }
+          />
+        </div>
+
+        <div className="col-12">
+          <label className="form-label fw-semibold">
+            Description
+          </label>
+          <textarea
+            className="form-control"
+            rows={3}
+            value={formData.process.description || ""}
+            onChange={(event) =>
+              updateNested(
+                "process",
+                "description",
+                event.target.value
+              )
+            }
+          />
+        </div>
+      </div>
+
+      <div className="row g-3">
+        {formData.process.steps.map((step, index) => (
+          <div className="col-xl-6" key={`${step.number}-${index}`}>
+            <div className="border rounded-3 p-3 h-100 bg-white">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <strong>Step #{index + 1}</strong>
+
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => removeStep(index)}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+
+              <div className="row g-2">
+                <div className="col-3">
+                  <label className="form-label small fw-semibold">
+                    Number
+                  </label>
+                  <input
+                    className="form-control"
+                    value={step.number || ""}
+                    onChange={(event) =>
+                      updateStep(
+                        index,
+                        "number",
+                        event.target.value
+                      )
+                    }
+                  />
+                </div>
+
+                <div className="col-9">
+                  <label className="form-label small fw-semibold">
+                    Title
+                  </label>
+                  <input
+                    className="form-control"
+                    value={step.title || ""}
+                    onChange={(event) =>
+                      updateStep(
+                        index,
+                        "title",
+                        event.target.value
+                      )
+                    }
+                  />
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label small fw-semibold">
+                    Description
+                  </label>
+                  <textarea
+                    className="form-control"
+                    rows={3}
+                    value={step.description || ""}
+                    onChange={(event) =>
+                      updateStep(
+                        index,
+                        "description",
+                        event.target.value
+                      )
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="col-12">
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={addStep}
+          >
+            <FaPlus className="me-2" />
+            Add Process Step
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <AuthMainLayout>
         <div
-          className="d-flex justify-content-center align-items-center"
+          className="d-flex align-items-center justify-content-center"
           style={{ minHeight: "60vh" }}
         >
-          <div className="spinner-border text-warning" role="status" />
+          <div className="spinner-border text-primary" role="status" />
         </div>
       </AuthMainLayout>
     );
@@ -237,216 +739,521 @@ export default function CmsWarranty() {
 
   return (
     <AuthMainLayout>
-      <div className="container-fluid py-5">
-        <div className="card border-0 shadow-sm">
-          <div className="card-body p-4 p-lg-5">
-            <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-              <div>
-                <h1 className="h3 fw-bold mb-1">Warranty Page</h1>
-                <p className="text-muted mb-0">
-                  Manage the public Warranty page, banner and CKEditor content from one screen.
-                </p>
+      <style jsx global>{`
+        .warranty-cms-shell {
+          max-width: 1440px;
+          margin: 0 auto;
+        }
+
+        .warranty-cms-tabs .nav-link {
+          color: #4b5563;
+          border: 0;
+          border-bottom: 2px solid transparent;
+          border-radius: 0;
+          font-weight: 600;
+        }
+
+        .warranty-cms-tabs .nav-link.active {
+          color: #ff914d;
+          border-bottom-color: #ff914d;
+          background: transparent;
+        }
+
+        .warranty-editor .ck-editor__top {
+          position: static !important;
+          top: auto !important;
+          z-index: auto !important;
+        }
+
+        .warranty-editor .ck-editor__editable {
+          min-height: 680px;
+          max-height: none;
+          overflow-y: visible;
+        }
+
+        .warranty-editor .ck-content {
+          max-width: 100%;
+          overflow-wrap: anywhere;
+        }
+
+        .warranty-editor .ck-content table {
+          max-width: 100%;
+        }
+      `}</style>
+
+      <div className="container-fluid py-4">
+        <div className="warranty-cms-shell">
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+              <div
+                className="text-uppercase fw-semibold"
+                style={{
+                  color: "#ff914d",
+                  letterSpacing: "0.12em",
+                  fontSize: 12,
+                }}
+              >
+                HCI Website CMS
               </div>
-              <span className="badge bg-light text-dark border px-3 py-2">
-                Slug: /warranty
-              </span>
+
+              <h1 className="h2 fw-bold mb-1">Warranty Page</h1>
+
+              <p className="text-muted mb-0">
+                Manage the Warranty Assurance content and the public
+                page presentation from one place.
+              </p>
             </div>
 
-            <form onSubmit={handleSave}>
-              <section className="border rounded-3 p-4 mb-4">
-                <h2 className="h5 fw-bold mb-4">Page Details</h2>
-                <div className="row g-3">
-                  <div className="col-lg-7">
-                    <label className="form-label fw-bold">Page Title *</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.title}
-                      onChange={(e) => setField("title", e.target.value)}
-                      required
-                    />
-                  </div>
+            <span className="badge bg-light text-dark border px-3 py-2">
+              /warranty
+            </span>
+          </div>
 
-                  <div className="col-lg-5">
-                    <label className="form-label fw-bold">Status</label>
-                    <select
-                      className="form-select"
-                      value={formData.status}
-                      onChange={(e) => setField("status", e.target.value)}
+          <div className="card border-0 shadow-sm">
+            <div className="card-body p-0">
+              <ul className="nav nav-tabs warranty-cms-tabs px-4 pt-3">
+                {[
+                  ["content", "Policy Content"],
+                  ["hero", "Intro"],
+                  ["categories", "Warranty Categories"],
+                  ["process", "Claim Process"],
+                  ["support", "Support Form"],
+                  ["banner", "Banner"],
+                  ["seo", "SEO"],
+                ].map(([key, label]) => (
+                  <li className="nav-item" key={key}>
+                    <button
+                      type="button"
+                      className={`nav-link ${
+                        activeTab === key ? "active" : ""
+                      }`}
+                      onClick={() => setActiveTab(key)}
                     >
-                      <option value="Draft">Draft</option>
-                      <option value="Pending Approval">Pending Approval</option>
-                      {canPublish && <option value="Published">Published</option>}
-                    </select>
-                  </div>
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
 
-                  <div className="col-12">
-                    <label className="form-label fw-bold">Main Content</label>
-                    <div className="border rounded overflow-hidden">
+              <div className="p-4 p-lg-5 bg-light">
+                {activeTab === "content" && (
+                  <section className="bg-white border rounded-3 p-4">
+                    <h2 className="h5 fw-bold mb-3">
+                      Main Warranty Content
+                    </h2>
+
+                    <p className="text-muted small mb-4">
+                      Keep the existing Warranty Assurance wording here.
+                      This is the source of truth for the detailed policy.
+                    </p>
+
+                    <div className="warranty-editor border rounded overflow-hidden">
                       <CKEditorComponent
                         pageData={formData.content}
-                        setPageData={(value) => setField("content", value)}
+                        setPageData={(value) =>
+                          setField("content", value)
+                        }
                       />
                     </div>
-                  </div>
-                </div>
-              </section>
+                  </section>
+                )}
 
-              <section className="border rounded-3 p-4 mb-4">
-                <h2 className="h5 fw-bold mb-4">Warranty Banner</h2>
-                <div className="row g-3">
-                  <div className="col-12">
-                    <label className="form-label fw-bold">Banner Image</label>
-                    <div className="input-group">
-                      <span className="input-group-text">
-                        <FaImage />
-                      </span>
+                {activeTab === "hero" && (
+                  <section className="bg-white border rounded-3 p-4">
+                    <div className="form-check form-switch mb-4">
                       <input
-                        type="file"
-                        accept="image/*"
-                        className="form-control"
-                        onChange={handleBannerImageChange}
+                        className="form-check-input"
+                        type="checkbox"
+                        checked={formData.hero.enabled !== false}
+                        onChange={(event) =>
+                          updateNested(
+                            "hero",
+                            "enabled",
+                            event.target.checked
+                          )
+                        }
                       />
+                      <label className="form-check-label fw-semibold">
+                        Show Warranty intro section
+                      </label>
                     </div>
-                    <small className="text-muted d-block mt-1">
-                      Recommended max upload size: 5 MB.
-                    </small>
-                    {bannerPreview && (
-                      <div className="mt-3 border rounded overflow-hidden bg-light">
-                        <img
-                          src={bannerPreview}
-                          alt="Warranty banner preview"
-                          style={{
-                            display: "block",
-                            width: "100%",
-                            maxHeight: 280,
-                            objectFit: "cover",
-                          }}
+
+                    <div className="row g-3">
+                      <div className="col-lg-4">
+                        <label className="form-label fw-semibold">
+                          Eyebrow
+                        </label>
+                        <input
+                          className="form-control"
+                          value={formData.hero.eyebrow || ""}
+                          onChange={(event) =>
+                            updateNested(
+                              "hero",
+                              "eyebrow",
+                              event.target.value
+                            )
+                          }
                         />
                       </div>
-                    )}
-                  </div>
 
-                  <div className="col-lg-8">
-                    <label className="form-label fw-bold">Banner Heading</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.banner_heading}
-                      onChange={(e) => setField("banner_heading", e.target.value)}
-                    />
-                  </div>
+                      <div className="col-lg-8">
+                        <label className="form-label fw-semibold">
+                          Heading
+                        </label>
+                        <input
+                          className="form-control"
+                          value={formData.hero.heading || ""}
+                          onChange={(event) =>
+                            updateNested(
+                              "hero",
+                              "heading",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
 
-                  <div className="col-lg-4">
-                    <label className="form-label fw-bold">Heading Tag</label>
-                    <select
-                      className="form-select"
-                      value={formData.banner_heading_tag}
-                      onChange={(e) => setField("banner_heading_tag", e.target.value)}
-                    >
-                      {['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].map((tag) => (
-                        <option key={tag} value={tag}>
-                          {tag.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-lg-8">
-                    <label className="form-label fw-bold">Banner Description</label>
-                    <textarea
-                      className="form-control"
-                      rows={3}
-                      value={formData.banner_description}
-                      onChange={(e) => setField("banner_description", e.target.value)}
-                    />
-                  </div>
-
-                  <div className="col-lg-4">
-                    <label className="form-label fw-bold">Description Font Size</label>
-                    <div className="input-group">
-                      <input
-                        type="number"
-                        min={10}
-                        max={30}
-                        className="form-control"
-                        value={formData.banner_description_font_size}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (Number.isNaN(value)) return;
-                          setField(
-                            "banner_description_font_size",
-                            Math.min(30, Math.max(10, value))
-                          );
-                        }}
-                      />
-                      <span className="input-group-text">px</span>
+                      <div className="col-12">
+                        <label className="form-label fw-semibold">
+                          Description
+                        </label>
+                        <textarea
+                          className="form-control"
+                          rows={4}
+                          value={formData.hero.description || ""}
+                          onChange={(event) =>
+                            updateNested(
+                              "hero",
+                              "description",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </section>
+                  </section>
+                )}
 
-              <section className="border rounded-3 p-4 mb-4">
-                <h2 className="h5 fw-bold mb-4">SEO</h2>
-                <div className="row g-3">
-                  <div className="col-lg-6">
-                    <label className="form-label fw-bold">Meta Title</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.meta_title}
-                      onChange={(e) => setField("meta_title", e.target.value)}
-                    />
-                  </div>
-                  <div className="col-lg-6">
-                    <label className="form-label fw-bold">Canonical URL</label>
-                    <input
-                      type="url"
-                      className="form-control"
-                      value={formData.canonical_url}
-                      onChange={(e) => setField("canonical_url", e.target.value)}
-                    />
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label fw-bold">Meta Description</label>
-                    <textarea
-                      className="form-control"
-                      rows={3}
-                      value={formData.meta_description}
-                      onChange={(e) => setField("meta_description", e.target.value)}
-                    />
-                  </div>
-                  <div className="col-12">
-                    <label className="form-label fw-bold">Meta Keywords</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={formData.meta_keywords}
-                      onChange={(e) => setField("meta_keywords", e.target.value)}
-                    />
-                  </div>
-                </div>
-              </section>
+                {activeTab === "categories" && (
+                  <section>
+                    <div className="mb-4">
+                      <h2 className="h5 fw-bold mb-1">
+                        Warranty at a Glance
+                      </h2>
+                      <p className="text-muted small mb-0">
+                        These cards are presentation data. Keep the
+                        detailed legal wording in Policy Content.
+                      </p>
+                    </div>
 
-              <div className="d-flex justify-content-end gap-2">
+                    {renderCategoryEditor()}
+                  </section>
+                )}
+
+                {activeTab === "process" && (
+                  <section className="bg-white border rounded-3 p-4">
+                    {renderProcessEditor()}
+                  </section>
+                )}
+
+                {activeTab === "support" && (
+                  <section className="bg-white border rounded-3 p-4">
+                    <div className="form-check form-switch mb-4">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        checked={
+                          formData.supportForm.enabled !== false
+                        }
+                        onChange={(event) =>
+                          updateNested(
+                            "supportForm",
+                            "enabled",
+                            event.target.checked
+                          )
+                        }
+                      />
+                      <label className="form-check-label fw-semibold">
+                        Show warranty support form
+                      </label>
+                    </div>
+
+                    <div className="row g-3">
+                      <div className="col-lg-4">
+                        <label className="form-label fw-semibold">
+                          Eyebrow
+                        </label>
+                        <input
+                          className="form-control"
+                          value={
+                            formData.supportForm.eyebrow || ""
+                          }
+                          onChange={(event) =>
+                            updateNested(
+                              "supportForm",
+                              "eyebrow",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-lg-8">
+                        <label className="form-label fw-semibold">
+                          Heading
+                        </label>
+                        <input
+                          className="form-control"
+                          value={
+                            formData.supportForm.heading || ""
+                          }
+                          onChange={(event) =>
+                            updateNested(
+                              "supportForm",
+                              "heading",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-lg-8">
+                        <label className="form-label fw-semibold">
+                          Description
+                        </label>
+                        <textarea
+                          className="form-control"
+                          rows={3}
+                          value={
+                            formData.supportForm.description || ""
+                          }
+                          onChange={(event) =>
+                            updateNested(
+                              "supportForm",
+                              "description",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-lg-4">
+                        <label className="form-label fw-semibold">
+                          Submit Button
+                        </label>
+                        <input
+                          className="form-control"
+                          value={
+                            formData.supportForm.submitLabel || ""
+                          }
+                          onChange={(event) =>
+                            updateNested(
+                              "supportForm",
+                              "submitLabel",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {activeTab === "banner" && (
+                  <section className="bg-white border rounded-3 p-4">
+                    <div className="row g-4">
+                      <div className="col-lg-7">
+                        <label className="form-label fw-semibold">
+                          Banner Image
+                        </label>
+
+                        <div className="input-group">
+                          <span className="input-group-text">
+                            <FaImage />
+                          </span>
+
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="form-control"
+                            onChange={handleBannerImageChange}
+                          />
+                        </div>
+
+                        {bannerPreview && (
+                          <div className="mt-3 border rounded overflow-hidden">
+                            <img
+                              src={bannerPreview}
+                              alt="Warranty banner preview"
+                              style={{
+                                display: "block",
+                                width: "100%",
+                                height: 260,
+                                objectFit: "cover",
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="col-lg-5">
+                        <label className="form-label fw-semibold">
+                          Banner Heading
+                        </label>
+                        <input
+                          className="form-control mb-3"
+                          value={formData.banner_heading}
+                          onChange={(event) =>
+                            setField(
+                              "banner_heading",
+                              event.target.value
+                            )
+                          }
+                        />
+
+                        <label className="form-label fw-semibold">
+                          Banner Description
+                        </label>
+                        <textarea
+                          className="form-control mb-3"
+                          rows={4}
+                          value={formData.banner_description}
+                          onChange={(event) =>
+                            setField(
+                              "banner_description",
+                              event.target.value
+                            )
+                          }
+                        />
+
+                        <label className="form-label fw-semibold">
+                          Heading Tag
+                        </label>
+
+                        <select
+                          className="form-select"
+                          value={formData.banner_heading_tag}
+                          onChange={(event) =>
+                            setField(
+                              "banner_heading_tag",
+                              event.target.value
+                            )
+                          }
+                        >
+                          {["h1", "h2", "h3", "h4", "h5", "h6"].map(
+                            (tag) => (
+                              <option key={tag} value={tag}>
+                                {tag.toUpperCase()}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {activeTab === "seo" && (
+                  <section className="bg-white border rounded-3 p-4">
+                    <div className="row g-3">
+                      <div className="col-lg-6">
+                        <label className="form-label fw-semibold">
+                          Meta Title
+                        </label>
+                        <input
+                          className="form-control"
+                          value={formData.meta_title}
+                          onChange={(event) =>
+                            setField(
+                              "meta_title",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-lg-6">
+                        <label className="form-label fw-semibold">
+                          Canonical URL
+                        </label>
+                        <input
+                          className="form-control"
+                          value={formData.canonical_url}
+                          onChange={(event) =>
+                            setField(
+                              "canonical_url",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-12">
+                        <label className="form-label fw-semibold">
+                          Meta Description
+                        </label>
+                        <textarea
+                          className="form-control"
+                          rows={3}
+                          value={formData.meta_description}
+                          onChange={(event) =>
+                            setField(
+                              "meta_description",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-12">
+                        <label className="form-label fw-semibold">
+                          Meta Keywords
+                        </label>
+                        <input
+                          className="form-control"
+                          value={formData.meta_keywords}
+                          onChange={(event) =>
+                            setField(
+                              "meta_keywords",
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div className="col-12">
+                        <div className="alert alert-warning small mb-0">
+                          Keep SEO changes separate from the policy
+                          wording. The page remains CMS-controlled.
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                )}
+              </div>
+
+              <div className="d-flex justify-content-end gap-2 p-4 border-top bg-white">
                 <button
                   type="button"
                   className="btn btn-outline-secondary px-4"
                   onClick={loadWarranty}
                   disabled={saving}
                 >
-                  Reset Changes
+                  Discard Changes
                 </button>
+
                 <button
-                  type="submit"
-                  className="btn btn-primary px-4"
+                  type="button"
+                  className="btn px-4 text-white"
+                  onClick={handleSave}
                   disabled={saving}
+                  style={{ background: "#ff914d" }}
                 >
                   <FaSave className="me-2" />
                   {saving ? "Saving..." : "Save Warranty Page"}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>

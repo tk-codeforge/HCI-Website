@@ -248,17 +248,17 @@ import { usePathname } from "next/navigation";
 import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
 
-// const CENTER_NAMES_BY_PATH = {
-//   "/experience-center-noida-extension": "Noida Extension",
-//   "/experience-center-noida": "Noida",
-//   "/experience-center-gurugram": "Gurugram",
-//   "/experience-center-faridabad": "Faridabad",
-//   "/experience-center-new-delhi": "New Delhi",
-// };
+const CENTER_NAMES_BY_PATH = {
+  "/experience-center-noida-extension": "Noida Extension",
+  "/experience-center": "Noida",
+  "/experience-center-gurugram": "Gurugram",
+  "/experience-center-faridabad": "Faridabad",
+  "/experience-center-new-delhi": "New Delhi",
+};
 
-// function getCenterNameFromPath(pathname) {
-//   return CENTER_NAMES_BY_PATH[pathname] || "Experience Center";
-// }
+function getCenterNameFromPath(pathname) {
+  return CENTER_NAMES_BY_PATH[pathname] || "Experience Center";
+}
 
 export const EXPERIENCE_FORM_DEFAULT_CONFIG = {
   backgroundColor: "", 
@@ -306,7 +306,7 @@ export function renderCheckboxText(text, links, color) {
         key={i}
         href={match.url || "#"}
         className="exp-checkbox-link"
-        style={{ color, textDecoration: "underline" }}
+        style={{ color: "#ffc107", textDecoration: "none" }}
         target={isExternal ? "_blank" : undefined}
         rel={isExternal ? "noopener noreferrer" : undefined}
       >
@@ -479,9 +479,9 @@ const ExperienceForm = () => {
         color: var(--experience-font-color) !important;
       }
       .form_experience_center .exp-checkbox-link {
-        color: var(--experience-font-color) !important;
-        text-decoration: underline;
-      }
+  color: #ffc107 !important;
+  text-decoration: none; 
+}
       .form_experience_center .exp-submit-btn {
         background-color: var(--experience-submit-bg) !important;
         border-color: var(--experience-submit-bg) !important;

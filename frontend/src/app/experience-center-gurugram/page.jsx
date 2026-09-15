@@ -511,7 +511,8 @@
 // export default Experience
 import MainLayout from "../layouts/MainLayout";
 import PortfolioCard from "../components/PortfolioCard";
-import ExperienceForm from "./ExperienceForm";
+// import ExperienceForm from "./ExperienceForm";
+import ExperienceForm from "../components/ExperienceForm";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds

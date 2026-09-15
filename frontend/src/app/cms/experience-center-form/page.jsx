@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import api from "@/utils/api";
-import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText  } from "../../experience-center-noida-extension/ExperienceForm";
+// import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText } from "../../experience-center-noida-extension/ExperienceForm";
+import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText } from "../../components/ExperienceForm";
+import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
 const EXPERIENCE_FORM_DEFAULT_CONFIG = IMPORTED_DEFAULT_CONFIG || {
   backgroundColor: "",
@@ -48,6 +50,8 @@ export default function ExperienceCenterFormCms() {
         const res = await api.get(CMS_ENDPOINT);
         const record = Array.isArray(res.data) ? res.data[0] : res.data;
         const content = record?.json_content;
+        // const rawContent = record?.json_content;
+        // const content = rawContent?.json_content ? rawContent.json_content : rawContent;
         if (content) {
           setConfig({
             ...EXPERIENCE_FORM_DEFAULT_CONFIG,
@@ -109,42 +113,44 @@ export default function ExperienceCenterFormCms() {
   // (`{ page_name, json_content }`, upserted by page_name). If your API
   // needs a PUT to an existing record ID instead, swap it in here.
   const handleSave = async () => {
-    setSaving(true);
-    setSaveMessage("");
-    setSaveIsError(false);
-    try {
-      await api.post("/cms-content", {
-        page_name: "experience_center_form",
-        json_content: config,
-      });
-      setSaveMessage("Saved. All 5 Experience Center pages now use this form.");
-    } catch (err) {
-      setSaveIsError(true);
-      setSaveMessage(
-        "Couldn't save — check that the /cms-content endpoint and payload shape match your backend."
-      );
-    } finally {
-      setSaving(false);
-      setTimeout(() => setSaveMessage(""), 6000);
-    }
-  };
+  setSaving(true);
+  setSaveMessage("");
+  setSaveIsError(false);
+  try {
+    await api.post(`/cms-content/experience_center_form`, config);
+    setSaveMessage("Saved. All Experience Center pages now use this form.");
+  } catch (err) {
+    setSaveIsError(true);
+    setSaveMessage(
+      "Couldn't save — check the browser console/network tab for the exact error."
+    );
+  } finally {
+    setSaving(false);
+    setTimeout(() => setSaveMessage(""), 6000);
+  }
+};
 
   if (loading) {
     return (
+        <AuthMainLayout>
       <div className="container py-5 text-center text-muted">
         Loading form settings…
       </div>
+      </AuthMainLayout>
     );
   }
 
+  // Never let color styling silently drop to "undefined" — always resolve
+  // to a real hex value so a picked color is guaranteed to render.
+  const previewFontColor = config.fontColor || "#ffffff";
+  const previewBgColor = config.backgroundColor || "#1a1a1a";
+
   return (
+    <AuthMainLayout>
     <div className="container py-4">
       <div className="d-flex align-items-center justify-content-between mb-4">
         <div>
           <h2 className="fw-bold mb-1">Experience Center Form</h2>
-          <p className="text-muted mb-0">
-            One shared form config used by all 5 Experience Center pages.
-          </p>
         </div>
         <button
           type="button"
@@ -179,7 +185,7 @@ export default function ExperienceCenterFormCms() {
                     <input
                       type="color"
                       className="form-control form-control-color"
-                      value={config.backgroundColor || "#1a1a1a"}
+                      value={previewBgColor}
                       onChange={(e) => setTop("backgroundColor", e.target.value)}
                     />
                     <input
@@ -197,7 +203,7 @@ export default function ExperienceCenterFormCms() {
                     <input
                       type="color"
                       className="form-control form-control-color"
-                      value={config.fontColor}
+                      value={previewFontColor}
                       onChange={(e) => setTop("fontColor", e.target.value)}
                     />
                     <input
@@ -358,10 +364,10 @@ export default function ExperienceCenterFormCms() {
             <div className="card-body">
               <h5 className="card-title mb-1">Checkbox Text & Links</h5>
               <p className="text-muted small">
-                Write the full sentence below. In the Links list, each "Link
-                Text" must match a phrase inside that sentence exactly — that
-                phrase becomes a clickable link to the URL you give it.
-              </p>
+  Write the full sentence below. In the Links list, each &quot;Link
+  Text&quot; must match a phrase inside that sentence exactly — that
+  phrase becomes a clickable link to the URL you give it.
+</p>
               <div className="mb-3">
                 <textarea
                   className="form-control"
@@ -420,15 +426,15 @@ export default function ExperienceCenterFormCms() {
             <div
               className="rounded-4 p-4"
               style={{
-                backgroundColor: config.backgroundColor || "#1a1a1a",
-                color: config.fontColor,
+                backgroundColor: previewBgColor,
+                color: previewFontColor,
               }}
             >
-              <h5 className="text-center" style={{ color: config.fontColor }}>
-                {config.heading}
+              <h5 className="text-center mb-2">
+                <span style={{ color: previewFontColor }}>{config.heading}</span>
               </h5>
-              <p className="text-center mb-4" style={{ color: config.fontColor }}>
-                {config.subheading}
+              <p className="text-center mb-4">
+                <span style={{ color: previewFontColor }}>{config.subheading}</span>
               </p>
 
               {FIELD_ORDER.filter((key) => config.fields[key]?.enabled).map(
@@ -468,9 +474,13 @@ export default function ExperienceCenterFormCms() {
                 <input type="checkbox" className="form-check-input" disabled />
                 <label
                   className="form-check-label small"
-                  style={{ color: config.fontColor }}
+                  style={{ color: previewFontColor, opacity: 1 }}
                 >
-                  {renderCheckboxText(config.checkboxText, config.checkboxLinks, config.fontColor)}
+                  {renderCheckboxText(
+                    config.checkboxText,
+                    config.checkboxLinks,
+                    previewFontColor
+                  )}
                 </label>
               </div>
             </div>
@@ -478,5 +488,6 @@ export default function ExperienceCenterFormCms() {
         </div>
       </div>
     </div>
+    </AuthMainLayout>
   );
 }

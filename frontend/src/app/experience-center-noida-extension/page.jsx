@@ -1,5 +1,6 @@
 import MainLayout from "../layouts/MainLayout";
-import ExperienceForm from "./ExperienceForm";
+// import ExperienceForm from "./ExperienceForm";
+import ExperienceForm from "../components/ExperienceForm";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import PortfolioCard from "../components/PortfolioCard";
