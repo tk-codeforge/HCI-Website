@@ -314,6 +314,7 @@ function AuthSidebar() {
                         <Link href="/cms/experience-center-faridabad" className={`sub-menu-link ${isActive('/cms/experience-center-faridabad')}`}>Faridabad Center</Link>
                         <Link href="/cms/experience-center-noida-extension" className={`sub-menu-link ${isActive('/cms/experience-center-noida-extension')}`}>Noida Extension Center</Link>
                         <Link href="/cms/experience-center-new-delhi" className={`sub-menu-link ${isActive('/cms/experience-center-new-delhi')}`}>New Delhi Center</Link>
+                        {/* <Link href="/cms/experience-center-form" className={`sub-menu-link ${isActive('/cms/experience-center-form')}`}>Experience Form</Link> */}
                     </div>
                 )}
 
@@ -327,6 +328,7 @@ function AuthSidebar() {
                         <Link href="/cms/privacy-policy" className={`sub-menu-link ${isActive('/cms/privacy-policy')}`}>Privacy Policy</Link>
                         <Link href="/cms/term-and-condition" className={`sub-menu-link ${isActive('/cms/term-and-condition')}`}>Terms & Conditions</Link>
                         <Link href="/cms/cancellation-policy" className={`sub-menu-link ${isActive('/cms/cancellation-policy')}`}>Cancellation Policy</Link>
+                        <Link href="/cms/warranty" className={`sub-menu-link ${isActive('/cms/warranty')}`}>Warranty Policy</Link>
                     </div>
                 )}
 

@@ -15,6 +15,7 @@ const PAGE_DEFS = [
   { key: "terms_and_condition", label: "Terms & Condition Page Banner" },
   { key: "privacy_policy", label: "Privacy Policy Page Banner" },
   { key: "cancellation_policy", label: "Cancellation Policy Page Banner" },
+  { key: "warranty", label: "Warranty Page Banner" },
   { key: "refer_and_earn", label: "Refer and Earn Page Banner" }, 
   { key: "faq", label: "FAQ Page Banner" },
 ];
