@@ -39,6 +39,46 @@ import {
 import CustomUploadAdapterPlugin, { requireAltTextPrompt } from './CustomUploadAdapter';
 import 'ckeditor5/ckeditor5.css';
 
+import { Plugin, ButtonView } from 'ckeditor5';
+
+const ARROW_SVG_MARKUP = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" fill="%23333333"/></svg>`;
+const ARROW_DATA_URI = `data:image/svg+xml,${encodeURIComponent(ARROW_SVG_MARKUP)}`;
+
+class InsertArrowIcon extends Plugin {
+    init() {
+        const editor = this.editor;
+        const selection = editor.model.document.selection;
+
+        editor.ui.componentFactory.add('insertArrowIcon', (locale) => {
+            const button = new ButtonView(locale);
+
+            button.set({
+                label: 'Insert Arrow Icon',
+                withText: false,
+                tooltip: true,
+                icon: `<svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>`
+            });
+
+            // 🔒 Critical guard: only enabled when there's a real text caret.
+            // Prevents the button from ever firing while a table/row/cell/widget
+            // is selected as an object — which is what was wiping your table.
+            button.bind('isEnabled').to(selection, 'isCollapsed');
+
+            button.on('execute', () => {
+                editor.model.change((writer) => {
+                    const imageElement = writer.createElement('imageInline', {
+                        src: ARROW_DATA_URI,
+                        alt: 'Arrow icon'
+                    });
+                    editor.model.insertContent(imageElement, selection.getFirstPosition());
+                });
+            });
+
+            return button;
+        });
+    }
+}
+
 function MandatoryAltTextPlugin(editor) {
     editor.model.document.on('change:data', () => {
         const differ = editor.model.document.differ;
@@ -162,7 +202,7 @@ const editorConfig = {
         TableToolbar,
         Undo
     ],
-    extraPlugins: [CustomUploadAdapterPlugin],
+    extraPlugins: [CustomUploadAdapterPlugin, InsertArrowIcon],
     toolbar: {
         items: [
             'undo', 'redo', '|',
@@ -170,7 +210,7 @@ const editorConfig = {
             'fontSize',
             'bold', 'italic', 'blockQuote', '|',
             'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'htmlEmbed', 'sourceEditing', '|',
-            'bulletedList', 'numberedList', 'outdent', 'indent'
+            'bulletedList', 'numberedList', 'outdent', 'indent', 'insertArrowIcon'
         ],
         shouldNotGroupWhenFull: true
     },
@@ -213,22 +253,12 @@ const editorConfig = {
     image: {
         resizeUnit: 'px',
         resizeOptions: [
-            {
-                name: 'resizeImage:original',
-                value: null,
-                label: 'Original'
-            },
-            {
-                name: 'resizeImage:50',
-                value: '50',
-                label: '50%'
-            },
-            {
-                name: 'resizeImage:75',
-                value: '75',
-                label: '75%'
-            }
-        ],
+        { name: 'resizeImage:original', value: null, label: 'Original' },
+         { name: 'resizeImage:25', value: '25', label: '25px' },
+        { name: 'resizeImage:30', value: '30', label: '30px' },
+        { name: 'resizeImage:40', value: '40', label: '40px' },
+        { name: 'resizeImage:50', value: '50', label: '50px' }
+    ],
         toolbar: [
             'imageResize',
             'imageStyle:inline',

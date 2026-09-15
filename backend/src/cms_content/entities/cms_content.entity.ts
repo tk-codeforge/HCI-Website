@@ -44,6 +44,7 @@ export enum PageType {
     CONTACT_PAGE = 'contact_page',
     TEAM_PAGE_MEDIA = 'team_page_media',
     SUSTAINABLE_FURNITURE = 'sustainable_furniture',
+    REDIRECT_CAREER = 'redirect_career',
  }
 
 @Entity('cms_content')

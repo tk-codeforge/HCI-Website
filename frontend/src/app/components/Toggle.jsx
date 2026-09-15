@@ -253,7 +253,7 @@ const Toggle = () => {
                       <li><a href="/experience-center-new-delhi/" className="offcanvas_anchor" onClick={closeSidebar}>New Delhi Experience Center</a></li>
                       <li><a href="/experience-center/" className="offcanvas_anchor" onClick={closeSidebar}>Noida Experience Center</a></li>
                       <li><a href="/experience-center-noida-extension/" className="offcanvas_anchor" onClick={closeSidebar}>Noida Extension Experience Center</a></li>
-                      <li><a href="/experience-center-gurugram/" className="offcanvas_anchor" onClick={closeSidebar}>Gurgaon Extension Experience Center</a></li>
+                      <li><a href="/experience-center-gurugram/" className="offcanvas_anchor" onClick={closeSidebar}>Gurgaon Experience Center</a></li>
                       <li><a href="/experience-center-faridabad/" className="offcanvas_anchor" onClick={closeSidebar}>Faridabad Experience Center</a></li>
                     </ul>
                   </div>

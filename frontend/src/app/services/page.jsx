@@ -298,6 +298,13 @@ const hasCustomBanner =
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
   font-size: 1.25rem;
 }
+  @media (max-width: 768px) {
+  .services-page-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+}
 
       `}} />
 
@@ -349,7 +356,7 @@ const hasCustomBanner =
 
               return (
                 <div className="modern-service-row" key={item.id || index}>
-                  <div className="row g-5 align-items-center">
+                  <div className="row g-3 g-lg-5 align-items-center">
                     
                     {/* IMAGE COLUMN */}
                     {/* <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>

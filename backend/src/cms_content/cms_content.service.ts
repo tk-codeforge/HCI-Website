@@ -82,6 +82,21 @@ export class CmsContentService {
     return parsed;
   }
 
+  private hydrateCareerPageContent(jsonContent: any, baseUrl: string) {
+  let parsed = this.parseJsonData(jsonContent, jsonContent);
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return parsed;
+
+  parsed.bg_image = this.normalizeImageUrl(parsed.bg_image, baseUrl);
+
+  if (Array.isArray(parsed.sections)) {
+    parsed.sections = parsed.sections.map((section) => ({
+      ...section,
+      image: this.normalizeImageUrl(section?.image, baseUrl),
+    }));
+  }
+  return parsed;
+}
+
   private cleanFooterContent(input: any): any {
     if (!input) return { is_empty: true };
     let parsed = this.parseJsonData(input, { is_empty: true });
@@ -318,6 +333,10 @@ export class CmsContentService {
           }
           contentData.json_content = jsonContent;
           break;
+
+          case PageType.REDIRECT_CAREER:
+  contentData.json_content = this.hydrateCareerPageContent(jsonContent, baseUrl);
+  break;
 
         default:
           contentData.json_content = jsonContent;
@@ -681,6 +700,43 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
         
         return this.cmsContentRepository.update(id, { json_content: jsonContent });
       }
+
+      case PageType.REDIRECT_CAREER: {
+
+        if (imagePath) {
+    jsonContent.bg_image = basename(imagePath);
+  } else if (jsonContent.bg_image !== undefined && jsonContent.bg_image !== null) {
+    jsonContent.bg_image = jsonContent.bg_image ? basename(jsonContent.bg_image) : "";
+  } else {
+    jsonContent.bg_image = existingJsonContent?.bg_image ? basename(existingJsonContent.bg_image) : "";
+  }
+  // Don't wipe sections if the admin form only submits banner fields
+  if (!jsonContent.sections && existingJsonContent?.sections) {
+    jsonContent.sections = existingJsonContent.sections;
+  }
+
+  // Preserve the CKEditor table HTML if this particular save didn't include it
+  if (jsonContent.tableContent === undefined && existingJsonContent?.tableContent !== undefined) {
+    jsonContent.tableContent = existingJsonContent.tableContent;
+  }
+
+  const imageIndices = this.extractIndices(updateCmsContentDto?.image_indices);
+
+  if (Array.isArray(jsonContent.sections)) {
+    jsonContent.sections.forEach((section, index) => {
+      const fileSlot = imageIndices.indexOf(index);
+      if (fileSlot !== -1 && icons && icons[fileSlot]) {
+        section.image = basename(icons[fileSlot].filename);
+      } else if (existingJsonContent?.sections?.[index]?.image) {
+        section.image = basename(existingJsonContent.sections[index].image);
+      } else if (section.image) {
+        section.image = basename(section.image);
+      }
+    });
+  }
+
+  return this.cmsContentRepository.update(id, { json_content: jsonContent });
+}
       
       default:
         return this.update(id, updateCmsContentDto);

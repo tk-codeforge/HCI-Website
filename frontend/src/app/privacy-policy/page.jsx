@@ -133,12 +133,12 @@ const bgDescription = bannerRecord?.banner_description || "Get all the informati
           <div className="container">
             <div className="row mx-0">
               <div>
-                <h2>High Creation Interior</h2>
+                {/* <h2>High Creation Interior</h2>
                 <h3>
                   <span className="font_stylish" style={{ color: "#ff914d" }}>
                     Privacy Policy
                   </span>
-                </h3>
+                </h3> */}
               </div>
               {/* Render HTML content from CMS */}
               <div dangerouslySetInnerHTML={{ __html: pageData }} />

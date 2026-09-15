@@ -2131,7 +2131,7 @@ const DynamicRootPage = async ({ params }) => {
                                 src={blog.image || "/images/default.jpg"} 
                                 alt={blog.title} 
                                 className="rounded shadow-sm flex-shrink-0" 
-                                style={{ width: "70px", height: "70px", objectFit: "inherit" }} 
+                                style={{ width: "70px", height: "70px", objectFit: "contain" }} 
                               />
                               <div>
                                 <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px', lineHeight: '1.4' }}>
@@ -2233,7 +2233,7 @@ const DynamicRootPage = async ({ params }) => {
                               <div className="col-md-6" key={idx}>
                                 <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                                   <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
-                                    <img src={blog.image || "/images/default.jpg"} alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "inherit" }} loading="lazy" />
+                                    <img src={blog.image || "/images/default.jpg"} alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" />
                                     <div className="ms-3">
                                       <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
                                       <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
@@ -2312,7 +2312,7 @@ const DynamicRootPage = async ({ params }) => {
                           <div className="col-md-6 col-lg-3">
                             <div className="modern-card">
                               <div className="modern-card-icon"><FaShieldAlt /></div>
-                              <h4 className="font-outfit fw-bold h6">10-Year Warranty</h4>
+                              <h4 className="font-outfit fw-bold h6">10-Year Warranty*</h4>
                               <p className="text-muted font-poppins small mb-0">India&apos;s only full-home coverage guarantee.</p>
                             </div>
                           </div>
