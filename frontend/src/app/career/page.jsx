@@ -1,6 +1,6 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import BoxIcon from "../components/BoxIcon";
-// import { FaArrowRightLong } from "react-icons/fa6";
+import { FaArrowRightLong } from "react-icons/fa6";
 import MainLayout from "../layouts/MainLayout";
 import Link from "next/link";
 
@@ -387,10 +387,10 @@ export default async function Career() {
     }
   }
 `}} />
-<section className="pb-5">
+{/* <section className="pb-5">
   <div className="container">
     <div className="row justify-content-center mx-0">
-      <div className="col-lg-10">
+      <div className="col-lg-10"> */}
         
         {/* Render CKEditor Table if it exists in CMS */}
         {/* {pageData.tableContent ? (
@@ -441,7 +441,7 @@ export default async function Career() {
           </div>
         )} */}
 
-        {pageData.tableContent ? (
+        {/* {pageData.tableContent ? (
   <div 
     className="table-responsive ckeditor-table-wrapper"
     dangerouslySetInnerHTML={{ __html: pageData.tableContent }}
@@ -450,6 +450,59 @@ export default async function Career() {
   <p className="text-center text-muted py-4">No active job openings at the moment.</p>
 )}
 
+      </div>
+    </div>
+  </div>
+</section> */}
+<section className="pb-5">
+  <div className="container">
+    <div className="row justify-content-center mx-0">
+      <div className="col-lg-10">
+        <div className="table-responsive">
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th>Job Posting</th>
+                <th>Experience</th>
+                <th>No of Opening</th>
+                <th>Location</th>
+                <th>Posted On</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {jobPostList && jobPostList.length > 0 ? (
+                jobPostList.map((job, index) => (
+                  <tr key={index}>
+                    <td>{job?.title ?? "-"}</td>
+                    <td>{job?.experience_required ?? "-"}</td>
+                    <td>{job?.job_opening ?? "-"}</td>
+                    <td>{job?.location ?? "-"}</td>
+                    <td>
+                      {job?.created_at
+                        ? new Date(job.created_at).toLocaleDateString("en-GB")
+                        : "-"}
+                    </td>
+                    <td>
+                      <Link
+                        href={`/career/career-form?jobId=${job.id}`}
+                        className="text-muted"
+                      >
+                        <FaArrowRightLong className="fs-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center py-4">
+                    No active job openings at the moment.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

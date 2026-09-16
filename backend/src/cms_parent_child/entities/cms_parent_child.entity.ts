@@ -27,6 +27,7 @@ export enum PageType {
     EXPERIENCE_CENTER_NEW_DELHI_VIDEO = 'experience_center_new_delhi_video',
     
     PRODUCT = 'product',
+    CAREER_FORM = 'career_form',
 }
 
 @Entity('cms_parent_child')

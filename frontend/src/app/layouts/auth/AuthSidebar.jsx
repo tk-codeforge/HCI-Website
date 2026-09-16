@@ -288,6 +288,7 @@ function AuthSidebar() {
                 {openGroups.company && (
                     <div className="sub-menu">
                         <Link href="/cms/career" className={`sub-menu-link ${isActive('/cms/career')}`}>Career</Link>
+                        <Link href="/cms/career-form" className={`sub-menu-link ${isActive('/cms/career-form')}`}>Career Form</Link>
                         <Link href="/cms/about-us" className={`sub-menu-link ${isActive('/cms/about-us')}`}>About Us</Link>
                         {/* <Link href="/cms/about-us-slider" className={`sub-menu-link ${isActive('/cms/about-us-slider')}`}>About Us Slider</Link> */}
                         <Link href="/cms/team" className={`sub-menu-link ${isActive('/cms/team')}`}>Team</Link>

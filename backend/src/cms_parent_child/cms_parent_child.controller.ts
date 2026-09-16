@@ -104,14 +104,21 @@ export class CmsParentChildController {
     @Body() updateCmsParentChildDto: UpdateCmsParentChildDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    // const imagePath = file ? file.path : null;
+    // const childContentIndex = updateCmsParentChildDto.childContentIndex;
+    // const updateData = {
+    //   title: updateCmsParentChildDto.title,
+    //   description: updateCmsParentChildDto.description,
+    //   image: imagePath,
+    // };
+    // return this.cmsParentChildService.update(+id, updateData);
     const imagePath = file ? file.path : null;
-    const childContentIndex = updateCmsParentChildDto.childContentIndex;
-    const updateData = {
-      title: updateCmsParentChildDto.title,
-      description: updateCmsParentChildDto.description,
-      image: imagePath,
-    };
-    return this.cmsParentChildService.update(+id, updateData);
+const childContentIndex = updateCmsParentChildDto.childContentIndex;
+const updateData = {
+  ...updateCmsParentChildDto,
+  image: imagePath,
+};
+return this.cmsParentChildService.update(+id, updateData);
   }
 
   @UseGuards(AuthGuard('jwt'))

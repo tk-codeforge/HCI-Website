@@ -427,21 +427,31 @@ export class CmsParentChildService {
     });
   }
 
-  async update(id: number, updateData: { title: string; description: string; image?: string }) {
+  // async update(id: number, updateData: { title: string; description: string; image?: string })
+  async update(id: number, updateData: Record<string, any>)
+   {
     const existingRecord = await this.cmsParentChildRepository.findOne({ where: { id } });
     if (!existingRecord) {
       throw new Error('Record not found');
     }
 
-    const childContent = existingRecord.child_content;
+    // const childContent = existingRecord.child_content;
+    const childContent = { ...existingRecord.child_content };
 
     if (updateData.image) {
-      const imageName = basename(updateData.image); 
-      childContent.image = imageName;
+      // const imageName = basename(updateData.image); 
+      // childContent.image = imageName;
+      childContent.image = basename(updateData.image);
     }
 
-    childContent.title = updateData?.title;
-    childContent.description = updateData.description;
+    // childContent.title = updateData?.title;
+    // childContent.description = updateData.description;
+    for (const key of Object.keys(updateData)) {
+    if (key === 'image' || key === 'childContentIndex') continue;
+    if (updateData[key] !== undefined) {
+      childContent[key] = updateData[key];
+    }
+  }
 
     existingRecord.child_content = childContent;
 
