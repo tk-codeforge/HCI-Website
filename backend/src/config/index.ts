@@ -11,6 +11,7 @@ export default () => ({
         host: 'localhost',
         port: 3306,
         username: 'root',
+        
         name: 'lp_high_creation_live',
         synchronize: true,
     },

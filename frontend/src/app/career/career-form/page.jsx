@@ -94,7 +94,7 @@ const Contact = () => {
                   <h2 className="pb-4"> High Creation Interior Team</h2>
                   <p>
                     Can’t find something suitable, but eager to work with us?
-                    Write to us at info@hcinterior.in and we’ll try to make it
+                    Write to us at hr@hcinterior.in and we’ll try to make it
                     happen.
                   </p>
                 </div>
