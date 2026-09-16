@@ -357,6 +357,86 @@ const jobId = new URLSearchParams(
 ).get("jobId");
 const jobText = cmsSettings?.job_texts?.[jobId] || {};
 
+const renderCheckboxLabel = () => {
+  const mainText = cmsSettings?.checkbox_text || "Accept Terms & Conditions";
+  const links = cmsSettings?.checkbox_links || [];
+
+  if (!links || links.length === 0) {
+    return mainText;
+  }
+
+  let matchedAny = false;
+  let elements = [mainText];
+
+  links.forEach((link, linkIdx) => {
+    if (!link.text) return;
+
+    const newElements = [];
+    elements.forEach((node) => {
+      if (typeof node !== "string") {
+        newElements.push(node);
+        return;
+      }
+
+      const index = node.indexOf(link.text);
+      if (index !== -1) {
+        matchedAny = true;
+        const before = node.slice(0, index);
+        const after = node.slice(index + link.text.length);
+
+        if (before) newElements.push(before);
+        newElements.push(
+          link.url ? (
+            <a
+              key={`link-${linkIdx}`}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="career-form-checkbox-link"
+            >
+              {link.text}
+            </a>
+          ) : (
+            link.text
+          )
+        );
+        if (after) newElements.push(after);
+      } else {
+        newElements.push(node);
+      }
+    });
+    elements = newElements;
+  });
+
+  // Fallback: If link text wasn't found inside checkbox_text, append it
+  if (!matchedAny) {
+    return (
+      <>
+        <span className="me-1">{mainText}</span>
+        {links.map((link, idx) => (
+          <span key={idx}>
+            {idx > 0 && " "}
+            {link.url ? (
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="career-form-checkbox-link"
+              >
+                {link.text}
+              </a>
+            ) : (
+              link.text
+            )}
+          </span>
+        ))}
+      </>
+    );
+  }
+
+  return elements;
+};
+
   return (
     <div>
       <head>
@@ -530,7 +610,7 @@ const jobText = cmsSettings?.job_texts?.[jobId] || {};
                           id="invalidCheck"
                           required
                         />
-                        <label
+                        {/* <label
                           className="form-check-label ms-1"
                           htmlFor="invalidCheck"
                           style={{
@@ -562,7 +642,16 @@ const jobText = cmsSettings?.job_texts?.[jobId] || {};
                           ) : (
                             !cmsSettings?.checkbox_text && "Accept Terms & Conditions"
                           )}
-                        </label>
+                        </label> */}
+                        <label
+  className="form-check-label ms-1"
+  htmlFor="invalidCheck"
+  style={{
+    color: cmsSettings?.font_color || "#000000",
+  }}
+>
+  {renderCheckboxLabel()}
+</label>
                         <div
                           className="invalid-feedback"
                           style={{
