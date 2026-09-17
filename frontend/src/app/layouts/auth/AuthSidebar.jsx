@@ -238,8 +238,9 @@ function AuthSidebar() {
                         <Link href="/cms/creating-the-home-of-your-dreams" className={`sub-menu-link ${isActive('/cms/creating-the-home-of-your-dreams')}`}>Creating Dreams</Link>
                         <Link href="/cms/manage-the-way-we-work" className={`sub-menu-link ${isActive('/cms/manage-the-way-we-work')}`}>The Way We Work</Link>
                         <Link href="/cms/manage-what-we-offer" className={`sub-menu-link ${isActive('/cms/manage-what-we-offer')}`}>Explore What We Offer</Link>
+                        <Link href="/cms/manage-header" className={`sub-menu-link ${isActive('/cms/manage-header')}`}>Manage Header</Link>
                         <Link href="/cms/manage-footer" className={`sub-menu-link ${isActive('/cms/manage-footer')}`}>Manage Footer</Link>
-                        <Link href="/cms/manage-navbar-serving-area" className={`sub-menu-link ${isActive('/cms/manage-navbar-serving-area')}`}>Serving Areas NavBar</Link>
+                        {/* <Link href="/cms/manage-navbar-serving-area" className={`sub-menu-link ${isActive('/cms/manage-navbar-serving-area')}`}>Serving Areas NavBar</Link> */}
                     </div>
                 )}
 

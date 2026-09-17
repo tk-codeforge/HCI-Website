@@ -4,17 +4,63 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { FaBars } from "react-icons/fa";
 import api from "@/utils/api";
 
-const DEFAULT_SERVING_AREAS = [
-  { label: "Interior Designers In Noida", href: "/interior-designers-in-noida" },
-  { label: "Interior Designers in Ghaziabad", href: "/interior-designers-in-ghaziabad" },
-  { label: "Interior Designers in Greater Noida", href: "/interior-designers-in-greater-noida" },
-  { label: "Interior Designers in Delhi", href: "/interior-designers-in-delhi" },
-  { label: "Interior Designers in Dwarka", href: "/interior-designers-in-dwarka" },
-  { label: "Interior Designers in Faridabad", href: "/interior-designers-in-faridabad" },
-  { label: "Interior Designers in Gurugram", href: "/interior-designers-in-gurgaon" },
-  { label: "Interior Designers In Manesar", href: "/interior-designers-in-manesar" },
-  { label: "Interior Designers in Sohna", href: "/interior-designer-in-sohna-gurgaon" },
-  { label: "Interior Designer in Noida Extension", href: "/interior-designer-in-noida-extension" }
+// const DEFAULT_SERVING_AREAS = [
+//   { label: "Interior Designers In Noida", href: "/interior-designers-in-noida" },
+//   { label: "Interior Designers in Ghaziabad", href: "/interior-designers-in-ghaziabad" },
+//   { label: "Interior Designers in Greater Noida", href: "/interior-designers-in-greater-noida" },
+//   { label: "Interior Designers in Delhi", href: "/interior-designers-in-delhi" },
+//   { label: "Interior Designers in Dwarka", href: "/interior-designers-in-dwarka" },
+//   { label: "Interior Designers in Faridabad", href: "/interior-designers-in-faridabad" },
+//   { label: "Interior Designers in Gurugram", href: "/interior-designers-in-gurgaon" },
+//   { label: "Interior Designers In Manesar", href: "/interior-designers-in-manesar" },
+//   { label: "Interior Designers in Sohna", href: "/interior-designer-in-sohna-gurgaon" },
+//   { label: "Interior Designer in Noida Extension", href: "/interior-designer-in-noida-extension" }
+// ];
+
+const DEFAULT_MENU = [
+  { label: "Design Ideas", href: "", dropdown: [
+    { label: "Design Gallery", href: "/design-idea/" },
+    { label: "Product", href: "/product/" },
+  ]},
+  { label: "Portfolio", href: "", dropdown: [
+    { label: "Residential Projects", href: "/residential-projects/" },
+    { label: "Luxury Projects", href: "/luxury-projects/" },
+  ]},
+  { label: "Experience Center", href: "", dropdown: [
+    { label: "Experience Center New Delhi", href: "/experience-center-new-delhi/" },
+    { label: "Experience Center Noida", href: "/experience-center/" },
+    { label: "Experience Center Noida Extension", href: "/experience-center-noida-extension/" },
+    { label: "Experience Center Gurgaon", href: "/experience-center-gurugram/" },
+    { label: "Experience Center Faridabad", href: "/experience-center-faridabad/" },
+  ]},
+  { label: "Exclusive Design", href: "", dropdown: [
+    { label: "Ready To Go Design", href: "/ready-togo-design/" },
+    { label: "Wallpapers", href: "/wallpaper/" },
+    { label: "Space-Saving Furniture", href: "/spacesaving-furniture/" },
+    { label: "Sustainable Furniture", href: "/sustainable-furniture/" },
+    { label: "Furniture", href: "/furniture/" },
+  ]},
+  { label: "Serving Areas", href: "", dropdown: [
+    { label: "Interior Designers In Noida", href: "/interior-designers-in-noida" },
+    { label: "Interior Designers in Ghaziabad", href: "/interior-designers-in-ghaziabad" },
+    { label: "Interior Designers in Greater Noida", href: "/interior-designers-in-greater-noida" },
+    { label: "Interior Designers in Delhi", href: "/interior-designers-in-delhi" },
+    { label: "Interior Designers in Dwarka", href: "/interior-designers-in-dwarka" },
+    { label: "Interior Designers in Faridabad", href: "/interior-designers-in-faridabad" },
+    { label: "Interior Designers in Gurugram", href: "/interior-designers-in-gurgaon" },
+    { label: "Interior Designers In Manesar", href: "/interior-designers-in-manesar" },
+    { label: "Interior Designers in Sohna", href: "/interior-designer-in-sohna-gurgaon" },
+    { label: "Interior Designer in Noida Extension", href: "/interior-designer-in-noida-extension" },
+  ]},
+  { label: "More", href: "", dropdown: [
+    { label: "About Us", href: "/about-us/" },
+    { label: "How It Works", href: "/how-its-works/" },
+    { label: "Serving Areas", href: "/services/" },
+    { label: "Team", href: "/team/" },
+    { label: "Contact Us", href: "/contact/" },
+    { label: "Blogs", href: "/blog/" },
+    { label: "Awards Gallery", href: "/awards/" },
+  ]},
 ];
 
 const Toggle = () => {
@@ -22,7 +68,8 @@ const Toggle = () => {
   const [error, setError] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [servingAreaItems, setServingAreaItems] = useState(DEFAULT_SERVING_AREAS);
+  // const [servingAreaItems, setServingAreaItems] = useState(DEFAULT_SERVING_AREAS);
+const [menu, setMenu] = useState(DEFAULT_MENU);
 
   const openSidebar = () => setIsOpen(true);
   const closeSidebar = () => setIsOpen(false);
@@ -44,25 +91,54 @@ const Toggle = () => {
     fetchLookMenu();
   }, []);
 
-  useEffect(() => {
-  const fetchServingArea = async () => {
+//   useEffect(() => {
+//   const fetchServingArea = async () => {
+//     try {
+//       const res = await api.get("/cms-content/navbar_serving_area");
+//       if (res.data) {
+//         const record = Array.isArray(res.data) ? res.data[0] : res.data;
+//         const content = record?.json_content || {};
+//         if (content.items && content.items.length > 0) {
+//           setServingAreaItems(content.items);
+//         }
+//       }
+//     } catch (err) {
+//       console.error("Error fetching serving area menu:", err);
+//       // keep DEFAULT_SERVING_AREAS as fallback
+//     }
+//   };
+
+//   fetchServingArea();
+// }, []);
+
+useEffect(() => {
+  const fetchMenu = async () => {
     try {
-      const res = await api.get("/cms-content/navbar_serving_area");
+      const res = await api.get("/cms-content/navbar_header_menu");
       if (res.data) {
         const record = Array.isArray(res.data) ? res.data[0] : res.data;
-        const content = record?.json_content || {};
-        if (content.items && content.items.length > 0) {
-          setServingAreaItems(content.items);
+        const items = record?.json_content?.menu;
+        if (items && items.length > 0) {
+          setMenu(items);
         }
       }
     } catch (err) {
-      console.error("Error fetching serving area menu:", err);
-      // keep DEFAULT_SERVING_AREAS as fallback
+      console.error("Error fetching header menu:", err);
+      // keep DEFAULT_MENU as fallback
     }
   };
 
-  fetchServingArea();
+  fetchMenu();
 }, []);
+
+const getColumn = (label) => {
+  const found = menu.find((h) => h.label === label);
+  if (found && Array.isArray(found.dropdown) && found.dropdown.length > 0) {
+    return found.dropdown;
+  }
+  const fallback = DEFAULT_MENU.find((h) => h.label === label);
+  return fallback ? fallback.dropdown : [];
+};
 
   return (
     <div>
@@ -238,16 +314,16 @@ const Toggle = () => {
                 <div className="row mobile-menu-grid">
                   
                   {/* 1st - Projects */}
-                  <div className="col-lg-3 mobile-menu-column">
+                  {/* <div className="col-lg-3 mobile-menu-column">
                     <h5 className="stylish-section-title">Projects</h5>
                     <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
                       <li><a href="/residential-projects" className="offcanvas_anchor" onClick={closeSidebar}>Residential Projects</a></li>
                       <li><a href="/luxury-projects" className="offcanvas_anchor" onClick={closeSidebar}>Luxury Projects</a></li>
                     </ul>
-                  </div>
+                  </div> */}
 
                   {/* 2nd - Experience Center */}
-                  <div className="col-lg-3 mobile-menu-column">
+                  {/* <div className="col-lg-3 mobile-menu-column">
                     <h5 className="stylish-section-title">Experience Center</h5>
                     <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
                       <li><a href="/experience-center-new-delhi/" className="offcanvas_anchor" onClick={closeSidebar}>New Delhi Experience Center</a></li>
@@ -256,7 +332,7 @@ const Toggle = () => {
                       <li><a href="/experience-center-gurugram/" className="offcanvas_anchor" onClick={closeSidebar}>Gurgaon Experience Center</a></li>
                       <li><a href="/experience-center-faridabad/" className="offcanvas_anchor" onClick={closeSidebar}>Faridabad Experience Center</a></li>
                     </ul>
-                  </div>
+                  </div> */}
 
                   {/* 3rd - Cities */}
                   {/* <div className="col-lg-3 mobile-menu-column">
@@ -274,7 +350,7 @@ const Toggle = () => {
                     </ul>
                   </div> */}
                   {/* 3rd - Cities */}
-<div className="col-lg-3 mobile-menu-column">
+{/* <div className="col-lg-3 mobile-menu-column">
   <h5 className="stylish-section-title">Cities</h5>
   <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
     {servingAreaItems.map((item, idx) => (
@@ -285,10 +361,10 @@ const Toggle = () => {
       </li>
     ))}
   </ul>
-</div>
+</div> */}
 
                   {/* 4th - Design Ideas */}
-                  <div className="col-lg-3 mobile-menu-column">
+                  {/* <div className="col-lg-3 mobile-menu-column">
                     <h5 className="stylish-section-title">Design Ideas</h5>
                     <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
                       <li><a href="/furniture/" className="offcanvas_anchor" onClick={closeSidebar}>Furniture</a></li>
@@ -297,7 +373,63 @@ const Toggle = () => {
                       <li><a href="/spacesaving-furniture/" className="offcanvas_anchor" onClick={closeSidebar}>Space-Saving</a></li>
                       <li><a href="/wallpaper/" className="offcanvas_anchor" onClick={closeSidebar}>Wallpapers</a></li>
                     </ul>
-                  </div>
+                  </div> */}
+
+                  {/* 1st - Projects (maps to "Portfolio" heading) */}
+<div className="col-lg-3 mobile-menu-column">
+  <h5 className="stylish-section-title">Projects</h5>
+  <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
+    {getColumn("Portfolio").map((item, idx) => (
+      <li key={idx}>
+        <a href={item.href} className="offcanvas_anchor" onClick={closeSidebar}>
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+{/* 2nd - Experience Center */}
+<div className="col-lg-3 mobile-menu-column">
+  <h5 className="stylish-section-title">Experience Center</h5>
+  <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
+    {getColumn("Experience Center").map((item, idx) => (
+      <li key={idx}>
+        <a href={item.href} className="offcanvas_anchor" onClick={closeSidebar}>
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+{/* 3rd - Cities (maps to "Serving Areas" heading) */}
+<div className="col-lg-3 mobile-menu-column">
+  <h5 className="stylish-section-title">Cities</h5>
+  <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
+    {getColumn("Serving Areas").map((item, idx) => (
+      <li key={idx}>
+        <a href={item.href} className="offcanvas_anchor" onClick={closeSidebar}>
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
+
+{/* 4th - Design Ideas (maps to "Exclusive Design" heading — matches your current hardcoded items) */}
+<div className="col-lg-3 mobile-menu-column">
+  <h5 className="stylish-section-title">Design Ideas</h5>
+  <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
+    {getColumn("Exclusive Design").map((item, idx) => (
+      <li key={idx}>
+        <a href={item.href} className="offcanvas_anchor" onClick={closeSidebar}>
+          {item.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>
 
                 </div>
               </div>

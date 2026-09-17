@@ -744,6 +744,9 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
 
   return this.cmsContentRepository.update(id, { json_content: jsonContent });
 }
+   case PageType.NAVBAR_HEADER_MENU: {
+     return this.cmsContentRepository.update(id, { json_content: jsonContent });
+   }
       
       default:
         return this.update(id, updateCmsContentDto);
