@@ -544,10 +544,10 @@ export default function ManageHeader() {
                     onChange={handleHeadingFormChange}
                   />
                   <div className="form-text">
-                    Leave blank if this heading is dropdown-only (matches current site behavior).
+                    Leave blank if this heading is dropdown-only
                     {headingForm.menu_index === null
-                      ? " New headings appear right away — remember to click that section's Save button."
-                      : " Remember to click this section's Save button to publish the change."}
+                      ? " New headings appear right away — remember to click that section&apos;s Save button."
+                      : " Remember to click this section&apos;s Save button to publish the change."}
                   </div>
                 </div>
               </div>
@@ -604,7 +604,7 @@ export default function ManageHeader() {
                     required
                   />
                   <div className="form-text">
-                    Remember to click this section's Save button to publish the change.
+                    Remember to click this section&apos;s Save button to publish the change.
                   </div>
                 </div>
               </div>

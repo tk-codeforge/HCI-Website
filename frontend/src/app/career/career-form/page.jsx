@@ -501,8 +501,8 @@ const renderCheckboxLabel = () => {
   <div dangerouslySetInnerHTML={{ __html: jobText.paragraph }} />
 ) : (
    <p>
-     Can't find something suitable, but eager to work with us?
-     Write to us at hr@hcinterior.in and we'll try to make it
+     Can&apos;t find something suitable, but eager to work with us?
+     Write to us at hr@hcinterior.in and we&apos;ll try to make it
      happen.
    </p>
  )}
