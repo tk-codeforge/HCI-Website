@@ -177,6 +177,9 @@ const hasCustomBanner =
   return (
     <MainLayout>
       <style dangerouslySetInnerHTML={{__html: `
+.services-page-wrapper .secbgbesclass {
+  border-left: none !important;
+} 
         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
         .font-outfit { font-family: var(--font-outfit), sans-serif; }
         .font-quicksand { font-family: var(--font-quicksand), sans-serif; }
@@ -304,6 +307,24 @@ const hasCustomBanner =
     width: 100%;
     max-width: 100vw;
   }
+    .services-custom-bg .sectionbg.services {
+    position: relative;
+    height: 0 !important;
+    padding-top: 31.25% !important; 
+    background-size: cover !important;
+    background-position: 25% center !important;
+    background-repeat: no-repeat !important;
+    background-color: transparent !important;
+    min-height: unset !important;
+    overflow: hidden;
+  }
+
+  .services-custom-bg .sectionbg.services > .container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+  }
 }
 
       `}} />
@@ -322,6 +343,7 @@ const hasCustomBanner =
   secBgHeadingClass="sec_bgheading_lass"
   sectionBgDescription={bannerDesc}
   secBgDesClass="secbgbesclass"
+  noDivider
 />
 
         <div className="container py-5">
