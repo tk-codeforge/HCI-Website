@@ -91,6 +91,11 @@ const DEFAULT_FORM = {
     description:
       "Share your details and our team can guide you to the appropriate next step.",
     submitLabel: "SUBMIT REQUEST",
+    contactItems: [
+    { icon: "phone", label: "Call Us", value: "+91 7070701373" },
+    { icon: "mail", label: "Customer Care", value: "care@hcinterior.in" },
+    { icon: "location", label: "Corporate Office", value: "H-56, 1st Floor, Sector-63, Noida, Uttar Pradesh - 201301" },
+  ],
   },
   cta: {
     enabled: true,
@@ -226,9 +231,9 @@ export default function CmsWarranty() {
           ...(source.cta || {}),
         },
         banner_heading:
-          banner?.banner_heading || DEFAULT_FORM.banner_heading,
+          banner?.banner_heading ?? DEFAULT_FORM.banner_heading,
         banner_description:
-          banner?.banner_description ||
+          banner?.banner_description ??
           DEFAULT_FORM.banner_description,
         banner_heading_tag:
           banner?.banner_heading_tag ||
@@ -378,6 +383,37 @@ export default function CmsWarranty() {
       },
     }));
   };
+
+  const updateContactItem = (index, field, value) => {
+  setFormData((prev) => {
+    const contactItems = [...prev.supportForm.contactItems];
+    contactItems[index] = { ...contactItems[index], [field]: value };
+    return { ...prev, supportForm: { ...prev.supportForm, contactItems } };
+  });
+};
+
+const addContactItem = () => {
+  setFormData((prev) => ({
+    ...prev,
+    supportForm: {
+      ...prev.supportForm,
+      contactItems: [
+        ...prev.supportForm.contactItems,
+        { icon: "phone", label: "New Item", value: "" },
+      ],
+    },
+  }));
+};
+
+const removeContactItem = (index) => {
+  setFormData((prev) => ({
+    ...prev,
+    supportForm: {
+      ...prev.supportForm,
+      contactItems: prev.supportForm.contactItems.filter((_, i) => i !== index),
+    },
+  }));
+};
 
   const persistContent = async () => {
     if (!pageId) {
@@ -760,7 +796,7 @@ export default function CmsWarranty() {
         }
 
         .warranty-editor .ck-editor__top {
-          position: static !important;
+          position: sticky !important;
           top: auto !important;
           z-index: auto !important;
         }
@@ -1055,6 +1091,49 @@ export default function CmsWarranty() {
                           }
                         />
                       </div>
+                      <div className="col-12">
+  <hr className="my-3" />
+  <label className="form-label fw-semibold">Contact Items</label>
+  {formData.supportForm.contactItems.map((item, index) => (
+    <div className="row g-2 align-items-center mb-2" key={index}>
+      <div className="col-md-2">
+        <select
+          className="form-select"
+          value={item.icon}
+          onChange={(e) => updateContactItem(index, "icon", e.target.value)}
+        >
+          <option value="phone">Phone</option>
+          <option value="mail">Mail</option>
+          <option value="location">Location</option>
+        </select>
+      </div>
+      <div className="col-md-3">
+        <input
+          className="form-control"
+          placeholder="Label"
+          value={item.label}
+          onChange={(e) => updateContactItem(index, "label", e.target.value)}
+        />
+      </div>
+      <div className="col-md-6">
+        <input
+          className="form-control"
+          placeholder="Value"
+          value={item.value}
+          onChange={(e) => updateContactItem(index, "value", e.target.value)}
+        />
+      </div>
+      <div className="col-md-1">
+        <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => removeContactItem(index)}>
+          <FaTrash />
+        </button>
+      </div>
+    </div>
+  ))}
+  <button type="button" className="btn btn-outline-primary btn-sm mt-1" onClick={addContactItem}>
+    <FaPlus className="me-2" />Add Contact Item
+  </button>
+</div>
                     </div>
                   </section>
                 )}

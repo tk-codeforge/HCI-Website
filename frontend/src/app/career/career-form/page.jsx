@@ -357,6 +357,17 @@ const jobId = new URLSearchParams(
 ).get("jobId");
 const jobText = cmsSettings?.job_texts?.[jobId] || {};
 
+const [jobTitle, setJobTitle] = useState("");
+useEffect(() => {
+  if (!jobId) return;
+  api.get("/manage-job/active")
+    .then((res) => {
+      const job = (res.data || []).find((j) => String(j.id) === String(jobId));
+      if (job) setJobTitle(job.title || "");
+    })
+    .catch((err) => console.error(err));
+}, [jobId]);
+
 const renderCheckboxLabel = () => {
   const mainText = cmsSettings?.checkbox_text || "Accept Terms & Conditions";
   const links = cmsSettings?.checkbox_links || [];
@@ -497,6 +508,7 @@ const renderCheckboxLabel = () => {
                     happen.
                   </p> */}
                   {/* <h2 className="pb-4">{jobText.heading || "High Creation Interior Team"}</h2> */}
+                  <h2 className="pb-4">{jobTitle || jobText.heading || "High Creation Interior Team"}</h2>
 {jobText.paragraph ? (
   <div dangerouslySetInnerHTML={{ __html: jobText.paragraph }} />
 ) : (

@@ -2,7 +2,7 @@ import MainLayout from "@/app/layouts/MainLayout";
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import WarrantySupportForm from "../components/WarrantySupportForm";
 import { notFound } from "next/navigation";
-import { FaShieldAlt, FaClock, FaCheckCircle } from "react-icons/fa";
+import { FaShieldAlt, FaClock, FaCheckCircle, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -201,10 +201,16 @@ export default async function WarrantyPage() {
     ...(content.process || {}),
   };
 
+  // const supportForm = {
+  //   enabled: true,
+  //   ...(content.supportForm || {}),
+  // };
+
   const supportForm = {
-    enabled: true,
-    ...(content.supportForm || {}),
-  };
+  enabled: true,
+  contactItems: [],
+  ...(content.supportForm || {}),
+};
 
   const cta = {
     enabled: true,
@@ -218,11 +224,11 @@ export default async function WarrantyPage() {
     : [];
 
   const heading =
-    banner?.banner_heading ||
+    banner?.banner_heading ??
     "Warranty";
 
   const description =
-    banner?.banner_description ||
+    banner?.banner_description ??
     "Our commitment to quality and reliable interior solutions";
 
   const policyHtml = content.html || "";
@@ -734,6 +740,13 @@ export default async function WarrantyPage() {
             padding: 28px 24px;
           }
         }
+          @media (min-width: 768px) {
+  .warranty_banner {
+    min-height: 360px !important;
+    background-position: center 20% !important;
+    background-size: cover !important;
+  }
+}
 
         .warranty_banner .sec_bgheading_lass {
   font-size: clamp(26px, 6vw, 64px) !important;
@@ -753,6 +766,29 @@ export default async function WarrantyPage() {
   padding-left: 16px;
   padding-right: 16px;
   box-sizing: border-box;
+}
+
+.hci-warranty .warranty-contact-items { margin-top: 24px; }
+.hci-warranty .warranty-contact-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 0; border-top: 1px solid var(--hci-border);
+}
+.hci-warranty .warranty-contact-icon {
+  position: relative;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #fff3e9; color: var(--hci-orange);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.hci-warranty .warranty-contact-icon svg {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) !important;
 }
       ` }} />
 
@@ -856,6 +892,22 @@ export default async function WarrantyPage() {
                   <span>{supportForm.eyebrow}</span>
                   <h3>{supportForm.heading}</h3>
                   <p>{supportForm.description}</p>
+                  {Array.isArray(supportForm.contactItems) && supportForm.contactItems.length > 0 && (
+  <div className="warranty-contact-items">
+    {supportForm.contactItems.map((item, index) => {
+      const Icon = item.icon === "mail" ? FaEnvelope : item.icon === "location" ? FaMapMarkerAlt : FaPhoneAlt;
+      return (
+        <div className="warranty-contact-item" key={index}>
+          <span className="warranty-contact-icon"><Icon /></span>
+          <div>
+            <strong>{item.label}</strong>
+            <div>{item.value}</div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)}
                 </div>
 
                 <div className="warranty-support-form-box">

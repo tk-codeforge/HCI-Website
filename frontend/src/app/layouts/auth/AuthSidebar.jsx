@@ -251,7 +251,6 @@ function AuthSidebar() {
                 </div>
                 {openGroups.galleries && (
                     <div className="sub-menu">
-                        <Link href="/cms/manage-banner" className={`sub-menu-link ${isActive('/cms/manage-banner')}`}>Manage Banner</Link>
                         <Link href="/cms/design-gallery" className={`sub-menu-link ${isActive('/cms/design-gallery')}`}>Design Gallery</Link>
                         <Link href="/cms/3d-gallery" className={`sub-menu-link ${isActive('/cms/3d-gallery')}`}>3D Gallery</Link>
                         <Link href="/cms/award-gallery" className={`sub-menu-link ${isActive('/cms/award-gallery')}`}>Award Gallery</Link>
@@ -268,6 +267,7 @@ function AuthSidebar() {
                 </div>
                 {openGroups.products && (
                     <div className="sub-menu">
+                        <Link href="/cms/manage-banner" className={`sub-menu-link ${isActive('/cms/manage-banner')}`}>Manage Banner</Link>
                         <Link href="/cms/manage-heading-and-description" className={`sub-menu-link ${isActive('/cms/manage-heading-and-description')}`}>Heading & Description Management</Link>
                         <Link href="/cms/product" className={`sub-menu-link ${isActive('/cms/product')}`}>Main Products</Link>
                         <Link href="/cms/designer-choice" className={`sub-menu-link ${isActive('/cms/designer-choice')}`}>{`Designer's Choice`}</Link>

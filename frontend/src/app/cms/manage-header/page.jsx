@@ -8,8 +8,6 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
 const CMS_KEY = "navbar_header_menu";
 
-// Sensible starting point if the CMS hasn't been saved to yet at all —
-// mirrors the current hard-coded Header.jsx menu so nothing breaks on first load.
 const DEFAULT_MENU = [
   {
     label: "Design Ideas",
@@ -98,8 +96,6 @@ export default function ManageHeader() {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Which heading card is currently persisting — used to disable/label that
-  // card's own Save button without blocking the rest of the page.
   const [savingIndex, setSavingIndex] = useState(null);
 
   const [headingForm, setHeadingForm] = useState(EMPTY_HEADING_FORM);
@@ -152,11 +148,6 @@ export default function ManageHeader() {
     }
   };
 
-  // ---------------- Core persistence ----------------
-  // Persists the FULL menu array (backend stores one json_content blob for
-  // this CMS key), but is always called with a specific heading index so the
-  // UI can show a per-card "Saving..." state and toast which section saved.
-  // Returns the response so callers can pick up a freshly created contentId.
   const persistMenu = async (updatedMenu, menuIndexForUi = null, sectionLabel = "") => {
     setSavingIndex(menuIndexForUi);
     try {
@@ -196,32 +187,33 @@ export default function ManageHeader() {
     setHeadingForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Adding/editing heading label+link still just updates local state — it's
-  // included in that card's own "Save Section" button below, so it's saved
-  // together with any dropdown edits, not the instant the modal closes.
-  const handleHeadingFormSubmit = (e) => {
-    e.preventDefault();
+const handleHeadingFormSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!headingForm.label.trim()) {
-      toast.error("Heading name is required.");
-      return;
-    }
+  if (!headingForm.label.trim()) {
+    toast.error("Heading name is required.");
+    return;
+  }
 
-    const updated = [...menu];
+  const updated = [...menu];
+  const isNew = headingForm.menu_index === null;
 
-    if (headingForm.menu_index === null) {
-      updated.push({ label: headingForm.label.trim(), href: headingForm.href.trim(), dropdown: [] });
-    } else {
-      updated[headingForm.menu_index] = {
-        ...updated[headingForm.menu_index],
-        label: headingForm.label.trim(),
-        href: headingForm.href.trim(),
-      };
-    }
+  if (isNew) {
+    updated.push({ label: headingForm.label.trim(), href: headingForm.href.trim(), dropdown: [] });
+  } else {
+    updated[headingForm.menu_index] = {
+      ...updated[headingForm.menu_index],
+      label: headingForm.label.trim(),
+      href: headingForm.href.trim(),
+    };
+  }
 
-    setMenu(updated);
-    document.getElementById("headingModalClose")?.click();
-  };
+  setMenu(updated);
+  document.getElementById("headingModalClose")?.click();
+
+  const targetIndex = isNew ? updated.length - 1 : headingForm.menu_index;
+  await persistMenu(updated, targetIndex, headingForm.label.trim());
+};
 
   // Delete = saved immediately, no separate Save click needed.
   const deleteHeading = async (index) => {
@@ -269,35 +261,34 @@ export default function ManageHeader() {
     setItemForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Adding/editing a dropdown item also just updates local state — covered
-  // by that heading's "Save Section" button, same as heading label edits.
-  const handleItemFormSubmit = (e) => {
-    e.preventDefault();
+const handleItemFormSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!itemForm.label.trim() || !itemForm.href.trim()) {
-      toast.error("Both name and link are required.");
-      return;
-    }
+  if (!itemForm.label.trim() || !itemForm.href.trim()) {
+    toast.error("Both name and link are required.");
+    return;
+  }
 
-    const updated = [...menu];
-    const heading = { ...updated[itemForm.menu_index] };
-    const dropdown = [...(heading.dropdown || [])];
+  const updated = [...menu];
+  const heading = { ...updated[itemForm.menu_index] };
+  const dropdown = [...(heading.dropdown || [])];
 
-    const newItem = { label: itemForm.label.trim(), href: itemForm.href.trim() };
+  const newItem = { label: itemForm.label.trim(), href: itemForm.href.trim() };
 
-    if (itemForm.item_index === null) {
-      dropdown.push(newItem);
-    } else {
-      dropdown[itemForm.item_index] = newItem;
-    }
+  if (itemForm.item_index === null) {
+    dropdown.push(newItem);
+  } else {
+    dropdown[itemForm.item_index] = newItem;
+  }
 
-    heading.dropdown = dropdown;
-    updated[itemForm.menu_index] = heading;
+  heading.dropdown = dropdown;
+  updated[itemForm.menu_index] = heading;
 
-    setMenu(updated);
-    document.getElementById("itemModalClose")?.click();
-  };
+  setMenu(updated);
+  document.getElementById("itemModalClose")?.click();
 
+  await persistMenu(updated, itemForm.menu_index, `${newItem.label} in ${heading.label || "section"}`);
+};
   // Delete = saved immediately, no separate Save click needed.
   const deleteItem = async (menuIndex, itemIndex) => {
     const heading = menu[menuIndex];
@@ -543,12 +534,6 @@ export default function ManageHeader() {
                     value={headingForm.href}
                     onChange={handleHeadingFormChange}
                   />
-                  <div className="form-text">
-                    Leave blank if this heading is dropdown-only
-                    {headingForm.menu_index === null
-                      ? " New headings appear right away — remember to click that section&apos;s Save button."
-                      : " Remember to click this section&apos;s Save button to publish the change."}
-                  </div>
                 </div>
               </div>
               <div className="modal-footer">
@@ -603,9 +588,6 @@ export default function ManageHeader() {
                     onChange={handleItemFormChange}
                     required
                   />
-                  <div className="form-text">
-                    Remember to click this section&apos;s Save button to publish the change.
-                  </div>
                 </div>
               </div>
               <div className="modal-footer">
