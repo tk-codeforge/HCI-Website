@@ -241,6 +241,13 @@ export class CmsContentService {
   async findOne(page_type: PageType) {
     const contentDataArray = await this.cmsContentRepository.find({ where: { page_type }, order: { id: 'DESC' } });
 
+    //   if ((!contentDataArray || contentDataArray.length === 0) && page_type === PageType.WARRANTY) {
+    //   const created = await this.cmsContentRepository.save(
+    //     this.cmsContentRepository.create({ page_type: PageType.WARRANTY, json_content: {} })
+    //   );
+    //   contentDataArray = [created];
+    // }
+
     if (!contentDataArray || contentDataArray.length === 0) {
       return null;
     }

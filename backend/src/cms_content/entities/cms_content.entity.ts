@@ -46,6 +46,7 @@ export enum PageType {
     SUSTAINABLE_FURNITURE = 'sustainable_furniture',
     REDIRECT_CAREER = 'redirect_career',
     EXPERIENCE_CENTER_FORM = 'experience_center_form',
+    WARRANTY = 'warranty',
  }
 
 @Entity('cms_content')

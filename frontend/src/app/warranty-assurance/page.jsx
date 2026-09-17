@@ -363,10 +363,17 @@ export default async function WarrantyPage() {
           font-size: 14px;
           font-weight: 700;
         }
+           .hci-warranty .warranty-summary {
+    padding: 18px 0 28px;      /* was 18px 0 62px */
+  }
 
         .hci-warranty .warranty-policy {
-          padding: 16px 0 78px;
+          padding: 24px 0 32 px;
         }
+
+        .hci-warranty .warranty-process {
+    padding: 32px 0 32px;      /* was 55px 0 32px from the last fix — reduce the top */
+  }
 
         .hci-warranty .warranty-policy-inner {
           border-top: 1px solid var(--hci-border);
@@ -574,6 +581,7 @@ export default async function WarrantyPage() {
           margin: 0 0 8px;
           font-size: clamp(24px, 3vw, 32px);
           font-weight: 500;
+           color: #fff !important;
         }
 
         .hci-warranty .warranty-cta-box p {
@@ -611,6 +619,53 @@ export default async function WarrantyPage() {
         }
 
         @media (max-width: 767px) {
+
+       .warranty_banner {
+ min-height: 0 !important;
+    padding: 26px 16px !important;
+    background-position: 26% center !important;
+}
+  .warranty_banner {
+  min-height: 220px !important;
+}
+
+.warranty_banner .secBgDesClass,
+  .warranty_banner p {
+    font-size: 14px !important;
+    line-height: 1.30 !important;
+    max-width: 260px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .hci-warranty .warranty-intro {
+    padding: 32px 0 34px !important;
+}
+
+.hci-warranty .warranty-policy {
+  padding: 24px 0 32 px;   /* ← "32 px" has a stray space */
+}
+  .hci-warranty .warranty-policy {
+  padding: 24px 0 32px;
+}
+
+.hci-warranty .warranty-policy {
+    padding-bottom: 24px !important;
+  }
+  .hci-warranty .warranty-process {
+    padding: 24px 0 16px !important;
+  }
+  .hci-warranty .warranty-support {
+    padding: 16px 0 55px !important;
+  }
+
+.hci-warranty .warranty-policy-content * {
+  height: auto !important;
+  max-height: none !important;
+}
+
+        .warranty_banner .sec_bgheading_lass {
+  font-size: clamp(22px, 7vw, 34px) !important;
+}
           .hci-warranty .warranty-container {
             width: min(100% - 24px, 1180px);
           }
@@ -619,20 +674,56 @@ export default async function WarrantyPage() {
             padding: 48px 0 34px;
           }
 
+          // .hci-warranty .warranty-grid,
+          // .hci-warranty .warranty-process-grid {
+          //   grid-template-columns: 1fr;
+          // }
+
           .hci-warranty .warranty-grid,
-          .hci-warranty .warranty-process-grid {
-            grid-template-columns: 1fr;
-          }
+.hci-warranty .warranty-process-grid {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;          
+  -ms-overflow-style: none;
+}
+
+.hci-warranty .warranty-grid::-webkit-scrollbar,
+.hci-warranty .warranty-process-grid::-webkit-scrollbar {
+  display: none;                  
+}
+
+.hci-warranty .warranty-card,
+.hci-warranty .warranty-process-card {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  text-align: center;
+}
+
+.hci-warranty .warranty-card-icon,
+.hci-warranty .warranty-step-number {
+  margin-left: auto;
+  margin-right: auto;
+}
 
           .hci-warranty .warranty-policy {
             padding-bottom: 55px;
           }
 
-          .hci-warranty .warranty-process,
-          .hci-warranty .warranty-support {
-            padding: 55px 0;
-          }
+          // .hci-warranty .warranty-process,
+          // .hci-warranty .warranty-support {
+          //   padding: 55px 0;
+          // }
 
+          .hci-warranty .warranty-process {
+  padding: 55px 0 32px;
+}
+
+.hci-warranty .warranty-support {
+  padding: 32px 0 55px;
+}
           .hci-warranty .warranty-cta {
             padding-bottom: 55px;
           }
@@ -643,6 +734,26 @@ export default async function WarrantyPage() {
             padding: 28px 24px;
           }
         }
+
+        .warranty_banner .sec_bgheading_lass {
+  font-size: clamp(26px, 6vw, 64px) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100%;
+}
+
+.warranty_banner {
+  overflow: hidden;
+}
+
+.warranty_banner .container {
+  max-width: 100%;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
       ` }} />
 
       <main className="hci-warranty">
