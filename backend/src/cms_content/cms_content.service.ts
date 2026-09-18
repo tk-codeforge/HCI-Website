@@ -238,6 +238,38 @@ export class CmsContentService {
     return this.cmsContentRepository.find();
   }
 
+  async updatePageContent(id: number, dto: any, formImagePath: string) {
+    const existing = await this.cmsContentRepository.findOne({ where: { id } });
+    if (!existing) throw new NotFoundException(`Content not found`);
+
+    let jsonContent = existing.json_content || {};
+    
+    // Migrate legacy raw array to an object wrapped under 'cards'
+    if (Array.isArray(jsonContent)) {
+        jsonContent = { cards: jsonContent };
+    }
+
+    jsonContent.main_heading = dto.main_heading;
+    jsonContent.main_heading_tag = dto.main_heading_tag;
+    jsonContent.main_description = dto.main_description;
+    jsonContent.main_description_font_size = dto.main_description_font_size;
+    jsonContent.form_bg_color = dto.form_bg_color;
+    jsonContent.form_heading_color = dto.form_heading_color;
+    jsonContent.form_heading = dto.form_heading;
+    jsonContent.submit_button_text = dto.submit_button_text;
+    jsonContent.submit_button_bg_color = dto.submit_button_bg_color;
+    jsonContent.submit_button_color = dto.submit_button_color;
+    
+    if (dto.form_fields) {
+        jsonContent.form_fields = typeof dto.form_fields === 'string' ? JSON.parse(dto.form_fields) : dto.form_fields;
+    }
+    
+    if (formImagePath) {
+        jsonContent.form_image = basename(formImagePath);
+    }
+
+    return this.cmsContentRepository.update(id, { json_content: jsonContent });
+  }
   async findOne(page_type: PageType) {
     const contentDataArray = await this.cmsContentRepository.find({ where: { page_type }, order: { id: 'DESC' } });
 
@@ -291,7 +323,6 @@ export class CmsContentService {
           contentData.json_content = jsonContent;
           break;
         case PageType.ABOUT_US_SLIDER:
-        case PageType.REFER_AND_EARN:
         case PageType.HOME_PAGE_CONTENT_WHY_CHOOSE_US:
           if (Array.isArray(jsonContent)) {
             jsonContent.forEach((content) => (content.image = this.normalizeImageUrl(content?.image, baseUrl)));
@@ -344,6 +375,20 @@ export class CmsContentService {
           case PageType.REDIRECT_CAREER:
   contentData.json_content = this.hydrateCareerPageContent(jsonContent, baseUrl);
   break;
+
+  case PageType.REFER_AND_EARN:
+          if (Array.isArray(jsonContent)) {
+            jsonContent.forEach((content) => (content.image = this.normalizeImageUrl(content?.image, baseUrl)));
+          } else if (jsonContent) {
+            if (Array.isArray(jsonContent.cards)) {
+              jsonContent.cards.forEach((card) => (card.image = this.normalizeImageUrl(card?.image, baseUrl)));
+            }
+            if (jsonContent.form_image) {
+              jsonContent.form_image = this.normalizeImageUrl(jsonContent.form_image, baseUrl);
+            }
+          }
+          contentData.json_content = jsonContent;
+          break;
 
         default:
           contentData.json_content = jsonContent;
@@ -761,29 +806,46 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
     if (!existingContent) return null;
 
     const jsonContent = existingContent.json_content;
-    if (!jsonContent || !Array.isArray(jsonContent)) return null;
+
+    // --- ISOLATED FIX START ---
+    let targetArray = jsonContent;
+    let isWrapped = false;
+    
+    if (jsonContent && !Array.isArray(jsonContent) && Array.isArray(jsonContent.cards)) {
+        targetArray = jsonContent.cards;
+        isWrapped = true;
+    }
+
+    if (!targetArray || !Array.isArray(targetArray)) return null;
+    // --- ISOLATED FIX END ---
+    // if (!jsonContent || !Array.isArray(jsonContent)) return null;
 
     const itemIndex = updateCmsContentDto?.item_index;
-    if (itemIndex === undefined || itemIndex < 0 || itemIndex >= jsonContent.length) return null;
+    if (itemIndex === undefined || itemIndex < 0 || itemIndex >= targetArray.length) return null;
 
-    jsonContent[itemIndex].title = updateCmsContentDto?.title || '';
-    jsonContent[itemIndex].description = updateCmsContentDto?.description || '';
+    targetArray[itemIndex].title = updateCmsContentDto?.title || '';
+    targetArray[itemIndex].description = updateCmsContentDto?.description || '';
     
-    if (jsonContent[itemIndex].designation) {
-      jsonContent[itemIndex].designation = updateCmsContentDto?.designation || '';
+    if (targetArray[itemIndex].designation) {
+      targetArray[itemIndex].designation = updateCmsContentDto?.designation || '';
     }
 
     if (imagePath) {
-      jsonContent[itemIndex].image = basename(imagePath);
+      targetArray[itemIndex].image = basename(imagePath);
     }
 
-    try {
-      const result = await this.cmsContentRepository.update(id, { json_content: jsonContent });
-      if (result.affected === 0) return null;
-      return result;
-    } catch (error) {
-      throw error;
+    if (isWrapped) {
+        jsonContent.cards = targetArray;
+        return this.cmsContentRepository.update(id, { json_content: jsonContent });
     }
+    return this.cmsContentRepository.update(id, { json_content: targetArray });
+    // try {
+    //   const result = await this.cmsContentRepository.update(id, { json_content: jsonContent });
+    //   if (result.affected === 0) return null;
+    //   return result;
+    // } catch (error) {
+    //   throw error;
+    // }
   }
 
   async updateJsonContentHomepageBanner(id: number, updateCmsContentDto: any, topIconPath: string, bannerImagePath: string, mobileBannerImagePath: string) {

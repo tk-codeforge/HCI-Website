@@ -194,4 +194,16 @@ async updateTeamPageMedia(
   const videoPath = files?.video?.[0]?.filename || null;
   return this.cmsContentService.updateTeamPageMedia(id, dto, imagePath, videoPath);
 }
+
+@UseGuards(AuthGuard('jwt'))
+  @Patch('update-page-content/:id')
+  @UseInterceptors(FileInterceptor('form_image'))
+  async updatePageContent(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const formImagePath = file ? file.filename : null;
+    return this.cmsContentService.updatePageContent(id, updateDto, formImagePath);
+  }
 }

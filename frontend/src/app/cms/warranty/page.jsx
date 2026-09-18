@@ -797,16 +797,21 @@ const removeContactItem = (index) => {
 
         .warranty-editor .ck-editor__top {
           position: sticky !important;
-          top: auto !important;
-          z-index: auto !important;
+          top: 70px !important;
+          z-index: 10 !important;
         }
+
+        // .warranty-editor .ck-editor__editable {
+        //   min-height: 680px;
+        //   max-height: none;
+        //   overflow-y: visible;
+        // }
 
         .warranty-editor .ck-editor__editable {
-          min-height: 680px;
-          max-height: none;
-          overflow-y: visible;
-        }
-
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  overflow: hidden;
+}
         .warranty-editor .ck-content {
           max-width: 100%;
           overflow-wrap: anywhere;
@@ -883,7 +888,7 @@ const removeContactItem = (index) => {
                       This is the source of truth for the detailed policy.
                     </p>
 
-                    <div className="warranty-editor border rounded overflow-hidden">
+                    <div className="warranty-editor border rounded">
                       <CKEditorComponent
                         pageData={formData.content}
                         setPageData={(value) =>

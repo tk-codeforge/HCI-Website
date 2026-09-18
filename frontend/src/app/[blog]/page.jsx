@@ -2406,7 +2406,7 @@ const DynamicRootPage = async ({ params }) => {
                       </div>
                     )}
 
-                    {faqs.length > 0 && (
+                    {/* {faqs.length > 0 && (
                       <div className="lazy-render">
                         <div className="premium-card border-0">
                           <h2 className="font-outfit fw-bold h3 mb-4">Insights for {displayCity}</h2>
@@ -2429,7 +2429,36 @@ const DynamicRootPage = async ({ params }) => {
                           </div>
                         </div>
                       </div>
-                    )}
+                    )} */}
+
+                    {faqs.length > 0 && (
+  <div className="lazy-render mb-5">
+    {/* Restored card padding (p-4 p-md-5) to fix the left/right overflow */}
+    <div className="premium-card p-4 p-md-5 bg-white shadow-sm rounded-4">
+      <h2 className="font-outfit fw-bold display-6 mb-4 text-dark">FAQ&apos;s</h2>
+      <div className="font-poppins">
+        {faqs.map((faq, index) => {
+          // Removes duplicate numbers (e.g., "1. ") coming from API data
+          const cleanQuestion = faq.question.replace(/^(\d+[\.\)]\s*|Q\d+[\.\)]\s*)/i, "");
+          // Removes duplicate "Ans:" or "Ans." coming from API data
+          const cleanAnswer = faq.answer.replace(/^(Ans[\.\:]?\s*)/i, "");
+
+          return (
+            <div key={index} className="mb-4 pb-2">
+              {/* Increased margin-bottom (mb-3) for spacing between Question and Answer */}
+              <p className="fw-bold mb-3 text-dark fs-6" style={{ color: "#1e293b", lineHeight: "1.5" }}>
+                Q{index + 1}. {cleanQuestion}
+              </p>
+              <p className="mb-0 text-secondary" style={{ whiteSpace: "pre-line", lineHeight: "1.8", fontSize: "0.98rem" }}>
+                <span className="fw-bold text-dark">Ans.</span> {cleanAnswer}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+)}
 
                   </div>
                 </div>

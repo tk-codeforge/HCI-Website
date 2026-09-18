@@ -214,6 +214,9 @@ const editorConfig = {
         ],
         shouldNotGroupWhenFull: true
     },
+    ui: {
+        viewportOffset: { top: 70 }   
+    },
     fontSize: {
         options: [
             10,11,12,13,14,15,'default',16,17,18,19,20,

@@ -2164,7 +2164,7 @@ th {
 }
 
 .refer_form {
-  background-color: #ff914d87 !important;
+  background-color: #ff914d87;
   box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px,
     rgba(14, 30, 37, 0.32) 0px 2px 16px 0px !important;
   padding: 2rem 2rem !important;
@@ -2566,7 +2566,7 @@ th {
   object-fit: contain;
 }
 .refer_form {
-  background-color: #ff914d87 !important;
+  background-color: #ff914d87;
   box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px,
     rgba(14, 30, 37, 0.32) 0px 2px 16px 0px !important;
   padding: 2rem 2rem !important;

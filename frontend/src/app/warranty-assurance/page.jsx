@@ -260,6 +260,12 @@ export default async function WarrantyPage() {
       />
 
       <style dangerouslySetInnerHTML={{ __html: `
+
+      .hci-warranty .warranty-contact-value {
+  color: var(--hci-text);
+  text-decoration: none;
+  display: block;
+}
         .hci-warranty {
           --hci-orange: #ff914d;
           --hci-text: #4f5867;
@@ -896,12 +902,26 @@ export default async function WarrantyPage() {
   <div className="warranty-contact-items">
     {supportForm.contactItems.map((item, index) => {
       const Icon = item.icon === "mail" ? FaEnvelope : item.icon === "location" ? FaMapMarkerAlt : FaPhoneAlt;
+
+      const getHref = () => {
+        if (item.icon === "mail") return `mailto:${item.value}`;
+        if (item.icon === "phone" || !item.icon) return `tel:${String(item.value).replace(/[^\d+]/g, "")}`;
+        return null; // location: not auto-linked
+      };
+      const href = getHref();
+
       return (
         <div className="warranty-contact-item" key={index}>
           <span className="warranty-contact-icon"><Icon /></span>
           <div>
             <strong>{item.label}</strong>
-            <div>{item.value}</div>
+            {href ? (
+              <a href={href} className="warranty-contact-value">
+                {item.value}
+              </a>
+            ) : (
+              <div className="warranty-contact-value">{item.value}</div>
+            )}
           </div>
         </div>
       );
