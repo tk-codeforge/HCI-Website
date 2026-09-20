@@ -7,6 +7,7 @@ import {
     Bold,
     ClassicEditor,
     Essentials,
+    FontColor,
     FontSize,
     GeneralHtmlSupport,
     Heading,
@@ -173,6 +174,7 @@ const editorConfig = {
         BlockQuote,
         Bold,
         Essentials,
+        FontColor,
         FontSize,
         GeneralHtmlSupport,
         Heading,
@@ -207,7 +209,7 @@ const editorConfig = {
         items: [
             'undo', 'redo', '|',
             'heading', '|',
-            'fontSize',
+            'fontSize','fontColor',
             'bold', 'italic', 'blockQuote', '|',
             'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'htmlEmbed', 'sourceEditing', '|',
             'bulletedList', 'numberedList', 'outdent', 'indent', 'insertArrowIcon'

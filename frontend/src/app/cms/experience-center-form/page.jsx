@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import api from "@/utils/api";
 // import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText } from "../../experience-center-noida-extension/ExperienceForm";
-import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText } from "../../components/ExperienceForm";
+// import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText } from "../../components/ExperienceForm";
+import { EXPERIENCE_FORM_DEFAULT_CONFIG as IMPORTED_DEFAULT_CONFIG, renderCheckboxText } from "@/app/components/ExperienceFormClient";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
 const EXPERIENCE_FORM_DEFAULT_CONFIG = IMPORTED_DEFAULT_CONFIG || {

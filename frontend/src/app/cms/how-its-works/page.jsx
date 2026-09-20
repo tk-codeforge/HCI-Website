@@ -51,54 +51,100 @@ const CmsHowItsWorks = () => {
 
     const [selectedId, setSelectedId] = useState(null);
 
-    const fetchContentManagerPages = useCallback(async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('/cms-content/how_it_works', {
-                headers: {
-                    Authorization: `Bearer ${authToken}`,
-                },
+//     const fetchContentManagerPages = useCallback(async () => {
+//         setLoading(true);
+//         try {
+//             const response = await api.get('/cms-content/how_it_works', {
+//                 headers: {
+//                     Authorization: `Bearer ${authToken}`,
+//                 },
+//             });
+
+//             if (response.data) {
+//                 // Handle both single-row and multi-row CMS responses safely
+//                 const contentData = Array.isArray(response.data)
+//                     ? response.data[0]
+//                     : response.data;
+
+//                 let stepsData = contentData?.json_content;
+
+// // If the backend sent it as a JSON string, parse it first
+// if (typeof stepsData === "string") {
+//     try {
+//         stepsData = JSON.parse(stepsData);
+//     } catch (e) {
+//         stepsData = [];
+//     }
+// }
+
+// // Only accept it if it's actually an array; otherwise fall back safely
+// const content = contentData?.json_content || {};
+
+// setPagesList(Array.isArray(content.steps) ? content.steps : []);
+
+// setBannerData({
+//     heading: content.bannerHeading || "",
+//     headingColor: content.bannerHeadingColor || "#ffffff",
+//     description: content.bannerDescription || "",
+//     descriptionColor: content.bannerDescriptionColor || "#ffffff",
+//     bgImage: null,
+//     previewImage: content.bg_image || "",
+// });
+
+// setSelectedId(contentData?.id || null);
+//             }
+//         } catch (err) {
+//             toast.error(err.message || "Failed to fetch data. Please try again.");
+//         } finally {
+//             setLoading(false);
+//         }
+//     }, [authToken]);
+
+const fetchContentManagerPages = useCallback(async () => {
+    setLoading(true);
+    try {
+        const response = await api.get('/cms-content/how_it_works', {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        if (response.data) {
+            const contentData = Array.isArray(response.data)
+                ? response.data[0]
+                : response.data;
+
+            // 1. Properly parse the JSON string into the 'content' variable
+            let content = contentData?.json_content || {};
+            if (typeof content === "string") {
+                try {
+                    content = JSON.parse(content);
+                } catch (e) {
+                    console.error("Failed to parse JSON content", e);
+                    content = {};
+                }
+            }
+
+            // 2. Safely read from the parsed 'content' object
+            setPagesList(Array.isArray(content.steps) ? content.steps : []);
+
+            setBannerData({
+                heading: content.bannerHeading || "",
+                headingColor: content.bannerHeadingColor || "#ffffff",
+                description: content.bannerDescription || "",
+                descriptionColor: content.bannerDescriptionColor || "#ffffff",
+                bgImage: null,
+                previewImage: content.bg_image || "",
             });
 
-            if (response.data) {
-                // Handle both single-row and multi-row CMS responses safely
-                const contentData = Array.isArray(response.data)
-                    ? response.data[0]
-                    : response.data;
-
-                let stepsData = contentData?.json_content;
-
-// If the backend sent it as a JSON string, parse it first
-if (typeof stepsData === "string") {
-    try {
-        stepsData = JSON.parse(stepsData);
-    } catch (e) {
-        stepsData = [];
-    }
-}
-
-// Only accept it if it's actually an array; otherwise fall back safely
-const content = contentData?.json_content || {};
-
-setPagesList(Array.isArray(content.steps) ? content.steps : []);
-
-setBannerData({
-    heading: content.bannerHeading || "",
-    headingColor: content.bannerHeadingColor || "#ffffff",
-    description: content.bannerDescription || "",
-    descriptionColor: content.bannerDescriptionColor || "#ffffff",
-    bgImage: null,
-    previewImage: content.bg_image || "",
-});
-
-setSelectedId(contentData?.id || null);
-            }
-        } catch (err) {
-            toast.error(err.message || "Failed to fetch data. Please try again.");
-        } finally {
-            setLoading(false);
+            setSelectedId(contentData?.id || null);
         }
-    }, [authToken]);
+    } catch (err) {
+        toast.error(err.message || "Failed to fetch data. Please try again.");
+    } finally {
+        setLoading(false);
+    }
+}, [authToken]);
 
     useEffect(() => {
         fetchContentManagerPages();

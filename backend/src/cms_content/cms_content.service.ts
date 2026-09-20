@@ -395,11 +395,23 @@ export class CmsContentService {
       }
     });
 
-    if (contentDataArray.length > 1) {
+    // if (contentDataArray.length > 1) {
+    //   return contentDataArray;
+    // } else {
+    //   const contentData = contentDataArray[0];
+    //   if (contentData.page_type === PageType.HOME_PAGE_CONTENT) return [contentData];
+    //   return contentData;
+    // }
+        if (contentDataArray.length > 1) {
       return contentDataArray;
     } else {
       const contentData = contentDataArray[0];
-      if (contentData.page_type === PageType.HOME_PAGE_CONTENT) return [contentData];
+      if (
+        contentData.page_type === PageType.HOME_PAGE_CONTENT ||
+        contentData.page_type === PageType.CANCELLATION_POLICY
+      ) {
+        return [contentData];
+      }
       return contentData;
     }
     return contentDataArray[0];
