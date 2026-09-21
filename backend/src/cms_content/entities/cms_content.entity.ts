@@ -48,6 +48,7 @@ export enum PageType {
     EXPERIENCE_CENTER_FORM = 'experience_center_form',
     WARRANTY = 'warranty',
      NAVBAR_HEADER_MENU = 'navbar_header_menu',
+     REDIRECT_THANK_YOU = 'redirect_thank_you',
  }
 
 @Entity('cms_content')

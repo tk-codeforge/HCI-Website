@@ -184,7 +184,7 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
               {jobText?.paragraph ? (
                 <div dangerouslySetInnerHTML={{ __html: jobText.paragraph }} />
               ) : (
-                <p style={{ fontSize: "18px" }}>
+                <p style={{ fontSize: "17px" }}>
                   Can&apos;t find something suitable, but eager to work with us?
                   Write to us at hr@hcinterior.in and we&apos;ll try to make it
                   happen.

@@ -223,6 +223,11 @@ export class CmsContentService {
       payload = this.cleanFooterContent(payload);
     }
 
+    // Thank-you page: the CMS sends { json_content: "<json string>" }, so unwrap it before saving
+    if (page_type === PageType.REDIRECT_THANK_YOU) {
+      payload = this.parseJsonData(payload?.json_content, payload);
+    }
+
     const newContent = this.cmsContentRepository.create({
       page_type,
       json_content: payload,
@@ -804,6 +809,10 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
    case PageType.NAVBAR_HEADER_MENU: {
      return this.cmsContentRepository.update(id, { json_content: jsonContent });
    }
+
+         case PageType.REDIRECT_THANK_YOU: {
+        return this.cmsContentRepository.update(id, { json_content: jsonContent });
+      }
       
       default:
         return this.update(id, updateCmsContentDto);

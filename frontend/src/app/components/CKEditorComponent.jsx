@@ -262,7 +262,12 @@ const editorConfig = {
          { name: 'resizeImage:25', value: '25', label: '25px' },
         { name: 'resizeImage:30', value: '30', label: '30px' },
         { name: 'resizeImage:40', value: '40', label: '40px' },
-        { name: 'resizeImage:50', value: '50', label: '50px' }
+        { name: 'resizeImage:50', value: '50', label: '50px' },
+        { name: 'resizeImage:50', value: '60', label: '50px' },
+        { name: 'resizeImage:50', value: '70', label: '50px' },
+        { name: 'resizeImage:50', value: '80', label: '50px' },
+        { name: 'resizeImage:50', value: '90', label: '50px' },
+        { name: 'resizeImage:50', value: '100', label: '50px' },
     ],
         toolbar: [
             'imageResize',

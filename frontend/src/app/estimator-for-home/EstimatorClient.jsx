@@ -986,7 +986,7 @@ const EstimatorClient = () => {
                   </div>
                 </div>
                 <div className="text-center mt-4">
-                  <a href="/thankyou" className="know_more px-3">
+                  <a href="/thank-you" className="know_more px-3">
                     Next
                   </a>
                 </div>

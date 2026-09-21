@@ -8,9 +8,14 @@ const API_BASE_URL =
 
 const normalizeMediaUrl = (url = '') => {
     if (!url) return '';
-    if (url.startsWith('http://')) return url.replace('http://', 'https://');
-    if (url.startsWith('/')) return `${API_BASE_URL}${url}`;
-    return url;
+    // if (url.startsWith('http://')) return url.replace('http://', 'https://');
+    // if (url.startsWith('/')) return `${API_BASE_URL}${url}`;
+    // return url;
+    const clean = url.replace(/\\/g, '/');
+    if (/^http:\/\/(localhost|127\.0\.0\.1)/i.test(clean)) return clean;
+    if (clean.startsWith('http://')) return clean.replace('http://', 'https://');
+    if (/^https?:\/\//i.test(clean)) return clean;
+    return `${API_BASE_URL}/${clean.replace(/^\/+/, '')}`;
 };
 
 // 🌟 MODERN ASYNC PROMPT UI (Unchanged, exactly as you designed it)
