@@ -76,6 +76,12 @@ const nextConfig = {
       { source: '/interior-designers-in-ghaziabad', destination: '/services-detail?city=ghaziabad', },
       { source: '/interior-designers-in-manesar', destination: '/services-detail?city=manesar', },
       { source: '/interior-designers-in-dwarka', destination: '/services-detail?city=dwarka', },
+      {
+      // Matches only slugs starting with "experience-center-" at the root,
+      // so it won't collide with any other root-level dynamic route.
+      source: "/:slug(experience-center-.*)",
+      destination: "/exp-center/:slug",
+    },
     ];
 
     // Combine static and blog routes
@@ -83,6 +89,7 @@ const nextConfig = {
 
     return combinedRoutes;
   },
+
 };
 
 export default nextConfig;

@@ -217,6 +217,73 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .footer-social-btn:hover { transform: translateY(-3px); }
+
+  @media (min-width: 992px) {
+
+  .footer_wrapper .section-divider {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  /* --- 1. PERFECT CENTERING & EQUAL GAPS --- */
+    .footer-bottom-bar {
+      display: grid !important;
+      grid-template-columns: 1fr auto 1fr !important;
+      align-items: center !important;
+      width: 100%;
+    }
+    .footer-bottom-bar > div:nth-child(1) { justify-self: start !important; }
+    .footer-bottom-bar > div:nth-child(2) { justify-self: center !important; }
+    .footer-bottom-bar > div:nth-child(3) { justify-self: end !important; }
+
+    /* --- 2. ALIGN PRIVACY & CANCELLATION POLICIES --- */
+    .footer-legal-links-col ul {
+      display: grid !important;
+      grid-template-columns: max-content max-content !important;
+      row-gap: 6px !important;
+      column-gap: 14px !important;
+    }
+    
+    /* Strip the mobile inline borders & margins that cause misalignment */
+    .footer-legal-links-col ul li {
+      border-left: none !important;
+      padding-left: 0 !important;
+      margin-left: 0 !important;
+    }
+    
+    /* Re-apply the vertical divider line ONLY to the right-column items (even) */
+    .footer-legal-links-col ul li:nth-child(even) {
+      border-left: 1px solid #dee2e6 !important;
+      padding-left: 14px !important;
+    }
+
+    /* ... keep your existing nowrap rules below this ... */
+    .footer-legal-links-col + div p,
+    .footer-legal-links-col ~ div .social-links {
+      white-space: nowrap;
+    }
+    .footer-legal-links-col ~ div .social-links {
+      flex-wrap: nowrap !important;
+    }
+
+  .footer-legal-links-col + div p,
+  .footer-legal-links-col ~ div .social-links {
+    white-space: nowrap;
+  }
+  .footer-legal-links-col ~ div .social-links {
+    flex-wrap: nowrap !important;
+  }
+
+  .footer-legal-links-col ul.footer-legal-2col {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+    row-gap: 4px;
+    column-gap: 0;
+  }
+}
   
   /* 1. Added !important to colors so they override any global link hover colors */
   .footer-social-btn.fb:hover { background-color: #1877F2 !important; color: white !important; box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3); }
@@ -230,6 +297,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
   .footer_wrapper {
     background-color: var(--dynamic-footer-bg) !important;
     color: var(--dynamic-footer-text) !important;
+    overflow-x: hidden;
   }
 
   /* 2. Global Hover effect - strictly excluding underlines and social/policy classes */
@@ -431,7 +499,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
           {/* ==================== 1. VERTICAL SECTION ==================== */}
           {hasVerticalColumns && (
           <div className="py-5 pb-0 mx-0 row justify-content-center">
-            <div className="col-lg-10">
+            <div className="col-lg-12">
               <div className="row justify-content-lg-center g-4">
                 
                 {verticalColumns.length > 0 ? (
@@ -567,18 +635,18 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
 
           {/* LINE DIVIDER 1 */}
 {hasVerticalColumns && hasBottomBarContent && (
-  <div className="col-lg-10 mx-auto">
-    <hr className="my-4" />
-  </div>
+  // <div className="col-lg-10 mx-auto">
+    <hr className="my-4 section-divider" />
+  // </div>
 )}
 
           {/* ==================== 2. BOTTOM BAR & SOCIAL LINKS ==================== */}
           {hasBottomBarContent && (
-          <div className="col-lg-10 mx-auto px-3 px-lg-0">
-            <div className="d-flex flex-column flex-lg-row justify-content-center justify-content-lg-between align-items-center gap-2 py-2 text-center">
+          <div className="col-lg-12 mx-auto px-3 px-lg-0">
+            <div className="footer-bottom-bar d-flex flex-column flex-lg-row justify-content-center justify-content-lg-between align-items-center gap-2 py-2 text-center">
               
               {/* Left: Legal Links */}
-              <div>
+              <div className="footer-legal-links-col" style={{ minWidth: 0 }}>
                 <ul className="list-unstyled d-flex flex-wrap justify-content-center mb-0 font-quicksand align-items-center">
                   {bottomBar.legalLinks?.length > 0 &&
   bottomBar.legalLinks.map((lLink, idx) => (
@@ -593,7 +661,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
               </div>
 
               {/* Center: Copyright Text */}
-              <div>
+             <div className="flex-lg-shrink-0">
                 {bottomBar.copyright && (
   <p className="mb-0 team_description font-quicksand text-center" style={{ fontSize: "12px" }}>
     {bottomBar.copyright}
@@ -602,7 +670,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
               </div>
 
               {/* Right: Social Icons */}
-              <div>
+              <div className="flex-lg-shrink-0">
                 <div className="social-links d-flex flex-wrap gap-2 my-0">
                     {(bottomBar.socials?.facebook || settings?.facebook_url) && (
                         <a href={bottomBar.socials?.facebook || settings?.facebook_url} target="_blank" rel="noopener noreferrer" className="footer-social-btn fb" aria-label="Facebook">
@@ -648,14 +716,14 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
 
          {/* LINE DIVIDER 2 */}
 {hasBottomBarContent && hasHorizontalSections && (
-  <div className="col-lg-10 mx-auto">
-    <hr className="my-3" />
-  </div>
+  // <div className="col-lg-10 mx-auto">
+    <hr className="my-3 section-divider" />
+  // </div>
 )}
 
           {/* ==================== 3. HORIZONTAL SECTION ==================== */}
           {horizontalSections.length > 0 && (
-            <div className="col-lg-10 mx-auto mb-4 font-quicksand">
+            <div className="col-lg-12 mx-auto mb-4 font-quicksand">
               {horizontalSections.map((sec, idx) => {
                 const validTags = ["h1", "h2", "h3", "h4", "h5", "h6"];
                 const rawTag = sec.headingTag ? String(sec.headingTag).toLowerCase() : "h6";
@@ -726,7 +794,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
 </p> */}
                       </div>
                     )}
-                    {idx < horizontalSections.length - 1 && <hr className="my-3 text-muted opacity-50" />}
+                    {idx < horizontalSections.length - 1 && <hr className="my-3 text-muted opacity-50 section-divider" />}
                   </div>
                 );
               })}
@@ -737,7 +805,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
 
           {/* ==================== 4. DESIGNED BY CREDIT ==================== */}
           {bottomBar.designedBy && (
-  <div className="col-lg-10 mx-auto pb-4">
+  <div className="col-lg-12 mx-auto pb-4">
     <p className="text-center text-lg-end team_description font-quicksand mb-0" style={{ fontSize: "13px" }}>
       {`Designed By `}
       <a href="#" className="fw-bold text-decoration-none designed-by-link">

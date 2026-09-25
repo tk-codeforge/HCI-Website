@@ -9,18 +9,18 @@ import { Express } from 'express';
 export class CmsExperienceCenterController {
   constructor(private readonly cmsExperienceCenterService: CmsExperienceCenterService) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('image'))
-  async create(
-    @Body() createCmsExperienceCenterDto: CreateCmsExperienceCenterDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      throw new Error('File is not uploaded');
-    }
-    const imagePath = file.path;
-    return this.cmsExperienceCenterService.create(createCmsExperienceCenterDto, imagePath);
-  }
+  // @Post()
+  // @UseInterceptors(FileInterceptor('image'))
+  // async create(
+  //   @Body() createCmsExperienceCenterDto: CreateCmsExperienceCenterDto,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   if (!file) {
+  //     throw new Error('File is not uploaded');
+  //   }
+  //   const imagePath = file.path;
+  //   return this.cmsExperienceCenterService.create(createCmsExperienceCenterDto, imagePath);
+  // }
 
   @Get()
   findAll() {
@@ -32,14 +32,43 @@ export class CmsExperienceCenterController {
     return this.cmsExperienceCenterService.findOne(+id);
   }
 
-  @Patch(':id')
-  @UseInterceptors(FileInterceptor('image'))
-  async update(
-    @Param('id') id: number,
-    @Body() updateCmsExperienceCenterDto: UpdateCmsExperienceCenterDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    const imagePath = file ? file.path : null;
-    return this.cmsExperienceCenterService.update(+id, updateCmsExperienceCenterDto, imagePath);
-  }
+  // @Patch(':id')
+  // @UseInterceptors(FileInterceptor('image'))
+  // async update(
+  //   @Param('id') id: number,
+  //   @Body() updateCmsExperienceCenterDto: UpdateCmsExperienceCenterDto,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   const imagePath = file ? file.path : null;
+  //   return this.cmsExperienceCenterService.update(+id, updateCmsExperienceCenterDto, imagePath);
+  // }
+
+  // In cms-experience-center.controller.ts
+@Post()
+@UseInterceptors(FileInterceptor('image'))
+async create(
+  @Body() createCmsExperienceCenterDto: CreateCmsExperienceCenterDto,
+  @UploadedFile() file: Express.Multer.File,
+) {
+  if (!file) throw new Error('File is not uploaded');
+  // Use file.filename instead of file.path
+  return this.cmsExperienceCenterService.create(createCmsExperienceCenterDto, file.filename); 
 }
+
+@Patch(':id')
+@UseInterceptors(FileInterceptor('image'))
+async update(
+  @Param('id') id: number,
+  @Body() updateCmsExperienceCenterDto: UpdateCmsExperienceCenterDto,
+  @UploadedFile() file: Express.Multer.File,
+) {
+  const imageName = file ? file.filename : null;
+  return this.cmsExperienceCenterService.update(+id, updateCmsExperienceCenterDto, imageName);
+}
+
+@Delete(':id')
+remove(@Param('id') id: number) {
+  return this.cmsExperienceCenterService.remove(+id);
+}
+}
+

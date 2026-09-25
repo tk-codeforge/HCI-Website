@@ -25,16 +25,17 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         // Grab the token from cookies (which your authSlice sets on login)
+        if (typeof window !== "undefined") {
         const token = getCookie("authToken");
         
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+    }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
+    
 );
 
 export default api;

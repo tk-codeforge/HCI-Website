@@ -150,6 +150,19 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
         secBgDesClass={"text-center text-white"}
       />
 
+<style>{`
+        .job-description-content a {
+          color: inherit !important;
+          text-decoration: none !important;
+          transition: color 0.2s ease-in-out;
+        }
+        
+        .job-description-content a:hover {
+          color: #f2793a !important; /* Theme orange */
+          text-decoration: none !important;
+        }
+      `}</style>
+
       {(cmsSettings?.bg_color || cmsSettings?.font_color) && (
         <style>{`
           .career-form-card {
@@ -177,18 +190,26 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
       <section className="container my-5 map">
         <div className="row mx-0 g-3">
           <div className="col-lg-5 d-flex align-items-center">
-            <div className="pe-lg-5">
+            <div className="pe-lg-5 job-description-content">
               <h2 className="pb-4">
                 {jobTitle || jobText?.heading || "High Creation Interior Team"}
               </h2>
               {jobText?.paragraph ? (
                 <div dangerouslySetInnerHTML={{ __html: jobText.paragraph }} />
               ) : (
+                // <p style={{ fontSize: "17px" }}>
+                //   Can&apos;t find something suitable, but eager to work with us?
+                //   Write to us at hr@hcinterior.in and we&apos;ll try to make it
+                //   happen.
+                // </p>
                 <p style={{ fontSize: "17px" }}>
-                  Can&apos;t find something suitable, but eager to work with us?
-                  Write to us at hr@hcinterior.in and we&apos;ll try to make it
-                  happen.
-                </p>
+  Can&apos;t find something suitable, but eager to work with us?
+  Write to us at{" "}
+  <a href="mailto:hr@hcinterior.in">
+    hr@hcinterior.in
+  </a>{" "}
+  and we&apos;ll try to make it happen.
+</p>
               )}
             </div>
           </div>

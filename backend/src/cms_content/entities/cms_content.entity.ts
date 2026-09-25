@@ -49,6 +49,7 @@ export enum PageType {
     WARRANTY = 'warranty',
      NAVBAR_HEADER_MENU = 'navbar_header_menu',
      REDIRECT_THANK_YOU = 'redirect_thank_you',
+     HOME_PAGE_CONTENT_FURNITURE_FACTORY = 'home_page_content_furniture_factory',  
  }
 
 @Entity('cms_content')

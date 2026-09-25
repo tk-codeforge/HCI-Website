@@ -8,8 +8,8 @@ export class CmsExperienceCenter {
     @Column()
     title: string;
 
-    @Column()
-    description: string;
+    // @Column()
+    // description: string;
 
     @Column()
     image: string;
@@ -19,4 +19,9 @@ export class CmsExperienceCenter {
 
     @UpdateDateColumn()
     updated_at: Date;
+
+    @Column({ nullable: true, type: 'text' })
+description: string;
+    
+    
 }

@@ -238,6 +238,7 @@ function AuthSidebar() {
                         <Link href="/cms/creating-the-home-of-your-dreams" className={`sub-menu-link ${isActive('/cms/creating-the-home-of-your-dreams')}`}>Creating Dreams</Link>
                         <Link href="/cms/manage-the-way-we-work" className={`sub-menu-link ${isActive('/cms/manage-the-way-we-work')}`}>The Way We Work</Link>
                         <Link href="/cms/manage-what-we-offer" className={`sub-menu-link ${isActive('/cms/manage-what-we-offer')}`}>Explore What We Offer</Link>
+                        <Link href="/cms/homePage-furniture-factory" className={`sub-menu-link ${isActive('/cms/homePage-furniture-factory')}`}>Factory</Link>
                         <Link href="/cms/manage-header" className={`sub-menu-link ${isActive('/cms/manage-header')}`}>Manage Header</Link>
                         <Link href="/cms/manage-footer" className={`sub-menu-link ${isActive('/cms/manage-footer')}`}>Manage Footer</Link>
                         {/* <Link href="/cms/manage-navbar-serving-area" className={`sub-menu-link ${isActive('/cms/manage-navbar-serving-area')}`}>Serving Areas NavBar</Link> */}
@@ -311,6 +312,7 @@ function AuthSidebar() {
                 </div>
                 {openGroups.expCenters && (
                     <div className="sub-menu">
+                        <Link href="/cms/custom-experience-center" className={`sub-menu-link ${isActive('/cms/custom-experience-center')}`}>Custom Experience Center</Link>
                         <Link href="/cms/experience-center" className={`sub-menu-link ${isActive('/cms/experience-center')}`}>Noida Center</Link>
                         <Link href="/cms/experience-center-gurugram" className={`sub-menu-link ${isActive('/cms/experience-center-gurugram')}`}>Gurugram Center</Link>
                         <Link href="/cms/experience-center-faridabad" className={`sub-menu-link ${isActive('/cms/experience-center-faridabad')}`}>Faridabad Center</Link>

@@ -395,6 +395,16 @@ export class CmsContentService {
           contentData.json_content = jsonContent;
           break;
 
+                case PageType.HOME_PAGE_CONTENT_FURNITURE_FACTORY:
+          if (jsonContent && typeof jsonContent === 'object') {
+            jsonContent.topImage = this.normalizeImageUrl(jsonContent.topImage, baseUrl);
+            jsonContent.image1 = this.normalizeImageUrl(jsonContent.image1, baseUrl);
+            jsonContent.image2 = this.normalizeImageUrl(jsonContent.image2, baseUrl);
+            jsonContent.video = this.normalizeImageUrl(jsonContent.video, baseUrl);   // 🆕 ADD THIS LINE
+          }
+          contentData.json_content = jsonContent;
+          break;
+
         default:
           contentData.json_content = jsonContent;
       }
@@ -811,6 +821,66 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
    }
 
          case PageType.REDIRECT_THANK_YOU: {
+        return this.cmsContentRepository.update(id, { json_content: jsonContent });
+      }
+
+            case PageType.HOME_PAGE_CONTENT_FURNITURE_FACTORY: {
+        const iconIndices = this.extractIndices(updateCmsContentDto?.icon_indices);
+
+        // image1 = slot 0, image2 = slot 1
+        const file0Slot = iconIndices.indexOf(0);
+  if (file0Slot !== -1 && icons && icons[file0Slot]) {
+    jsonContent.topImage = basename(icons[file0Slot].filename);
+  } else if (jsonContent.topImage !== undefined && jsonContent.topImage !== null) {
+    jsonContent.topImage = jsonContent.topImage ? basename(jsonContent.topImage) : "";
+  } else {
+    jsonContent.topImage = existingJsonContent?.topImage ? basename(existingJsonContent.topImage) : "";
+  }
+
+  const file1Slot = iconIndices.indexOf(1);
+  if (file1Slot !== -1 && icons && icons[file1Slot]) {
+    jsonContent.image1 = basename(icons[file1Slot].filename);
+  } else if (jsonContent.image1 !== undefined && jsonContent.image1 !== null) {
+    jsonContent.image1 = jsonContent.image1 ? basename(jsonContent.image1) : "";
+  } else {
+    jsonContent.image1 = existingJsonContent?.image1 ? basename(existingJsonContent.image1) : "";
+  }
+
+  const file2Slot = iconIndices.indexOf(2);
+  if (file2Slot !== -1 && icons && icons[file2Slot]) {
+    jsonContent.image2 = basename(icons[file2Slot].filename);
+  } else if (jsonContent.image2 !== undefined && jsonContent.image2 !== null) {
+    jsonContent.image2 = jsonContent.image2 ? basename(jsonContent.image2) : "";
+  } else {
+    jsonContent.image2 = existingJsonContent?.image2 ? basename(existingJsonContent.image2) : "";
+  }
+
+        // 🆕 Video is now a real upload. The controller already puts the
+        // uploaded filename onto updateCmsContentDto.video for any page type,
+        // so prefer that; otherwise fall back to whatever the JSON body says
+        // (lets the frontend explicitly clear it by sending "").
+        if (updateCmsContentDto?.video) {
+          jsonContent.video = basename(updateCmsContentDto.video);
+        } else if (jsonContent.video !== undefined && jsonContent.video !== null) {
+          jsonContent.video = jsonContent.video ? basename(jsonContent.video) : "";
+        } else {
+          jsonContent.video = existingJsonContent?.video ? basename(existingJsonContent.video) : "";
+        }
+
+        jsonContent.heading = jsonContent.heading || existingJsonContent?.heading || "Large Modular Furniture Factories";
+        jsonContent.headingColor = jsonContent.headingColor || existingJsonContent?.headingColor || "#000000";
+        jsonContent.description = jsonContent.description ?? existingJsonContent?.description ?? "";
+        // 🆕 descriptionFontSize, clamped to the 10–30px range regardless of what's sent
+        const rawFontSize = Number(jsonContent.descriptionFontSize ?? existingJsonContent?.descriptionFontSize ?? 16);
+        jsonContent.descriptionFontSize = Number.isFinite(rawFontSize)
+          ? Math.min(30, Math.max(10, rawFontSize))
+          : 16;
+        jsonContent.buttonText = jsonContent.buttonText || existingJsonContent?.buttonText || "View More";
+        jsonContent.buttonLink = jsonContent.buttonLink || existingJsonContent?.buttonLink || "/furniture/";
+        jsonContent.topImageCaption = jsonContent.topImageCaption ?? existingJsonContent?.topImageCaption ?? "";
+        jsonContent.image1Caption = jsonContent.image1Caption ?? existingJsonContent?.image1Caption ?? "";
+        jsonContent.image2Caption = jsonContent.image2Caption ?? existingJsonContent?.image2Caption ?? "";
+
         return this.cmsContentRepository.update(id, { json_content: jsonContent });
       }
       

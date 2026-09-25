@@ -1,10 +1,36 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+
+const HIDE_DELAY_MS = 3000;
 
 export default function EstimateCalculator({ estimateSectionData }) {
     const router = useRouter();
     const [submittingId, setSubmittingId] = useState(null);
+
+    const gridRef = useRef(null);
+    const hideTimerRef = useRef(null);
+    const [showArrows, setShowArrows] = useState(false);
+
+    const revealArrows = useCallback(() => {
+        setShowArrows(true);
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => setShowArrows(false), HIDE_DELAY_MS);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        };
+    }, []);
+
+    const scrollGrid = (dir) => {
+        const el = gridRef.current;
+        if (!el) return;
+        const amount = el.clientWidth * 0.85;
+        el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+        revealArrows();
+    };
 
     const handleCalculateClick = async (propertyType) => {
         setSubmittingId(propertyType);
@@ -105,6 +131,9 @@ export default function EstimateCalculator({ estimateSectionData }) {
                     100% { transform: translateY(-100%); opacity: 0; }
                 }
 
+                .property-grid-wrap { position: relative; }
+
+
                 .property-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
                 .property-card { background: #ffffff; border: 1px solid #eaeaea; border-radius: 16px; padding: 35px 25px; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
                 .property-card:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.08); border-color: #ffc099; }
@@ -125,6 +154,7 @@ export default function EstimateCalculator({ estimateSectionData }) {
                 @media (max-width: 768px) { 
                     .estimate-section-title { font-size: 2.2rem; } 
                     .estimate-container { padding: 0 15px !important; overflow: hidden; }
+                    .rotating-text-wrapper { min-width: auto; text-align: center; }
                     .property-grid { 
                         display: flex !important; 
                         flex-wrap: nowrap !important; 
@@ -150,10 +180,37 @@ export default function EstimateCalculator({ estimateSectionData }) {
                         scroll-snap-align: start !important; /* Ensures clean snapping to the left */
                         padding: 30px 20px;
                     }
-                    .estimate-wrapper { padding: 4rem 0; }
+                                        .estimate-wrapper { padding: 4rem 0; }
+
+                    .estimate-arrow {
+                        position: absolute;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        z-index: 10;
+                        cursor: pointer;
+                        background: #fff;
+                        border-radius: 50%;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 45px;
+                        height: 45px;
+                        opacity: 0;
+                        pointer-events: none;
+                        transition: opacity 0.25s ease;
+                    }
+                    .estimate-arrow-left { left: 4px; }
+                    .estimate-arrow-right { right: 4px; }
+                    .property-grid-wrap.estimate-arrows-active .estimate-arrow {
+                        opacity: 1;
+                        pointer-events: auto;
+                    }
+                }
+                @media (min-width: 769px) {
+                    .estimate-arrow { display: none; }
                 }
             `}} />
-
             <div className="estimate-container">
                 <h2 className="estimate-section-title">
                     {headingBase} <span className="rotating-text-wrapper">
@@ -164,7 +221,18 @@ export default function EstimateCalculator({ estimateSectionData }) {
                 </h2>
                 <p className="estimate-subheading">{subHeading}</p>
 
-                <div className="property-grid">
+                <div className={`property-grid-wrap ${showArrows ? "estimate-arrows-active" : ""}`}>
+                    <div className="estimate-arrow estimate-arrow-left" onClick={() => scrollGrid("left")}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff914d" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                    </div>
+
+                <div
+                        className="property-grid"
+                        ref={gridRef}
+                        onTouchStart={revealArrows}
+                        onPointerDown={revealArrows}
+                        onScroll={revealArrows}
+                    >
                     {propertyCards.map((card) => {
                         const isThisCardLoading = submittingId === card.id;
                         return (
@@ -197,7 +265,12 @@ export default function EstimateCalculator({ estimateSectionData }) {
                                 </button>
                             </div>
                         );
-                    })}
+                                            })}
+                    </div>
+
+                    <div className="estimate-arrow estimate-arrow-right" onClick={() => scrollGrid("right")}>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff914d" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                    </div>
                 </div>
             </div>
         </section>

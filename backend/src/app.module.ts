@@ -50,6 +50,8 @@ import { RobotsTxtModule } from './robots-txt/robots-txt.module';
 import { HomeAboutVideoModule } from './home-about-video/home-about-video.module';
 import { CmsBasicPagesModule } from './cms-basic-pages/cms-basic-pages.module';
 
+import { ExperienceCenterAssetModule } from './experience-center-assets/experience-center-asset.module';
+
 // import { CmsHeadingsModule } from './cms-headings/cms-headings.module';
 
 @Module({
@@ -104,7 +106,8 @@ import { CmsBasicPagesModule } from './cms-basic-pages/cms-basic-pages.module';
     PopupRulesModule,
     RobotsTxtModule,
     HomeAboutVideoModule,
-    CmsBasicPagesModule
+    CmsBasicPagesModule,
+     ExperienceCenterAssetModule,
   ],
   })
 export class AppModule {}

@@ -795,11 +795,11 @@ const removeContactItem = (index) => {
           background: transparent;
         }
 
-        .warranty-editor .ck-editor__top {
-          position: sticky !important;
-          top: 70px !important;
-          z-index: 10 !important;
-        }
+        // .warranty-editor .ck-editor__top {
+        //   position: sticky !important;
+        //   top: 70px !important;
+        //   z-index: 10 !important;
+        // }
 
         // .warranty-editor .ck-editor__editable {
         //   min-height: 680px;

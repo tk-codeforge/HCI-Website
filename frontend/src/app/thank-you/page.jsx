@@ -1159,16 +1159,6 @@ const ThankYou = () => {
       <MainLayout>
         <main>
           <section className="ty-section">
-            {/* Background blobs */}
-            {/* <span
-              className="ty-blob ty-blob--1"
-              aria-hidden="true"
-            />
-
-            <span
-              className="ty-blob ty-blob--2"
-              aria-hidden="true"
-            /> */}
 
             <div className="container">
               <div className="ty-card">
@@ -1338,49 +1328,8 @@ const ThankYou = () => {
 
           padding: clamp(56px, 8vw, 100px) 0;
 
-          // background:
-          //   radial-gradient(
-          //     circle at 50% -10%,
-          //     rgba(255, 145, 77, 0.18),
-          //     transparent 42%
-          //   ),
-          //   linear-gradient(
-          //     180deg,
-          //     #fffaf7 0%,
-          //     #ffffff 100%
-          //   );
           background: #ffffff;
         }
-
-        /* Ambient glow behind card */
-
-        // .ty-section::before {
-        //   content: "";
-
-        //   position: absolute;
-
-        //   width: 520px;
-        //   height: 520px;
-
-        //   top: 50%;
-        //   left: 50%;
-
-        //   transform:
-        //     translate(-50%, -50%);
-
-        //   border-radius: 50%;
-
-        //   background:
-        //     radial-gradient(
-        //       circle,
-        //       rgba(255, 145, 77, 0.11),
-        //       transparent 68%
-        //     );
-
-        //   filter: blur(25px);
-
-        //   pointer-events: none;
-        // }
 
         .ty-section .container {
           position: relative;

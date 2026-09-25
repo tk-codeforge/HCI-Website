@@ -16,6 +16,10 @@ import React, { Fragment } from "react";
 import LazySection from "./clientHome/LazySection";
 import ContactForm from "./clientHome/ContactForm";
 
+import CarouselRow from "./clientHome/CarouselRow";
+import PopCarousel from "./clientHome/PopCarousel";
+import FactoryImageSlider from "./clientHome/FactoryImageSlider";
+
 // --- SERVER IMPORTS ---
 import RowImage from "../components/RowImage";
 import Card from "../components/Card";
@@ -45,7 +49,7 @@ async function getRemainingData() {
   };
 
   try {
-    const [designIdea, h3d_gallery, contentData, blogsData, whyChooseUsRaw,estimateBannerRaw , estimateCardsRaw , theWayWeWorkRaw, whatWeOfferRaw, headingManagementRaw] = await Promise.all([
+    const [designIdea, h3d_gallery, contentData, blogsData, whyChooseUsRaw,estimateBannerRaw , estimateCardsRaw , theWayWeWorkRaw, whatWeOfferRaw, headingManagementRaw, furnitureFactoryRaw ] = await Promise.all([
       fetchData("/cms-parent-child/designer_choice"),
       fetchData("/cms-parent-child/h3d_gallery"),
       fetchData("/cms-content/home_page_content_what_we_are"),
@@ -56,7 +60,8 @@ async function getRemainingData() {
       fetchData("/cms-content/home_page_estimate_cards") ,
        fetchData("/cms-content/home_page_content_the_way_we_work"),
        fetchData("/cms-content/what_we_offer"),
-       fetchData("/cms-content/home_page_heading_management")
+       fetchData("/cms-content/home_page_heading_management"),
+       fetchData("/cms-content/home_page_content_furniture_factory"),
     ]);
 
     let whatWeOfferData = null;
@@ -136,11 +141,49 @@ if (theWayWeWorkRaw) {
         estimateCardsData = Array.isArray(json) ? json : [];
     }
 
-    return { designIdea: designIdea || [], h3d_gallery: h3d_gallery || [], content: contentData || [], blogs: Array.isArray(blogsData) ? blogsData.slice(0, 3) : [], theWayWeWorkData,whyChooseUsData, estimateBannerData, estimateCardsData, whatWeOfferData, headingsData };
+    let furnitureFactoryData = {
+  heading: "Large Modular Furniture Factories",
+  headingColor: "#000000",
+  description: "",
+  buttonText: "View More",
+  buttonLink: "/furniture/",
+  video: "",
+  topImage: "",              // 🆕 ADD
+      topImageCaption: "",
+  image1: "",
+  image1Caption: "",
+  image2: "",
+  image2Caption: "",
+  descriptionFontSize: 16,
+};
+
+if (furnitureFactoryRaw) {
+  const record = Array.isArray(furnitureFactoryRaw) ? furnitureFactoryRaw[0] : furnitureFactoryRaw;
+  const json = record?.json_content || {};
+
+  furnitureFactoryData = {
+    heading: json.heading || "Large Modular Furniture Factories",
+    headingColor: json.headingColor || "#000000",
+    description: json.description || "",
+    buttonText: json.buttonText || "View More",
+    buttonLink: json.buttonLink || "/furniture/",
+    video: json.video || "",
+    topImage: json.topImage || "",              // 🆕 ADD
+        topImageCaption: json.topImageCaption || "", // 🆕 ADD
+    image1: json.image1 || "",
+    image1Caption: json.image1Caption || "",
+    image2: json.image2 || "",
+    image2Caption: json.image2Caption || "",
+    descriptionFontSize: json.descriptionFontSize || 16,
+  };
+}
+
+    return { designIdea: designIdea || [], h3d_gallery: h3d_gallery || [], content: contentData || [], blogs: Array.isArray(blogsData) ? blogsData.slice(0, 3) : [], theWayWeWorkData,whyChooseUsData, estimateBannerData, estimateCardsData, whatWeOfferData, headingsData, furnitureFactoryData };
   } catch (err) {
     return {
       designIdea: [], h3d_gallery: [], content: [], blogs: [],
       theWayWeWorkData: { heading: "The Way We Work", bg_image: "", cards: [] },
+      furnitureFactoryData: { heading: "Large Modular Furniture Factories", headingColor: "#000000", description: "", buttonText: "View More", buttonLink: "/furniture/", video: "", image1: "", image1Caption: "", image2: "", image2Caption: "" },
       whyChooseUsData: { heading: "Why Choose us", headingColor: "#222222", cards: [] },
       estimateBannerData: null, estimateCardsData: [], whatWeOfferData: null, headingsData: {}  };
   }
@@ -154,7 +197,7 @@ const formatDate = (dateString) => {
 };
 
 export default async function HomeContent() {
-  const { designIdea, h3d_gallery, content, blogs, theWayWeWorkData, whyChooseUsData, estimateBannerData,estimateCardsData,whatWeOfferData, headingsData } = await getRemainingData();
+  const { designIdea, h3d_gallery, content, blogs, theWayWeWorkData, whyChooseUsData, estimateBannerData,estimateCardsData,whatWeOfferData, headingsData , furnitureFactoryData} = await getRemainingData();
   const readyToGoDesignsHeading = headingsData?.ready_to_go_designs || {};
   const designersChoiceHeading = headingsData?.designers_choice || {};
   const celebratingExcellenceHeading = headingsData?.celebrating_excellence || {};
@@ -203,6 +246,10 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
+
+      html, body {
+          overflow-x: hidden;
+        }
         .text-orange-force { color: #ff914d !important; }
         .banner-overlay { padding-bottom: 7rem !important; }
         .force-white-title { color: #ffffff !important; }
@@ -240,6 +287,11 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
     box-shadow:none !important;
 }
 
+.way-work-card.way-work-card-pop{
+    height: 306px !important;
+    min-height: 306px !important;
+}
+
         .way-work-card > div:first-child{
     width:50% !important;
     flex:0 0 50% !important;
@@ -264,10 +316,6 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
         @media (max-width: 992px) {
           .way-work-number { font-size: 3.75rem !important; }
         }
-
-        // @media (max-width: 768px) {
-        //   .way-work-number { font-size: 3.25rem !important; }
-        // }
 
         @media (max-width: 767px) {
   /* Keep cards full width and identical in appearance — only change
@@ -324,7 +372,7 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
         .bgsectionroom .designercard *, .card_room h3 { font-weight: 800 !important; }
 
         .oofer_card .row > div { display: flex; }
-        .oofer_card .cardoffer { height: 100%; width: 100%; display: flex; flex-direction: column; }
+        .oofer_card .cardoffer { height: 100%; width: 100%; flex-direction: column; }
         /* Forces the inner body (which holds text and button) to fill remaining space */
         .oofer_card .cardoffer > div:last-child { display: flex; flex-direction: column; flex-grow: 1; }
         /* Pushes the button (link) to the very bottom */
@@ -369,6 +417,14 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
         }
 
         @media (max-width: 768px) {
+
+  .designidea .btn_knowmoreblack {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    align-self: flex-start !important;
+    display: inline-block !important;
+    float: left !important;
+  }
           /* 🌟 FIX 2: Reduce all large bootstrap spacings on mobile devices to collapse whitespace */
           .my-5 { margin-top: 1.5rem !important; margin-bottom: 1.5rem !important; }
           .py-5 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
@@ -377,9 +433,37 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
           .pt-5 { padding-top: 1.5rem !important; }
           .pb-5 { padding-bottom: 1.5rem !important; }
           
-          .mobile-scroll-row { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; padding-top:20px !important; padding-bottom: 20px !important; margin-bottom: 10px !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; justify-content: flex-start !important; }
+          // .mobile-scroll-row { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; padding-top:20px !important; padding-bottom: 20px !important; margin-bottom: 10px !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; justify-content: flex-start !important; }
+.mobile-scroll-row { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; overflow-y: visible !important; scroll-snap-type: x mandatory; padding-top:20px !important; padding-bottom: 20px !important; margin-bottom: 10px !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; justify-content: flex-start !important; }
+
           .mobile-scroll-row::-webkit-scrollbar { display: none; }
           .mobile-scroll-row > [class*="col-"] { flex: 0 0 100% !important; max-width: 100% !important; scroll-snap-align: center; }
+
+/* Reusable horizontal carousel behavior for CarouselRow — additive only,
+   doesn't touch .mobile-scroll-row so Blogs/RoomOffice rows are unaffected */
+// .hcarousel-row {
+//   display: flex !important;
+//   flex-wrap: nowrap !important;
+//   overflow-x: auto !important;
+//   scroll-snap-type: x mandatory;
+//   -webkit-overflow-scrolling: touch;
+//   scrollbar-width: none;
+// }
+.hcarousel-row {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.hcarousel-row::-webkit-scrollbar { display: none; }
+.hcarousel-row > [class*="col-"] {
+  scroll-snap-align: start;
+}
+
           .mobile-process-row { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; padding-bottom: 20px !important; -webkit-overflow-scrolling: touch; scrollbar-width: none; gap: 15px; margin-left: 0; margin-right: 0; justify-content: flex-start !important; }
           .mobile-process-row::-webkit-scrollbar { display: none; }
           .process-mobile-wrap { flex: 0 0 85% !important; scroll-snap-align: center; display: flex; flex-direction: column; }
@@ -418,7 +502,7 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
              </h2>
           </div>
           
-          <div className="mx-0 row g-4 mobile-scroll-row">
+          <CarouselRow className="mx-0 row g-4 mobile-scroll-row">
             {offerCards.length > 0 ? (
               offerCards.map((card, index) => { const targetId = `section-${index + 1}`;
                 return (
@@ -458,7 +542,7 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
               );
             })
             )}
-          </div>
+          </CarouselRow>
         </div>
       </div>
 
@@ -486,7 +570,9 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
             </h2>
           </div>
 
-          <div className="row g-4 justify-content-center">
+          {/* <div className="row g-4 justify-content-center"> */}
+          <div className="d-block d-md-none">
+          <CarouselRow className="row g-4 justify-content-center"> 
             {theWayWeWorkData.cards.map((card, index) => {
               
               const palette = WAY_WE_WORK_PALETTE[index % WAY_WE_WORK_PALETTE.length] || { light: "#f8f9fa", dark: "#e9ecef" };
@@ -506,13 +592,11 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
 const targetId = `step-${index + 1}`;
 
 
-              return (
+                            return (
                 <div key={index} className="col-lg-4 col-md-6 col-12">
                   <div
                     className="way-work-card h-100 d-flex overflow-hidden"
-                    style={{
-        height: "306px"
-    }}
+                    style={{ height: "306px" }}
                   >
                     <div
                       className="d-flex align-items-center justify-content-center"
@@ -591,9 +675,92 @@ const targetId = `step-${index + 1}`;
                 </div>
               );
             })}
+           </CarouselRow> 
           </div>
+          <PopCarousel slidesToShow={3} dimSides={false}>
+            {theWayWeWorkData.cards.map((card, index) => {
+              const palette = WAY_WE_WORK_PALETTE[index % WAY_WE_WORK_PALETTE.length] || { light: "#f8f9fa", dark: "#e9ecef" };
+              const rawNumber = card.number
+                ? parseInt(String(card.number).replace(/\D/g, ""), 10)
+                : NaN;
+              const number = String(
+                Number.isFinite(rawNumber) && rawNumber > 0 ? rawNumber : index + 1
+              ).padStart(2, "0");
+              const iconSize = card.iconSize ? `${card.iconSize}px` : "80px";
+              const rightSideBgColor = card.iconColor || palette.dark;
+              const textColor = card.textColor || "#ffffff";
+              const leftSideBgColor = card.bgColorLeft || palette.light;
+              const titleColorClass = `way-work-title-color-pop-${index}`;
+              const targetId = `step-${index + 1}`;
+
+                            return (
+                <div
+                  key={index}
+                  className="way-work-card way-work-card-pop h-100 d-flex overflow-hidden"
+                >
+                  <div
+                    className="d-flex align-items-center justify-content-center"
+                    style={{ background: leftSideBgColor, width: "50%" }}
+                  >
+                    <span className="way-work-number" style={{ color: rightSideBgColor }}>{number}</span>
+                  </div>
+
+                  <div
+                    className="p-4 d-flex flex-column align-items-start text-start"
+                    style={{ background: rightSideBgColor, color: textColor, width: "50%" }}
+                  >
+                    {card.icon && (
+                      <div className="mb-3">
+                        <img
+                          src={card.icon}
+                          alt={card.title}
+                          style={{ width: iconSize, height: iconSize, objectFit: "contain" }}
+                        />
+                      </div>
+                    )}
+
+                    {textColor && (
+                      <style>{`.${titleColorClass} { color: ${textColor} !important; }`}</style>
+                    )}
+                    <h4
+                      className={`fw-bold mb-3 force-white-title ${titleColorClass}`}
+                      style={{ fontSize: "20px", lineHeight: "1.25", overflow: "hidden", textOverflow: "ellipsis" }}
+                    >
+                      {card.title}
+                    </h4>
+
+                    {card.description && (
+                      <p
+                        className="mb-4"
+                        style={{ color: textColor, opacity: .95, fontSize: "14px", lineHeight: "1.45" }}
+                      >
+                        {card.description}
+                      </p>
+                                        )}
+                    
+                      <a href={card.buttonLink || `/how-its-works#${targetId}`}
+                      className="know_mores mt-auto align-self-start"
+                      style={{
+                        borderRadius: "30px",
+                        padding: "6px 20px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        textDecoration: "none",
+                        borderStyle: "solid",
+                        borderWidth: "1px",
+                        color: textColor,
+                        borderColor: textColor,
+                      }}
+                    >
+                      {card.buttonText || "Know More"}
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </PopCarousel>
         </div>
-      </div>
+         </div>
       
       <LazySection placeholderHeight="300px">
         <section className="my-5 py-5" style={{ backgroundColor: "#fafafa" }}>
@@ -627,10 +794,10 @@ const targetId = `step-${index + 1}`;
             <div className="mb-5 text-center">
               <h2 className="h2 font_about fw-bold mb-0">{content[1]?.json_content?.title} <span className="font_stylish text-orange-force d-block mt-1">{content[1]?.json_content?.description}</span></h2>
             </div>
-            <div className="row g-4 mobile-scroll-row">
+            <CarouselRow className="row g-4 mobile-scroll-row">
               <div className="col-lg-6 col-md-6 col-12"><RoomOfice cardRoomOffice={"card card_room border-0 h-100"} badge_circle="badge_circleblack" arrowIcon="images/arrow_icon.png" altArrow="arrow" width="80" imageRoom_Office={content[15]?.json_content?.image} roomImg="residential_imgs" altImage="room" cardBody="card_body office_card_body" cardTitle={content[15]?.json_content?.title} cardText={content[15]?.json_content?.description} btnText="Know More " btnLink={content[15]?.json_content?.designation} btnClass={"btn_knowmoreblack"} /></div>
               <div className="col-lg-6 col-md-6 col-12"><RoomOfice cardRoomOffice={"card card_room border-0 h-100"} badge_circle="badge_circleblack" arrowIcon="images/arrow_icon.png" altArrow="arrow" width="80" imageRoom_Office={content[14]?.json_content?.image} roomImg="residential_imgs" altImage="room" cardBody="card_body office_card_body" cardTitle={content[14]?.json_content?.title} cardText={content[14]?.json_content?.description} btnText="Know More " btnLink={content[14]?.json_content?.designation} btnClass={"btn_knowmoreblack"} /></div>
-            </div>
+            </CarouselRow>
           </div>
         </div>
       </LazySection>
@@ -672,13 +839,43 @@ const targetId = `step-${index + 1}`;
                  <h2 className="h2 font_about fw-bold mb-0 dc-heading-color">{designersChoiceHeading.text || "Exclusive Design Specials"}</h2>
                </div>
             </div>
-            <div className="mt-4 row g-4 mx-0 mobile-scroll-row">
+            {/* <div className="mt-4 row g-4 mx-0 mobile-scroll-row">
               {staticRecords.map((record, i) => (
                 <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
                   <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} descriptionBg={record?.child_content?.description} />
                 </div>
               ))}
+            </div> */}
+            {/* <CarouselRow className="mt-4 row g-4 mx-0 mobile-scroll-row" desktopCarousel>
+  {staticRecords.map((record, i) => (
+    <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
+      <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} descriptionBg={record?.child_content?.description} />
+    </div>
+  ))}
+</CarouselRow> */}
+
+            <div className="d-block d-md-none">
+              <CarouselRow className="mt-4 row g-4 mx-0 mobile-scroll-row">
+                {staticRecords.map((record, i) => (
+                  <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
+                    <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} descriptionBg={record?.child_content?.description} />
+                  </div>
+                ))}
+              </CarouselRow>
             </div>
+
+            <PopCarousel slidesToShow={3}>
+              {staticRecords.map((record) => (
+                <BgImageCard
+                  key={record.id}
+                  style={{ backgroundImage: `url(${record?.child_content?.image})` }}
+                  cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
+                  designerCardBgDiv={"designercard designercardimg1"}
+                  titleBgImage={record?.child_content?.title}
+                  descriptionBg={record?.child_content?.description}
+                />
+              ))}
+            </PopCarousel>
             <div className="mt-4 col-lg-12 text-end pe-3"><a href="/designer-choice" className="know_more" style={{ 
       padding: '12px 32px', 
       fontSize: '16px', 
@@ -716,6 +913,92 @@ const targetId = `step-${index + 1}`;
         />
       </LazySection>
 
+                  <LazySection placeholderHeight="400px">
+        <section className="my-5">
+          <style dangerouslySetInnerHTML={{__html: `
+            .factory-video-wrap {
+              overflow: hidden;
+            }
+            .btn-factory-cta {
+              display: inline-block;
+              background: linear-gradient(90deg, #ff914d, #ff6a3d);
+              color: #ffffff !important;
+              font-weight: 700;
+              letter-spacing: 0.03em;
+              text-transform: uppercase;
+              border-radius: 50px;
+              padding: 0.6rem 1.5rem; 
+              font-size: 16px;
+              border: none;
+              transition: all 0.3s ease;
+              text-decoration: none;
+            }
+            .btn-factory-cta:hover {
+              color: #ffffff !important;
+              box-shadow: 0 0.5rem 1.2rem rgba(255, 145, 77, 0.4);
+              transform: translateY(-2px);
+            }
+          `}} />
+          <div className="container">
+            <div className="row align-items-center g-4 g-lg-5">
+
+              {furnitureFactoryData.video ? (
+                <div className="col-lg-7">
+                  <div className="ratio ratio-16x9 factory-video-wrap">
+                    <video
+                      src={furnitureFactoryData.video}
+                      controls
+                      className="w-100 h-100"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="col-lg-7">
+                  <FactoryImageSlider
+                    topImage={
+                      furnitureFactoryData.topImage
+                        ? { src: furnitureFactoryData.topImage, caption: furnitureFactoryData.topImageCaption }
+                        : null
+                    }
+                    images={[
+                      furnitureFactoryData.image1
+                        ? { src: furnitureFactoryData.image1, caption: furnitureFactoryData.image1Caption }
+                        : null,
+                      furnitureFactoryData.image2
+                        ? { src: furnitureFactoryData.image2, caption: furnitureFactoryData.image2Caption }
+                        : null,
+                    ]}
+                  />
+                </div>
+              )}
+
+              <div className="col-lg-5">
+                {furnitureFactoryData.headingColor && (
+                  <style>{`.furniture-factory-heading-color { color: ${furnitureFactoryData.headingColor} !important; }`}</style>
+                )}
+                <h2 className="h2 font_about fw-bold mb-3 furniture-factory-heading-color">
+                  {furnitureFactoryData.heading}
+                </h2>
+                <p
+                  className="mb-4 text-secondary"
+                  style={{ fontSize: `${furnitureFactoryData.descriptionFontSize || 16}px` }}
+                >
+                  {furnitureFactoryData.description}
+                </p>
+<div className="text-center text-lg-start">
+                 <a href={furnitureFactoryData.buttonLink || "/furniture/"}
+                  className="btn-factory-cta"
+                >
+                  {furnitureFactoryData.buttonText || "View More"}
+                </a>
+              </div>
+</div>
+            </div>
+          </div>
+        </section>
+      </LazySection>
+
       {activeEstimateBanner.is_active !== false && (
         <LazySection placeholderHeight="600px">
           <section className="my-5 py-5 estimate-fix-wrapper" style={{ backgroundColor: "#fff9f9", borderTop: "1px solid #ffeeee", borderBottom: "1px solid #ffeeee" }}>
@@ -751,13 +1034,13 @@ const targetId = `step-${index + 1}`;
               <style>{`.blogs-heading-color { color: ${blogsHeading.color} !important; }`}</style>
             )}
             <h2 className="h2 pb-4 text-center font_about fw-bold blogs-heading-color">{blogsHeading.text || "Blogs"}</h2>
-            <div className="row g-2 g-lg-4 justify-content-center mx-1 mobile-scroll-row">
+            <CarouselRow className="row g-2 g-lg-4 justify-content-center mx-1 mobile-scroll-row">
               {blogs.map((blog, index) => (
                 <div key={index} className="col-lg-4 col-md-6 col-12">
                   <Blogs blogCard="blog_cards" imgSrcBlog={blog?.image || "/images/default.jpg"} blogImglink={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} blogImgALt={blog?.title || "Blog Image"} blogClassImg="card-img-top rounded-4 object-fit-cover" blogdate={blog?.published_on ? formatDate(blog.published_on) : "Date not available"} blogTitle={blog?.title || "Untitled Blog"} blogDescription={blog?.description || "No description available"} buttonBlog="Continue Reading" blogBtnHref={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} writer_name={blog?.writer_name || "High Creation"} />
                 </div>
               ))}
-            </div>
+            </CarouselRow>
           </div>
         </div>
       </LazySection>
@@ -781,7 +1064,7 @@ const targetId = `step-${index + 1}`;
          <ContactForm mapSrc={content[3]?.json_content?.description} />
       </LazySection>
 
-      <hr />
+            <hr />
     </>
   );
 }

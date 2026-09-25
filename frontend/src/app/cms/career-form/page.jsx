@@ -375,6 +375,12 @@ const handleSubmit = async (e) => {
 
   return (
     <AuthMainLayout>
+      <style jsx global>{`
+        :root {
+          --ck-z-default: 100;
+          --ck-z-modal: calc(var(--ck-z-default) + 999);
+        }
+      `}</style>
       <div className="container py-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="fw-bold">Career Form — Manage Jobs</h2>
@@ -444,7 +450,7 @@ const handleSubmit = async (e) => {
       </div>
 
       {/* Edit Job Modal (Description Only) */}
-      <div className="modal fade" id="jobModal" tabIndex="-1" aria-hidden="true">
+      <div className="modal fade" id="jobModal" tabIndex="-1" aria-hidden="true" data-bs-focus="false">
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">
@@ -481,7 +487,7 @@ const handleSubmit = async (e) => {
       </div>
 
       {/* Page Settings Modal */}
-      <div className="modal fade" id="pageSettingsModal" tabIndex="-1" aria-hidden="true">
+      <div className="modal fade" id="pageSettingsModal" tabIndex="-1" aria-hidden="true" data-bs-focus="false">
         <div className="modal-dialog modal-lg">
           <div className="modal-content">
             <div className="modal-header">

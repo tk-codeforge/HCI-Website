@@ -43,19 +43,22 @@ const PrevArrow = ({ onClick }) => {
   );
 };
 
-const SliderCard = (props) => {
+// const SliderCard = (props) => {
+  const SliderCard = ({ endpoint = "ready_to_go_design", linkBase = "/ready-togo-design/gallery" }) => {
   const [sliderListData, setSliderListData] = useState([]);
 
   const fetchContentManagerPages = useCallback(async () => {
     try {
-      const response = await api.get(`/cms-parent-child/ready_to_go_design`, {});
+      // const response = await api.get(`/cms-parent-child/ready_to_go_design`, {});
+      const response = await api.get(`/cms-parent-child/${endpoint}`, {});
       if (response.status === 200) {
         setSliderListData(response.data);
       }
     } catch (err) {
       toast.error(err.message || "Failed to fetch data.");
     }
-  }, []);
+  // }, []);
+  }, [endpoint]);
 
   useEffect(() => {
     fetchContentManagerPages();
@@ -108,7 +111,8 @@ const SliderCard = (props) => {
           {sliderListData && sliderListData.map((slider) => (
             <div className="p-3" key={slider.id}>
               <Card
-                cardLinkName={`/ready-togo-design/gallery?id=${slider?.id}`}
+                // cardLinkName={`/ready-togo-design/gallery?id=${slider?.id}`}
+                cardLinkName={`${linkBase}?id=${slider?.id}`}
                 cardNameALl="cardoffer"
                 imgSrc={slider?.child_content?.image || "/images/about/About-banner.jpg"}
                 imgAlt={slider.child_content?.title ?? defaultAltText}
