@@ -1,6 +1,7 @@
 import TeamGallery from "../components/TeamGallery";
 import MainLayout from "../layouts/MainLayout";
 import BackgroundImageRow from "../components/BackgroundImageRow";
+import TeamMediaGallery from "../components/TeamMediaGallery";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -126,7 +127,7 @@ descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
 sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
   sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
         />
-        <style dangerouslySetInnerHTML={{__html: `
+        {/* <style dangerouslySetInnerHTML={{__html: `
   .team-media-image {
     width: 100%;
     height: 450px;
@@ -139,6 +140,167 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
       aspect-ratio: 16 / 9;
     }
   }
+`}} /> */}
+
+<style dangerouslySetInnerHTML={{__html: `
+  .team-media-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  // .team-media-video,
+  // .team-media-image {
+  //   width: 100%;
+  //   height: 450px;
+  //   object-fit: contain;
+  //   display: block;
+  //   border-radius: 15px;
+  //   overflow: hidden;
+  // }
+
+  .team-media-video,
+  .team-media-image {
+    width: 100%;
+    height: 360px;
+    display: block;
+    border-radius: 15px;
+  }
+  .team-media-description {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #555;
+    white-space: pre-line;
+  }
+  @media (min-width: 768px) {
+    .team-media-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 768px) {
+    .team-media-video,
+    .team-media-image {
+      height: auto;
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  // .team-media-cell {
+  //   position: relative;
+  // }
+  // .team-media-overlay {
+  //   position: absolute;
+  //   inset: 0;
+  //   background: rgba(0, 0, 0, 0.35);
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+  //   opacity: 0;
+  //   cursor: pointer;
+  //   border-radius: 15px;
+  //   transition: opacity 0.2s ease;
+  // }
+
+  .team-media-box {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+    cursor: pointer;
+  }
+
+  .team-media-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    cursor: pointer;
+    border-radius: 15px;
+    transition: opacity 0.2s ease;
+  }
+  // .team-media-cell:hover .team-media-overlay {
+  //   opacity: 1;
+  // }
+  .team-media-box:hover .team-media-overlay {
+    opacity: 1;
+  }
+  .team-media-viewfull {
+    padding: 12px 24px;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 500;
+    backdrop-filter: blur(2px);
+  }
+  .team-media-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .team-media-lightbox-content {
+    max-width: 90vw;
+    max-height: 85vh;
+  }
+  .team-media-lightbox-media {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
+  .team-media-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 36px;
+    cursor: pointer;
+  }
+  .team-media-lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .team-media-lightbox-arrow.left {
+    left: 20px;
+  }
+  .team-media-lightbox-arrow.right {
+    right: 20px;
+  }
+  .team-media-lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 14px;
+  }
+  // @media (max-width: 768px) {
+  //   .team-media-overlay {
+  //     opacity: 1;
+  //     background: transparent;
+  //   }
+  //   .team-media-viewfull {
+  //     display: none;
+  //   }
+  // }
 `}} />
 
         {/* 2. CLEAR VIDEO SECTION (No dark overlays, no blurry stretching) */}
@@ -249,7 +411,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
   )}
 </section> */}
 
-<section className="container my-5">
+{/* <section className="container my-5">
   {teamMediaItems
     .filter((item) => item.type === 'video')
     .map((item, idx) => (
@@ -273,19 +435,6 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
       </div>
     ))}
 
-  {/* {teamMediaItems
-    .filter((item) => item.type === 'image')
-    .map((item, idx) => (
-      <div key={`image-${idx}`} className="mb-4 w-100">
-        <img
-          src={item.url}
-          alt="Team media"
-          className="rounded-3 shadow-lg"
-          style={{ display: "block", width: "100%", maxHeight: "80vh", objectFit: "cover" }}
-        />
-      </div>
-    ))} */}
-
     {teamMediaItems
   .filter((item) => item.type === 'image')
   .map((item, idx) => (
@@ -299,6 +448,76 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
       />
     </div>
   ))}
+
+  {!hasMedia && (
+    <div
+      className="video-container shadow-lg w-100"
+      style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
+    >
+      <video
+        width="100%"
+        autoPlay
+        loop
+        muted
+        playsInline
+        controls
+        style={{ display: "block", width: "100%", maxHeight: "70vh", objectFit: "contain" }}
+      >
+        <source src="/team.MP4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  )}
+</section> */}
+
+<section className="container my-5">
+  {/* <div className="team-media-grid">
+    {teamMediaItems
+      .filter((item) => item.type === 'video')
+      .map((item, idx) => (
+        <div key={`video-${idx}`}>
+          <video
+            className="team-media-video"
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls
+          >
+            <source src={item.url} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          {item.description && (
+            <p className="team-media-description">{item.description}</p>
+          )}
+        </div>
+      ))}
+
+    {teamMediaItems
+      .filter((item) => item.type === 'image')
+      .map((item, idx) => (
+        <div key={`image-${idx}`}>
+          <img
+            src={item.url}
+            alt="Team media"
+            className="img-thumbnail team-media-image"
+            loading="lazy"
+            decoding="async"
+          />
+          {item.description && (
+            <p className="team-media-description">{item.description}</p>
+          )}
+        </div>
+      ))}
+  </div> */}
+  {hasMedia && (
+  <TeamMediaGallery
+    items={[
+      ...teamMediaItems.filter((item) => item.type === "video"),
+      ...teamMediaItems.filter((item) => item.type === "image"),
+    ]}
+  />
+)}
 
   {!hasMedia && (
     <div

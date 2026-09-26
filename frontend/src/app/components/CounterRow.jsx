@@ -258,7 +258,8 @@ const CounterRow = (props) => {
         }}
       />
 
-      <div className="container-fluid px-lg-5 px-3">
+      {/* <div className="container-fluid px-lg-5 px-3"> */}
+      <div className="container">
         {/* HEADING */}
         <div className="section-heading-wrapper text-center">
           <h2 className="h2 font_about fw-bolder section-main-heading mb-0">

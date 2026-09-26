@@ -1039,7 +1039,14 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
   } else if (action === 'delete') {
     if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
       jsonContent.items.splice(itemIndex, 1);
+    } 
+} else if (action === 'update_description') {
+    if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
+      jsonContent.items[itemIndex].description = dto?.description || '';
+    } else {
+      throw new BadRequestException(`Invalid item_index: ${itemIndex}`);
     }
+
   } else if (action === 'update') {
     if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
       if (imagePath) jsonContent.items[itemIndex].image = basename(imagePath);

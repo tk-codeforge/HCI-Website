@@ -26,6 +26,7 @@ const CmsHowItsWorks = () => {
 const [teamMediaItems, setTeamMediaItems] = useState([]);
 const [newImageFile, setNewImageFile] = useState(null);
 const [newVideoFile, setNewVideoFile] = useState(null);
+const [mediaDescriptions, setMediaDescriptions] = useState({});
 
     const fetchContentManagerPages = useCallback(async () => {
         try {
@@ -55,7 +56,15 @@ const [newVideoFile, setNewVideoFile] = useState(null);
         if (response.data) {
             const record = Array.isArray(response.data) ? response.data[0] : response.data;
             setPageMediaId(record?.id || null);
-            setTeamMediaItems(record?.json_content?.items || []);
+            // setTeamMediaItems(record?.json_content?.items || []);
+            const items = record?.json_content?.items || [];
+setTeamMediaItems(items);
+setMediaDescriptions(
+    items.reduce((acc, item, idx) => {
+        acc[idx] = item.description || "";
+        return acc;
+    }, {})
+);
         }
     } catch (err) {
         console.error("Failed to fetch team page media:", err);
@@ -169,6 +178,32 @@ const handleAddVideo = async (e) => {
         }
     } catch (error) {
         toast.error(error.message ?? "Error adding video.");
+    }
+};
+
+const handleUpdateDescription = async (index) => {
+    const formDataToSend = new FormData();
+    formDataToSend.append("action", "update_description");
+    formDataToSend.append("item_index", index);
+    formDataToSend.append("description", mediaDescriptions[index] || "");
+
+    try {
+        const response = await api.patch(
+            `/cms-content/update-team-page-media/${pageMediaId}`,
+            formDataToSend,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            }
+        );
+        if (response.status === 200) {
+            toast.success("Description updated.");
+            fetchTeamPageMedia();
+        }
+    } catch (error) {
+        toast.error(error.message ?? "Error updating description.");
     }
 };
 
@@ -467,6 +502,21 @@ const handleDeleteMedia = async (index) => {
                                 <div className="small text-muted mt-2 text-truncate" title={item.url}>
                                     {item.url?.split('/').pop()}
                                 </div>
+                                <textarea
+    className="form-control form-control-sm mt-2"
+    placeholder="Add description..."
+    rows={2}
+    value={mediaDescriptions[idx] || ""}
+    onChange={(e) =>
+        setMediaDescriptions((prev) => ({ ...prev, [idx]: e.target.value }))
+    }
+/>
+<button
+    className="btn btn-outline-primary btn-sm mt-2 w-100"
+    onClick={() => handleUpdateDescription(idx)}
+>
+    Save Description
+</button>
                                 <button className="btn btn-danger btn-sm mt-2 w-100" onClick={() => handleDeleteMedia(idx)}>
                                     Delete Video
                                 </button>
@@ -494,6 +544,21 @@ const handleDeleteMedia = async (index) => {
                                     height="160"
                                     style={{ objectFit: "cover", width: "100%", borderRadius: "6px" }}
                                 />
+                                <textarea
+    className="form-control form-control-sm mt-2"
+    placeholder="Add description..."
+    rows={2}
+    value={mediaDescriptions[idx] || ""}
+    onChange={(e) =>
+        setMediaDescriptions((prev) => ({ ...prev, [idx]: e.target.value }))
+    }
+/>
+<button
+    className="btn btn-outline-primary btn-sm mt-2 w-100"
+    onClick={() => handleUpdateDescription(idx)}
+>
+    Save Description
+</button>
                                 <button className="btn btn-danger btn-sm mt-2 w-100" onClick={() => handleDeleteMedia(idx)}>
                                     Delete Image
                                 </button>
