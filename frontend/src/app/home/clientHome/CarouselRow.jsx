@@ -206,7 +206,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { MdOutlineChevronLeft, MdKeyboardArrowRight } from "react-icons/md";
 
-const HIDE_DELAY_MS = 3000;
+const HIDE_DELAY_MS = 2000;
 
 export default function CarouselRow({ children, className = "", desktopCarousel = false }) {
   const trackRef = useRef(null);

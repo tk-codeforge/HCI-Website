@@ -42,7 +42,8 @@ const VideoTestimonial = () => {
   const settings = {
     dots: false,
     infinite: true,
-    speed: 600, // Slightly slower transition for premium feel
+    speed: 400, // Slightly slower transition for premium feel
+    cssEase: "ease-out",
     autoplay: true,
     autoplaySpeed: 5000,
     slidesToShow: 3,
@@ -68,8 +69,8 @@ const VideoTestimonial = () => {
       {/* 🌟 SLIDER UI OVERRIDES */}
       <style dangerouslySetInnerHTML={{__html: `
         .yt-slider-wrapper {
-            padding: 0 20px;
-        }
+            padding: 0;
+        } 
 
         /* Premium Floating Navigation Buttons */
         .yt-nav-btn {
@@ -105,8 +106,15 @@ const VideoTestimonial = () => {
         .slick-prev, .slick-next { display: none !important; }
 
         /* Slide Spacing and Center Highlight Effect */
+        // .slick-slider { padding: 20px 0; }
+
         .slick-slider { padding: 20px 0; }
-        .slick-slide { 
+.yt-slider-wrapper .slick-list {
+    padding-top: 30px !important;
+    padding-bottom: 30px !important;
+}
+        
+       /* .slick-slide { 
             padding: 0 15px; 
             transition: all 0.5s ease; 
             opacity: 0.5; 
@@ -117,7 +125,20 @@ const VideoTestimonial = () => {
             transform: scale(1.05); 
             z-index: 10; 
             position: relative; 
-        }
+        } */
+
+            .slick-slide { 
+    padding: 0 8px; 
+    transition: all 0.5s ease; 
+    opacity: 0.5; 
+    transform: scale(0.95); 
+}
+.slick-center { 
+    opacity: 1; 
+    transform: scale(1.1);
+    z-index: 10; 
+    position: relative; 
+}
 
         /* 🌟 FIX: Force Strict 16:9 Aspect Ratio on Iframes */
         .video_card {

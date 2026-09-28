@@ -3,7 +3,8 @@ import Image from "next/image";
 const Blogs = (props) => {
   return (
     <>
-      <div className={props.blogCard}>
+      {/* <div className={props.blogCard}> */}
+      <div className={`${props.blogCard} d-flex flex-column w-100`}>
         <div className="position-relative">
           {/* 🌟 SEO FIX: Descriptive link label */}
           <a href={props.blogImglink} aria-label={`Read article: ${props.blogTitle}`}>
@@ -24,23 +25,27 @@ const Blogs = (props) => {
             </div>
           </div>
         </div>
-        <div className="card-body px-3 pt-3">
+        {/* <div className="card-body px-3 pt-3"> */}
+        <div className="card-body px-3 pt-3 d-flex flex-column flex-grow-1">
           <span className="blog_span">{props.blogdate}</span>
           <h5 className="blog-title pt-2">{props.blogTitle}</h5>
-          <p
-            className="blog-text"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-            dangerouslySetInnerHTML={{ __html: props.blogDescription }}>
-          </p>
+          
+          {props.blogDescription && (
+  <p
+    className="blog-text"
+    style={{
+      display: '-webkit-box',
+      WebkitLineClamp: 3,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    }}
+    dangerouslySetInnerHTML={{ __html: props.blogDescription }}
+  />
+)}
           <a 
             href={props.blogBtnHref} 
-            className="btn_continue"
+            className="btn_continue mt-auto align-self-start"
             aria-label={`${props.buttonBlog} - ${props.blogTitle}`} // 🌟 SEO FIX
           >
             {props.buttonBlog}

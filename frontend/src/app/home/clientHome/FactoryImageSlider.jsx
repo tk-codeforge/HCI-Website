@@ -55,10 +55,15 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
       <style
         dangerouslySetInnerHTML={{
           __html: `
+
+          .ffs-wrapper { width: 100%; }
+@media (min-width: 992px) {
+  .ffs-wrapper { height: 100%; }
+}
         .ffs-box {
           position: relative;
           overflow: hidden;
-          border-radius: 12px;
+          border-radius: 16px;
         }
         .ffs-box img {
           width: 100%;
@@ -77,19 +82,45 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
           font-weight: 600;
           font-size: 0.9rem;
         }
+          @media (min-width: 992px) {
+  .ffs-desktop .ffs-box img {
+    position: absolute;
+    inset: 0;
+  }
+}
 
         /* ---------- Desktop / tablet static layout ---------- */
+        // .ffs-desktop {
+        //   display: flex;
+        //   flex-direction: column;
+        //   gap: 16px;
+        // }
+        // .ffs-top.ffs-box { height: 260px; }
+        // .ffs-bottom {
+        //   display: grid;
+        //   gap: 12px;
+        // }
+        // .ffs-bottom .ffs-box { height: 220px; }
+
         .ffs-desktop {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-        .ffs-top.ffs-box { height: 260px; }
-        .ffs-bottom {
-          display: grid;
-          gap: 12px;
-        }
-        .ffs-bottom .ffs-box { height: 220px; }
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 420px;   /* safety floor if the right side is short */
+}
+.ffs-top.ffs-box {
+  flex: 1.15 1 0;      /* top image slightly taller than the bottom row */
+  min-height: 0;
+}
+.ffs-bottom {
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: 12px;
+  flex: 1 1 0;
+  min-height: 0;
+}
+.ffs-bottom .ffs-box { height: 100%; }
 
         /* ---------- Mobile swipeable slider ---------- */
         .ffs-mobile { position: relative; }

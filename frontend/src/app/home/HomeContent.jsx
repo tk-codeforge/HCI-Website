@@ -917,8 +917,40 @@ const targetId = `step-${index + 1}`;
         <section className="my-5">
           <style dangerouslySetInnerHTML={{__html: `
             .factory-video-wrap {
-              overflow: hidden;
-            }
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  transform: translateZ(0);   /* makes the radius clip reliably in Chrome/Safari */
+}
+  .factory-video-wrap video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.factory-video-wrap .fv-bg {
+  object-fit: cover;
+  filter: blur(22px) brightness(0.85);
+  transform: scale(1.15);      /* hides blurred edges */
+  pointer-events: none;
+}
+.factory-video-wrap .fv-main {
+  object-fit: contain;         /* full frame, nothing cropped */
+  position: relative;
+}
+
+@media (min-width: 992px) {
+  .factory-video-wrap {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 260px;
+  }
+}
             .btn-factory-cta {
               display: inline-block;
               background: linear-gradient(90deg, #ff914d, #ff6a3d);
@@ -940,21 +972,35 @@ const targetId = `step-${index + 1}`;
             }
           `}} />
           <div className="container">
-            <div className="row align-items-center g-4 g-lg-5">
+            <div className="row align-items-stretch g-4 g-lg-5">
 
               {furnitureFactoryData.video ? (
-                <div className="col-lg-7">
-                  <div className="ratio ratio-16x9 factory-video-wrap">
+                <div className="col-lg-7 d-flex">
+                  <div className="factory-video-wrap">
                     <video
-                      src={furnitureFactoryData.video}
-                      controls
-                      className="w-100 h-100"
-                      style={{ objectFit: "cover" }}
-                    />
+  className="fv-bg"
+  src={furnitureFactoryData.video}
+  autoPlay
+  muted
+  loop
+  playsInline
+  aria-hidden="true"
+  tabIndex={-1}
+/>
+<video
+  className="fv-main"
+  src={furnitureFactoryData.video}
+  autoPlay
+  muted
+  loop
+  playsInline
+  controls
+/>
                   </div>
                 </div>
               ) : (
-                <div className="col-lg-7">
+                <div className="col-lg-7 d-flex">
+                   <div className="w-100">
                   <FactoryImageSlider
                     topImage={
                       furnitureFactoryData.topImage
@@ -971,9 +1017,11 @@ const targetId = `step-${index + 1}`;
                     ]}
                   />
                 </div>
+                 </div>
               )}
 
-              <div className="col-lg-5">
+              {/* <div className="col-lg-5"> */}
+              <div className="col-lg-5 text-center text-lg-start">
                 {furnitureFactoryData.headingColor && (
                   <style>{`.furniture-factory-heading-color { color: ${furnitureFactoryData.headingColor} !important; }`}</style>
                 )}
@@ -1036,8 +1084,9 @@ const targetId = `step-${index + 1}`;
             <h2 className="h2 pb-4 text-center font_about fw-bold blogs-heading-color">{blogsHeading.text || "Blogs"}</h2>
             <CarouselRow className="row g-2 g-lg-4 justify-content-center mx-1 mobile-scroll-row">
               {blogs.map((blog, index) => (
-                <div key={index} className="col-lg-4 col-md-6 col-12">
-                  <Blogs blogCard="blog_cards" imgSrcBlog={blog?.image || "/images/default.jpg"} blogImglink={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} blogImgALt={blog?.title || "Blog Image"} blogClassImg="card-img-top rounded-4 object-fit-cover" blogdate={blog?.published_on ? formatDate(blog.published_on) : "Date not available"} blogTitle={blog?.title || "Untitled Blog"} blogDescription={blog?.description || "No description available"} buttonBlog="Continue Reading" blogBtnHref={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} writer_name={blog?.writer_name || "High Creation"} />
+                // <div key={index} className="col-lg-4 col-md-6 col-12">
+                <div key={index} className="col-lg-4 col-md-6 col-12 d-flex">
+                  <Blogs blogCard="blog_cards" imgSrcBlog={blog?.image || "/images/default.jpg"} blogImglink={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} blogImgALt={blog?.title || "Blog Image"} blogClassImg="card-img-top rounded-4 object-fit-cover" blogdate={blog?.published_on ? formatDate(blog.published_on) : "Date not available"} blogTitle={blog?.title || "Untitled Blog"} buttonBlog="Continue Reading" blogBtnHref={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} writer_name={blog?.writer_name || "High Creation"} />
                 </div>
               ))}
             </CarouselRow>
@@ -1048,7 +1097,8 @@ const targetId = `step-${index + 1}`;
       <hr />
       
       <LazySection placeholderHeight="400px">
-        <section className="my-5 yt-fix-wrapper">
+        {/* <section className="my-5 yt-fix-wrapper"> */}
+        <section className="my-5 py-4 yt-fix-wrapper">
           {/* 🎨 COLOR FIX: same !important-vs-!important cascade-order trick as above */}
           {whatPeopleSayHeading.spanColor && (
             <style>{`.wps-span-color { color: ${whatPeopleSayHeading.spanColor} !important; }`}</style>

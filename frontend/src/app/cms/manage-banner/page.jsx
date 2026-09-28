@@ -8,7 +8,7 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
 // You can add more pages here later if you want to manage other banners
 const PAGE_DEFS = [
-  { key: "design_idea", label: "Design Idea Page Banner" },
+  { key: "design_idea", label: "Design Gallery Page Banner" },
   { key: "award_gallery", label: "Awards Page Banner" },
   { key: "award_galleries", label: "Award Gallery Page Banner" },
   { key: "team", label: "Team Page Banner" },
