@@ -1,6 +1,7 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import MainLayout from "../layouts/MainLayout";
 import BoxIcon from "../components/BoxIcon";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 const getBaseUrl = () => {
   return process.env.NODE_ENV === "development"
@@ -38,11 +39,55 @@ async function getPageContent() {
   }
 }
 
-export const metadata = {
-  title: "Refer & Earn - High Creation Interior",
-  description:
-    "Refer & Earn - High Creation Interior",
-};
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/refer-and-earn")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Refer & Earn - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Refer & Earn - High Creation Interior";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/refer-and-earn",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
+  };
+}
 // const ReferEarn = () => {
 export default async function ReferEarn() {
   const bannerRecord = await getBannerData();

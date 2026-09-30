@@ -193,70 +193,102 @@ export class SeoTagService {
     return record;
   }
 
+//   async findByPageName(page_name: string): Promise<SeoTag> {
+//   // 1. Clean domain and trailing slashes
+//   let cleanPath = page_name.replace(/^https?:\/\/hcinterior\.in/, '');
+//   if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
+//     cleanPath = cleanPath.slice(0, -1);
+//   }
+
+//   const isHome = cleanPath === '' || cleanPath === '/' || cleanPath === '/home';
+
+//   if (isHome) {
+//     const homeRecord = await this.seoTagRepository.createQueryBuilder('seoTag')
+//       .where('seoTag.status = :status', { status: 'active' })
+//       .andWhere('(seoTag.page_name IN (:...homePaths))', {
+//         homePaths: ['/', '/home', 'https://hcinterior.in', 'https://hcinterior.in/']
+//       })
+//       .getOne();
+
+//     if (homeRecord) return homeRecord;
+//   }
+
+//   // 2. Prepare search path variations
+//   const withSlash = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+//   const withoutSlash = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+
+//   // Build secondary fallback paths (e.g., converts /interior-designers-in-delhi -> /services-detail/delhi)
+//   let altPathWithSlash = withSlash;
+//   let altPathWithoutSlash = withoutSlash;
+
+//   if (withSlash.startsWith('/interior-designers-in-')) {
+//     const cityName = withSlash.replace('/interior-designers-in-', '');
+//     altPathWithSlash = `/services-detail/${cityName}`;
+//     altPathWithoutSlash = `services-detail/${cityName}`;
+//   } else if (withSlash.startsWith('/services-detail/')) {
+//     const cityName = withSlash.replace('/services-detail/', '');
+//     altPathWithSlash = `/interior-designers-in-${cityName}`;
+//     altPathWithoutSlash = `interior-designers-in-${cityName}`;
+//   }
+
+//   // 3. Query DB matching primary or mapped path variations
+//   const record = await this.seoTagRepository.createQueryBuilder('seoTag')
+//     .where('seoTag.status = :status', { status: 'active' })
+//     .andWhere(`(
+//       seoTag.page_name = :withSlash OR 
+//       seoTag.page_name = :withoutSlash OR 
+//       seoTag.page_name = :withSlashTrailing OR
+//       seoTag.page_name = :altPathWithSlash OR
+//       seoTag.page_name = :altPathWithoutSlash OR
+//       seoTag.page_name = :fullUrl
+//     )`, {
+//       withSlash,
+//       withoutSlash,
+//       withSlashTrailing: `${withSlash}/`,
+//       altPathWithSlash,
+//       altPathWithoutSlash,
+//       fullUrl: `https://hcinterior.in${withSlash}`
+//     })
+//     .orderBy('seoTag.updated_at', 'DESC')   // ← add
+//     .addOrderBy('seoTag.id', 'DESC')
+//     .getOne();
+
+//   if (!record) {
+//     throw new NotFoundException(`Active SEO Tag for page ${page_name} not found`);
+//   }
+
+//   return record;
+// }
+
+  private normalizeKey(value: string): string {
+    let p = String(value || '').trim().toLowerCase()
+      .replace(/^https?:\/\/(www\.)?hcinterior\.in/, '')
+      .split(/[?#]/)[0];
+    if (!p.startsWith('/')) p = '/' + p;
+    if (p.length > 1) p = p.replace(/\/+$/, '');
+    return p === '/home' ? '/' : p;
+  }
+
   async findByPageName(page_name: string): Promise<SeoTag> {
-  // 1. Clean domain and trailing slashes
-  let cleanPath = page_name.replace(/^https?:\/\/hcinterior\.in/, '');
-  if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
-    cleanPath = cleanPath.slice(0, -1);
+    const key = this.normalizeKey(page_name);
+    const keys = [key];
+    if (key.startsWith('/interior-designers-in-')) {
+      keys.push(`/services-detail/${key.replace('/interior-designers-in-', '')}`);
+    } else if (key.startsWith('/services-detail/')) {
+      keys.push(`/interior-designers-in-${key.replace('/services-detail/', '')}`);
+    }
+
+    const rows = await this.seoTagRepository.find({
+      where: { status: 'active' },
+      order: { updated_at: 'DESC', id: 'DESC' },
+    });
+
+    const record = rows.find((r) => keys.includes(this.normalizeKey(r.page_name)));
+    if (!record) {
+      throw new NotFoundException(`Active SEO Tag for page ${page_name} not found`);
+    }
+    return record;
   }
-
-  const isHome = cleanPath === '' || cleanPath === '/' || cleanPath === '/home';
-
-  if (isHome) {
-    const homeRecord = await this.seoTagRepository.createQueryBuilder('seoTag')
-      .where('seoTag.status = :status', { status: 'active' })
-      .andWhere('(seoTag.page_name IN (:...homePaths))', {
-        homePaths: ['/', '/home', 'https://hcinterior.in', 'https://hcinterior.in/']
-      })
-      .getOne();
-
-    if (homeRecord) return homeRecord;
-  }
-
-  // 2. Prepare search path variations
-  const withSlash = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
-  const withoutSlash = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
-
-  // Build secondary fallback paths (e.g., converts /interior-designers-in-delhi -> /services-detail/delhi)
-  let altPathWithSlash = withSlash;
-  let altPathWithoutSlash = withoutSlash;
-
-  if (withSlash.startsWith('/interior-designers-in-')) {
-    const cityName = withSlash.replace('/interior-designers-in-', '');
-    altPathWithSlash = `/services-detail/${cityName}`;
-    altPathWithoutSlash = `services-detail/${cityName}`;
-  } else if (withSlash.startsWith('/services-detail/')) {
-    const cityName = withSlash.replace('/services-detail/', '');
-    altPathWithSlash = `/interior-designers-in-${cityName}`;
-    altPathWithoutSlash = `interior-designers-in-${cityName}`;
-  }
-
-  // 3. Query DB matching primary or mapped path variations
-  const record = await this.seoTagRepository.createQueryBuilder('seoTag')
-    .where('seoTag.status = :status', { status: 'active' })
-    .andWhere(`(
-      seoTag.page_name = :withSlash OR 
-      seoTag.page_name = :withoutSlash OR 
-      seoTag.page_name = :withSlashTrailing OR
-      seoTag.page_name = :altPathWithSlash OR
-      seoTag.page_name = :altPathWithoutSlash OR
-      seoTag.page_name = :fullUrl
-    )`, {
-      withSlash,
-      withoutSlash,
-      withSlashTrailing: `${withSlash}/`,
-      altPathWithSlash,
-      altPathWithoutSlash,
-      fullUrl: `https://hcinterior.in${withSlash}`
-    })
-    .getOne();
-
-  if (!record) {
-    throw new NotFoundException(`Active SEO Tag for page ${page_name} not found`);
-  }
-
-  return record;
-}
 
   async remove(id: number): Promise<void> {
     const record = await this.findOne(id);

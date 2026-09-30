@@ -1,5 +1,6 @@
 import MainLayout from "../layouts/MainLayout";
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; 
@@ -37,54 +38,104 @@ async function getCityData() {
 }
 
 // --- HELPER: Fetch SEO Data specifically for Faridabad ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/interior-designers-in-faridabad" ||
+//           tag.page_name?.endsWith("/interior-designers-in-faridabad")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
+// // --- DYNAMIC METADATA GENERATION ---
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+
+//   const defaultTitle = "Top Interior Designers in Faridabad | High Creation Interior";
+//   const defaultDesc = "Looking for the best interior designers in Faridabad? High Creation Interior offers premium residential and commercial interior design services.";
+//   const defaultCanonical = "https://hcinterior.in/interior-designers-in-faridabad";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/interior-designers-in-faridabad")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/interior-designers-in-faridabad" ||
-          tag.page_name?.endsWith("/interior-designers-in-faridabad")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
   }
 }
 
-// --- DYNAMIC METADATA GENERATION ---
 export async function generateMetadata() {
-  const seoData = await getSeoData();
+  const seo = await getSeoData();
 
-  const defaultTitle = "Top Interior Designers in Faridabad | High Creation Interior";
-  const defaultDesc = "Looking for the best interior designers in Faridabad? High Creation Interior offers premium residential and commercial interior design services.";
-  const defaultCanonical = "https://hcinterior.in/interior-designers-in-faridabad";
+  const title =
+    seo?.meta_title || "Top Interior Designers in Faridabad | High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Looking for the best interior designers in Faridabad? High Creation Interior offers premium residential and commercial interior design services.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/interior-designers-in-faridabad",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
-
 // --- MAIN SERVER COMPONENT ---
 export default async function FaridabadCityPage() {
   const cityData = await getCityData();

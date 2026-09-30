@@ -405,6 +405,15 @@ export class CmsContentService {
           contentData.json_content = jsonContent;
           break;
 
+          case 'manage_heading_description' as any:
+  if (jsonContent?.sections) {
+    Object.values(jsonContent.sections).forEach((s: any) => {
+      s.bannerImage = this.normalizeImageUrl(s?.bannerImage, baseUrl) || '';
+    });
+  }
+  contentData.json_content = jsonContent;
+  break;
+
         default:
           contentData.json_content = jsonContent;
       }
@@ -1055,6 +1064,29 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
   }
 
   return this.cmsContentRepository.update(id, { json_content: jsonContent });
+}
+
+async updateHeadingDescription(id: number, dto: any, files: Express.Multer.File[]) {
+  const existing = await this.cmsContentRepository.findOne({ where: { id } });
+  if (!existing) throw new NotFoundException(`Content with id ${id} not found`);
+
+  const sections = this.parseJsonData(dto?.sections, {});
+
+  Object.keys(sections).forEach((key) => {
+    const section = sections[key] || {};
+    const file = files.find((f) => f.fieldname === `banner_${key}`);
+
+    if (file) {
+      section.bannerImage = basename(file.filename || file.path);   // new upload
+    } else if (section.bannerImage) {
+      section.bannerImage = basename(section.bannerImage);          // keep old, strip base URL
+    } else {
+      section.bannerImage = '';                                      // removed
+    }
+    sections[key] = section;
+  });
+
+  return this.cmsContentRepository.update(id, { json_content: { sections } });
 }
 
   async updateEstimateCards(id: number, dto: any, imagePath: string) {

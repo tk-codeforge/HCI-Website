@@ -269,7 +269,7 @@ function AuthSidebar() {
                 {openGroups.products && (
                     <div className="sub-menu">
                         <Link href="/cms/manage-banner" className={`sub-menu-link ${isActive('/cms/manage-banner')}`}>Manage Banner</Link>
-                        <Link href="/cms/manage-heading-and-description" className={`sub-menu-link ${isActive('/cms/manage-heading-and-description')}`}>Heading & Description Management</Link>
+                        <Link href="/cms/manage-heading-and-description" className={`sub-menu-link ${isActive('/cms/manage-heading-and-description')}`}>Manage Heading, Description and Banner</Link>
                         <Link href="/cms/product" className={`sub-menu-link ${isActive('/cms/product')}`}>Main Products</Link>
                         <Link href="/cms/designer-choice" className={`sub-menu-link ${isActive('/cms/designer-choice')}`}>{`Designer's Choice`}</Link>
                         <Link href="/cms/sustainable-furniture" className={`sub-menu-link ${isActive('/cms/sustainable-furniture')}`}>Sustainable Furniture</Link>

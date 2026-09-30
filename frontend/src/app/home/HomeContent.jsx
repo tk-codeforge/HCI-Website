@@ -923,7 +923,7 @@ const targetId = `step-${index + 1}`;
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
-  transform: translateZ(0);   /* makes the radius clip reliably in Chrome/Safari */
+  isolation: isolate;
 }
   .factory-video-wrap video {
   position: absolute;
@@ -931,17 +931,13 @@ const targetId = `step-${index + 1}`;
   width: 100%;
   height: 100%;
   display: block;
+   border-radius: 16px;
 }
 
-.factory-video-wrap .fv-bg {
-  object-fit: cover;
-  filter: blur(22px) brightness(0.85);
-  transform: scale(1.15);      /* hides blurred edges */
-  pointer-events: none;
-}
+.factory-video-wrap .fv-bg { display: none; }
 .factory-video-wrap .fv-main {
-  object-fit: contain;         /* full frame, nothing cropped */
-  position: relative;
+  object-fit: contain;           
+  z-index: 1;
 }
 
 @media (min-width: 992px) {
@@ -949,6 +945,16 @@ const targetId = `step-${index + 1}`;
     aspect-ratio: auto;
     height: 100%;
     min-height: 260px;
+  }
+    .factory-video-wrap .fv-bg {
+    display: block;
+    object-fit: cover;
+    filter: blur(22px) brightness(0.85);
+    transform: scale(1.15);
+    pointer-events: none;
+  }
+  .factory-video-wrap .fv-main {
+    object-fit: contain;       /* desktop: full frame over the blurred backdrop */
   }
 }
             .btn-factory-cta {
@@ -978,7 +984,8 @@ const targetId = `step-${index + 1}`;
                 <div className="col-lg-7 d-flex">
                   <div className="factory-video-wrap">
                     <video
-  className="fv-bg"
+  className="fv-bg d-none d-lg-block"
+  preload="metadata"
   src={furnitureFactoryData.video}
   autoPlay
   muted

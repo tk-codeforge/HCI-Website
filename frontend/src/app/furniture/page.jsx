@@ -1,7 +1,8 @@
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
-
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -37,28 +38,43 @@ async function getFurnitureData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+//     if (!res.ok) return null;
+//     const allTags = await res.json();
+//     // Match the specific page URL for Furniture
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/furniture" ||
+//           tag.page_name?.endsWith("/furniture")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/furniture")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-    const allTags = await res.json();
-    // Match the specific page URL for Furniture
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/furniture" ||
-          tag.page_name?.endsWith("/furniture")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
   }
 }
+
 async function getHeadingDescriptionData() {
   try {
     const baseURL = getBaseUrl();
@@ -78,24 +94,59 @@ async function getHeadingDescriptionData() {
 }
 
 // --- DYNAMIC METADATA GENERATION ---
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+//   const defaultTitle = "Explore customized furniture design for your dream home";
+//   const defaultDesc =
+//     "Discover customized furniture designs tailored for your dream home, blending style, functionality, and personalization to create spaces you'll love.";
+//   const defaultCanonical = "https://hcinterior.in/furniture";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
 export async function generateMetadata() {
-  const seoData = await getSeoData();
-  const defaultTitle = "Explore customized furniture design for your dream home";
-  const defaultDesc =
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Explore customized furniture design for your dream home";
+  const description =
+    seo?.meta_description ||
     "Discover customized furniture designs tailored for your dream home, blending style, functionality, and personalization to create spaces you'll love.";
-  const defaultCanonical = "https://hcinterior.in/furniture";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/furniture",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -112,7 +163,10 @@ export default async function Furniture() {
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Furniture";
 const headingStyle = {
-  textShadow: "none",
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -122,13 +176,30 @@ const descriptionText =
   "Why settle for ordinary when your home can be one of a kind? Our customized furniture is designed around your space, your style, and your story. Thoughtfully crafted for a flawless fit, every piece transforms everyday living into a personalized experience of comfort, elegance, and functionality."
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+  const bannerStyle = bannerImage
+    ? {
+        backgroundImage: `url("${bannerImage}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        aspectRatio: "1900 / 441",
+      }
+    : {};
 
   return (
     <MainLayout>
       <main>
-        <section className="container my-5">
-          <div className="text-center mb-5 row mx-0">
+        <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center row mx-0 mb-3 mb-lg-5"}>
             <HeadingTag id="furniture-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -139,8 +210,12 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
+          </div>
+          <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => {

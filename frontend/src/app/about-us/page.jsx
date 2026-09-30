@@ -1,4 +1,4 @@
-import { getPageSEO } from "@/utils/getSEO";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import BackgroundImageRow from "../components/BackgroundImageRow";
 import MainLayout from "../layouts/MainLayout";
 
@@ -82,8 +82,54 @@ async function getAboutUsContent() {
 //   };
 // }
 
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/about-us")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
 export async function generateMetadata() {
-  return await getPageSEO("https://hcinterior.in/about-us"); 
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "About Us | End To End Interior Design - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+    "High Creation Interior delivering top notch interior design services in Noida & Delhi NCR | 8+ Years of experience | 1000+ Projects Done";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/about-us",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
+  };
 }
 
 // --- MAIN SERVER COMPONENT ---

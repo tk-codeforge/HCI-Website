@@ -61,13 +61,22 @@ export function getCanonicalUrl({
   return normalizeUrl(canonicalUrl || metaCanonicalTag || fallbackPath, siteUrl);
 }
 
-export function parseRobotsString(metaRobots = "") {
-  const robotsString = String(metaRobots || "").toLowerCase();
+// export function parseRobotsString(metaRobots = "") {
+//   const robotsString = String(metaRobots || "").toLowerCase();
 
+//   return {
+//     index: robotsString.includes("index") && !robotsString.includes("noindex"),
+//     follow:
+//       robotsString.includes("follow") && !robotsString.includes("nofollow"),
+//   };
+// }
+
+export function parseRobotsString(metaRobots = "") {
+  const s = String(metaRobots || "").toLowerCase();
+  const none = /\bnone\b/.test(s);
   return {
-    index: robotsString.includes("index") && !robotsString.includes("noindex"),
-    follow:
-      robotsString.includes("follow") && !robotsString.includes("nofollow"),
+    index: !none && !s.includes("noindex"),
+    follow: !none && !s.includes("nofollow"),
   };
 }
 

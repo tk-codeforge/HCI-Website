@@ -389,6 +389,7 @@ import React from "react";
 import MainLayout from "../layouts/MainLayout";
 import WhatWeOfferClient from "./WhatWeOfferClient";
 import ScrollToHash from "../components/ScrollToHash";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 export const revalidate = 60;
 
@@ -403,22 +404,37 @@ const getBaseUrl = () => {
     : process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api";
 };
 
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+//     if (!res.ok) return null;
+//     const allTags = await res.json();
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/what-we-offer" ||
+//           tag.page_name?.endsWith("/what-we-offer")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/what-we-offer")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-    const allTags = await res.json();
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/what-we-offer" ||
-          tag.page_name?.endsWith("/what-we-offer")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -441,22 +457,56 @@ async function getWhatWeOfferContent() {
   }
 }
 
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+//   const defaultTitle = "What We Offer - High Creation Interior";
+//   const defaultDesc =
+//     "Explore the comprehensive interior design services offered by High Creation Interior.";
+//   const defaultCanonical = "https://hcinterior.in/what-we-offer";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: { canonical: seoData?.page_name || defaultCanonical },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
 export async function generateMetadata() {
-  const seoData = await getSeoData();
-  const defaultTitle = "What We Offer - High Creation Interior";
-  const defaultDesc =
-    "Explore the comprehensive interior design services offered by High Creation Interior.";
-  const defaultCanonical = "https://hcinterior.in/what-we-offer";
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "What We Offer - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Explore the comprehensive interior design services offered by High Creation Interior.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/what-we-offer",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: { canonical: seoData?.page_name || defaultCanonical },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }

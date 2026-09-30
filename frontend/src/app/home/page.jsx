@@ -1,13 +1,65 @@
 import { Suspense } from "react";
 import HeroCarousel from "./clientHome/HeroCarousel";
 import HomeContent from "./HomeContent"; 
-import { getPageSEO } from "@/utils/getSEO";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- OPTIMIZATION: ISR Configuration ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
+const getBaseUrl = () => {
+  return process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_API_DEV_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
+};
+
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/home")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
 export async function generateMetadata() {
-  return await getPageSEO("/home"); 
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Top Interior Designers In Delhi NCR For Home";
+  const description =
+    seo?.meta_description ||
+   "Home interior designers in Delhi NCR - Elevate your living space with best interior design company in Noida & Delhi NCR.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/home",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
+  };
 }
 
 

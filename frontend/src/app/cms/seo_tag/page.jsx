@@ -38,8 +38,21 @@ const SeoTag = () => {
         fetchQueries();
     }, [fetchQueries]);
 
+const validateSeoLengths = (data) => {
+    if ((data.meta_title || data.title || "").length > 60) {
+        toast.error("Meta title must be 60 characters or less.");
+        return false;
+    }
+    if ((data.meta_description || "").length > 160) {
+        toast.error("Meta description must be 160 characters or less.");
+        return false;
+    }
+    return true;
+};
+
     // Handle Create Submit
     const handleCreate = async (formattedData) => {
+        if (!validateSeoLengths(formattedData)) return;
         try {
             if (!canPublish && formattedData.status === "active") {
                 toast.info(getPublishWorkflowMessage("This SEO record"));
@@ -57,6 +70,7 @@ const SeoTag = () => {
 
     // Handle Edit Submit
     const handleUpdate = async (formattedData) => {
+        if (!validateSeoLengths(formattedData)) return;
         try {
             if (!canPublish && formattedData.status === "active") {
                 toast.info(getPublishWorkflowMessage("This SEO record"));

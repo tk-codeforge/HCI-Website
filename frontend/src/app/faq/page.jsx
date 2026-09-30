@@ -1,7 +1,7 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import MainLayout from "../layouts/MainLayout";
 import { generateFAQSchema } from "@/utils/schemaGenerator";
-
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -37,26 +37,41 @@ async function getFaqData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for FAQ
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/faq" ||
+//           tag.page_name?.endsWith("/faq")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/faq")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for FAQ
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/faq" ||
-          tag.page_name?.endsWith("/faq")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -79,27 +94,62 @@ async function getBannerData() {
 }
 
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle = "Here Know About FAQs Of High Creation Interior | Policy";
-  const defaultDesc =
-    "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
-  const defaultCanonical = "https://hcinterior.in/faq";
+//   const defaultTitle = "Here Know About FAQs Of High Creation Interior | Policy";
+//   const defaultDesc =
+//     "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
+//   const defaultCanonical = "https://hcinterior.in/faq";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//     keywords: seoData?.metaKeywords || "Interior Design FAQs, High Creation Interior Policy, Design Process, Pricing",
+//   };
+// }
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Here Know About FAQs Of High Creation Interior | Policy";
+  const description =
+    seo?.meta_description ||
+   "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/faq",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
-    keywords: seoData?.metaKeywords || "Interior Design FAQs, High Creation Interior Policy, Design Process, Pricing",
   };
 }
 

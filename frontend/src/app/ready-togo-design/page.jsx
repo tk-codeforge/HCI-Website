@@ -2,6 +2,8 @@ import MainLayout from "../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -34,26 +36,41 @@ async function getReadyToGoDesignData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Ready To Go Design
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/ready-togo-design" ||
+//           tag.page_name?.endsWith("/ready-togo-design")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/ready-togo-design")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Ready To Go Design
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/ready-togo-design" ||
-          tag.page_name?.endsWith("/ready-togo-design")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -78,29 +95,64 @@ async function getHeadingDescriptionData() {
   }
 }
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle = "Ready To Go Interior Design : High Creation Interior";
-  const defaultDesc =
-    "Explore our Ready-To-Go Interior Design solutions, offering stylish, pre-designed spaces that blend functionality and aesthetics for a hassle-free transformation.";
-  const defaultCanonical = "https://hcinterior.in/ready-togo-design";
+//   const defaultTitle = "Ready To Go Interior Design : High Creation Interior";
+//   const defaultDesc =
+//     "Explore our Ready-To-Go Interior Design solutions, offering stylish, pre-designed spaces that blend functionality and aesthetics for a hassle-free transformation.";
+//   const defaultCanonical = "https://hcinterior.in/ready-togo-design";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Ready To Go Interior Design : High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Explore our Ready-To-Go Interior Design solutions, offering stylish, pre-designed spaces that blend functionality and aesthetics for a hassle-free transformation.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/ready-togo-design",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
-
 // --- MAIN SERVER COMPONENT ---
 export default async function ReadyToGoDesign() {
   const exclusiveDesignData = await getReadyToGoDesignData();
@@ -110,7 +162,10 @@ export default async function ReadyToGoDesign() {
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Ready To Go Design";
 const headingStyle = {
-  textShadow: "none",
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -120,7 +175,21 @@ const descriptionText =
   "Why wait to create your dream space? Our ready-to-go interior design solutions deliver thoughtfully crafted interiors that combine stunning aesthetics with smart functionality. Designed for effortless living, every space is ready to elevate your home with style and comfort."
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+     aspectRatio: "1900 / 441",
+    }
+  : {};
 
   return (
     <MainLayout>
@@ -199,7 +268,14 @@ const descriptionStyle = {
       <main className="bg-light pb-5">
         
         {/* --- PREMIUM HEADER SECTION --- */}
-        <section className="py-5 bg-white border-bottom shadow-sm mb-5">
+        <section
+  className={
+    bannerImage
+      ? "py-5 border-bottom shadow-sm mb-5 d-flex align-items-center justify-content-center"
+      : "py-5 bg-white border-bottom shadow-sm mb-5"
+  }
+  style={bannerStyle}
+>
           <div className="container text-center">
             <HeadingTag id="ready-to-go-design-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
@@ -211,6 +287,8 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#ready-to-go-design-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#ready-to-go-design-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#ready-to-go-design-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #ready-to-go-design-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #ready-to-go-design-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
         </section>

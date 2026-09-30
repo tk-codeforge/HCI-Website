@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { defaultAltText } from "@/utils/helper";
 import { FaArrowRight, FaCalendarAlt, FaUserCircle } from "react-icons/fa";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // 🌟 IMPORT OUR GLOBAL PREMIUM TEXT EXPANDER
 import ExpandableRichText from "../components/ModernPara";
@@ -14,18 +16,73 @@ export const revalidate = 60;
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 
+const getBaseUrl = () =>
+  process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_API_DEV_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
+
 // --- Dynamic Metadata for Pagination ---
-export async function generateMetadata({ searchParams }) {
-  const page = searchParams?.page || "1";
-  const canonicalUrl = page === "1" 
-    ? "https://hcinterior.in/blog" 
-    : `https://hcinterior.in/blog?page=${page}`;
+// export async function generateMetadata({ searchParams }) {
+//   const page = searchParams?.page || "1";
+//   const canonicalUrl = page === "1" 
+//     ? "https://hcinterior.in/blog" 
+//     : `https://hcinterior.in/blog?page=${page}`;
+
+//   return {
+//     title: "Latest News And Updates | High Creation Interior",
+//     description: "Latest News & Updates From High Creation Interior In Noida. Discover premium interior design blogs and insights.",
+//     alternates: {
+//       canonical: canonicalUrl,
+//     },
+//   };
+// }
+
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/blog")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Latest News And Updates | High Creation Interior";
+  const description =
+    seo?.meta_description ||
+    "Latest News & Updates From High Creation Interior In Noida. Discover premium interior design blogs and insights.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/blog",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: "Latest News And Updates | High Creation Interior",
-    description: "Latest News & Updates From High Creation Interior In Noida. Discover premium interior design blogs and insights.",
-    alternates: {
-      canonical: canonicalUrl,
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -84,6 +141,10 @@ export default async function Blog({ searchParams }) {
 const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Latest News & Updates";
 const headingStyle = {
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
 
@@ -93,6 +154,10 @@ const descriptionText =
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
   ...(headingData?.descriptionFontSize && { fontSize: `${headingData.descriptionFontSize}px` }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
 
 const badgeText = headingData?.badgeText || (isPageOne ? "Design Insights" : `Page ${page}`);
@@ -101,6 +166,17 @@ const badgeStyle = {
   ...(headingData?.badgeBgColor && { backgroundColor: headingData.badgeBgColor }),
   ...(headingData?.badgeFontSize && { fontSize: `${headingData.badgeFontSize}px` }),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      aspectRatio: "1900 / 441",
+      padding: 0,
+    }
+  : {};
 
   // SEO Content for the bottom of the page
   const seoPageDescription = `
@@ -222,8 +298,11 @@ const badgeStyle = {
       <main className="bg-light pb-5">
         
         {/* --- HERO SECTION --- */}
-        <section className="blog-hero-section">
-  <div className="container">
+        <section
+  className={bannerImage ? "blog-hero-section d-flex align-items-center justify-content-center" : "blog-hero-section"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container py-5" : "container"}>
     <span
       id="blog-hero-badge"
       className="badge bg-dark px-3 py-2 rounded-pill mb-3 font-poppins text-uppercase tracking-wider"
@@ -252,6 +331,8 @@ const badgeStyle = {
       ${headingData?.badgeTextColor ? `#blog-hero-badge { color: ${headingData.badgeTextColor} !important; }` : ""}
       ${headingData?.badgeBgColor ? `#blog-hero-badge { background-color: ${headingData.badgeBgColor} !important; }` : ""}
       ${headingData?.badgeFontSize ? `#blog-hero-badge { font-size: ${headingData.badgeFontSize}px !important; }` : ""}
+            #blog-hero-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+      #blog-hero-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
     `}</style>
   </div>
 </section>

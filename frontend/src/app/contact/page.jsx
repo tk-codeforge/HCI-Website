@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import ContactForm from "./ContactForm";
 import MapSection from "../components/MapSection";
 import { FaPhoneAlt, FaEnvelope, FaBuilding, FaStore, FaTools, FaMapMarkerAlt, FaWhatsapp, FaClock, FaFax, FaGlobe, FaUser, FaHome, FaWarehouse, FaIndustry } from "react-icons/fa";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 const ICON_MAP = { FaPhoneAlt, FaEnvelope, FaBuilding, FaStore, FaTools, FaMapMarkerAlt, FaWhatsapp, FaClock, FaFax, FaGlobe, FaUser, FaHome, FaWarehouse, FaIndustry };
 const RenderIcon = ({ name }) => { const Cmp = ICON_MAP[name] || FaPhoneAlt; return <Cmp />; };
@@ -52,25 +53,40 @@ const getBaseUrl = () => {
 };
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/contact" ||
+//           tag.page_name?.endsWith("/contact")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/contact")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/contact" ||
-          tag.page_name?.endsWith("/contact")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -97,25 +113,60 @@ async function getContactPageContent() {
 
 
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle = "Book Free Consultation With High Creation Interior Noida";
-  const defaultDesc =
+//   const defaultTitle = "Book Free Consultation With High Creation Interior Noida";
+//   const defaultDesc =
+//     "Make a call on +91 7070701373 for top notch interior designing services in Noida. Address : H-56, 1st Floor, Sector-63, Noida, Uttar Pradesh- 201301";
+//   const defaultCanonical = "https://hcinterior.in/contact";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Book Free Consultation With High Creation Interior Noida";
+  const description =
+    seo?.meta_description ||
     "Make a call on +91 7070701373 for top notch interior designing services in Noida. Address : H-56, 1st Floor, Sector-63, Noida, Uttar Pradesh- 201301";
-  const defaultCanonical = "https://hcinterior.in/contact";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/contact",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }

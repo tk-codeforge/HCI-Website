@@ -475,6 +475,7 @@ import MainLayout from "../../layouts/MainLayout";
 import PortfolioCard from "../../components/PortfolioCard";
 import ExperienceForm from "../../components/ExperienceForm";
 import { notFound } from "next/navigation";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // Force dynamic because we are rendering based on dynamic params
 export const dynamic = "force-dynamic";
@@ -496,49 +497,105 @@ const EXTRA_PAIR_BG_CLASSES = ["desig_gal_bg7", "desig_gal_bg8"];
 const EXTRA_SINGLE_BG_CLASS = "desig_gal_bg4";
 
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata({ params }) {
-  // CORRECTED: Next.js maps the param to the exact folder name
-  const slug = params?.["experience-center"];
+// export async function generateMetadata({ params }) {
+//   // CORRECTED: Next.js maps the param to the exact folder name
+//   const slug = params?.["experience-center"];
 
-  if (!slug) return { title: "Custom Experience Center" };
+//   if (!slug) return { title: "Custom Experience Center" };
 
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag?slug=${slug}`);
+
+//     if (!res.ok) throw new Error("SEO fetch failed");
+
+//     const allTags = await res.json();
+//     const seoData = Array.isArray(allTags)
+//       ? allTags.find((tag) => tag.page_name?.includes(slug))
+//       : allTags;
+
+//     const defaultTitle = `High Creation Interior - ${slug.replace(/-/g, " ")}`;
+//     const defaultDesc = `Explore our bespoke ${slug.replace(/-/g, " ")} interior experience center.`;
+//     // Route lives at experience-center/[experience-center]/page.jsx,
+//     // so the public URL is /experience-center/<slug>, not a flat /<slug>.
+//     const canonicalUrl = `/exp-center/${slug}`;
+
+//     return {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       alternates: {
+//         canonical: seoData?.page_name || canonicalUrl,
+//       },
+//       openGraph: {
+//         title: seoData?.title || defaultTitle,
+//         description: seoData?.meta_description || defaultDesc,
+//         url: seoData?.page_name || canonicalUrl,
+//         type: "website",
+//       },
+//       keywords: seoData?.metaKeywords || "design idea, interior design, experience center",
+//     };
+//   } catch (error) {
+//     return {
+//       title: "Custom Experience Center",
+//       robots: "noindex",
+//     };
+//   }
+// }
+
+async function getSeoData(slug) {
   try {
-    const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag?slug=${slug}`);
-
-    if (!res.ok) throw new Error("SEO fetch failed");
-
-    const allTags = await res.json();
-    const seoData = Array.isArray(allTags)
-      ? allTags.find((tag) => tag.page_name?.includes(slug))
-      : allTags;
-
-    const defaultTitle = `High Creation Interior - ${slug.replace(/-/g, " ")}`;
-    const defaultDesc = `Explore our bespoke ${slug.replace(/-/g, " ")} interior experience center.`;
-    // Route lives at experience-center/[experience-center]/page.jsx,
-    // so the public URL is /experience-center/<slug>, not a flat /<slug>.
-    const canonicalUrl = `/exp-center/${slug}`;
-
-    return {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      alternates: {
-        canonical: seoData?.page_name || canonicalUrl,
-      },
-      openGraph: {
-        title: seoData?.title || defaultTitle,
-        description: seoData?.meta_description || defaultDesc,
-        url: seoData?.page_name || canonicalUrl,
-        type: "website",
-      },
-      keywords: seoData?.metaKeywords || "design idea, interior design, experience center",
-    };
-  } catch (error) {
-    return {
-      title: "Custom Experience Center",
-      robots: "noindex",
-    };
+    const res = await fetch(
+      `${getBaseUrl()}/seo-tag/route?path=${encodeURIComponent(`/${slug}`)}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
   }
+}
+
+export async function generateMetadata({ params }) {
+  const { "experience-center": slug } = await params;
+
+  // Same guard the page itself uses: invalid slugs are not indexed
+  if (!slug || !slug.startsWith("experience-center-")) {
+    return { title: "Custom Experience Center", robots: { index: false, follow: false } };
+  }
+
+  const seo = await getSeoData(slug);
+  const readable = slug.replace(/-/g, " ");
+
+  const title = seo?.meta_title || `High Creation Interior - ${readable}`;
+  const description =
+    seo?.meta_description ||
+    `Explore our bespoke ${readable} interior experience center.`;
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: `/exp-center/${slug}`,   // real public URL
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    keywords: seo?.keywords || "design idea, interior design, experience center",
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
+  };
 }
 
 // --- MAIN SERVER COMPONENT ---

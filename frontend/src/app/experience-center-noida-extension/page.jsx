@@ -4,6 +4,7 @@ import ExperienceForm from "../components/ExperienceForm";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import PortfolioCard from "../components/PortfolioCard";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; 
@@ -41,31 +42,81 @@ async function getExperienceDataVideo() {
 }
 
 // --- SEO FETCHING ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, { next: { revalidate: 60 } });
+//     if (!res.ok) return null;
+//     const allTags = await res.json();
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(tag => tag.page_name?.includes("/experience-center-noida-extension"));
+//     }
+//     return null;
+//   } catch (err) {
+//     return null;
+//   }
+// }
+
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+//   const defaultTitle = "Noida Extension Experience Center | High Creation Interior";
+//   const defaultDesc = "Visit our new Experience Center in Noida Extension. Explore exclusive interior designs, touch premium materials, and consult with our experts.";
+//   const defaultCanonical = "https://hcinterior.in/experience-center-noida-extension";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: { canonical: seoData?.page_name || defaultCanonical },
+//   };
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, { next: { revalidate: 60 } });
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/experience-center-noida-extension")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-    const allTags = await res.json();
-    if (Array.isArray(allTags)) {
-      return allTags.find(tag => tag.page_name?.includes("/experience-center-noida-extension"));
-    }
-    return null;
+    return await res.json();
   } catch (err) {
+    console.error("SEO Fetch Error:", err);
     return null;
   }
 }
 
 export async function generateMetadata() {
-  const seoData = await getSeoData();
-  const defaultTitle = "Noida Extension Experience Center | High Creation Interior";
-  const defaultDesc = "Visit our new Experience Center in Noida Extension. Explore exclusive interior designs, touch premium materials, and consult with our experts.";
-  const defaultCanonical = "https://hcinterior.in/experience-center-noida-extension";
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Noida Extension Experience Center | High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Visit our new Experience Center in Noida Extension. Explore exclusive interior designs, touch premium materials, and consult with our experts.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/experience-center-noida-extension",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: { canonical: seoData?.page_name || defaultCanonical },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
   };
 }
 

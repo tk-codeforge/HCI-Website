@@ -277,6 +277,8 @@
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -312,31 +314,47 @@ async function getRattanData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Rattan
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/rattan" ||
+//           tag.page_name?.endsWith("/rattan")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/rattan")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Rattan
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/rattan" ||
-          tag.page_name?.endsWith("/rattan")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
   }
 }
+
 
 async function getHeadingDescriptionData() {
   try {
@@ -357,26 +375,61 @@ async function getHeadingDescriptionData() {
 }
 
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle =
-    "Custom Rattan furniture for your home - High Creation Interior";
-  const defaultDesc =
-    "Enhance your home with High Creation Interior's custom rattan furniture, handcrafted for timeless elegance, durability, and personalized style.";
-  const defaultCanonical = "https://hcinterior.in/rattan";
+//   const defaultTitle =
+//     "Custom Rattan furniture for your home - High Creation Interior";
+//   const defaultDesc =
+//     "Enhance your home with High Creation Interior's custom rattan furniture, handcrafted for timeless elegance, durability, and personalized style.";
+//   const defaultCanonical = "https://hcinterior.in/rattan";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Custom Rattan furniture for your home - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Enhance your home with High Creation Interior's custom rattan furniture, handcrafted for timeless elegance, durability, and personalized style.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/rattan",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -390,7 +443,10 @@ export default async function SustainableFurniture() {
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Rattan";
 const headingStyle = {
-  textShadow: "none",
+  textShadow: buildTextShadow(
+      headingData?.headingShadowEnabled,
+      headingData?.headingShadowIntensity
+    ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -400,13 +456,30 @@ const descriptionText =
   "Upgrade your home with High Creation Interior's custom rattan furniture, beautifully handcrafted to bring timeless elegance and durability to your space. Each piece is made with care, blending natural materials and expert craftsmanship to create furniture that’s both stylish and functional. Whether you’re looking for a cozy chair, a statement table, or unique storage solutions, our rattan designs can be tailored to match your personal taste and needs. Perfect for any room, these pieces add warmth and character while standing the test of time. Experience the charm of rattan furniture designed just for you, combining beauty and practicality seamlessly."
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+      headingData?.descriptionShadowEnabled,
+      headingData?.descriptionShadowIntensity
+    ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      aspectRatio: "1900 / 441",
+    }
+  : {};
 
   return (
     <MainLayout>
       <main>
-        <section className="container my-5 rattan_wrapper">
-          <div className="text-center mb-5">
+        <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center mt-3 mx-0 row"}>
             <HeadingTag id="rattan-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -417,9 +490,12 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#rattan-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#rattan-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#rattan-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #rattan-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+    #rattan-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-
+          </div>
+<section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (

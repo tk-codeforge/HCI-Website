@@ -1,5 +1,7 @@
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -32,26 +34,41 @@ async function getProductList() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Product
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/product" ||
+//           tag.page_name?.endsWith("/product")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/product")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Product
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/product" ||
-          tag.page_name?.endsWith("/product")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -76,28 +93,62 @@ async function getHeadingDescriptionData() {
   }
 }
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle =
-    "High Creation Interior - Customized Products design for your Home";
-  const defaultDesc =
-    "Explore customized Interior products gallery for your home, designed by Top interior designers at High Creation Interior.";
-  const defaultCanonical = "https://hcinterior.in/product";
+//   const defaultTitle =
+//     "High Creation Interior - Customized Products design for your Home";
+//   const defaultDesc =
+//     "Explore customized Interior products gallery for your home, designed by Top interior designers at High Creation Interior.";
+//   const defaultCanonical = "https://hcinterior.in/product";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//     keywords: seoData?.metaKeywords || "",
+//   };
+// }
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "High Creation Interior - Customized Products design for your Home";
+  const description =
+    seo?.meta_description ||
+   "Explore customized Interior products gallery for your home, designed by Top interior designers at High Creation Interior.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/product",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
-    keywords: seoData?.metaKeywords || "",
   };
 }
 
@@ -111,7 +162,10 @@ export default async function Product() {
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Our Product";
 const headingStyle = {
-  textShadow: "none",
+    textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -121,13 +175,33 @@ const descriptionText =
   "Beautiful to look at. Effortless to live with. Designed to last — Explore our products that are as practical as they are beautiful, designed to add style, comfort, and character to every space. From modular TV units to wall art and innovative wall designs.";
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+     aspectRatio: "1900 / 441",
+    }
+  : {};
 
   return (
     <MainLayout>
       <main>
-        <section className="container my-5">
-          <div className="text-center mb-5 row mx-0">
+        {/* <section className="container my-5">
+          <div className="text-center mb-5 row mx-0"> */}
+
+          <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center mb-5 row mx-0"}>
             <HeadingTag id="our-product-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -138,8 +212,12 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#our-product-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#our-product-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#our-product-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+    #our-product-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #our-product-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
+          </div>
+          <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {productList && productList.length > 0 ? (
               productList.map((product) => (

@@ -3,6 +3,7 @@ import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading
 import WarrantySupportForm from "../components/WarrantySupportForm";
 import { notFound } from "next/navigation";
 import { FaShieldAlt, FaClock, FaCheckCircle, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -15,6 +16,21 @@ const getBaseUrl = () =>
 
 const getSiteUrl = () =>
   process.env.NEXT_PUBLIC_SITE_URL || "https://hcinterior.in";
+
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/warranty-assurance")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
 
 const getWarrantyRecord = async () => {
   const baseUrl = getBaseUrl();
@@ -129,41 +145,76 @@ const normalizeJson = (value) => {
   return value;
 };
 
+// export async function generateMetadata() {
+//   const primary = await getWarrantyRecord();
+//   const fallback = primary ? null : await getLegacyWarrantyRecord();
+
+//   const selected = primary || fallback;
+
+//   if (!selected || !isPublished(selected.record, selected.source)) {
+//     return {
+//       title: "Warranty | High Creation Interior",
+//       description:
+//         "Warranty assurance and support information from High Creation Interior.",
+//       robots: {
+//         index: false,
+//         follow: true,
+//       },
+//     };
+//   }
+
+//   const seo =
+//     selected.record?.seo_content ||
+//     selected.json?.seo ||
+//     {};
+
+//   return {
+//     title:
+//       seo.meta_title ||
+//       "Warranty | High Creation Interior",
+//     description:
+//       seo.meta_description ||
+//       "Warranty assurance and support information from High Creation Interior.",
+//     keywords: seo.meta_keywords || undefined,
+//     alternates: {
+//       canonical:
+//         seo.canonical_url ||
+//         `${getSiteUrl()}/warranty`,
+//     },
+//   };
+// }
+
 export async function generateMetadata() {
-  const primary = await getWarrantyRecord();
-  const fallback = primary ? null : await getLegacyWarrantyRecord();
+  const seo = await getSeoData();
 
-  const selected = primary || fallback;
+  const title =
+    seo?.meta_title || "Warranty | High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Warranty assurance and support information from High Creation Interior.";
 
-  if (!selected || !isPublished(selected.record, selected.source)) {
-    return {
-      title: "Warranty | High Creation Interior",
-      description:
-        "Warranty assurance and support information from High Creation Interior.",
-      robots: {
-        index: false,
-        follow: true,
-      },
-    };
-  }
-
-  const seo =
-    selected.record?.seo_content ||
-    selected.json?.seo ||
-    {};
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/warranty-assurance",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title:
-      seo.meta_title ||
-      "Warranty | High Creation Interior",
-    description:
-      seo.meta_description ||
-      "Warranty assurance and support information from High Creation Interior.",
-    keywords: seo.meta_keywords || undefined,
-    alternates: {
-      canonical:
-        seo.canonical_url ||
-        `${getSiteUrl()}/warranty`,
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }

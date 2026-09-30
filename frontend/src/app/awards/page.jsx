@@ -1,6 +1,7 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import MainLayout from "../layouts/MainLayout";
 import PortfolioCard from "../components/PortfolioCard";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 // export const metadata = {
 //   title: "Design Excellence Award - High Creation Interior",
 //   description:
@@ -18,17 +19,12 @@ const getBaseUrl = () => {
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, { next: { revalidate: 60 } });
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/awards")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-    const allTags = await res.json();
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/awards" ||
-          tag.page_name?.endsWith("/awards")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -50,22 +46,57 @@ async function getBannerData() {
   }
 }
 
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+//   const defaultTitle = "Design Excellence Award - High Creation Interior";
+//   const defaultDesc =
+//     "Explore our Awards Gallery showcasing innovative interior designs by High Creation. Discover our award-winning projects that blend creativity, style, and functionality for stunning space.";
+//   const defaultCanonical = "https://hcinterior.in/awards";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: { canonical: seoData?.page_name || defaultCanonical },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
 export async function generateMetadata() {
-  const seoData = await getSeoData();
-  const defaultTitle = "Design Excellence Award - High Creation Interior";
-  const defaultDesc =
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Design Excellence Award - High Creation Interior";
+  const description =
+    seo?.meta_description ||
     "Explore our Awards Gallery showcasing innovative interior designs by High Creation. Discover our award-winning projects that blend creativity, style, and functionality for stunning space.";
-  const defaultCanonical = "https://hcinterior.in/awards";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/furniture",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: { canonical: seoData?.page_name || defaultCanonical },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }

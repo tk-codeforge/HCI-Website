@@ -174,6 +174,8 @@
 // export default Designidea;
 import MainLayout from "../layouts/MainLayout";
 import BgImageCard from "../components/BgImageCard";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -206,26 +208,41 @@ async function getDesignerChoices() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Designer Choice
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/designer-choice" ||
+//           tag.page_name?.endsWith("/designer-choice")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/designer-choice")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Designer Choice
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/designer-choice" ||
-          tag.page_name?.endsWith("/designer-choice")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -251,24 +268,59 @@ async function getHeadingDescriptionData() {
 }
 
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle = "High Creation Interior - Interior Design Gallery";
-  const defaultDesc = "Explore Interior Design gallery designed by Top interior designers at High Creation Interior.";
-  const defaultCanonical = "https://hcinterior.in/designer-choice";
+//   const defaultTitle = "High Creation Interior - Interior Design Gallery";
+//   const defaultDesc = "Explore Interior Design gallery designed by Top interior designers at High Creation Interior.";
+//   const defaultCanonical = "https://hcinterior.in/designer-choice";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "High Creation Interior - Interior Design Gallery";
+  const description =
+    seo?.meta_description ||
+    "Explore Interior Design gallery designed by Top interior designers at High Creation Interior.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/designer-choice",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -294,7 +346,10 @@ export default async function DesignerChoice() {
 const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Designer Choice";
 const headingStyle = {
-  textShadow: "none",
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -304,13 +359,32 @@ const descriptionText =
   "Explore our curated selection of stunning interior designs, blending luxury, functionality, and innovation. From modern minimalism to timeless elegance, each space is crafted to inspire. Discover bespoke designs, premium materials, and expert craftsmanship that transform homes into masterpieces. Elevate your interiors with our exclusive designer choices."
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      aspectRatio: "1900 / 441",
+    }
+  : {};
 
   return (
     <MainLayout>
       <main>
-        <div className="container">
-          <div className="text-center mt-3 mx-0 row">
+        {/* <div className="container">
+          <div className="text-center mt-3 mx-0 row"> */}
+          <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center mt-3 mx-0 row"}>
             <HeadingTag id="designer-choice-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -321,6 +395,8 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#designer-choice-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#designer-choice-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#designer-choice-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #designer-choice-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #designer-choice-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
         </div>

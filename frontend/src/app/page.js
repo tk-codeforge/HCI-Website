@@ -51,6 +51,7 @@ export async function generateMetadata() {
     alternates: seoData.alternates,
     robots: seoData.robots,
     openGraph: seoData.openGraph,
+    twitter: seoData.twitter,
   };
 }
 
@@ -64,7 +65,8 @@ export default async function App() {
      {seoData?.customSchema && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(seoData.customSchema) }}
+          // dangerouslySetInnerHTML={{ __html: JSON.stringify(seoData.customSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(seoData.customSchema).replace(/</g, "\\u003c") }}
         />
      )}
 

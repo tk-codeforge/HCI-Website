@@ -75,6 +75,8 @@
 // export default SustainableFurniture;
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -87,26 +89,41 @@ const getBaseUrl = () => {
 };
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Sustainable Furniture
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/sustainable-furniture" ||
+//           tag.page_name?.endsWith("/sustainable-furniture")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/sustainable-furniture")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Sustainable Furniture
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/sustainable-furniture" ||
-          tag.page_name?.endsWith("/sustainable-furniture")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -172,26 +189,60 @@ async function getSustainableFurnitureCards() {
   }
 }
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle =
-    "Sustainable furniture for your home - High Creation Interior";
-  const defaultDesc =
-    "Elevate your home with High Creation Interior's sustainable furniture, combining eco-friendly materials and timeless designs for a greener, stylish living space.";
-  const defaultCanonical = "https://hcinterior.in/sustainable-furniture";
+//   const defaultTitle =
+//     "Sustainable furniture for your home - High Creation Interior";
+//   const defaultDesc =
+//     "Elevate your home with High Creation Interior's sustainable furniture, combining eco-friendly materials and timeless designs for a greener, stylish living space.";
+//   const defaultCanonical = "https://hcinterior.in/sustainable-furniture";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Sustainable furniture for your home - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Elevate your home with High Creation Interior's sustainable furniture, combining eco-friendly materials and timeless designs for a greener, stylish living space.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/sustainable-furniture",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -207,6 +258,10 @@ export default async function SustainableFurniture() {
   const HeadingTag = headingData?.headingTag || "h1";
   const headingText = headingData?.headingText || "Sustainable Furniture";
   const headingStyle = {
+    textShadow: buildTextShadow(
+      headingData?.headingShadowEnabled,
+      headingData?.headingShadowIntensity
+    ),
     ...(headingData?.headingColor && { color: headingData.headingColor }),
   };
 
@@ -216,13 +271,30 @@ export default async function SustainableFurniture() {
   const descriptionStyle = {
     ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
     ...(headingData?.descriptionFontSize && { fontSize: `${headingData.descriptionFontSize}px` }),
+    textShadow: buildTextShadow(
+      headingData?.descriptionShadowEnabled,
+      headingData?.descriptionShadowIntensity
+    ),
   };
+
+  const bannerImage = headingData?.bannerImage || "";
+  const bannerStyle = bannerImage
+    ? {
+        backgroundImage: `url("${bannerImage}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        aspectRatio: "1900 / 441",
+      }
+    : {}
 
   return (
     <MainLayout>
       <main>
-        <section className="container my-5 rattan_wrapper">
-          <div className="text-center mb-5">
+        <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center mb-5"}>
             <HeadingTag id="sustainable-furniture-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -230,11 +302,13 @@ export default async function SustainableFurniture() {
   {descriptionText}
 </p>
 <style>{`
-  #sustainable-furniture-heading { text-shadow: none !important; }
+    #sustainable-furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #sustainable-furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
   ${headingData?.headingColor ? `#sustainable-furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#sustainable-furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#sustainable-furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
 `}</style>
+          </div>
           </div>
           {/* <div className="row g-4 mx-0">
             <div className="col-lg-6 col-md-6 col-12">
@@ -266,7 +340,7 @@ export default async function SustainableFurniture() {
               />
             </div>
           </div> */}
-
+<section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}> 
           <div className="row g-4 mx-0">
   {furnitureCards.map((card, index) => (
     <div className="col-lg-6 col-md-6 col-12" key={card.buttonLink || index}>

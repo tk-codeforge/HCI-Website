@@ -3,7 +3,7 @@ import { CmsContentService } from './cms_content.service';
 import { CreateCmsContentDto } from './dto/create-cms_content.dto';
 import { UpdateCmsContentDto, UpdateJsonContentChildImageDto } from './dto/update-cms_content.dto';
 import { PageType } from './entities/cms_content.entity';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import {AnyFilesInterceptor, FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { ensureCmsDeletePermission } from '../auth/utils/cms-access.util';
 
@@ -171,6 +171,17 @@ async updateWithImage(
     const imagePath = file ? file.filename : null;
     return this.cmsContentService.updateWhatWeOfferCards(id, updateCmsContentDto, imagePath);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+@Patch('update-heading-description/:id')
+@UseInterceptors(AnyFilesInterceptor())
+async updateHeadingDescription(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() dto: any,
+  @UploadedFiles() files: Express.Multer.File[],
+) {
+  return this.cmsContentService.updateHeadingDescription(id, dto, files || []);
+}
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(':id')

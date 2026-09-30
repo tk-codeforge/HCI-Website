@@ -217,6 +217,8 @@
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -252,26 +254,41 @@ async function getSpaceSavingFurnitureData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Space Saving Furniture
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/spacesaving-furniture" ||
+//           tag.page_name?.endsWith("/spacesaving-furniture")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/spacesaving-furniture")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Space Saving Furniture
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/spacesaving-furniture" ||
-          tag.page_name?.endsWith("/spacesaving-furniture")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -296,26 +313,60 @@ async function getHeadingDescriptionData() {
   }
 }
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle =
-    "Space saving furniture for your home - High Creation Interior";
-  const defaultDesc =
-    "Maximize your home’s potential with High Creation Interior's space-saving furniture. Stylish, functional designs crafted to optimize every inch of your living space.";
-  const defaultCanonical = "https://hcinterior.in/spacesaving-furniture";
+//   const defaultTitle =
+//     "Space saving furniture for your home - High Creation Interior";
+//   const defaultDesc =
+//     "Maximize your home’s potential with High Creation Interior's space-saving furniture. Stylish, functional designs crafted to optimize every inch of your living space.";
+//   const defaultCanonical = "https://hcinterior.in/spacesaving-furniture";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Space saving furniture for your home - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Maximize your home’s potential with High Creation Interior's space-saving furniture. Stylish, functional designs crafted to optimize every inch of your living space.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/spacesaving-furniture",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -329,7 +380,10 @@ export default async function SpaceSavingFurniture() {
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Space-Saving Furniture";
 const headingStyle = {
-  textShadow: "none",
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -339,13 +393,33 @@ const descriptionText =
   "Every inch matters—make it count with smart space-saving furniture by High Creation Interior. Expertly designed to maximize functionality without compromising on style, our innovative pieces create spacious, organized, and elegant interiors. From hidden storage to multifunctional designs."
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+     aspectRatio: "1900 / 441",
+    }
+  : {};
 
   return (
     <MainLayout>
       <main>
-        <section className="container my-5">
-          <div className="text-center row mx-0 mb-3 mb-lg-5">
+        {/* <section className="container my-5">
+          <div className="text-center row mx-0 mb-3 mb-lg-5"> */}
+
+        <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center row mx-0 mb-3 mb-lg-5"}>
             <HeadingTag id="space-saving-furniture-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -356,9 +430,12 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#space-saving-furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#space-saving-furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#space-saving-furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #space-saving-furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #space-saving-furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-
+ </div>
+          <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (

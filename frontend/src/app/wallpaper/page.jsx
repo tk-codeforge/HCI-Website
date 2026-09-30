@@ -268,6 +268,8 @@
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -300,26 +302,41 @@ async function getWallpaperData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Wallpaper
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/wallpaper" ||
+//           tag.page_name?.endsWith("/wallpaper")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
-
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/wallpaper")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-
-    const allTags = await res.json();
-
-    // Match the specific page URL for Wallpaper
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name === "https://hcinterior.in/wallpaper" ||
-          tag.page_name?.endsWith("/wallpaper")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
@@ -344,26 +361,61 @@ async function getHeadingDescriptionData() {
   }
 }
 // --- DYNAMIC METADATA GENERATION ---
-export async function generateMetadata() {
-  const seoData = await getSeoData();
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
 
-  const defaultTitle =
-    "Customized wallpapers for your home - High Creation Interior";
-  const defaultDesc =
-    "Transform your walls with stunning wallpapers that add style, texture, and personality to any space. Explore our collection of wall papers for every taste and design.";
-  const defaultCanonical = "https://hcinterior.in/wallpaper";
+//   const defaultTitle =
+//     "Customized wallpapers for your home - High Creation Interior";
+//   const defaultDesc =
+//     "Transform your walls with stunning wallpapers that add style, texture, and personality to any space. Explore our collection of wall papers for every taste and design.";
+//   const defaultCanonical = "https://hcinterior.in/wallpaper";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Customized wallpapers for your home - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+   "Transform your walls with stunning wallpapers that add style, texture, and personality to any space. Explore our collection of wall papers for every taste and design.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/wallpaper",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: {
-      canonical: seoData?.page_name || defaultCanonical,
-    },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
     openGraph: {
-      title: seoData?.title || defaultTitle,
-      description: seoData?.meta_description || defaultDesc,
-      url: seoData?.page_name || defaultCanonical,
+      title,
+      description,
+      url: canonical,
       type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
     },
   };
 }
@@ -377,7 +429,10 @@ export default async function Wallpaper() {
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Wallpaper";
 const headingStyle = {
-  textShadow: "none",
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
   fontFamily: "inherit",
   ...(headingData?.headingColor && { color: headingData.headingColor }),
 };
@@ -387,13 +442,30 @@ const descriptionText =
   "Your walls deserve more than just paint—they deserve a statement. Discover our premium wallpaper collection, where striking designs meet timeless elegance. From bold textures to refined patterns, every wallpaper is crafted to transform ordinary spaces into unforgettable interiors."
 const descriptionStyle = {
   ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
 };
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+     aspectRatio: "1900 / 441",
+    }
+  : {};
 
   return (
     <MainLayout>
       <main>
-        <section className="container my-5">
-          <div className="text-center row mx-0 mb-3 mb-lg-5">
+         <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center mb-5 row mx-0"}>
             <HeadingTag id="wallpaper-heading" className="wallpaperHeading" style={headingStyle}>
   {headingText}
 </HeadingTag>
@@ -404,9 +476,12 @@ const descriptionStyle = {
   ${headingData?.headingColor ? `#wallpaper-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#wallpaper-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#wallpaper-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #wallpaper-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #wallpaper-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-
+</div>
+        <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (

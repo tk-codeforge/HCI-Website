@@ -701,13 +701,60 @@
 import React from "react";
 import MainLayout from "../../layouts/MainLayout";
 import CareerFormClient from "./CareerFormClient";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // Regenerate the page data every 60 seconds
 export const revalidate = 60;
 
-export const metadata = {
-  title: "Career form - High Creation Interior",
-};
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/career/career-form")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Career - High Creation Interior";
+  const description =
+    seo?.meta_description ||
+    "Know about careers in High Creation Interior Noida. High Creation Interior opens doors for professional growth and development in Interior Designing.";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/career/career-form",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
+  };
+}
 
 const getBaseUrl = () => {
   return process.env.NODE_ENV === "development"

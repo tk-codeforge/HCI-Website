@@ -139,7 +139,10 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
           box-sizing: border-box;
           scroll-snap-align: center;
         }
-        .ffs-slide .ffs-box { height: 300px; }
+        .ffs-slide .ffs-box {
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
         .ffs-scrollbar-track {
           position: relative;
           height: 4px;

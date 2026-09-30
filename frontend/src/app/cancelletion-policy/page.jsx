@@ -1,6 +1,7 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import MainLayout from "../layouts/MainLayout";
 import DOMPurify from "isomorphic-dompurify";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
 // --- CONFIGURATION ---
 export const revalidate = 60;
@@ -13,28 +14,42 @@ const getBaseUrl = () => {
 };
 
 // --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+//     if (!res.ok) return null;
+//     const allTags = await res.json();
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name?.endsWith("/cancelletion-policy") ||
+//           tag.page_name?.endsWith("/cancellation-policy")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/seo-tag`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/cancelletion-policy")}`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
-    const allTags = await res.json();
-    if (Array.isArray(allTags)) {
-      return allTags.find(
-        (tag) =>
-          tag.page_name?.endsWith("/cancelletion-policy") ||
-          tag.page_name?.endsWith("/cancellation-policy")
-      );
-    }
-    return null;
+    return await res.json();
   } catch (err) {
     console.error("SEO Fetch Error:", err);
     return null;
   }
 }
-
 async function getBannerData() {
   try {
     const baseURL = getBaseUrl();
@@ -147,17 +162,52 @@ function normalizeHexColor(color) {
   return null;
 }
 
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+//   const defaultTitle = "Cancellation Policy - High Creation Interior";
+//   const defaultDesc =
+//     "Understand our transparent cancellation and refund terms for your interior design projects.";
+//   const defaultCanonical = "https://hcinterior.in/cancelletion-policy";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: { canonical: seoData?.page_name || defaultCanonical },
+//   };
+// }
+
 export async function generateMetadata() {
-  const seoData = await getSeoData();
-  const defaultTitle = "Cancellation Policy - High Creation Interior";
-  const defaultDesc =
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "Cancellation Policy - High Creation Interior";
+  const description =
+    seo?.meta_description ||
     "Understand our transparent cancellation and refund terms for your interior design projects.";
-  const defaultCanonical = "https://hcinterior.in/cancelletion-policy";
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/cancelletion-policy",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
 
   return {
-    title: seoData?.title || defaultTitle,
-    description: seoData?.meta_description || defaultDesc,
-    alternates: { canonical: seoData?.page_name || defaultCanonical },
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: "website",
+      ...(seo?.og_image && {
+        images: [{ url: seo.og_image, width: 1200, height: 630 }],
+      }),
+    },
   };
 }
 

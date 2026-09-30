@@ -1,16 +1,19 @@
-import { IsString, IsOptional, IsEnum, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, MaxLength} from 'class-validator';
 
 export class CreateSeoTagDto {
     @IsString()
     @IsOptional()
+    @MaxLength(60)
     title?: string;
 
     @IsString()
     @IsOptional()
+    @MaxLength(60)
     meta_title?: string;
 
     @IsString()
     @IsOptional()
+    @MaxLength(160)
     meta_description?: string;
 
     @IsString()

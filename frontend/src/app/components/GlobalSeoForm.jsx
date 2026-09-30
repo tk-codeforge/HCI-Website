@@ -2,6 +2,21 @@
 import React, { useState, useEffect } from "react";
 import { DEFAULT_SITEMAP_CHANGE_FREQUENCY, DEFAULT_SITEMAP_PRIORITY, SITEMAP_CHANGE_FREQUENCY_OPTIONS } from "@/utils/seoHelpers";
 
+const TITLE_LIMIT = 60;
+const DESC_LIMIT = 160;
+
+const Counter = ({ value = "", limit }) => (
+  <small
+    className={
+      value.length > limit ? "text-danger"
+      : value.length >= limit - 10 ? "text-warning"
+      : "text-muted"
+    }
+  >
+    {value.length}/{limit} characters
+  </small>
+);
+
 export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
     const [formData, setFormData] = useState({
         page_name: "",
@@ -59,6 +74,14 @@ export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
+        if (formData.meta_title.length > TITLE_LIMIT) {
+    alert(`Meta title must be ${TITLE_LIMIT} characters or less (currently ${formData.meta_title.length}).`);
+    return;
+}
+if (formData.meta_description.length > DESC_LIMIT) {
+    alert(`Meta description must be ${DESC_LIMIT} characters or less (currently ${formData.meta_description.length}).`);
+    return;
+}
         let formattedData = { ...formData };
         
         // 🌟 FIX: Explicitly handle empty schema to prevent backend crashes
@@ -86,7 +109,8 @@ export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
 
             <div className="mb-3 col-md-6">
                 <label className="form-label">Meta Title</label>
-                <input type="text" className="form-control" name="meta_title" value={formData.meta_title} onChange={handleInputChange} required />
+                <input type="text" className="form-control" name="meta_title" value={formData.meta_title} onChange={handleInputChange} maxLength={TITLE_LIMIT} required />
+                <Counter value={formData.meta_title} limit={TITLE_LIMIT} />
             </div>
 
             <div className="mb-3 col-md-6">
@@ -96,7 +120,8 @@ export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
 
             <div className="mb-3 col-md-12">
                 <label className="form-label">Meta Description</label>
-                <textarea className="form-control" name="meta_description" rows="2" value={formData.meta_description} onChange={handleInputChange} required />
+                <textarea className="form-control" name="meta_description" rows="2" value={formData.meta_description} onChange={handleInputChange} maxLength={DESC_LIMIT} required />
+                <Counter value={formData.meta_description} limit={DESC_LIMIT} />
             </div>
 
             <div className="mb-3 col-md-6">
