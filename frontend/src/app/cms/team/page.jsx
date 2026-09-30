@@ -18,7 +18,7 @@ const CmsHowItsWorks = () => {
         description: "",
         designation: "",
         image: null,
-        item_index: null,
+        item_index: 0,
     });
     const [selectedId, setSelectedId] = useState(null);
 
