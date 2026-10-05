@@ -1,8 +1,10 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import ResidentialCard from "../components/ResidentialCard";
 import MainLayout from "../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -167,6 +169,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function LuxuryProjects({ searchParams }) {
+  const slugMap = await getGallerySlugMap("luxury-projects", "project-gallery");
   // Get current page from URL query params (default to 1)
   // Await searchParams as per Next.js 15+ (if you are on older versions, await is not needed but safe)
   const params = await searchParams;
@@ -210,12 +213,30 @@ const bannerStyle = bannerImage
     }
   : {};
 
+  const headingBlock = (
+    <>
+  <HeadingTag id="luxury-projects-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+<p id="luxury-projects-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+  ${headingData?.headingColor ? `#luxury-projects-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#luxury-projects-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#luxury-projects-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #luxury-projects-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #luxury-projects-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+      </>
+  );
+
   return (
     <MainLayout>
       <main>
         {/* <section className="container my-5">
           <div className="text-center mb-5"> */}
-          <div
+          {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center mb-5" : "container mt-5"}
   style={bannerStyle}
 >
@@ -234,7 +255,22 @@ const bannerStyle = bannerImage
   #luxury-projects-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-         </div>
+         </div> */}
+
+                 {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center mb-5"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container mt-5">
+            <div className="text-center mb-5 row mx-0">{headingBlock}</div>
+          </div>
+        )}
 
         <section className="resi_card">
           <div className="container">
@@ -243,7 +279,7 @@ const bannerStyle = bannerImage
                 projects.map((project, index) => (
                   <div key={index} className="col-lg-4 col-md-6 col-12">
                     <ResidentialCard
-                      projectCardLink={`/luxury-projects/project-gallery?id=${project.id}`}
+                      projectCardLink={pageGalleryHref("luxury-projects", slugMap, project.id, "project-gallery")}
                       cardNameResid="card_product"
                       resiImgUrl={project.image}
                       resiImgALt={project.title ?? defaultAltText}
@@ -253,7 +289,7 @@ const bannerStyle = bannerImage
                       // residentialDescriptiion={project.description}
                       residentialClassCss="team_designation mb-0"
                       residentialButton="View More"
-                      residentialButtonUrl={`/luxury-projects/project-gallery?id=${project.id}`}
+                      residentialButtonUrl={pageGalleryHref("luxury-projects", slugMap, project.id, "project-gallery")}
                     />
                   </div>
                 ))

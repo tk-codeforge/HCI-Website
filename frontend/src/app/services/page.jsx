@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -240,6 +241,10 @@ const hasCustomBanner =
   background-size: cover !important;
   background-position: center !important;
 }
+
+.services-custom-bg .sectionbg.services .services-bg-img {
+  object-position: center !important;
+}
         
         .modern-service-row { padding: 4rem 0; border-bottom: 1px solid #f1f5f9; transition: background 0.3s ease; }
         .modern-service-row:hover { background: #fdfdfd; }
@@ -371,10 +376,14 @@ const hasCustomBanner =
   }
 
   .services-custom-bg .sectionbg.services > .container {
-    position: absolute;
+    position: absolute !important;
     inset: 0;
     display: flex;
     align-items: center;
+  }
+
+    .services-custom-bg .sectionbg.services .services-bg-img {
+    object-position: 45% center !important;
   }
 }
 
@@ -395,6 +404,9 @@ const hasCustomBanner =
   sectionBgDescription={bannerDesc}
   secBgDesClass="secbgbesclass"
   noDivider
+  bgImageUrl={hasCustomBanner ? rawBannerImg : undefined}
+  bgImageAlt={bannerHeading}
+  bgImageClassName="services-bg-img"
 />
 
         <div className="container py-5">

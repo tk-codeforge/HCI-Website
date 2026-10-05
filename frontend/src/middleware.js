@@ -96,6 +96,24 @@
 // };
 import { NextResponse } from "next/server";
 
+const SLUG_FOLDER = /^\/([a-z0-9-]+)\/((?:project-)?gallery)(?:\/([^/]+))?\/?$/;
+const SLUG_SKIP = ["cms", "api", "dashboard"]; // admin/internal routes, never touched
+const redirectNoCache = (dest, status) => {
+  const res = NextResponse.redirect(dest, status);
+  res.headers.set("Cache-Control", "no-store, max-age=0"); // editable URLs: browsers must not cache these
+  return res;
+};
+
+const slugApiGet = async (path) => {
+  try {
+    const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9999";
+    const res = await fetch(`${base}${path}`, { cache: "no-store" });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
+};
+
 export async function middleware(request) {
   const url = request.nextUrl;
   const { pathname, searchParams } = url;
@@ -174,7 +192,7 @@ export async function middleware(request) {
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9999"; 
     
     const res = await fetch(`${apiUrl}/redirects/active`, {
-      next: { revalidate: 300 }
+      next: { revalidate: 60 }
     });
 
     if (res.ok) {
@@ -194,6 +212,122 @@ export async function middleware(request) {
     }
   } catch (error) {
     console.error("Middleware fetch dynamic redirects failed:", error);
+  }
+  // const gm = normalizedPath.match(SLUG_FOLDER);
+  // if (gm && !SLUG_SKIP.includes(gm[1])) {
+  //   const [, page, folder, slug] = gm;
+  //   const type = `${page}-${folder}`; // e.g. product-gallery, kitchen-project-gallery
+
+  //   if (!slug) {
+  //     const id = searchParams.get("id");
+  //     if (id && /^\d+$/.test(id)) {
+  //       const data = await slugApiGet(`/slug-edit/by-entity?entityType=${type}&entityId=${id}`);
+  //       if (data?.slug) {
+  //         const dest = request.nextUrl.clone();
+  //         dest.pathname = data.canonical;
+  //         dest.searchParams.delete("id");
+  //         return NextResponse.redirect(dest, 301);
+  //       }
+  //     }
+  //   } else {
+  //     const data = await slugApiGet(`/slug-edit/resolve?path=${encodeURIComponent(normalizedPath)}`);
+  //     if (data) {
+  //       const dest = request.nextUrl.clone();
+  //       if (data.redirect) {                       // old slug -> current slug
+  //         dest.pathname = data.canonical;
+  //         return NextResponse.redirect(dest, 301);
+  //       }
+  //       dest.pathname = `/${page}/${folder}`;
+  //       dest.searchParams.set("id", String(data.entityId));
+  //       return NextResponse.rewrite(dest);
+  //     }
+  //   }
+  // }
+
+  // const gm = normalizedPath.match(SLUG_FOLDER);
+  // if (gm && !SLUG_SKIP.includes(gm[1])) {
+  //   const [, page, folder, slug] = gm;
+  //   const type = `${page}-${folder}`;
+
+  //   if (!slug) {
+  //     // /<page>/gallery?id=103 -> slug URL (only if an active slug exists)
+  //     const id = searchParams.get("id");
+  //     if (id && /^\d+$/.test(id)) {
+  //       const data = await slugApiGet(`/slug-edit/by-entity?entityType=${type}&entityId=${id}`);
+  //       if (data?.slug && data.canonical?.startsWith("/")) {
+  //         const dest = request.nextUrl.clone();
+  //         dest.pathname = data.canonical;
+  //         dest.searchParams.delete("id");
+  //         return redirectNoCache(dest, 301);
+  //       }
+  //     }
+  //   } else {
+  //     const data = await slugApiGet(`/slug-edit/resolve?path=${encodeURIComponent(normalizedPath)}`);
+  //     if (data) {
+  //       const dest = request.nextUrl.clone();
+  //       if (data.redirect) {
+  //         if (!data.canonical?.startsWith("/")) return NextResponse.next(); // never redirect to "undefined/..."
+  //         const [p, q] = data.canonical.split("?");
+  //         dest.pathname = p;
+  //         dest.search = q ? `?${q}` : "";
+  //         // renamed slug: permanent; deleted/disabled slug -> original ?id= URL: temporary
+  //         return redirectNoCache(dest, q ? 302 : 301);
+  //       }
+  //       dest.pathname = `/${page}/${folder}`;
+  //       dest.searchParams.set("id", String(data.entityId));
+  //       return NextResponse.rewrite(dest);
+  //     }
+  //   }
+  // }
+
+    // --- 6. EDITABLE SLUG URLS (CMS > Slug Setting) ---
+  // let target = null;
+  // const cm = normalizedPath.match(CENTER_GALLERY);
+  // if (cm && cm[1] !== "gallery") {
+  //   // generated experience centers: /experience-center/<center>/gallery[/<slug>]
+  //   target = { type: `center~${cm[1]}`, base: `/experience-center/${cm[1]}/gallery`, slug: cm[2] };
+  // } else {
+  //   const gm = normalizedPath.match(SLUG_FOLDER);
+  //   if (gm && !SLUG_SKIP.includes(gm[1])) {
+  //     target = { type: `${gm[1]}-${gm[2]}`, base: `/${gm[1]}/${gm[2]}`, slug: gm[3] };
+  //   }
+  // }
+  let target = null;
+  const gm = normalizedPath.match(SLUG_FOLDER);
+  if (gm && !SLUG_SKIP.includes(gm[1])) {
+    target = { type: `${gm[1]}-${gm[2]}`, base: `/${gm[1]}/${gm[2]}`, slug: gm[3] };
+  }
+
+  if (target) {
+    const { type, base, slug } = target;
+
+    if (!slug) {
+      const id = searchParams.get("id");
+      if (id && /^\d+$/.test(id)) {
+        const data = await slugApiGet(`/slug-edit/by-entity?entityType=${encodeURIComponent(type)}&entityId=${id}`);
+        if (data?.slug && data.canonical?.startsWith("/")) {
+          const dest = request.nextUrl.clone();
+          dest.pathname = data.canonical;
+          dest.searchParams.delete("id");
+          return redirectNoCache(dest, 301);
+        }
+      }
+    } else {
+      const data = await slugApiGet(`/slug-edit/resolve?path=${encodeURIComponent(normalizedPath)}`);
+      if (data) {
+        const dest = request.nextUrl.clone();
+        if (data.redirect) {
+          if (!data.canonical?.startsWith("/")) return NextResponse.next();
+          const [p, q] = data.canonical.split("?");
+          dest.pathname = p;
+          dest.search = q ? `?${q}` : "";
+          return redirectNoCache(dest, q ? 302 : 301);
+        }
+        dest.pathname = base;
+        dest.searchParams.set("id", String(data.entityId));
+        return NextResponse.rewrite(dest);
+      }
+    }
   }
 
   return NextResponse.next();

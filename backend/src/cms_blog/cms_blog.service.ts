@@ -73,7 +73,10 @@ export class CmsBlogService {
         };
 
         blog = this.cmsBlogRepository.create({
-            ...data,
+            // ...data,
+            // title: data.title || 'Untitled Draft',
+            published_on: data.published_on || null,
+            image_alt: data.image_alt || null,
             title: data.title || 'Untitled Draft',
             description: data.description || '',
             writer_name: data.writer_name || 'Admin',
@@ -100,7 +103,15 @@ export class CmsBlogService {
             await this.createBackupVersion(blog);
         }
 
-        const updateData: any = { ...data };
+        // const updateData: any = { ...data };
+                const updateData: any = {
+            title: data.title,
+            description: data.description,
+            writer_name: data.writer_name,
+            published_on: data.published_on,
+            image_alt: data.image_alt,
+        };
+        Object.keys(updateData).forEach((k) => updateData[k] === undefined && delete updateData[k]);
         if (image) updateData.image = image;
 
         await this.cmsBlogRepository.update(blog.id, updateData);

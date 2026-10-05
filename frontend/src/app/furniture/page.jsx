@@ -1,8 +1,10 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -153,6 +155,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Furniture() {
+  const slugMap = await getGallerySlugMap("furniture");
   const rawData = await getFurnitureData();
   
   // Strictly ensure it's an array so .map() never triggers a TypeError
@@ -192,10 +195,28 @@ const bannerImage = headingData?.bannerImage || "";
       }
     : {};
 
+      const headingBlock = (
+    <>
+      <HeadingTag id="furniture-heading" className="wallpaperHeading" style={headingStyle}>
+        {headingText}
+      </HeadingTag>
+      <p id="furniture-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+        {descriptionText}
+      </p>
+      <style>{`
+  ${headingData?.headingColor ? `#furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+    </>
+  );
+
   return (
     <MainLayout>
       <main>
-        <div
+        {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
   style={bannerStyle}
 >
@@ -214,7 +235,22 @@ const bannerImage = headingData?.bannerImage || "";
   #furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
+          </div> */}
+
+                  {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container mt-5">
+            <div className="text-center row mx-0 mb-3 mb-lg-5">{headingBlock}</div>
           </div>
+        )}
           <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData.length > 0 ? (
@@ -229,7 +265,7 @@ const bannerImage = headingData?.bannerImage || "";
                 return (
                   <div key={index} className="col-lg-6 col-md-6 col-12">
                     <WallpaperCard
-                      linkTagWallpaper={`/furniture/gallery?id=${safeId}`}
+                      linkTagWallpaper={pageGalleryHref("furniture", slugMap, safeId)}
                       wallpaperCard="wallpapercard"
                       imgWallpaper={safeImage}
                       wallpaperImgClass="wallpaperclass"
@@ -238,7 +274,7 @@ const bannerImage = headingData?.bannerImage || "";
                       wallpaperDescriptiion={safeDescription}
                       descriptionClass="team_description mb-0"
                       textBtnWallpaper="View Design"
-                      btnHrefWallpaper={`/furniture/gallery?id=${safeId}`}
+                      btnHrefWallpaper={pageGalleryHref("furniture", slugMap, safeId)}
                     />
                   </div>
                 );

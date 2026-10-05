@@ -1032,38 +1032,134 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
     }
   }
 
-  async updateTeamPageMedia(id: number, dto: any, imagePath: string, videoPath: string) {
-  const existingContent = await this.cmsContentRepository.findOne({ where: { id } });
-  if (!existingContent) throw new NotFoundException(`Content with id ${id} not found`);
+//   async updateTeamPageMedia(id: number, dto: any, imagePath: string, videoPath: string) {
+//   const existingContent = await this.cmsContentRepository.findOne({ where: { id } });
+//   if (!existingContent) throw new NotFoundException(`Content with id ${id} not found`);
 
-  let jsonContent = this.parseJsonData(existingContent.json_content, { items: [] });
-  if (!Array.isArray(jsonContent.items)) jsonContent.items = [];
+//   let jsonContent = this.parseJsonData(existingContent.json_content, { items: [] });
+//   if (!Array.isArray(jsonContent.items)) jsonContent.items = [];
 
-  const action = dto?.action || 'add';
-  const itemIndex = parseInt(dto?.item_index, 10);
+//   const action = dto?.action || 'add';
+//   const itemIndex = parseInt(dto?.item_index, 10);
 
-  if (action === 'add') {
-    if (imagePath) jsonContent.items.push({ type: 'image', url: basename(imagePath) });
-  if (videoPath) jsonContent.items.push({ type: 'video', url: basename(videoPath) });
-  } else if (action === 'delete') {
-    if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
-      jsonContent.items.splice(itemIndex, 1);
-    } 
-} else if (action === 'update_description') {
-    if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
-      jsonContent.items[itemIndex].description = dto?.description || '';
-    } else {
-      throw new BadRequestException(`Invalid item_index: ${itemIndex}`);
+//   if (action === 'add') {
+//     if (imagePath) jsonContent.items.push({ type: 'image', url: basename(imagePath) });
+//   if (videoPath) jsonContent.items.push({ type: 'video', url: basename(videoPath) });
+//   } else if (action === 'delete') {
+//     if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
+//       jsonContent.items.splice(itemIndex, 1);
+//     } 
+// } else if (action === 'update_description') {
+//     if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
+//       jsonContent.items[itemIndex].description = dto?.description || '';
+//     } else {
+//       throw new BadRequestException(`Invalid item_index: ${itemIndex}`);
+//     }
+
+//   } else if (action === 'update') {
+//     if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
+//       if (imagePath) jsonContent.items[itemIndex].image = basename(imagePath);
+//       if (videoPath) jsonContent.items[itemIndex].video = basename(videoPath);
+//     }
+//   }
+
+//   return this.cmsContentRepository.update(id, { json_content: jsonContent });
+// }
+
+async updateTeamPageMedia(
+  id: number | null,
+  dto: any,
+  imagePath: string | null,
+  videoPath: string | null,
+) {
+  // 1. Find the record by id, or fall back to the page_type; create it if it doesn't exist yet
+  let existingContent = id
+    ? await this.cmsContentRepository.findOne({ where: { id } })
+    : await this.cmsContentRepository.findOne({
+        where: { page_type: PageType.TEAM_PAGE_MEDIA },
+        order: { id: 'DESC' },
+      });
+
+  if (!existingContent) {
+    if (id) {
+      throw new NotFoundException(`Content with id ${id} not found`);
     }
-
-  } else if (action === 'update') {
-    if (itemIndex >= 0 && itemIndex < jsonContent.items.length) {
-      if (imagePath) jsonContent.items[itemIndex].image = basename(imagePath);
-      if (videoPath) jsonContent.items[itemIndex].video = basename(videoPath);
-    }
+    existingContent = await this.cmsContentRepository.save(
+      this.cmsContentRepository.create({
+        page_type: PageType.TEAM_PAGE_MEDIA,
+        json_content: { items: [] },
+      }),
+    );
   }
 
-  return this.cmsContentRepository.update(id, { json_content: jsonContent });
+  // 2. Parse existing JSON safely
+  const jsonContent = this.parseJsonData(existingContent.json_content, { items: [] });
+  if (!jsonContent || typeof jsonContent !== 'object') {
+    throw new BadRequestException('Invalid json_content');
+  }
+  if (!Array.isArray(jsonContent.items)) jsonContent.items = [];
+
+  const action: string = dto?.action || 'add';
+  const itemIndex = parseInt(dto?.item_index, 10);
+  const hasValidIndex =
+    Number.isInteger(itemIndex) && itemIndex >= 0 && itemIndex < jsonContent.items.length;
+
+  // 3. Apply the action
+  switch (action) {
+    case 'add': {
+      if (!imagePath && !videoPath) {
+        throw new BadRequestException('No image or video file provided');
+      }
+      if (imagePath) {
+        jsonContent.items.push({ type: 'image', url: basename(imagePath), description: '' });
+      }
+      if (videoPath) {
+        jsonContent.items.push({ type: 'video', url: basename(videoPath), description: '' });
+      }
+      break;
+    }
+
+    case 'delete': {
+      if (!hasValidIndex) {
+        throw new BadRequestException(`Invalid item_index: ${dto?.item_index}`);
+      }
+      jsonContent.items.splice(itemIndex, 1);
+      break;
+    }
+
+    case 'update_description': {
+      if (!hasValidIndex) {
+        throw new BadRequestException(`Invalid item_index: ${dto?.item_index}`);
+      }
+      jsonContent.items[itemIndex].description = dto?.description || '';
+      break;
+    }
+
+    case 'update': {
+      if (!hasValidIndex) {
+        throw new BadRequestException(`Invalid item_index: ${dto?.item_index}`);
+      }
+      if (!imagePath && !videoPath) {
+        throw new BadRequestException('No file provided for update');
+      }
+      if (imagePath) {
+        jsonContent.items[itemIndex].type = 'image';
+        jsonContent.items[itemIndex].url = basename(imagePath);
+      }
+      if (videoPath) {
+        jsonContent.items[itemIndex].type = 'video';
+        jsonContent.items[itemIndex].url = basename(videoPath);
+      }
+      break;
+    }
+
+    default:
+      throw new BadRequestException(`Unknown action: ${action}`);
+  }
+
+  // 4. Save and return the updated record
+  await this.cmsContentRepository.update(existingContent.id, { json_content: jsonContent });
+  return this.cmsContentRepository.findOne({ where: { id: existingContent.id } });
 }
 
 async updateHeadingDescription(id: number, dto: any, files: Express.Multer.File[]) {

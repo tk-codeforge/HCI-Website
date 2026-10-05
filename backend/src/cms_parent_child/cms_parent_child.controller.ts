@@ -40,28 +40,58 @@ export class CmsParentChildController {
     return this.cmsParentChildService.getAllMedia();
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
+  // @Patch('media-library/:filename/alt')
+  // updateMediaAlt(
+  //   @Param('filename') targetFilename: string,
+  //   @Body('alt_text') altText: string,
+  // ) {
+  //   return this.cmsParentChildService.updateMediaAlt(targetFilename, altText);
+  // }
+
+    @UseGuards(AuthGuard('jwt'))
   @Patch('media-library/:filename/alt')
   updateMediaAlt(
     @Param('filename') targetFilename: string,
     @Body('alt_text') altText: string,
+    @Body('folder') folder?: string,
   ) {
-    return this.cmsParentChildService.updateMediaAlt(targetFilename, altText);
+    return this.cmsParentChildService.updateMediaAlt(targetFilename, altText, folder);
+  }
+
+    @Get('media-library/alt-map')
+  getAltMap() {
+    return this.cmsParentChildService.getAltMap();
   }
 
   // --- NEW: Image Replacement Without URL Change ---
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post('replace-image/:filename')
+  // @UseInterceptors(FileInterceptor('image'))
+  // replaceImage(
+  //   @Param('filename') targetFilename: string,
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Body('alt_text') altText?: string,
+  // ) {
+  //   if (!file) {
+  //     throw new BadRequestException('No new file uploaded for replacement');
+  //   }
+  //   return this.cmsParentChildService.replaceExistingImage(targetFilename, file, altText);
+  // }
+
+    @UseGuards(AuthGuard('jwt'))
   @Post('replace-image/:filename')
   @UseInterceptors(FileInterceptor('image'))
   replaceImage(
     @Param('filename') targetFilename: string,
     @UploadedFile() file: Express.Multer.File,
     @Body('alt_text') altText?: string,
+    @Body('folder') folder?: string,
   ) {
     if (!file) {
       throw new BadRequestException('No new file uploaded for replacement');
     }
-    return this.cmsParentChildService.replaceExistingImage(targetFilename, file, altText);
+    return this.cmsParentChildService.replaceExistingImage(targetFilename, file, altText, folder);
   }
 
   @UseGuards(AuthGuard('jwt'))

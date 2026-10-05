@@ -1,3 +1,4 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 // import ExperienceForm from "./ExperienceForm";
 import ExperienceForm from "../components/ExperienceForm";
@@ -122,6 +123,7 @@ export async function generateMetadata() {
 
 // --- MAIN COMPONENT ---
 export default async function Experience() {
+  const slugMap = await getGallerySlugMap("experience-center-noida-extension");
   // const rawData = await getExperienceCenterData();
   // const exclusiveDesignData = Array.isArray(rawData) ? rawData : (rawData?.data || []);
   
@@ -204,14 +206,14 @@ export default async function Experience() {
               exclusiveDesignData.map((design, index) => (
                 <div key={index} className="col-lg-4 col-md-6 col-12">
                   <WallpaperCard
-                    linkTagWallpaper={`/experience-center-noida-extension/gallery?id=${design?.id}`}
+                    linkTagWallpaper={pageGalleryHref("experience-center-noida-extension", slugMap, design?.id)}
                     wallpaperCard="wallpapercard shadow-sm border-0"
                     imgWallpaper={design?.child_content?.image || "/images/default.jpg"}
                     wallpaperImgClass="wallpaperclass rounded-top"
                     altWallpaper={design?.child_content?.title || defaultAltText}
                     portfolioTitle={design?.child_content?.title || "Gallery View"}
                     textBtnWallpaper="View Gallery"
-                    btnHrefWallpaper={`/experience-center-noida-extension/gallery?id=${design?.id}`}
+                    btnHrefWallpaper={pageGalleryHref("experience-center-noida-extension", slugMap, design?.id)}
                   />
                 </div>
               ))
@@ -228,8 +230,8 @@ export default async function Experience() {
     <div className="col-lg-7">
       {experienceData[0] && (
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[0]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[0]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[0]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[0]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg1 design_exper"}
           portfolioImg={experienceData[0]?.child_content?.image}
@@ -238,8 +240,8 @@ export default async function Experience() {
       )}
       {experienceData[1] && (
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[1]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[1]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[1]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[1]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg2"}
           portfolioImg={experienceData[1]?.child_content?.image}
@@ -255,8 +257,8 @@ export default async function Experience() {
     {experienceData[2] && (
       <div className="col-lg-12">
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[2]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[2]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[2]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[2]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg4"}
           portfolioImg={experienceData[2]?.child_content?.image}
@@ -268,8 +270,8 @@ export default async function Experience() {
     {experienceData[3] && (
       <div className="col-lg-9">
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[3]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[3]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[3]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[3]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg5"}
           portfolioImg={experienceData[3]?.child_content?.image}
@@ -281,8 +283,8 @@ export default async function Experience() {
     {experienceData[4] && (
       <div className="col-lg-3">
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[4]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[4]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[4]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[4]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg6"}
           portfolioImg={experienceData[4]?.child_content?.image}
@@ -294,8 +296,8 @@ export default async function Experience() {
     {experienceData[5] && (
       <div className="col-lg-6">
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[5]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[5]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[5]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[5]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg7"}
           portfolioImg={experienceData[5]?.child_content?.image}
@@ -308,8 +310,8 @@ export default async function Experience() {
     {experienceData[6] && (
       <div className="col-lg-6">
         <PortfolioCard
-          // cardDetailLink={`/experience-center-noida-extension/gallery?id=${exclusiveDesignData[6]?.id}`}
-          cardDetailLink={`/experience-center/gallery?id=${experienceData[6]?.id}`}
+          // cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, exclusiveDesignData[6]?.id)}
+          cardDetailLink={pageGalleryHref("experience-center-noida-extension", slugMap, experienceData[6]?.id)}
           portCard={"card_portfolio portfolio_1"}
           portfolioImgBg={"portfolioimgall desig_gal_bg8"}
           portfolioImg={experienceData[6]?.child_content?.image}

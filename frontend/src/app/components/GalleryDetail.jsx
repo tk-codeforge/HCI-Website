@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { FaTimes, FaChevronLeft, FaChevronRight, FaExpandArrowsAlt } from "react-icons/fa";
+import { useMediaAlt } from "./MediaImage";
 
 const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalImgClass, images = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -11,6 +12,12 @@ const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalImgClass, images = [] }) =>
   const currentImage = hasImages 
     ? (images[currentIndex]?.image ?? imgGalUrl) 
     : imgGalUrl;
+
+    const thumbAlt = useMediaAlt(imgGalUrl, imgGalAlt);
+  const lightboxAlt = useMediaAlt(
+    currentImage,
+    images[currentIndex]?.title || imgGalAlt || "Fullscreen view"
+  );
 
   const handleNext = useCallback((e) => {
     if (e) e.stopPropagation();
@@ -66,7 +73,8 @@ const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalImgClass, images = [] }) =>
       >
         <img
           src={imgGalUrl}
-          alt={imgGalAlt}
+          // alt={imgGalAlt}
+          alt={thumbAlt}
           className={`${imgGalImgClass} premium-thumbnail`}
           decoding="async"  
           loading="lazy" 
@@ -88,7 +96,8 @@ const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalImgClass, images = [] }) =>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <img
               src={currentImage}
-              alt={imgGalAlt || "Fullscreen view"}
+              // alt={imgGalAlt || "Fullscreen view"}
+              alt={lightboxAlt}
               className="lightbox-img"
               decoding="async"  
               loading="lazy" 

@@ -7,6 +7,7 @@ import { defaultAltText } from "@/utils/helper";
 import { FaArrowRight, FaCalendarAlt, FaUserCircle } from "react-icons/fa";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaImg } from "../components/MediaImage";
 
 // 🌟 IMPORT OUR GLOBAL PREMIUM TEXT EXPANDER
 import ExpandableRichText from "../components/ModernPara";
@@ -175,6 +176,7 @@ const bannerStyle = bannerImage
       backgroundPosition: "center",
       aspectRatio: "1900 / 441",
       padding: 0,
+      position: "relative",
     }
   : {};
 
@@ -302,7 +304,16 @@ const bannerStyle = bannerImage
   className={bannerImage ? "blog-hero-section d-flex align-items-center justify-content-center" : "blog-hero-section"}
   style={bannerStyle}
 >
-  <div className={bannerImage ? "container py-5" : "container"}>
+    {bannerImage && (
+    <MediaImg
+      src={bannerImage}
+      fallbackAlt={headingText}
+      loading="eager"
+      fetchPriority="high"
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", zIndex: 0 }}
+    />
+  )}
+    <div className={bannerImage ? "container py-5" : "container"} style={bannerImage ? { position: "relative", zIndex: 1 } : undefined}>
     <span
       id="blog-hero-badge"
       className="badge bg-dark px-3 py-2 rounded-pill mb-3 font-poppins text-uppercase tracking-wider"

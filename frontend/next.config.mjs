@@ -77,11 +77,13 @@ const nextConfig = {
       { source: '/interior-designers-in-manesar', destination: '/services-detail?city=manesar', },
       { source: '/interior-designers-in-dwarka', destination: '/services-detail?city=dwarka', },
       {
-      // Matches only slugs starting with "experience-center-" at the root,
-      // so it won't collide with any other root-level dynamic route.
       source: "/:slug(experience-center-.*)",
-      destination: "/exp-center/:slug",
+      destination: "/experience-center/:slug",
     },
+    {
+        source: "/:slug(experience-center-[^/]+)/gallery",
+        destination: "/experience-center/:slug/gallery",
+      },
     ];
 
     // Combine static and blog routes

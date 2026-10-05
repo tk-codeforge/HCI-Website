@@ -1,3 +1,4 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import PortfolioCard from "../components/PortfolioCard";
 import BackgroundImageRow from "../components/BackgroundImageRow";
@@ -128,6 +129,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function DesignIdea() {
+  const slugMap = await getGallerySlugMap("design-idea");
   const designIdea = await getDesignIdeas();
   const bannerRecord = await getBannerData();
 const bgHeading = bannerRecord?.banner_heading || "Design Gallery";
@@ -169,7 +171,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-7">
                 {staticRecords[0] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[0]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[0]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg1"}
                     portfolioImg={staticRecords[0]?.child_content?.image}
@@ -178,7 +180,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                 )}
                 {staticRecords[1] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[1]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[1]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg2"}
                     portfolioImg={staticRecords[1]?.child_content?.image}
@@ -191,7 +193,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-5">
                 {staticRecords[2] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[2]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[2]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg3"}
                     portfolioImg={staticRecords[2]?.child_content?.image}
@@ -204,7 +206,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-12">
                 {staticRecords[3] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[3]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[3]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg4"}
                     portfolioImg={staticRecords[3]?.child_content?.image}
@@ -217,7 +219,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-9">
                 {staticRecords[4] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[4]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[4]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg5"}
                     portfolioImg={staticRecords[4]?.child_content?.image}
@@ -230,7 +232,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-3">
                 {staticRecords[5] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[5]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[5]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg6"}
                     portfolioImg={staticRecords[5]?.child_content?.image}
@@ -243,7 +245,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-6">
                 {staticRecords[6] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[6]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[6]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg7"}
                     portfolioImg={staticRecords[6]?.child_content?.image}
@@ -256,7 +258,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
               <div className="col-lg-6">
                 {staticRecords[7] && (
                   <PortfolioCard
-                    cardDetailLink={`/design-idea/gallery?id=${staticRecords[7]?.id}`}
+                    cardDetailLink={pageGalleryHref("design-idea", slugMap, staticRecords[7]?.id)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={"portfolioimgall desig_gal_bg8"}
                     portfolioImg={staticRecords[7]?.child_content?.image}
@@ -272,7 +274,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
             {latestRecords.map((item) => (
               <div key={item.id} className="col-lg-6">
                 <PortfolioCard
-                  cardDetailLink={`/design-idea/gallery?id=${item.id}`}
+                  cardDetailLink={pageGalleryHref("design-idea", slugMap, item.id)}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={`portfolioimgall desig_gal_bg8`}
                   portfolioImg={item.child_content?.image}

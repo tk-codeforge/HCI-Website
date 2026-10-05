@@ -116,7 +116,7 @@ const NextArrow = ({ onClick }) => (
     role="button"
     aria-label="Next"
     onClick={onClick}
-    style={{ ...arrowStyle, right: "-15px" }}
+    style={{ ...arrowStyle, right: "-25px" }}
   >
     <MdKeyboardArrowRight size={30} color="#ff914d" />
   </div>

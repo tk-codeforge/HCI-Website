@@ -1,3 +1,4 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import { useCallback, useEffect, useState } from "react";
 // import WallpaperCard from "../components/WallpaperCard";
 // import MainLayout from "../layouts/MainLayout";
@@ -275,6 +276,7 @@ import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -431,6 +433,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function ReclaimedWood() {
+  const slugMap = await getGallerySlugMap("reclaimed-wood");
   const exclusiveDesignData = await getReclaimedWoodData();
 
   const headingData = await getHeadingDescriptionData();
@@ -467,10 +470,28 @@ const bannerStyle = bannerImage
     }
   : {};
 
+  const headingBlock = (
+    <>
+    <HeadingTag id="reclaimed-wood-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+<p id="reclaimed-wood-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+  ${headingData?.headingColor ? `#reclaimed-wood-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#reclaimed-wood-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#reclaimed-wood-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #reclaimed-wood-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+    #reclaimed-wood-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+</>
+  );
+
   return (
     <MainLayout>
       <main>
-        <div
+        {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
   style={bannerStyle}
 >
@@ -489,7 +510,22 @@ const bannerStyle = bannerImage
     #reclaimed-wood-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
+          </div> */}
+
+                  {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container">
+            <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
           </div>
+        )}
 
           <section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}>
           <div className="row g-4 mx-0">
@@ -497,7 +533,7 @@ const bannerStyle = bannerImage
               exclusiveDesignData.map((design, index) => (
                 <div key={index} className="col-lg-4 col-md-6 col-12">
                   <WallpaperCard
-                    linkTagWallpaper={`/reclaimed-wood/gallery?id=${design?.id}`}
+                    linkTagWallpaper={pageGalleryHref("reclaimed-wood", slugMap, design?.id)}
                     wallpaperCard="wallpapercard"
                     imgWallpaper={
                       design?.child_content?.image ?? "/images/Bhk/1bhk.png"
@@ -510,7 +546,7 @@ const bannerStyle = bannerImage
                     wallpaperDescriptiion={design?.child_content?.description}
                     descriptionClass="team_description mb-0"
                     textBtnWallpaper="View Design"
-                    btnHrefWallpaper={`/reclaimed-wood/gallery?id=${design?.id}`}
+                    btnHrefWallpaper={pageGalleryHref("reclaimed-wood", slugMap, design?.id)}
                   />
                 </div>
               ))

@@ -1,9 +1,11 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg, MediaImg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -155,6 +157,7 @@ export async function generateMetadata() {
 }
 // --- MAIN SERVER COMPONENT ---
 export default async function ReadyToGoDesign() {
+  const slugMap = await getGallerySlugMap("ready-togo-design");
   const exclusiveDesignData = await getReadyToGoDesignData();
 
   const headingData = await getHeadingDescriptionData();
@@ -190,6 +193,24 @@ const bannerStyle = bannerImage
      aspectRatio: "1900 / 441",
     }
   : {};
+
+    const headingBlock = (
+    <>
+      <HeadingTag id="ready-to-go-design-heading" className="wallpaperHeading" style={headingStyle}>
+        {headingText}
+      </HeadingTag>
+      <p id="ready-to-go-design-description" className="rtd-header-text fs-6 text-muted mx-auto" style={descriptionStyle}>
+        {descriptionText}
+      </p>
+      <style>{`
+  ${headingData?.headingColor ? `#ready-to-go-design-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#ready-to-go-design-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#ready-to-go-design-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #ready-to-go-design-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #ready-to-go-design-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+    </>
+  );
 
   return (
     <MainLayout>
@@ -268,7 +289,7 @@ const bannerStyle = bannerImage
       <main className="bg-light pb-5">
         
         {/* --- PREMIUM HEADER SECTION --- */}
-        <section
+        {/* <section
   className={
     bannerImage
       ? "py-5 border-bottom shadow-sm mb-5 d-flex align-items-center justify-content-center"
@@ -291,7 +312,22 @@ const bannerStyle = bannerImage
   #ready-to-go-design-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-        </section>
+        </section> */}
+
+                {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="py-5 border-bottom shadow-sm mb-5 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <section className="py-5 bg-white border-bottom shadow-sm mb-5">
+            <div className="container text-center">{headingBlock}</div>
+          </section>
+        )}
 
         {/* --- PREMIUM GRID SECTION --- */}
         <section className="container">
@@ -300,18 +336,24 @@ const bannerStyle = bannerImage
               exclusiveDesignData.map((design, index) => (
                 <div key={index} className="col-lg-6 col-md-6 col-12">
                   <Link 
-                    href={`/ready-togo-design/gallery?id=${design?.id}`} 
+                    href={pageGalleryHref("ready-togo-design", slugMap, design?.id)} 
                     className="premium-rtd-card text-decoration-none h-100"
                   >
                     
                     <div className="rtd-img-wrapper">
-                      <img 
+                     {/* <img 
                         src={design?.child_content?.image ?? "/images/Bhk/1bhk.png"} 
                         alt={design?.child_content?.title ?? defaultAltText} 
                         className="rtd-img"
                         decoding="async"
                         loading="lazy"
-                      />
+                      /> */}
+
+                      <MediaImg
+  src={design?.child_content?.image ?? "/images/Bhk/1bhk.png"}
+  fallbackAlt={design?.child_content?.title ?? defaultAltText}
+  className="rtd-img"
+/>
                     </div>
                     
                     <div className="rtd-content">

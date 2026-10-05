@@ -574,7 +574,7 @@ export async function generateMetadata({ params }) {
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
-    fallbackPath: `/exp-center/${slug}`,   // real public URL
+    fallbackPath: `/${slug}`,   // real public URL
   });
   const { index, follow } = seo
     ? getRobotsDirectives(seo)
@@ -635,6 +635,7 @@ export default async function CustomExperienceCenterPage({ params }) {
   // each); if the trailing row would only have one image left, it spans
   // the full width instead, so a lone extra image never sits half-empty.
   const extraImages = experienceData.slice(7);
+    const galleryLink = (item) => `/${slug}/gallery?id=${item?.id}`;
 
   return (
     <MainLayout>
@@ -663,7 +664,8 @@ export default async function CustomExperienceCenterPage({ params }) {
             <div className="col-lg-7">
               {experienceData[0] && (
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[0]?.id}`}
+                  // cardDetailLink={`experience-center/gallery?id=${experienceData[0]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[0])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg1 design_exper"}
                   portfolioImg={experienceData[0]?.child_content?.image}
@@ -672,7 +674,7 @@ export default async function CustomExperienceCenterPage({ params }) {
               )}
               {experienceData[1] && (
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[1]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[1])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg2"}
                   portfolioImg={experienceData[1]?.child_content?.image}
@@ -690,7 +692,7 @@ export default async function CustomExperienceCenterPage({ params }) {
             {experienceData[2] && (
               <div className="col-lg-12">
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[2]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[2])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg4"}
                   portfolioImg={experienceData[2]?.child_content?.image}
@@ -702,7 +704,7 @@ export default async function CustomExperienceCenterPage({ params }) {
             {experienceData[3] && (
               <div className="col-lg-9">
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[3]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[3])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg5"}
                   portfolioImg={experienceData[3]?.child_content?.image}
@@ -714,7 +716,7 @@ export default async function CustomExperienceCenterPage({ params }) {
             {experienceData[4] && (
               <div className="col-lg-3">
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[4]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[4])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg6"}
                   portfolioImg={experienceData[4]?.child_content?.image}
@@ -726,7 +728,7 @@ export default async function CustomExperienceCenterPage({ params }) {
             {experienceData[5] && (
               <div className="col-lg-6">
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[5]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[5])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg7"}
                   portfolioImg={experienceData[5]?.child_content?.image}
@@ -739,7 +741,7 @@ export default async function CustomExperienceCenterPage({ params }) {
             {experienceData[6] && (
               <div className="col-lg-6">
                 <PortfolioCard
-                  cardDetailLink={`/exp-center/gallery?id=${experienceData[6]?.id}`}
+                  cardDetailLink={galleryLink(experienceData[6])}
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg8"}
                   portfolioImg={experienceData[6]?.child_content?.image}
@@ -761,7 +763,7 @@ export default async function CustomExperienceCenterPage({ params }) {
               return (
                 <div className={colClass} key={item.id}>
                   <PortfolioCard
-                    cardDetailLink={`/exp-center/gallery?id=${item?.id}`}
+                    cardDetailLink={galleryLink(item)}
                     portCard={"card_portfolio portfolio_1"}
                     portfolioImgBg={`portfolioimgall ${bgClass}`}
                     portfolioImg={item?.child_content?.image}

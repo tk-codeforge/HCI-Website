@@ -45,8 +45,8 @@
 // }
 
 "use client";
-import GalleryDetail from "../../components/GalleryDetail";
-import MainLayout from "../../layouts/MainLayout";
+import GalleryDetail from "../../../components/GalleryDetail";
+import MainLayout from "../../../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 
 export default function GalleryClient({ galleryData }) {

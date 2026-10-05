@@ -940,6 +940,8 @@ const targetId = `step-${index + 1}`;
   z-index: 1;
 }
 
+.factory-video-wrap video { pointer-events: none; }
+
 @media (min-width: 992px) {
   .factory-video-wrap {
     aspect-ratio: auto;
@@ -994,7 +996,7 @@ const targetId = `step-${index + 1}`;
   aria-hidden="true"
   tabIndex={-1}
 />
-<video
+{/* <video
   className="fv-main"
   src={furnitureFactoryData.video}
   autoPlay
@@ -1002,6 +1004,21 @@ const targetId = `step-${index + 1}`;
   loop
   playsInline
   controls
+/> */}
+
+<video
+  className="fv-main"
+  src={furnitureFactoryData.video}
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="auto"
+  disablePictureInPicture
+  disableRemotePlayback
+  controlsList="nodownload nofullscreen noremoteplayback"
+  tabIndex={-1}
+  aria-hidden="true"
 />
                   </div>
                 </div>

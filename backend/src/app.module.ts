@@ -51,6 +51,7 @@ import { HomeAboutVideoModule } from './home-about-video/home-about-video.module
 import { CmsBasicPagesModule } from './cms-basic-pages/cms-basic-pages.module';
 
 import { ExperienceCenterAssetModule } from './experience-center-assets/experience-center-asset.module';
+import { SlugEditModule } from './slug-edit/slug-edit.module';
 
 // import { CmsHeadingsModule } from './cms-headings/cms-headings.module';
 
@@ -108,6 +109,7 @@ import { ExperienceCenterAssetModule } from './experience-center-assets/experien
     HomeAboutVideoModule,
     CmsBasicPagesModule,
      ExperienceCenterAssetModule,
+     SlugEditModule,
   ],
   })
 export class AppModule {}

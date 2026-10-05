@@ -1,3 +1,4 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import { useCallback, useEffect, useState } from "react";
 // import WallpaperCard from "../components/WallpaperCard";
 // import MainLayout from "../layouts/MainLayout";
@@ -279,6 +280,7 @@ import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -436,6 +438,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function SustainableFurniture() {
+  const slugMap = await getGallerySlugMap("rattan");
   const exclusiveDesignData = await getRattanData();
 
    const headingData = await getHeadingDescriptionData();
@@ -472,10 +475,28 @@ const bannerStyle = bannerImage
     }
   : {};
 
+    const headingBlock = (
+    <>
+      <HeadingTag id="rattan-heading" className="wallpaperHeading" style={headingStyle}>
+        {headingText}
+      </HeadingTag>
+      <p id="rattan-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+        {descriptionText}
+      </p>
+      <style>{`
+  ${headingData?.headingColor ? `#rattan-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#rattan-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#rattan-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #rattan-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #rattan-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+    </>
+  );
+
   return (
     <MainLayout>
       <main>
-        <div
+        {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
   style={bannerStyle}
 >
@@ -494,14 +515,29 @@ const bannerStyle = bannerImage
     #rattan-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
+          </div> */}
+
+                 {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container">
+            <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
           </div>
+        )} 
 <section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (
                 <div key={index} className="col-lg-4 col-md-6 col-12">
                   <WallpaperCard
-                    linkTagWallpaper={`/rattan/gallery?id=${design?.id}`}
+                    linkTagWallpaper={pageGalleryHref("rattan", slugMap, design?.id)}
                     wallpaperCard="wallpapercard"
                     imgWallpaper={
                       design?.child_content?.image ?? "/images/Bhk/1bhk.png"
@@ -514,7 +550,7 @@ const bannerStyle = bannerImage
                     wallpaperDescriptiion={design?.child_content?.description}
                     descriptionClass="team_description mb-0"
                     textBtnWallpaper="View Design"
-                    btnHrefWallpaper={`/rattan/gallery?id=${design?.id}`}
+                    btnHrefWallpaper={pageGalleryHref("rattan", slugMap, design?.id)}
                   />
                 </div>
               ))

@@ -1,0 +1,91 @@
+
+=== design-idea/gallery ===
+10: async function getGalleryData(id) {
+12: const res = await fetch(`${API_BASE_URL}/cms-parent-child/by-id/${id}`, {
+24: export async function generateMetadata({ searchParams }) {
+25: const id = searchParams?.id;
+38: const ResidentialProjectsGallery = async ({ searchParams }) => {
+39: const id = searchParams?.id;
+
+=== exp-center/gallery ===
+13: export async function generateMetadata({ searchParams }) {
+14: const id = searchParams?.id;
+19: const res = await fetch(`${baseURL}/experience-center-assets/by-id/${id}`);
+38: export default async function ExperienceCenterGalleryPage({ searchParams }) {
+39: const id = searchParams?.id;
+48: const parentRes = await fetch(`${baseURL}/experience-center-assets/by-id/${id}`, { cache: "no-store" });
+53: const childrenRes = await fetch(`${baseURL}/experience-center-assets/gallery/${id}`, { cache: "no-store" });
+
+=== experience-center/gallery ===
+5: // Force dynamic because we use searchParams (?id=...)
+9: export async function generateMetadata({ searchParams }) {
+10: const galleryId = searchParams?.id;
+16: const response = await api.get(`/cms-parent-child/by-id/${galleryId}`);
+41: export default async function ExperienceCenterGalleryPage({ searchParams }) {
+42: const galleryId = searchParams?.id;
+52: const response = await api.get(`/cms-parent-child/by-id/${galleryId}`);
+
+=== experience-center-faridabad/gallery ===
+8: export async function generateMetadata({ searchParams }) {
+9: const id = searchParams?.id;
+13: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+30: export default async function FaridabadGalleryPage({ searchParams }) {
+31: const id = searchParams?.id;
+36: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+
+=== experience-center-gurugram/gallery ===
+8: export async function generateMetadata({ searchParams }) {
+9: const id = searchParams?.id;
+13: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+30: export default async function GurugramGalleryPage({ searchParams }) {
+31: const id = searchParams?.id;
+36: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+
+=== experience-center-new-delhi/gallery ===
+8: export async function generateMetadata({ searchParams }) {
+9: const id = searchParams?.id;
+13: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+30: export default async function NewDelhiGalleryPage({ searchParams }) {
+31: const id = searchParams?.id;
+36: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+
+=== experience-center-noida-extension/gallery ===
+8: export async function generateMetadata({ searchParams }) {
+9: const id = searchParams?.id;
+13: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+32: export default async function GurugramGalleryPage({ searchParams }) {
+33: const id = searchParams?.id;
+38: const response = await api.get(`/cms-parent-child/by-id/${id}`);
+
+=== furniture/gallery ===
+9: async function getGalleryData(id) {
+11: const res = await fetch(`${API_BASE_URL}/cms-parent-child/by-id/${id}`, {
+22: export async function generateMetadata({ searchParams }) {
+23: const id = searchParams?.id;
+35: const ResidentialProjectsGallery = async ({ searchParams }) => {
+36: const id = searchParams?.id;
+
+=== luxury-projects/project-gallery ===
+8: export async function generateMetadata({ searchParams }) {
+9: const id = searchParams?.id;
+13: const response = await api.get(`/portfolio-project/${id}`);
+28: export default async function LuxuryProjectsPage({ searchParams }) {
+29: const id = searchParams?.id;
+34: const response = await api.get(`/portfolio-project/${id}`);
+
+=== ready-togo-design/gallery ===
+9: async function getGalleryData(id) {
+11: const res = await fetch(`${API_BASE_URL}/cms-parent-child/by-id/${id}`, {
+22: export async function generateMetadata({ searchParams }) {
+23: const id = searchParams?.id;
+35: const ResidentialProjectsGallery = async ({ searchParams }) => {
+36: const id = searchParams?.id;
+
+=== residential-projects/project-gallery ===
+5: // Force dynamic rendering because we rely on searchParams (e.g. ?id=123)
+9: export async function generateMetadata({ searchParams }) {
+10: const id = searchParams?.id;
+15: const response = await api.get(`/portfolio-project/${id}`);
+35: export default async function ResidentialProjectsGallery({ searchParams }) {
+36: const id = searchParams?.id;
+47: const response = await api.get(`/portfolio-project/${id}`);

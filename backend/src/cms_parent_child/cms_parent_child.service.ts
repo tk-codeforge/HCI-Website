@@ -22,7 +22,8 @@ export class CmsParentChildService {
     'city',
     'about',
     'product',
-    'job-application'
+    'job-application',
+    'experience-center-assets',
   ];
 
   constructor(
@@ -51,6 +52,14 @@ export class CmsParentChildService {
     }
 
     return uploadDir;
+  }
+
+    private resolveFolder(folder?: string) {
+    if (!folder) return this.mediaFolder;
+    if (!this.uploadFolders.includes(folder)) {
+      throw new BadRequestException('Invalid media folder');
+    }
+    return folder;
   }
 
   private getBaseUrl() {
@@ -226,19 +235,42 @@ export class CmsParentChildService {
 
   // --- FIXED: Retrieve all images for Media Library ---
   async getAllMedia(searchQuery?: string) {
-    let allFiles = [];
+    // let allFiles = [];
+
+    // for (const folder of this.uploadFolders) {
+    //   const folderPath = path.join(process.cwd(), 'uploads', folder);
+      
+    //   if (!fs.existsSync(folderPath)) continue;
+
+    //   const files = fs.readdirSync(folderPath)
+    //     .filter((file) => file !== '.gitkeep' && !file.startsWith('.'))
+    //     .map((filename) => {
+    //       const stats = fs.statSync(path.join(folderPath, filename));
+    //       // Format based on folder name
+    //       return this.formatMediaResponse(filename, null, stats, folder);
+    //     });
+
+    //   allFiles.push(...files);
+    // }
+
+        let allFiles = [];
+
+    // Load all saved alt texts once (single query)
+    const assets = await this.mediaAssetRepository.find();
+    const assetMap = new Map<string, MediaAsset>();
+    assets.forEach((a) => assetMap.set(`${a.folder}/${a.filename}`, a));
 
     for (const folder of this.uploadFolders) {
       const folderPath = path.join(process.cwd(), 'uploads', folder);
-      
+
       if (!fs.existsSync(folderPath)) continue;
 
       const files = fs.readdirSync(folderPath)
         .filter((file) => file !== '.gitkeep' && !file.startsWith('.'))
         .map((filename) => {
           const stats = fs.statSync(path.join(folderPath, filename));
-          // Format based on folder name
-          return this.formatMediaResponse(filename, null, stats, folder);
+          const asset = assetMap.get(`${folder}/${filename}`) || null;
+          return this.formatMediaResponse(filename, asset, stats, folder);
         });
 
       allFiles.push(...files);
@@ -258,15 +290,46 @@ export class CmsParentChildService {
     );
   }
 
-  async updateMediaAlt(targetFilename: string, altText: string) {
+  // async updateMediaAlt(targetFilename: string, altText: string) {
+  //   const trimmedAltText = altText?.trim();
+
+  //   if (!trimmedAltText) {
+  //     throw new BadRequestException('Alt text is mandatory');
+  //   }
+
+  //   const uploadDir = this.ensureUploadDir();
+  //   const targetPath = path.join(uploadDir, targetFilename);
+
+  //   if (!fs.existsSync(targetPath)) {
+  //     throw new NotFoundException('Image not found');
+  //   }
+
+  //   const fileStats = fs.statSync(targetPath);
+  //   const asset = await this.upsertMediaAsset({
+  //     filename: targetFilename,
+  //     altText: trimmedAltText,
+  //     originalName: targetFilename,
+  //     mimeType: this.guessMimeType(targetFilename),
+  //     sizeBytes: fileStats.size,
+  //   });
+
+  //   return {
+  //     message: 'Alt text updated successfully.',
+  //     media: this.formatMediaResponse(targetFilename, asset, fileStats),
+  //   };
+  // }
+
+    async updateMediaAlt(targetFilename: string, altText: string, folder?: string) {
     const trimmedAltText = altText?.trim();
 
     if (!trimmedAltText) {
       throw new BadRequestException('Alt text is mandatory');
     }
 
-    const uploadDir = this.ensureUploadDir();
-    const targetPath = path.join(uploadDir, targetFilename);
+    const safeFolder = this.resolveFolder(folder);
+    const safeFilename = basename(targetFilename);
+    const uploadDir = this.ensureUploadDir(safeFolder);
+    const targetPath = path.join(uploadDir, safeFilename);
 
     if (!fs.existsSync(targetPath)) {
       throw new NotFoundException('Image not found');
@@ -274,28 +337,89 @@ export class CmsParentChildService {
 
     const fileStats = fs.statSync(targetPath);
     const asset = await this.upsertMediaAsset({
-      filename: targetFilename,
+      filename: safeFilename,
+      folder: safeFolder,
       altText: trimmedAltText,
-      originalName: targetFilename,
-      mimeType: this.guessMimeType(targetFilename),
+      originalName: safeFilename,
+      mimeType: this.guessMimeType(safeFilename),
       sizeBytes: fileStats.size,
     });
 
     return {
       message: 'Alt text updated successfully.',
-      media: this.formatMediaResponse(targetFilename, asset, fileStats),
+      media: this.formatMediaResponse(safeFilename, asset, fileStats, safeFolder),
     };
   }
 
+  async getAltMap() {
+    const rows = await this.mediaAssetRepository.find({ select: ['filename', 'alt_text'] });
+    return rows.reduce((map, r) => {
+      if (r.alt_text) map[r.filename] = r.alt_text;
+      return map;
+    }, {} as Record<string, string>);
+  }
+
   // --- Replace image without URL change ---
-  async replaceExistingImage(
+  // async replaceExistingImage(
+  //   targetFilename: string,
+  //   newFile: Express.Multer.File,
+  //   altText?: string,
+  // ) {
+  //   const uploadDir = this.ensureUploadDir();
+  //   const targetPath = path.join(uploadDir, targetFilename);
+  //   const targetExtension = extname(targetFilename).toLowerCase();
+  //   const newFileExtension = extname(newFile.originalname).toLowerCase();
+
+  //   if (!fs.existsSync(targetPath)) {
+  //     this.cleanupTempFile(newFile);
+  //     throw new NotFoundException('Image not found');
+  //   }
+
+  //   if (targetExtension && newFileExtension && targetExtension !== newFileExtension) {
+  //     this.cleanupTempFile(newFile);
+  //     throw new BadRequestException(
+  //       `Replacement image must use the same file format (${targetExtension}) to preserve the existing URL safely.`,
+  //     );
+  //   }
+
+  //   fs.copyFileSync(newFile.path, targetPath);
+  //   this.cleanupTempFile(newFile);
+
+  //   const existingAsset = await this.mediaAssetRepository.findOne({
+  //     where: {
+  //       filename: targetFilename,
+  //       folder: this.mediaFolder,
+  //     },
+  //   });
+  //   const fileStats = fs.statSync(targetPath);
+  //   const asset = await this.upsertMediaAsset({
+  //     filename: targetFilename,
+  //     altText:
+  //       altText !== undefined
+  //         ? altText
+  //         : existingAsset?.alt_text || this.createFallbackAltText(targetFilename),
+  //     originalName: newFile.originalname,
+  //     mimeType: newFile.mimetype || this.guessMimeType(targetFilename),
+  //     sizeBytes: fileStats.size,
+  //   });
+
+  //   return { 
+  //     message: 'Image successfully replaced. Existing URL remains active.',
+  //     media: this.formatMediaResponse(targetFilename, asset, fileStats),
+  //   };
+  // }
+
+    async replaceExistingImage(
     targetFilename: string,
     newFile: Express.Multer.File,
     altText?: string,
+    folder?: string,
   ) {
-    const uploadDir = this.ensureUploadDir();
-    const targetPath = path.join(uploadDir, targetFilename);
-    const targetExtension = extname(targetFilename).toLowerCase();
+    const safeFolder = this.resolveFolder(folder);
+    const safeFilename = basename(targetFilename);
+    const uploadDir = this.ensureUploadDir(safeFolder);
+    const targetPath = path.join(uploadDir, safeFilename);
+    const targetExtension = extname(safeFilename).toLowerCase();
     const newFileExtension = extname(newFile.originalname).toLowerCase();
 
     if (!fs.existsSync(targetPath)) {
@@ -314,26 +438,24 @@ export class CmsParentChildService {
     this.cleanupTempFile(newFile);
 
     const existingAsset = await this.mediaAssetRepository.findOne({
-      where: {
-        filename: targetFilename,
-        folder: this.mediaFolder,
-      },
+      where: { filename: safeFilename, folder: safeFolder },
     });
     const fileStats = fs.statSync(targetPath);
     const asset = await this.upsertMediaAsset({
-      filename: targetFilename,
+      filename: safeFilename,
+      folder: safeFolder,
       altText:
         altText !== undefined
           ? altText
-          : existingAsset?.alt_text || this.createFallbackAltText(targetFilename),
+          : existingAsset?.alt_text || this.createFallbackAltText(safeFilename),
       originalName: newFile.originalname,
-      mimeType: newFile.mimetype || this.guessMimeType(targetFilename),
+      mimeType: newFile.mimetype || this.guessMimeType(safeFilename),
       sizeBytes: fileStats.size,
     });
 
-    return { 
+    return {
       message: 'Image successfully replaced. Existing URL remains active.',
-      media: this.formatMediaResponse(targetFilename, asset, fileStats),
+      media: this.formatMediaResponse(safeFilename, asset, fileStats, safeFolder),
     };
   }
   

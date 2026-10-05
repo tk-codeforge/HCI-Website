@@ -784,7 +784,7 @@ select.form-select.form-control {
 
 .career_form_banner {
   height: 50vh;
-  background-image: url(../images/services/career_form.jpg) !important;
+  background-image: url(../images/services/career_form.jpg);
 }
 
 .design_gallery_banner {

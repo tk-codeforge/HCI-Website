@@ -11,7 +11,6 @@ const CMS_KEY = "navbar_header_menu";
 const DEFAULT_MENU = [
   {
     label: "Design Ideas",
-    href: "",
     dropdown: [
       { label: "Design Gallery", href: "/design-idea/" },
       { label: "Product", href: "/product/" },
@@ -19,7 +18,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Portfolio",
-    href: "",
     dropdown: [
       { label: "Residential Projects", href: "/residential-projects/" },
       { label: "Luxury Projects", href: "/luxury-projects/" },
@@ -27,7 +25,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Experience Center",
-    href: "",
     dropdown: [
       { label: "Experience Center New Delhi", href: "/experience-center-new-delhi/" },
       { label: "Experience Center Noida", href: "/experience-center/" },
@@ -38,7 +35,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Exclusive Design",
-    href: "",
     dropdown: [
       { label: "Ready To Go Design", href: "/ready-togo-design/" },
       { label: "Wallpapers", href: "/wallpaper/" },
@@ -49,7 +45,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Serving Areas",
-    href: "",
     dropdown: [
       { label: "Interior Designers In Noida", href: "/interior-designers-in-noida" },
       { label: "Interior Designers in Ghaziabad", href: "/interior-designers-in-ghaziabad" },
@@ -65,7 +60,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "More",
-    href: "",
     dropdown: [
       { label: "About Us", href: "/about-us/" },
       { label: "How It Works", href: "/how-its-works/" },
@@ -80,7 +74,6 @@ const DEFAULT_MENU = [
 
 const EMPTY_HEADING_FORM = {
   label: "",
-  href: "",
   menu_index: null, // null => adding a new heading, otherwise editing existing at this index
 };
 
@@ -127,7 +120,6 @@ export default function ManageHeader() {
         const hydrated = Array.isArray(menuData) && menuData.length
           ? menuData.map((m) => ({
               label: m.label || "",
-              href: m.href || "",
               dropdown: Array.isArray(m.dropdown)
                 ? m.dropdown.map((d) => ({ label: d.label || "", href: d.href || "" }))
                 : [],
@@ -175,11 +167,13 @@ export default function ManageHeader() {
 
   // ---------------- Heading (top-level nav item) handlers ----------------
   const openAddHeadingModal = () => {
-    setHeadingForm({ label: "", href: "", menu_index: null });
+    // setHeadingForm({ label: "", href: "", menu_index: null });
+       setHeadingForm({ label: "", menu_index: null });
   };
 
   const openEditHeadingModal = (heading, index) => {
-    setHeadingForm({ label: heading.label || "", href: heading.href || "", menu_index: index });
+    // setHeadingForm({ label: heading.label || "", href: heading.href || "", menu_index: index });
+       setHeadingForm({ label: heading.label || "", menu_index: index });
   };
 
   const handleHeadingFormChange = (e) => {
@@ -198,15 +192,25 @@ const handleHeadingFormSubmit = async (e) => {
   const updated = [...menu];
   const isNew = headingForm.menu_index === null;
 
-  if (isNew) {
-    updated.push({ label: headingForm.label.trim(), href: headingForm.href.trim(), dropdown: [] });
-  } else {
-    updated[headingForm.menu_index] = {
-      ...updated[headingForm.menu_index],
-      label: headingForm.label.trim(),
-      href: headingForm.href.trim(),
-    };
-  }
+  // if (isNew) {
+  //   updated.push({ label: headingForm.label.trim(), href: headingForm.href.trim(), dropdown: [] });
+  // } else {
+  //   updated[headingForm.menu_index] = {
+  //     ...updated[headingForm.menu_index],
+  //     label: headingForm.label.trim(),
+  //     href: headingForm.href.trim(),
+  //   };
+  // }
+
+     if (isNew) {
+     updated.push({ label: headingForm.label.trim(), dropdown: [] });
+   } else {
+     updated[headingForm.menu_index] = {
+       ...updated[headingForm.menu_index],
+       label: headingForm.label.trim(),
+       href: "", // clears any old saved direct link
+     };
+   }
 
   setMenu(updated);
   document.getElementById("headingModalClose")?.click();
@@ -361,11 +365,11 @@ const handleItemFormSubmit = async (e) => {
               <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                 <div>
                   <h5 className="fw-bold mb-1">{heading.label}</h5>
-                  {heading.href ? (
+                  {/* {heading.href ? (
                     <div className="text-muted small">Direct link: {heading.href}</div>
                   ) : (
                     <div className="text-muted small">No direct link (dropdown only)</div>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="d-flex align-items-center gap-1">
@@ -524,7 +528,7 @@ const handleItemFormSubmit = async (e) => {
                   />
                 </div>
 
-                <div className="mb-1">
+                {/* <div className="mb-1">
                   <label className="form-label">Direct Link (optional)</label>
                   <input
                     type="text"
@@ -534,7 +538,7 @@ const handleItemFormSubmit = async (e) => {
                     value={headingForm.href}
                     onChange={handleHeadingFormChange}
                   />
-                </div>
+                </div> */}
               </div>
               <div className="modal-footer">
                 <button className="btn btn-primary px-4" type="submit">

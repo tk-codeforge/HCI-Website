@@ -134,7 +134,7 @@ const MediaLibrary = () => {
         }));
     };
 
-    const handleSaveAlt = async (filename) => {
+    const handleSaveAlt = async (filename, folder) => {
         const altText = altDrafts[filename]?.trim();
 
         if (!altText) {
@@ -147,7 +147,8 @@ const MediaLibrary = () => {
         try {
             const response = await api.patch(
                 `/cms-parent-child/media-library/${encodeURIComponent(filename)}/alt`,
-                { alt_text: altText },
+                // { alt_text: altText },
+                 { alt_text: altText, folder: folder || "parent-child" },
                 {
                     headers: { Authorization: `Bearer ${getToken()}` }
                 }
@@ -188,6 +189,7 @@ const MediaLibrary = () => {
             const formData = new FormData();
             formData.append("image", file);
             formData.append("alt_text", activeAltText);
+            formData.append("folder", fileRecord.folder || "parent-child");
 
             try {
                 const response = await api.post(
@@ -343,7 +345,7 @@ const MediaLibrary = () => {
                                                     <button
                                                         type="button"
                                                         className="btn btn-sm btn-outline-primary"
-                                                        onClick={() => handleSaveAlt(file.filename)}
+                                                        onClick={() => handleSaveAlt(file.filename, file.folder)}
                                                         disabled={savingAltFor === file.filename}
                                                     >
                                                         {savingAltFor === file.filename ? "Saving..." : "Save Alt Text"}

@@ -144,6 +144,8 @@ export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
           secBgHeadingClass="sec_bgheading_lass force-white-heading"
           sectionBgDescription={bannerData.description}
           secBgDesClass={"text-center bg-transparent"}
+           bgImageUrl={bannerData.bgImage || undefined}
+          bgImageAlt={bannerData.heading}
         />
 
         {OFFERINGS.map((offer, index) => {

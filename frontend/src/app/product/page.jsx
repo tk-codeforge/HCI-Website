@@ -1,8 +1,10 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
-
+import { getSlugMap, galleryHref, PRODUCT_GALLERY_TYPE } from "@/utils/slugEdit";
+import { MediaBg } from "../components/MediaImage";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -154,9 +156,11 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Product() {
-  const [productList, headingData] = await Promise.all([
+  // const slugMap = await getGallerySlugMap("product");
+  const [productList, headingData, slugMap] = await Promise.all([
     getProductList(),
     getHeadingDescriptionData(),
+    getSlugMap(PRODUCT_GALLERY_TYPE),
   ]);
 
   const HeadingTag = headingData?.headingTag || "h1";
@@ -191,13 +195,30 @@ const bannerStyle = bannerImage
     }
   : {};
 
+  const headingBlock = (
+    <>
+    <HeadingTag id="our-product-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+<p id="our-product-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+  ${headingData?.headingColor ? `#our-product-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#our-product-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#our-product-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+    #our-product-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #our-product-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+</>
+);
   return (
     <MainLayout>
       <main>
         {/* <section className="container my-5">
           <div className="text-center mb-5 row mx-0"> */}
 
-          <div
+          {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
   style={bannerStyle}
 >
@@ -216,14 +237,31 @@ const bannerStyle = bannerImage
   #our-product-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
+          </div> */}
+
+                  {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container mt-5">
+            <div className="text-center row mx-0 mb-3 mb-lg-5">{headingBlock}</div>
           </div>
+        )}
+        
           <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {productList && productList.length > 0 ? (
               productList.map((product) => (
                 <div className="col-lg-6 col-md-6 col-12" key={product.id}>
                   <WallpaperCard
-                    linkTagWallpaper={`/product/gallery?id=${product.id}`}
+                    // linkTagWallpaper={pageGalleryHref("product", slugMap, product.id)}
+                    linkTagWallpaper={galleryHref(slugMap, product.id)}
                     wallpaperCard="wallpapercard"
                     imgWallpaper={product?.child_content?.image}
                     wallpaperImgClass="wallpaperclass"
@@ -234,7 +272,8 @@ const bannerStyle = bannerImage
                     wallpaperDescriptiion={product?.child_content?.description}
                     descriptionClass="team_description mb-0 pb-2 pb-lg-0"
                     textBtnWallpaper="View Design"
-                    btnHrefWallpaper={`/product/gallery?id=${product.id}`}
+                    // btnHrefWallpaper={pageGalleryHref("product", slugMap, product.id)}
+                    btnHrefWallpaper={galleryHref(slugMap, product.id)}
                   />
                 </div>
               ))

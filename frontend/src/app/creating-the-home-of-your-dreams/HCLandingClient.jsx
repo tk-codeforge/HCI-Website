@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import api from "@/utils/api";
 import { image } from "@nextui-org/theme";
 import { buildLeadMetadata } from "@/utils/leadForms";
+import { MediaImg } from "../components/MediaImage";
 
 const HCLandingPage = () => {
   const pathname = usePathname();
@@ -346,6 +347,24 @@ const HCLandingPage = () => {
             backgroundPosition: "center"
           }}
         >
+                    {data1?.mid_image && (
+            <MediaImg
+              src={data1.mid_image}
+              fallbackAlt={data1?.mid_sub_title || data1?.top_title || ""}
+              loading="eager"
+              fetchPriority="high"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center",
+                pointerEvents: "none",
+                zIndex: 0,
+              }}
+            />
+          )}
              <div className="container position-relative" style={{ zIndex: 1 }}>
               <div className="row">
                 <div className="col-lg-7 d-flex align-items-center">

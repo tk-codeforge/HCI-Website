@@ -2297,6 +2297,8 @@
 
 // src/app/cms/custom-experience-center/page.jsx
 
+import { useSelector } from "react-redux";
+import { getCmsAccess } from "@/utils/cmsAccess";
 import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { FaPlus, FaEdit, FaTrash, FaExternalLinkAlt, FaCloudUploadAlt } from "react-icons/fa";
@@ -2338,17 +2340,27 @@ const getSlug = (center) =>
     ? center.slug
     : `experience-center-${slugify(center?.title || "")}`;
 
-const EMPTY_SEO = {
-  page_name: "",
-  canonical_url: "",
-  meta_title: "",
-meta_description: "",
-keywords: "",
-  robots_index: "index",
-  robots_follow: "follow",
-  include_in_sitemap: true,
-  sitemap_frequency: "monthly",
-  sitemap_priority: "0.8",
+// const EMPTY_SEO = {
+//   page_name: "",
+//   canonical_url: "",
+//   meta_title: "",
+// meta_description: "",
+// keywords: "",
+//   robots_index: "index",
+//   robots_follow: "follow",
+//   include_in_sitemap: true,
+//   sitemap_frequency: "monthly",
+//   sitemap_priority: "0.8",
+// };
+
+const stripSlash = (s = "") => String(s).replace(/^\/+/, "");
+
+const parseRobots = (v = "") => {
+  const parts = String(v || "").toLowerCase().split(",").map((x) => x.trim());
+  return {
+    robots_index: parts.includes("noindex") ? "noindex" : "index",
+    robots_follow: parts.includes("nofollow") ? "nofollow" : "follow",
+  };
 };
 
 // Bottom-row layout of the live page, in upload order starting at index 2.
@@ -2686,27 +2698,57 @@ export default function ManageExperienceCenters() {
 /*  SEO MODAL                                                          */
 /* ------------------------------------------------------------------ */
 function SeoModal({ center, onClose }) {
-  const defaultSlug = getSlug(center);
+  const slug = getSlug(center);
+  const authToken = useSelector((state) => state.auth.authToken);
+  const user = useSelector((state) => state.auth.user);
+  const { canPublish } = getCmsAccess(user);
+  const authHeaders = { headers: { Authorization: `Bearer ${authToken}` } };
+
   const [seo, setSeo] = useState({
-    ...EMPTY_SEO,
-    page_name: defaultSlug,
+    page_name: `/${slug}`,
     meta_title: center.title || "",
-    // CHANGED: public route is now /experience-center/<slug>, not a flat /<slug>
-    canonical_url: `${SITE_URL}/${defaultSlug}`,
+    meta_description: "",
+    canonical_url: `${SITE_URL}/${slug}`,
+    keywords: "",
+    robots_index: "index",
+    robots_follow: "follow",
+    include_in_sitemap: true,
+    sitemap_change_frequency: "monthly",
+    sitemap_priority: "0.8",
+    status: "active",
   });
   const [seoId, setSeoId] = useState(null);
+  const [fromGlobal, setFromGlobal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Finds the record the Global SEO manager uses (stored with or without "/")
+  const findExisting = async () => {
+    const res = await api.get(EP.seo, authHeaders);
+    const list = Array.isArray(res.data) ? res.data : res.data ? [res.data] : [];
+    return list.find((t) => stripSlash(t.page_name) === slug) || null;
+  };
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get(`${EP.seo}?slug=${defaultSlug}`);
-        const list = Array.isArray(res.data) ? res.data : res.data ? [res.data] : [];
-        const found = list.find((t) => t.page_name === defaultSlug) || null;
+        const found = await findExisting();
         if (found) {
           setSeoId(found.id);
-          setSeo((prev) => ({ ...prev, ...found }));
+          setFromGlobal(true);
+          setSeo((prev) => ({
+            ...prev,
+            page_name: found.page_name,
+            meta_title: found.meta_title ?? prev.meta_title,
+            meta_description: found.meta_description ?? "",
+            canonical_url: found.canonical_url || prev.canonical_url,
+            keywords: found.keywords ?? "",
+            ...parseRobots(found.meta_robots),
+            include_in_sitemap: found.include_in_sitemap !== false,
+            sitemap_change_frequency: found.sitemap_change_frequency || "monthly",
+            sitemap_priority: found.sitemap_priority || "0.8",
+            status: found.status || "active",
+          }));
         }
       } catch (err) {
         console.error(err); // no SEO row yet – keep defaults
@@ -2720,23 +2762,62 @@ function SeoModal({ center, onClose }) {
   const set = (name, value) => setSeo((p) => ({ ...p, [name]: value }));
 
   const handleSave = async () => {
-    if (!seo.page_name) {
+    if (!stripSlash(seo.page_name)) {
       toast.error("URL slug is required.");
       return;
     }
+    if ((seo.meta_title || "").length > 60) {
+      toast.error("Meta title must be 60 characters or less.");
+      return;
+    }
+    if ((seo.meta_description || "").length > 160) {
+      toast.error("Meta description must be 160 characters or less.");
+      return;
+    }
+
     setSaving(true);
     try {
-      if (seoId) {
-        await api.patch(`${EP.seo}/${seoId}`, seo);
+      // Re-check so we never create a duplicate of a record made in Global SEO
+      let id = seoId;
+      let pageName = seo.page_name;
+      if (!id) {
+        const existing = await findExisting();
+        if (existing) {
+          id = existing.id;
+          pageName = existing.page_name; // keep the global record's exact format
+        }
+      }
+
+      // Only fields the backend DTO accepts
+      const payload = {
+        page_name: pageName,
+        meta_title: seo.meta_title,
+        meta_description: seo.meta_description,
+        canonical_url: seo.canonical_url,
+        keywords: seo.keywords,
+        meta_robots: `${seo.robots_index}, ${seo.robots_follow}`,
+        include_in_sitemap: !!seo.include_in_sitemap,
+        sitemap_change_frequency: seo.sitemap_change_frequency,
+        sitemap_priority: String(seo.sitemap_priority),
+        status: seo.status,
+      };
+
+      if (id) {
+        if (!canPublish && payload.status === "active") {
+          payload.status = "inactive";
+          toast.info("Saved as inactive until an admin republishes it.");
+        }
+        await api.patch(`${EP.seo}/${id}`, payload, authHeaders);
       } else {
-        const res = await api.post(EP.seo, seo);
+        const res = await api.post(EP.seo, payload, authHeaders);
         setSeoId(res.data?.id || null);
       }
       toast.success("SEO settings saved");
       onClose();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to save SEO settings.");
+      const msg = err.response?.data?.message;
+      toast.error(Array.isArray(msg) ? msg.join(", ") : msg || "Failed to save SEO settings.");
     } finally {
       setSaving(false);
     }
@@ -2758,18 +2839,22 @@ function SeoModal({ center, onClose }) {
               </div>
             ) : (
               <>
+                {fromGlobal && (
+                  <div className="alert alert-info py-2">
+                    This route already exists in Global Route SEO. Changes here update that same record.
+                  </div>
+                )}
+
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">
-                    <label className="form-label fw-bold">URL Slug *</label>
-                    <div className="input-group">
-                      <span className="input-group-text">/</span>
-                      <input
-                        className="form-control"
-                        value={seo.page_name}
-                        onChange={(e) => set("page_name", e.target.value)}
-                      />
-                    </div>
-                    {!seo.page_name.startsWith("experience-center-") && (
+                    <label className="form-label fw-bold">Route Path *</label>
+                    <input
+                      className="form-control"
+                      value={seo.page_name}
+                      onChange={(e) => set("page_name", e.target.value)}
+                      disabled={!!seoId}
+                    />
+                    {!stripSlash(seo.page_name).startsWith("experience-center-") && (
                       <div className="form-text text-danger">
                         Must start with {'"experience-center-"'} or the page will return 404.
                       </div>
@@ -2786,19 +2871,25 @@ function SeoModal({ center, onClose }) {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-bold">Meta Title</label>
+                  <label className="form-label fw-bold">
+                    Meta Title <small className="text-muted">({seo.meta_title.length}/60)</small>
+                  </label>
                   <input
                     className="form-control"
+                    maxLength={60}
                     value={seo.meta_title}
                     onChange={(e) => set("meta_title", e.target.value)}
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label fw-bold">Meta Description</label>
+                  <label className="form-label fw-bold">
+                    Meta Description <small className="text-muted">({seo.meta_description.length}/160)</small>
+                  </label>
                   <textarea
                     className="form-control"
                     rows="3"
+                    maxLength={160}
                     value={seo.meta_description}
                     onChange={(e) => set("meta_description", e.target.value)}
                   />
@@ -2809,7 +2900,7 @@ function SeoModal({ center, onClose }) {
                   <input
                     className="form-control"
                     value={seo.keywords}
-onChange={(e) => set("keywords", e.target.value)}
+                    onChange={(e) => set("keywords", e.target.value)}
                   />
                 </div>
 
@@ -2862,8 +2953,8 @@ onChange={(e) => set("keywords", e.target.value)}
                     <label className="form-label fw-bold">Sitemap Change Frequency</label>
                     <select
                       className="form-select"
-                      value={seo.sitemap_frequency}
-                      onChange={(e) => set("sitemap_frequency", e.target.value)}
+                      value={seo.sitemap_change_frequency}
+                      onChange={(e) => set("sitemap_change_frequency", e.target.value)}
                     >
                       {["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"].map((f) => (
                         <option key={f} value={f}>

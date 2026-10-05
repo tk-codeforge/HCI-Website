@@ -1,15 +1,23 @@
+import { MediaImg } from "./MediaImage";
+
 const WallpaperCard = (props) => {
   return (
     <div>
       <div className={props.wallpaperCard}>
        <a href={props.linkTagWallpaper}>
         <div className="">
-          <img
+          {/* <img
             src={props.imgWallpaper}
             className={`responsive-media ${props.wallpaperImgClass || ""}`}
             alt={props.altWallpaper}
             loading="lazy"
             decoding="async"
+          /> */}
+
+                    <MediaImg
+            src={props.imgWallpaper}
+            className={`responsive-media ${props.wallpaperImgClass || ""}`}
+            fallbackAlt={props.altWallpaper}
           />
         </div></a>
         <div className="card-body px-4 pt-3">

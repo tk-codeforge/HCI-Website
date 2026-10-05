@@ -2,6 +2,7 @@ import GalleryDetail from "../../components/GalleryDetail";
 import MainLayout from "../../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import { notFound } from "next/navigation";
+import { buildGalleryMetadata } from "@/utils/gallerySeo";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 const BASE_URL = "https://hcinterior.in";
@@ -19,17 +20,26 @@ async function getGalleryData(id) {
   }
 }
 
+// export async function generateMetadata({ searchParams }) {
+//   const id = searchParams?.id;
+//   const canonicalUrl = id 
+//     ? `${BASE_URL}/ready-togo-design/gallery?id=${id}` 
+//     : `${BASE_URL}/ready-togo-design/gallery`;
+
+//   return {
+//     alternates: {
+//       canonical: canonicalUrl,
+//     },
+//   };
+// }
+
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
-  const canonicalUrl = id 
-    ? `${BASE_URL}/ready-togo-design/gallery?id=${id}` 
-    : `${BASE_URL}/ready-togo-design/gallery`;
-
-  return {
-    alternates: {
-      canonical: canonicalUrl,
-    },
-  };
+  return buildGalleryMetadata({
+    basePath: "/ready-togo-design/gallery",
+    id,
+    itemApi: `/cms-parent-child/by-id/${id}`,
+  });
 }
 
 const ResidentialProjectsGallery = async ({ searchParams }) => {

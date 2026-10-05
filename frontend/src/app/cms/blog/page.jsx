@@ -51,6 +51,8 @@ const CmsBlog = () => {
     });
     
     const [selectedId, setSelectedId] = useState(null);
+    const [historyId, setHistoryId] = useState(null);
+    const [seoId, setSeoId] = useState(null);
 
     // --- Versioning & Autosave States ---
     const [versionsList, setVersionsList] = useState([]);
@@ -239,7 +241,8 @@ const CmsBlog = () => {
 
     // --- History Features ---
     const handleViewHistory = async (id) => {
-        setSelectedId(id);
+        // setSelectedId(id);
+        setHistoryId(id);
         setVersionsList([]); // Clear previous
         try {
             const response = await api.get(`/cms-blog/${id}/versions`, {
@@ -254,7 +257,8 @@ const CmsBlog = () => {
     const handleRestore = async (versionId) => {
         if (window.confirm("Are you sure you want to restore this version? Your current state will be backed up.")) {
             try {
-                await api.post(`/cms-blog/${selectedId}/restore/${versionId}`, {}, {
+                // await api.post(`/cms-blog/${selectedId}/restore/${versionId}`, {}, {
+                await api.post(`/cms-blog/${historyId}/restore/${versionId}`, {}, {
                     headers: { Authorization: `Bearer ${authToken}` },
                 });
                 toast.success("Blog restored to previous version!");
@@ -267,7 +271,8 @@ const CmsBlog = () => {
     };
 
     const handleManageSeoContentClick = (id, item) => {
-        setSelectedId(id);
+        // setSelectedId(id);
+        setSeoId(id);
         setFormSeoContentData({
             slug: item?.slug ?? "",
             canonical_url: item?.canonical_url ?? "",
@@ -356,7 +361,8 @@ const CmsBlog = () => {
         };
 
         try {
-            const response = await api.patch(`/cms-blog/seo-content/${selectedId}`, formDataToSend, {
+            // const response = await api.patch(`/cms-blog/seo-content/${selectedId}`, formDataToSend, {
+            const response = await api.patch(`/cms-blog/seo-content/${seoId}`, formDataToSend, {
                 headers: { Authorization: `Bearer ${authToken}` },
             });
 

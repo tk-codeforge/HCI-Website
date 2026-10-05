@@ -2,6 +2,7 @@ import GalleryDetail from "../../components/GalleryDetail";
 import MainLayout from "../../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import { notFound } from "next/navigation";
+import { buildGalleryMetadata } from "@/utils/gallerySeo";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 const BASE_URL = "https://hcinterior.in";
@@ -21,19 +22,27 @@ async function getGalleryData(id) {
 }
 
 // --- SEO METADATA (Canonical Fix) ---
+// export async function generateMetadata({ searchParams }) {
+//   const id = searchParams?.id;
+//   const canonicalUrl = id 
+//     ? `${BASE_URL}/design-idea/gallery?id=${id}` 
+//     : `${BASE_URL}/design-idea/gallery`;
+
+//   return {
+//     alternates: {
+//       canonical: canonicalUrl,
+//     },
+//   };
+// }
+
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
-  const canonicalUrl = id 
-    ? `${BASE_URL}/design-idea/gallery?id=${id}` 
-    : `${BASE_URL}/design-idea/gallery`;
-
-  return {
-    alternates: {
-      canonical: canonicalUrl,
-    },
-  };
+  return buildGalleryMetadata({
+    basePath: "/design-idea/gallery",
+    id,
+    itemApi: `/cms-parent-child/by-id/${id}`,
+  });
 }
-
 // --- SERVER COMPONENT ---
 const ResidentialProjectsGallery = async ({ searchParams }) => {
   const id = searchParams?.id;

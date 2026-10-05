@@ -77,6 +77,7 @@ import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -287,10 +288,28 @@ export default async function SustainableFurniture() {
       }
     : {}
 
+    const headingBlock = (
+    <>
+    <HeadingTag id="sustainable-furniture-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+<p id="sustainable-furniture-description" className="px-lg-5 team_description" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+    #sustainable-furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #sustainable-furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+  ${headingData?.headingColor ? `#sustainable-furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#sustainable-furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#sustainable-furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+`}</style>
+    </>
+);
+
   return (
     <MainLayout>
       <main>
-        <div
+        {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
   style={bannerStyle}
 >
@@ -309,7 +328,22 @@ export default async function SustainableFurniture() {
   ${headingData?.descriptionFontSize ? `#sustainable-furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
 `}</style>
           </div>
+          </div> */}
+        {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container">
+            <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
           </div>
+        )}
+
           {/* <div className="row g-4 mx-0">
             <div className="col-lg-6 col-md-6 col-12">
               <WallpaperCard

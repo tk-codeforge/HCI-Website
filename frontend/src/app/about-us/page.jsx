@@ -1,6 +1,7 @@
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import BackgroundImageRow from "../components/BackgroundImageRow";
 import MainLayout from "../layouts/MainLayout";
+import { MediaImg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; 
@@ -160,6 +161,7 @@ export default async function AboutUs() {
           headingTag={formData?.banner_heading_tag || "h1"}
           descriptionFontSize={formData?.banner_description_font_size ? `${formData.banner_description_font_size}px` : undefined}
           bgImageUrl={formData?.banner_image}
+           bgImageAlt={formData?.banner_heading || "About Us"}
           sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
   sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
         />
@@ -173,16 +175,26 @@ export default async function AboutUs() {
               <div className="row justify-content-center">
                 <div className="col-6 d-flex justify-content-center">
                   {formData?.mid_image && (
-                    <img
+  //                   <img
+  //                     src={formData.mid_image}
+  //                     className="d-block"
+  //                     style={{ 
+  //   width: formData?.mid_image_size ? `${formData.mid_image_size}%` : '100%', 
+  //   maxWidth: 'none', 
+  //   height: 'auto' 
+  // }}
+  //                     alt={formData?.top_title || "About Us"}
+  //                   decoding="async"  loading="lazy" />
+                      <MediaImg
                       src={formData.mid_image}
+                      fallbackAlt={formData?.top_title || "About Us"}
                       className="d-block"
-                      style={{ 
-    width: formData?.mid_image_size ? `${formData.mid_image_size}%` : '100%', 
-    maxWidth: 'none', 
-    height: 'auto' 
-  }}
-                      alt={formData?.top_title || "About Us"}
-                    decoding="async"  loading="lazy" />
+                      style={{
+                        width: formData?.mid_image_size ? `${formData.mid_image_size}%` : "100%",
+                        maxWidth: "none",
+                        height: "auto",
+                      }}
+                    />
                   )}
                 </div>
               </div>

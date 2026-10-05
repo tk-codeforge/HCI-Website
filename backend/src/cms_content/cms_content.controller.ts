@@ -197,10 +197,12 @@ async updateHeadingDescription(
   { name: 'video', maxCount: 1 },
 ]))
 async updateTeamPageMedia(
-  @Param('id', ParseIntPipe) id: number,
+  // @Param('id', ParseIntPipe) id: number,
+  @Param('id') idParam: string,
   @Body() dto: any,
   @UploadedFiles() files: { image?: Express.Multer.File[], video?: Express.Multer.File[] },
 ) {
+  const id = /^\d+$/.test(idParam) ? parseInt(idParam, 10) : null;
   const imagePath = files?.image?.[0]?.filename || null;
   const videoPath = files?.video?.[0]?.filename || null;
   return this.cmsContentService.updateTeamPageMedia(id, dto, imagePath, videoPath);

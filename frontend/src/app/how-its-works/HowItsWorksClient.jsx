@@ -15,6 +15,8 @@ export default function HowItsWorksClient({ displaySteps, bannerData }) {
     }
   }, []);
 
+   const hasCustomBg = Boolean(bannerData.image) && bannerData.image !== "contact_wrapper services";
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -124,6 +126,8 @@ export default function HowItsWorksClient({ displaySteps, bannerData }) {
           secBgHeadingClass="sec_bgheading_lass force-white-heading" 
           sectionBgDescription={bannerData.description}
           secBgDesClass={"text-center bg-transparent"}
+          bgImageUrl={hasCustomBg ? bannerData.image : undefined}
+          bgImageAlt={bannerData.heading}
         />
 
         {displaySteps.map((step, index) => {

@@ -44,15 +44,24 @@ export class CmsExperienceCenterController {
   // }
 
   // In cms-experience-center.controller.ts
+// @Post()
+// @UseInterceptors(FileInterceptor('image'))
+// async create(
+//   @Body() createCmsExperienceCenterDto: CreateCmsExperienceCenterDto,
+//   @UploadedFile() file: Express.Multer.File,
+// ) {
+//   if (!file) throw new Error('File is not uploaded');
+//   // Use file.filename instead of file.path
+//   return this.cmsExperienceCenterService.create(createCmsExperienceCenterDto, file.filename); 
+// }
+
 @Post()
 @UseInterceptors(FileInterceptor('image'))
 async create(
-  @Body() createCmsExperienceCenterDto: CreateCmsExperienceCenterDto,
-  @UploadedFile() file: Express.Multer.File,
+  @Body() dto: CreateCmsExperienceCenterDto,
+  @UploadedFile() file?: Express.Multer.File,
 ) {
-  if (!file) throw new Error('File is not uploaded');
-  // Use file.filename instead of file.path
-  return this.cmsExperienceCenterService.create(createCmsExperienceCenterDto, file.filename); 
+  return this.cmsExperienceCenterService.create(dto, file ? file.filename : null);
 }
 
 @Patch(':id')

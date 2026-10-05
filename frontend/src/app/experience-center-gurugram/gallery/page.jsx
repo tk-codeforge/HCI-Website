@@ -1,29 +1,39 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
+import { buildGalleryMetadata } from "@/utils/gallerySeo";
 
 export const dynamic = "force-dynamic";
 
 // --- SEO FIX ---
+// export async function generateMetadata({ searchParams }) {
+//   const id = searchParams?.id;
+//   if (!id) return { title: "Gurugram Experience Center" };
+
+//   try {
+//     const response = await api.get(`/cms-parent-child/by-id/${id}`);
+//     const data = response.data;
+//     const title = data?.child_content?.title || "Gurugram Gallery";
+    
+//     return {
+//       title: title,
+//       description: `Explore our ${title} at High Creation Interior Gurugram.`,
+//       alternates: {
+//         canonical: `/experience-center-gurugram/gallery?id=${id}`,
+//       },
+//     };
+//   } catch (error) {
+//     return { title: "Gurugram Experience Center", robots: "noindex" };
+//   }
+// }
+
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
-  if (!id) return { title: "Gurugram Experience Center" };
-
-  try {
-    const response = await api.get(`/cms-parent-child/by-id/${id}`);
-    const data = response.data;
-    const title = data?.child_content?.title || "Gurugram Gallery";
-    
-    return {
-      title: title,
-      description: `Explore our ${title} at High Creation Interior Gurugram.`,
-      alternates: {
-        canonical: `/experience-center-gurugram/gallery?id=${id}`,
-      },
-    };
-  } catch (error) {
-    return { title: "Gurugram Experience Center", robots: "noindex" };
-  }
+  return buildGalleryMetadata({
+    basePath: "/experience-center-gurugram/gallery",
+    id,
+    itemApi: `/cms-parent-child/by-id/${id}`,
+  });
 }
 
 // --- SERVER COMPONENT ---

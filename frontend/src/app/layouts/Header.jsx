@@ -20,7 +20,6 @@ import api from "@/utils/api";
 const DEFAULT_MENU = [
   {
     label: "Design Ideas",
-    href: "",
     dropdown: [
       { label: "Design Gallery", href: "/design-idea/" },
       { label: "Product", href: "/product/" },
@@ -28,7 +27,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Portfolio",
-    href: "",
     dropdown: [
       { label: "Residential Projects", href: "/residential-projects/" },
       { label: "Luxury Projects", href: "/luxury-projects/" },
@@ -36,7 +34,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Experience Center",
-    href: "",
     dropdown: [
       { label: "Experience Center New Delhi", href: "/experience-center-new-delhi/" },
       { label: "Experience Center Noida", href: "/experience-center/" },
@@ -47,7 +44,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Exclusive Design",
-    href: "",
     dropdown: [
       { label: "Ready To Go Design", href: "/ready-togo-design/" },
       { label: "Wallpapers", href: "/wallpaper/" },
@@ -58,7 +54,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "Serving Areas",
-    href: "",
     dropdown: [
       { label: "Interior Designers In Noida", href: "/interior-designers-in-noida" },
       { label: "Interior Designers in Ghaziabad", href: "/interior-designers-in-ghaziabad" },
@@ -74,7 +69,6 @@ const DEFAULT_MENU = [
   },
   {
     label: "More",
-    href: "",
     dropdown: [
       { label: "About Us", href: "/about-us/" },
       { label: "How It Works", href: "/how-its-works/" },
@@ -288,26 +282,35 @@ const Header = () => {
   const key = heading.label?.toLowerCase().replace(/\s+/g, "-") || `menu-${index}`;
   const hasDropdown = Array.isArray(heading.dropdown) && heading.dropdown.length > 0;
 
-  if (!hasDropdown) {
-    return (
-      <li className="nav-item" key={key}>
-        <a className="nav-link text-dark" href={heading.href || "#"}>
-          {heading.label}
-        </a>
-      </li>
-    );
-  }
+  // if (!hasDropdown) {
+  //   return (
+  //     <li className="nav-item" key={key}>
+  //       <a className="nav-link text-dark" href={heading.href || "#"}>
+  //         {heading.label}
+  //       </a>
+  //     </li>
+  //   );
+  // }
 
   return (
     <li className={`nav-item dropdown ${activeDropdown === key ? "show" : ""}`} key={key}>
-        <a
+        {/* <a
         className="nav-link dropdown-toggle text-dark"
         href="#"
         onClick={(e) => handleDropdown(e, key)}
         aria-expanded={activeDropdown === key}
         >
         {heading.label}
-    </a>
+    </a> */}
+
+    <button
+  type="button"
+  className="nav-link dropdown-toggle text-dark"
+  onClick={(e) => handleDropdown(e, key)}
+  aria-expanded={activeDropdown === key}
+>
+  {heading.label}
+</button>
       <ul className={`dropdown-menu border-0 shadow-sm ${activeDropdown === key ? "show" : ""}`}>
         {heading.dropdown.map((item, i) => (
           <li key={i}>

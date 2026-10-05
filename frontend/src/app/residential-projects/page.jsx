@@ -1,8 +1,10 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import ResidentialCard from "../components/ResidentialCard";
 import MainLayout from "../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -164,6 +166,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function ResidentialProjects({ searchParams }) {
+  const slugMap = await getGallerySlugMap("residential-projects", "project-gallery");
   const params = await searchParams;
   const currentPage = Number(params?.page) || 1;
 
@@ -203,6 +206,25 @@ const bannerStyle = bannerImage
      aspectRatio: "1900 / 441",
     }
   : {};
+  
+  const headingBlock = (
+    <>
+     <HeadingTag id="residential-projects-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+<p id="residential-projects-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+  ${headingData?.headingColor ? `#residential-projects-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#residential-projects-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#residential-projects-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #residential-projects-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #residential-projects-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+    </>
+     );
+
 
   return (
     <MainLayout>
@@ -211,7 +233,7 @@ const bannerStyle = bannerImage
         {/* <section className="container my-5">
           <div className="text-center mb-5"> */}
 
-          <div
+          {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center mb-5" : "container mt-5"}
   style={bannerStyle}
 >
@@ -230,7 +252,22 @@ const bannerStyle = bannerImage
   #residential-projects-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-        </div>
+        </div> */}
+        {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center mb-5"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container mt-5">
+            <div className="text-center mb-5 row mx-0">{headingBlock}</div>
+          </div>
+        )}
+
         {/* Modernized Projects Grid */}
         <section className="resi_card">
           <div className="container">
@@ -239,7 +276,7 @@ const bannerStyle = bannerImage
                 projects.map((project, index) => (
                   <div key={index} className="col-lg-4 col-md-6 col-sm-12">
                     <ResidentialCard
-                      projectCardLink={`/residential-projects/project-gallery?id=${project.id}`}
+                      projectCardLink={pageGalleryHref("residential-projects", slugMap, project.id, "project-gallery")}
                       cardNameResid="card_product"
                       resiImgUrl={project.image}
                       resiImgALt={project.title ?? defaultAltText}
@@ -249,7 +286,7 @@ const bannerStyle = bannerImage
                       // residentialDescriptiion={project.description}
                       residentialClassCss="team_designation"
                       residentialButton="Explore Design"
-                      residentialButtonUrl={`/residential-projects/project-gallery?id=${project.id}`}
+                      residentialButtonUrl={pageGalleryHref("residential-projects", slugMap, project.id, "project-gallery")}
                     />
                   </div>
                 ))

@@ -11,8 +11,8 @@ export class CmsExperienceCenter {
     // @Column()
     // description: string;
 
-    @Column()
-    image: string;
+    // @Column()
+    // image: string;
 
     @CreateDateColumn()
     created_at: Date;
@@ -23,5 +23,7 @@ export class CmsExperienceCenter {
     @Column({ nullable: true, type: 'text' })
 description: string;
     
+@Column({ type: 'varchar', length: 255, nullable: true })
+image: string | null;
     
 }

@@ -1,3 +1,4 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import MainLayout from "../layouts/MainLayout";
 // import PortfolioCard from "../components/PortfolioCard";
 // import BgImageCard from "../components/BgImageCard";
@@ -176,6 +177,7 @@ import MainLayout from "../layouts/MainLayout";
 import BgImageCard from "../components/BgImageCard";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -327,6 +329,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function DesignerChoice() {
+  const slugMap = await getGallerySlugMap("designer-choice");
   const designIdea = await getDesignerChoices();
 
   // --- LOGIC: Sort and Split Records ---
@@ -375,12 +378,30 @@ const bannerStyle = bannerImage
     }
   : {};
 
+const headingBlock = (
+  <>
+    <HeadingTag id="designer-choice-heading" className="wallpaperHeading" style={headingStyle}>
+      {headingText}
+    </HeadingTag>
+    <p id="designer-choice-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+      {descriptionText}
+    </p>
+    <style>{`
+  ${headingData?.headingColor ? `#designer-choice-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#designer-choice-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#designer-choice-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #designer-choice-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #designer-choice-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+  </>
+);
+
   return (
     <MainLayout>
       <main>
         {/* <div className="container">
           <div className="text-center mt-3 mx-0 row"> */}
-          <div
+          {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
   style={bannerStyle}
 >
@@ -399,7 +420,22 @@ const bannerStyle = bannerImage
   #designer-choice-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-        </div>
+        </div> */}
+
+                {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container">
+            <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
+          </div>
+        )}
 
         <section className="container my-0">
           {/* Static Records Grid (Oldest 5) */}
@@ -411,7 +447,7 @@ const bannerStyle = bannerImage
                     style={{
                       backgroundImage: `url(${staticRecords[0]?.child_content?.image})`,
                     }}
-                    cardLinkTag={`/designer-choice/gallery?id=${staticRecords[0]?.id}`}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[0]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[0]?.child_content?.title}
                     descriptionBg={staticRecords[0]?.child_content?.description}
@@ -424,7 +460,7 @@ const bannerStyle = bannerImage
                     style={{
                       backgroundImage: `url(${staticRecords[1]?.child_content?.image})`,
                     }}
-                    cardLinkTag={`/designer-choice/gallery?id=${staticRecords[1]?.id}`}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[1]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[1]?.child_content?.title}
                     descriptionBg={staticRecords[1]?.child_content?.description}
@@ -437,7 +473,7 @@ const bannerStyle = bannerImage
                     style={{
                       backgroundImage: `url(${staticRecords[2]?.child_content?.image})`,
                     }}
-                    cardLinkTag={`/designer-choice/gallery?id=${staticRecords[2]?.id}`}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[2]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[2]?.child_content?.title}
                     descriptionBg={staticRecords[2]?.child_content?.description}
@@ -450,7 +486,7 @@ const bannerStyle = bannerImage
                     style={{
                       backgroundImage: `url(${staticRecords[3]?.child_content?.image})`,
                     }}
-                    cardLinkTag={`/designer-choice/gallery?id=${staticRecords[3]?.id}`}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[3]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[3]?.child_content?.title}
                     descriptionBg={staticRecords[3]?.child_content?.description}
@@ -463,7 +499,7 @@ const bannerStyle = bannerImage
                     style={{
                       backgroundImage: `url(${staticRecords[4]?.child_content?.image})`,
                     }}
-                    cardLinkTag={`/designer-choice/gallery?id=${staticRecords[4]?.id}`}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[4]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[4]?.child_content?.title}
                     descriptionBg={staticRecords[4]?.child_content?.description}
@@ -481,7 +517,7 @@ const bannerStyle = bannerImage
                   style={{
                     backgroundImage: `url(${item.child_content?.image})`,
                   }}
-                  cardLinkTag={`/designer-choice/gallery?id=${item.id}`}
+                  cardLinkTag={pageGalleryHref("designer-choice", slugMap, item.id)}
                   designerCardBgDiv={"designercard designercardimg1"}
                   titleBgImage={item.child_content?.title}
                   descriptionBg={item.child_content?.description}

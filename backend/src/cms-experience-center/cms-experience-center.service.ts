@@ -13,14 +13,22 @@ export class CmsExperienceCenterService {
     private readonly cmsExperienceCenterRepository: Repository<CmsExperienceCenter>,
   ) {}
 
-  async create(createCmsExperienceCenterDto: CreateCmsExperienceCenterDto, imageName: string): Promise<CmsExperienceCenter> {
-    // const imageName = basename(imagePath); 
-    const newRecord = this.cmsExperienceCenterRepository.create({
-      ...createCmsExperienceCenterDto,
-      image: imageName,
-    });
-    return await this.cmsExperienceCenterRepository.save(newRecord);
-  }
+  // async create(createCmsExperienceCenterDto: CreateCmsExperienceCenterDto, imageName: string): Promise<CmsExperienceCenter> {
+  //   // const imageName = basename(imagePath); 
+  //   const newRecord = this.cmsExperienceCenterRepository.create({
+  //     ...createCmsExperienceCenterDto,
+  //     image: imageName,
+  //   });
+  //   return await this.cmsExperienceCenterRepository.save(newRecord);
+  // }
+
+async create(dto: CreateCmsExperienceCenterDto, imageName: string | null) {
+  const newRecord = this.cmsExperienceCenterRepository.create({
+    ...dto,
+    image: imageName,
+  });
+  return await this.cmsExperienceCenterRepository.save(newRecord);
+}
 
   // async findAll() {
   //   const baseUrl = `${process.env.BASE_URL}/uploads/experience-center/`;

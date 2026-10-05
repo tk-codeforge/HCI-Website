@@ -12,6 +12,7 @@ const Designidea = () => {
   const [error, setError] = useState("");
   const [seoData, setSeoData] = useState({});
   const [bannerRecord, setBannerRecord] = useState(null);
+    const [slugMap, setSlugMap] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -28,6 +29,13 @@ const Designidea = () => {
     };
 
     fetchDesignIdea();
+  }, []);
+
+    useEffect(() => {
+    api
+      .get("/slug-edit/map", { params: { entityType: "design-idea-gallery" } })
+      .then((res) => setSlugMap(res.data || {}))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -66,6 +74,8 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
 
   // Get the latest records (excluding the last 8)
   const latestRecords = sortedDesignIdea.slice(0, -8); // Everything except last 8
+    const designIdeaHref = (id) =>
+    slugMap[id] ? `/design-idea/gallery/${slugMap[id]}` : `/design-idea/gallery?id=${id}`;
  console.log('latestRecords',latestRecords);
   return (
     <div>
@@ -124,14 +134,14 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
               <div className="row mx-0">
                     <div className="col-lg-7">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[0]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[0]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg1"}
                         portfolioImg={staticRecords[0]?.child_content?.image}
                         portfolioTitle={staticRecords[0]?.child_content?.title}
                       />
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[1]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[1]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg2"}
                         portfolioImg={staticRecords[1]?.child_content?.image}
@@ -140,7 +150,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                     </div>
                     <div className="col-lg-5">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[2]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[2]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg3"}
                         portfolioImg={staticRecords[2]?.child_content?.image}
@@ -149,7 +159,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                     </div>
                     <div className="col-lg-12">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[3]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[3]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg4"}
                         portfolioImg={staticRecords[3]?.child_content?.image}
@@ -158,7 +168,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                     </div>
                     <div className="col-lg-9">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[4]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[4]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg5"}
                         portfolioImg={staticRecords[4]?.child_content?.image}
@@ -167,7 +177,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                     </div>
                     <div className="col-lg-3">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[5]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[5]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg6"}
                         portfolioImg={staticRecords[5]?.child_content?.image}
@@ -176,7 +186,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                     </div>
                     <div className="col-lg-6">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[6]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[6]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg7"}
                         portfolioImg={staticRecords[6]?.child_content?.image}
@@ -185,7 +195,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                     </div>
                     <div className="col-lg-6">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${staticRecords[7]?.id}`}
+                        cardDetailLink={designIdeaHref(staticRecords[7]?.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={"portfolioimgall desig_gal_bg8"}
                         portfolioImg={staticRecords[7]?.child_content?.image}
@@ -201,7 +211,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
                   {latestRecords.map((item) => (
                     <div key={item.id} className="col-lg-6">
                       <PortfolioCard
-                        cardDetailLink={`/design-idea/gallery?id=${item.id}`}
+                        cardDetailLink={designIdeaHref(item.id)}
                         portCard={"card_portfolio portfolio_1"}
                         portfolioImgBg={`portfolioimgall desig_gal_bg8`}
                         portfolioImg={item.child_content?.image}

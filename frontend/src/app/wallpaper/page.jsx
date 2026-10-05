@@ -1,3 +1,4 @@
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import { useCallback, useEffect, useState } from "react";
 // import api from "@/utils/api";
 // import { toast } from "react-toastify";
@@ -270,7 +271,7 @@ import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
-
+import { MediaBg } from "../components/MediaImage";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -422,6 +423,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Wallpaper() {
+  const slugMap = await getGallerySlugMap("wallpaper");
   const exclusiveDesignData = await getWallpaperData();
 
   const headingData = await getHeadingDescriptionData();
@@ -458,10 +460,28 @@ const bannerStyle = bannerImage
     }
   : {};
 
+  const headingBlock = (
+    <>
+    <HeadingTag id="wallpaper-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+<p id="wallpaper-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+  ${headingData?.headingColor ? `#wallpaper-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#wallpaper-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#wallpaper-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #wallpaper-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #wallpaper-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+    </>
+     );
+
   return (
     <MainLayout>
       <main>
-         <div
+         {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
   style={bannerStyle}
 >
@@ -480,14 +500,30 @@ const bannerStyle = bannerImage
   #wallpaper-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
 `}</style>
           </div>
-</div>
+</div> */}
+
+        {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container">
+            <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
+          </div>
+        )}
+
         <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (
                 <div key={index} className="col-lg-6 col-md-6 col-12">
                   <WallpaperCard
-                    linkTagWallpaper={`/wallpaper/gallery?id=${design?.id}`}
+                    linkTagWallpaper={pageGalleryHref("wallpaper", slugMap, design?.id)}
                     wallpaperCard="wallpapercard"
                     imgWallpaper={
                       design?.child_content?.image ?? "/images/Bhk/1bhk.png"
@@ -500,7 +536,7 @@ const bannerStyle = bannerImage
                     wallpaperDescriptiion={design?.child_content?.description}
                     descriptionClass="team_description mb-0"
                     textBtnWallpaper="View Design"
-                    btnHrefWallpaper={`/wallpaper/gallery?id=${design?.id}`}
+                    btnHrefWallpaper={pageGalleryHref("wallpaper", slugMap, design?.id)}
                   />
                 </div>
               ))
