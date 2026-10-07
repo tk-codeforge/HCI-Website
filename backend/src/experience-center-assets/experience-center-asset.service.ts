@@ -109,9 +109,4 @@ export class ExperienceCenterAssetService {
     await this.repo.delete(id);
     return { deleted: true };
   }
-
-  async removeBySlug(parentSlug: string) {
-  const result = await this.repo.delete({ parent_slug: parentSlug });
-  return { deleted: true, count: result.affected ?? 0 };
-}
 }

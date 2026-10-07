@@ -41,3 +41,4 @@ export class ExperienceCenterAsset {
   @Column({ nullable: true })
 parent_asset_id: number | null;
 }
+

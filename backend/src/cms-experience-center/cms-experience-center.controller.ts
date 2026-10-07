@@ -27,7 +27,12 @@ export class CmsExperienceCenterController {
     return this.cmsExperienceCenterService.findAll();
   }
 
-  @Get('by-slug/:slug')
+  @Get('trash')
+findDeleted() {
+  return this.cmsExperienceCenterService.findDeleted();
+}
+
+@Get('by-slug/:slug')
 findBySlug(@Param('slug') slug: string) {
   return this.cmsExperienceCenterService.findBySlug(slug);
 }
@@ -67,6 +72,11 @@ async create(
   @UploadedFile() file?: Express.Multer.File,
 ) {
   return this.cmsExperienceCenterService.create(dto, file ? file.filename : null);
+}
+
+@Patch(':id/restore')
+restore(@Param('id') id: number) {
+  return this.cmsExperienceCenterService.restore(+id);
 }
 
 @Patch(':id')

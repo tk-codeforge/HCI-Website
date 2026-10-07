@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCmsExperienceCenterDto } from './dto/create-cms-experience-center.dto';
@@ -62,7 +61,7 @@ private slugify(text = '') {
 }
 
 async findBySlug(slug: string) {
-  const centers = await this.cmsExperienceCenterRepository.find();
+  const centers = await this.cmsExperienceCenterRepository.find({ where: { is_active: true } });
   const match = centers.find(
     (c) => `experience-center-${this.slugify(c.title)}` === slug,
   );
@@ -71,17 +70,18 @@ async findBySlug(slug: string) {
 }
 
 async findAll() {
-  const centers = await this.cmsExperienceCenterRepository.find();
+  // const centers = await this.cmsExperienceCenterRepository.find();
+  const centers = await this.cmsExperienceCenterRepository.find({ where: { is_active: true } });
   return centers.map(center => this.formatRecord(center));
 }
 
 async findOne(id: number) {
-  const center = await this.cmsExperienceCenterRepository.findOne({ where: { id } });
+  const center = await this.cmsExperienceCenterRepository.findOne({ where: { id, is_active: true } });
   return this.formatRecord(center);
 }
 
   async update(id: number, updateCmsExperienceCenterDto: UpdateCmsExperienceCenterDto, imageName: string | null) {
-    const existingRecord = await this.cmsExperienceCenterRepository.findOne({ where: { id } });
+    const existingRecord = await this.cmsExperienceCenterRepository.findOne({ where: { id, is_active: true } });
     if (!existingRecord) {
       throw new Error('Record not found');
     }
@@ -99,9 +99,21 @@ async findOne(id: number) {
   }
 
   async remove(id: number) {
-  const existing = await this.cmsExperienceCenterRepository.findOne({ where: { id } });
-  if (!existing) throw new Error('Record not found');
-  await this.cmsExperienceCenterRepository.delete(id);
+  const existing = await this.cmsExperienceCenterRepository.findOne({ where: { id, is_active: true } });
+  if (!existing) throw new NotFoundException('Record not found');
+  await this.cmsExperienceCenterRepository.update(id, { is_active: false });
   return { deleted: true };
+}
+
+async findDeleted() {
+  const rows = await this.cmsExperienceCenterRepository.find({ where: { is_active: false } });
+  return rows.map((r) => this.formatRecord(r));
+}
+
+async restore(id: number) {
+  const row = await this.cmsExperienceCenterRepository.findOne({ where: { id } });
+  if (!row) throw new NotFoundException('Record not found');
+  await this.cmsExperienceCenterRepository.update(id, { is_active: true });
+  return this.formatRecord(await this.cmsExperienceCenterRepository.findOne({ where: { id } }));
 }
 }
