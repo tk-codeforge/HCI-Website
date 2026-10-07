@@ -12,6 +12,11 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default async function GalleryPage({ searchParams }) {
+  const id = searchParams?.id;
+  const seo = await getGallerySeo({
+    basePath: "/spacesaving-furniture/gallery",
+    id,
+  });
   return (
     <>
       <JsonLd data={seo?.custom_schema} />
