@@ -455,6 +455,13 @@ import { toast } from "react-toastify";
 import { FaSave, FaTrash } from "react-icons/fa";
 import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const CONTENT_KEY = "home_page_content_furniture_factory";
 
@@ -463,6 +470,7 @@ export default function ManageFurnitureFactory() {
 
   const [heading, setHeading] = useState("Large Modular Furniture Factories");
   const [headingColor, setHeadingColor] = useState("#000000");
+  const [headingTag, setHeadingTag] = useState("h2");
   const [description, setDescription] = useState("");
   const [descriptionFontSize, setDescriptionFontSize] = useState(16);
   const [buttonText, setButtonText] = useState("View More");
@@ -514,6 +522,7 @@ export default function ManageFurnitureFactory() {
 
       setHeading(content.heading || "Large Modular Furniture Factories");
       setHeadingColor(content.headingColor || "#000000");
+      setHeadingTag(content.headingTag || "h2");
       setDescription(content.description || "");
       setDescriptionFontSize(
         content.descriptionFontSize ? Number(content.descriptionFontSize) : 16
@@ -549,6 +558,7 @@ export default function ManageFurnitureFactory() {
     const values = {
       heading,
       headingColor,
+      headingTag,
       description,
       descriptionFontSize,
       buttonText,
@@ -574,6 +584,7 @@ export default function ManageFurnitureFactory() {
       JSON.stringify({
         heading: values.heading,
         headingColor: values.headingColor,
+        headingTag: values.headingTag, 
         description: values.description,
         descriptionFontSize: values.descriptionFontSize,
         buttonText: values.buttonText,
@@ -813,7 +824,7 @@ export default function ManageFurnitureFactory() {
         {/* Heading & Text */}
         <div className="card shadow-sm border-0 mb-4">
           <div className="card-body row g-3">
-            <div className="col-md-8">
+            {/* <div className="col-md-8">
               <label className="form-label fw-bold">Heading</label>
               <input
                 className="form-control"
@@ -853,7 +864,45 @@ export default function ManageFurnitureFactory() {
                 onChange={(e) => setDescriptionFontSize(Number(e.target.value))}
               />
               <div className="text-muted text-center fw-bold">{descriptionFontSize}px</div>
-            </div>
+            </div> */}
+
+            <div className="col-md-6">
+  <label className="form-label fw-bold">Heading</label>
+  <input
+    className="form-control"
+    value={heading}
+    onChange={(e) => setHeading(e.target.value)}
+  />
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Tag</label>
+  <select
+    className="form-select"
+    value={headingTag}
+    onChange={(e) => setHeadingTag(e.target.value)}
+  >
+    {HEADING_TAGS.map((t) => (
+      <option key={t} value={t}>{t.toUpperCase()}</option>
+    ))}
+  </select>
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Color</label>
+  <input
+    type="color"
+    className="form-control form-control-color w-100"
+    value={headingColor}
+    onChange={(e) => setHeadingColor(e.target.value)}
+  />
+</div>
+
+<div className="col-12">
+  <label className="form-label fw-bold">Description</label>
+  <CKEditorComponent
+    pageData={description}
+    setPageData={setDescription}
+  />
+</div>
 
             <div className="col-md-6">
               <label className="form-label fw-bold">Button Text</label>

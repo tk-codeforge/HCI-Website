@@ -6,6 +6,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg, MediaImg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -157,6 +158,7 @@ export async function generateMetadata() {
 }
 // --- MAIN SERVER COMPONENT ---
 export default async function ReadyToGoDesign() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("ready-togo-design");
   const exclusiveDesignData = await getReadyToGoDesignData();
 
@@ -214,6 +216,7 @@ const bannerStyle = bannerImage
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <style dangerouslySetInnerHTML={{__html: `
         /* Premium Card Layout */
         .premium-rtd-card {

@@ -2,6 +2,7 @@ import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading
 import MainLayout from "../layouts/MainLayout";
 import { generateFAQSchema } from "@/utils/schemaGenerator";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -155,6 +156,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function FaqPage() {
+  const seo = await getSeoData();
   const faqData = await getFaqData();
   const faqSchema = generateFAQSchema(faqData);
 
@@ -164,13 +166,14 @@ const bgDescription = bannerRecord?.banner_description || "Get all the informati
 
   return (
     <MainLayout>
-      {faqSchema && (
+      {/* {faqSchema && (
         <script
           id="faq-page-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
-      )}
+      )} */}
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <BackgroundImageWithHeading
           sectionBgImages="contact_wrapper faq_banner"

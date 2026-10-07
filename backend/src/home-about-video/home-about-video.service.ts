@@ -30,6 +30,12 @@ export class HomeAboutVideoService {
 
     if (dto.title) settings.title = dto.title;
     if (dto.description) settings.description = dto.description;
+
+    if (dto.title) settings.title = dto.title;
+if (dto.title_tag && ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(dto.title_tag)) {
+  settings.title_tag = dto.title_tag;
+}
+if (dto.description) settings.description = dto.description;
     
     // Parse strings to booleans
     if (dto.show_video_desktop !== undefined) settings.show_video_desktop = String(dto.show_video_desktop) === 'true';

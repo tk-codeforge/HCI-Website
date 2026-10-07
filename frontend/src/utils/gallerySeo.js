@@ -82,3 +82,20 @@ const candidates = [slugPath, `${basePath}?id=${id}`].filter(Boolean);
     },
   };
 }
+
+export async function getGallerySeo({ basePath, id }) {
+  if (!id) return null;
+  const type = basePath.slice(1).replace(/\//g, "-");
+  const slugPath = await getCanonicalByType(type, id);
+  const candidates = [slugPath, `${basePath}?id=${id}`].filter(Boolean);
+
+  for (const p of candidates) {
+    const found = await getJson(`/seo-tag/route?path=${encodeURIComponent(p)}`, {
+      next: { revalidate: 60 },
+    });
+    if (found && typeof found === "object" && Object.keys(found).length > 0) {
+      return found;
+    }
+  }
+  return null;
+}

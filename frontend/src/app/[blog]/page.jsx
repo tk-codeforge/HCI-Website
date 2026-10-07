@@ -1709,7 +1709,7 @@ const isDraftStatus = (data) => {
 
 async function getRecentBlogs() {
   try {
-    const res = await fetch(`${API_BASE_URL}/cms-blog`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_BASE_URL}/cms-blog`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data.slice(0, 4) : [];

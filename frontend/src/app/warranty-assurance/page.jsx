@@ -4,6 +4,9 @@ import WarrantySupportForm from "../components/WarrantySupportForm";
 import { notFound } from "next/navigation";
 import { FaShieldAlt, FaClock, FaCheckCircle, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -220,6 +223,7 @@ export async function generateMetadata() {
 }
 
 export default async function WarrantyPage() {
+  const seo = await getSeoData();
   const [primary, banner] = await Promise.all([
     getWarrantyRecord(),
     getWarrantyBanner(),
@@ -241,6 +245,10 @@ export default async function WarrantyPage() {
     enabled: true,
     ...(content.hero || {}),
   };
+
+  const HeroHeadingTag = HEADING_TAGS.includes(hero.headingTag) ? hero.headingTag : "h2";
+const heroEyebrowStyle = hero.eyebrowSize ? { fontSize: `${hero.eyebrowSize}px` } : undefined;
+const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descriptionSize}px` } : undefined;
 
   const summary = {
     enabled: true,
@@ -291,6 +299,7 @@ export default async function WarrantyPage() {
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <BackgroundImageWithHeading
         sectionBgImages="contact_wrapper warranty_banner"
         sectionBgHeading={heading}
@@ -348,15 +357,29 @@ export default async function WarrantyPage() {
           text-transform: uppercase;
         }
 
-        .hci-warranty .warranty-intro h2 {
-          margin: 0 auto;
-          max-width: 820px;
-          color: var(--hci-heading);
-          font-size: clamp(30px, 4vw, 46px);
-          line-height: 1.12;
-          font-weight: 500;
-          letter-spacing: -.025em;
-        }
+        // .hci-warranty .warranty-intro h2 {
+        //   margin: 0 auto;
+        //   max-width: 820px;
+        //   color: var(--hci-heading);
+        //   font-size: clamp(30px, 4vw, 46px);
+        //   line-height: 1.12;
+        //   font-weight: 500;
+        //   letter-spacing: -.025em;
+        // }
+
+        .hci-warranty .warranty-intro .warranty-heading {
+  margin: 0 auto;
+  max-width: 820px;
+  color: var(--hci-heading);
+  font-family: var(--font-outfit), sans-serif;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.12;
+  font-weight: 600 !important;
+  letter-spacing: -.025em;
+}
+@media screen and (max-width: 767px) {
+  .hci-warranty .warranty-intro .warranty-heading { font-size: 32px !important; }
+}
 
         .hci-warranty .warranty-intro p {
           max-width: 820px;
@@ -853,7 +876,7 @@ export default async function WarrantyPage() {
         {hero.enabled !== false && (
           <section className="warranty-intro">
             <div className="warranty-container">
-              <div className="warranty-eyebrow">
+             {/* <div className="warranty-eyebrow">
                 <FaShieldAlt />
                 {hero.eyebrow}
               </div>
@@ -861,6 +884,16 @@ export default async function WarrantyPage() {
               <h2>{hero.heading}</h2>
 
               <p>{hero.description}</p>
+              */}
+
+              <div className="warranty-eyebrow" style={heroEyebrowStyle}>
+  <FaShieldAlt />
+  {hero.eyebrow}
+</div>
+
+<HeroHeadingTag className="warranty-heading">{hero.heading}</HeroHeadingTag>
+
+<p style={heroDescriptionStyle}>{hero.description}</p>
             </div>
           </section>
         )}

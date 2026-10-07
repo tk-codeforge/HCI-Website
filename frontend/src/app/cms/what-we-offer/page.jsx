@@ -5,6 +5,29 @@ import { toast } from "react-toastify";
 import { FaSave, FaPlus, FaTrash, FaCheck } from "react-icons/fa";
 import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i); // 10px to 30px
+
+const escapeHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const pointsToHtml = (points = []) => {
+  const items = points.filter(Boolean).map((p) => `<li>${escapeHtml(p)}</li>`).join("");
+  return items ? `<ul>${items}</ul>` : "";
+};
+const htmlToPoints = (html) => {
+  if (typeof window === "undefined" || !html) return [];
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return [...doc.body.querySelectorAll("li, p")]
+    .filter((el) => !el.querySelector("li, p"))
+    .map((el) => el.textContent.trim())
+    .filter(Boolean);
+};
 
 // 🌟 FIX: A tiny 1x1 transparent pixel to trick the backend into overwriting the old image
 const TRANSPARENT_PIXEL =
@@ -30,6 +53,9 @@ export default function ManageWhatWeOffer() {
   // Banner states
   const [bannerHeading, setBannerHeading] = useState("What We Offer");
   const [bannerHeadingColor, setBannerHeadingColor] = useState("#ffffff");
+  const [bannerHeadingTag, setBannerHeadingTag] = useState("h1"); // set to the tag your public page uses today
+const [bannerDescriptionSize, setBannerDescriptionSize] = useState(20);
+const [editorKey, setEditorKey] = useState(0);
   const [bannerDescription, setBannerDescription] = useState(
     "We provide bespoke interior design solutions tailored to your vision."
   );
@@ -48,7 +74,8 @@ export default function ManageWhatWeOffer() {
   // Modal (Edit Block) form state
   const [blockForm, setBlockForm] = useState({
     heading: "",
-    pointsText: "",
+    headingTag: "h2",
+description: "",
     imageSize: 100,
     image: null,
     preview: "",
@@ -74,6 +101,8 @@ export default function ManageWhatWeOffer() {
 
       setBannerHeading(content.bannerHeading || "What We Offer");
       setBannerHeadingColor(content.bannerHeadingColor || "#ffffff");
+      setBannerHeadingTag(content.bannerHeadingTag || "h1");
+setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 20);
       setBannerDescription(
         content.bannerDescription ||
           "We provide bespoke interior design solutions tailored to your vision."
@@ -97,6 +126,8 @@ export default function ManageWhatWeOffer() {
       const hydratedSections = Array.isArray(sectionsData)
         ? sectionsData.map((s) => ({
             heading: s.heading || "",
+            headingTag: s.headingTag || "h2",
+description: s.description || "",
             points: Array.isArray(s.points) && s.points.length ? s.points : [""],
             image: s.image || null,
             preview: "",
@@ -124,9 +155,11 @@ export default function ManageWhatWeOffer() {
 
   // ---------------- Block modal handlers ----------------
   const openAddBlockModal = () => {
+    setEditorKey((k) => k + 1);
     setBlockForm({
       heading: "",
-      pointsText: "",
+      headingTag: "h2",
+description: "",
       imageSize: 100,
       image: null,
       preview: "",
@@ -135,9 +168,11 @@ export default function ManageWhatWeOffer() {
   };
 
   const openEditBlockModal = (section, index) => {
+    setEditorKey((k) => k + 1);
     setBlockForm({
       heading: section.heading || "",
-      pointsText: (section.points || []).join("\n"),
+      headingTag: section.headingTag || "h2",
+description: section.description || pointsToHtml(section.points),
       imageSize: section.imageSize || 100,
       image: null,
       preview: typeof section.image === "string" ? section.image : "",
@@ -171,6 +206,8 @@ const persistSection = async (updatedSections, newSection, index) => {
 
     const cleanedSections = updatedSections.map((s) => ({
       heading: s.heading,
+      headingTag: s.headingTag,
+description: s.description,
       points: s.points,
       imageSize: s.imageSize,
       image: typeof s.image === "string" ? s.image : "",
@@ -181,6 +218,8 @@ const persistSection = async (updatedSections, newSection, index) => {
       JSON.stringify({
         bannerHeading,
         bannerHeadingColor,
+        bannerHeadingTag,
+bannerDescriptionSize,
         bannerDescription,
         bannerDescriptionColor,
         bgSize: "cover",
@@ -213,16 +252,34 @@ const persistSection = async (updatedSections, newSection, index) => {
   e.preventDefault();
 
   const updated = [...sections];
-  const points = blockForm.pointsText.split("\n").map((p) => p.trim()).filter(Boolean);
-  const existing = updated[blockForm.item_index];
+  // const points = blockForm.pointsText.split("\n").map((p) => p.trim()).filter(Boolean);
+  // const existing = updated[blockForm.item_index];
 
-  const newSection = {
-    heading: blockForm.heading,
-    points: points.length ? points : [""],
-    imageSize: Number(blockForm.imageSize) || 100,
-    image: blockForm.image instanceof File ? blockForm.image : existing?.image || null,
-    preview: blockForm.image instanceof File ? blockForm.preview : "",
-  };
+  // const newSection = {
+  //   heading: blockForm.heading,
+  //   points: points.length ? points : [""],
+  //   imageSize: Number(blockForm.imageSize) || 100,
+  //   image: blockForm.image instanceof File ? blockForm.image : existing?.image || null,
+  //   preview: blockForm.image instanceof File ? blockForm.preview : "",
+  // };
+
+  const html = blockForm.description || "";
+const points = htmlToPoints(html);
+if (!points.length && !/<img/i.test(html)) {
+  toast.error("Description is required.");
+  return;
+}
+const existing = updated[blockForm.item_index];
+
+const newSection = {
+  heading: blockForm.heading,
+  headingTag: blockForm.headingTag || "h2",
+  description: html,
+  points: points.length ? points : [""],
+  imageSize: Number(blockForm.imageSize) || 100,
+  image: blockForm.image instanceof File ? blockForm.image : existing?.image || null,
+  preview: blockForm.image instanceof File ? blockForm.preview : "",
+};
 
   updated[blockForm.item_index] = newSection;
 
@@ -268,6 +325,8 @@ const persistSection = async (updatedSections, newSection, index) => {
         JSON.stringify({
           bannerHeading,
           bannerHeadingColor,
+          bannerHeadingTag,
+bannerDescriptionSize,
           bannerDescription,
           bannerDescriptionColor,
           bgSize: "cover", // background image always fills the banner
@@ -331,7 +390,7 @@ const persistSection = async (updatedSections, newSection, index) => {
             <h5 className="fw-bold mb-3">Banner Content</h5>
 
             {/* Row 1 — Heading + Description */}
-            <div className="row mb-3">
+            {/* <div className="row mb-3">
               <div className="col-md-6">
                 <label className="form-label">Banner Heading</label>
                 <input
@@ -351,7 +410,6 @@ const persistSection = async (updatedSections, newSection, index) => {
               </div>
             </div>
 
-            {/* Row 2 — Heading Color + Description Color */}
             <div className="row align-items-start mb-3">
               <div className="col-md-6">
                 <label className="form-label">Heading Color</label>
@@ -371,7 +429,43 @@ const persistSection = async (updatedSections, newSection, index) => {
                   onChange={(e) => setBannerDescriptionColor(e.target.value)}
                 />
               </div>
-            </div>
+            </div> */}
+
+            {/* Row 1 — Heading + Tag + Color */}
+<div className="row g-3 mb-3">
+  <div className="col-md-6">
+    <label className="form-label">Banner Heading</label>
+    <input className="form-control" value={bannerHeading} onChange={(e) => setBannerHeading(e.target.value)} />
+  </div>
+  <div className="col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select className="form-select" value={bannerHeadingTag} onChange={(e) => setBannerHeadingTag(e.target.value)}>
+      {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+    </select>
+  </div>
+  <div className="col-md-3">
+    <label className="form-label">Heading Color</label>
+    <input type="color" className="form-control form-control-color w-100" value={bannerHeadingColor} onChange={(e) => setBannerHeadingColor(e.target.value)} />
+  </div>
+</div>
+
+{/* Row 2 — Description + Size + Color */}
+<div className="row g-3 mb-3">
+  <div className="col-md-6">
+    <label className="form-label">Banner Description</label>
+    <textarea rows={2} className="form-control" value={bannerDescription} onChange={(e) => setBannerDescription(e.target.value)} />
+  </div>
+  <div className="col-md-3">
+    <label className="form-label">Description Size (px)</label>
+    <select className="form-select" value={bannerDescriptionSize} onChange={(e) => setBannerDescriptionSize(Number(e.target.value))}>
+      {DESC_SIZES.map((s) => <option key={s} value={s}>{s}px</option>)}
+    </select>
+  </div>
+  <div className="col-md-3">
+    <label className="form-label">Description Color</label>
+    <input type="color" className="form-control form-control-color w-100" value={bannerDescriptionColor} onChange={(e) => setBannerDescriptionColor(e.target.value)} />
+  </div>
+</div>
 
             {/* Row 3 — Background Image, full width, always fills as cover */}
             <div className="row">
@@ -531,7 +625,7 @@ const persistSection = async (updatedSections, newSection, index) => {
             </div>
             <form onSubmit={handleBlockSave}>
               <div className="modal-body row">
-                <div className="mb-3 col-md-12">
+                {/* <div className="mb-3 col-md-12">
                   <label className="form-label">Title</label>
                   <input
                     type="text"
@@ -542,11 +636,23 @@ const persistSection = async (updatedSections, newSection, index) => {
                     onChange={handleBlockFormChange}
                     required
                   />
-                </div>
+                </div> */}
+
+                <div className="mb-3 col-md-9">
+  <label className="form-label">Title</label>
+  <input type="text" className="form-control" name="heading" placeholder="e.g. Interior Design & Planning"
+    value={blockForm.heading} onChange={handleBlockFormChange} required />
+</div>
+<div className="mb-3 col-md-3">
+  <label className="form-label">Title Tag</label>
+  <select className="form-select" name="headingTag" value={blockForm.headingTag} onChange={handleBlockFormChange}>
+    {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+  </select>
+</div>
 
                 {/* Paragraph textarea — each line becomes a tick-point on the public page.
                     The tick icon itself is fixed and not editable. */}
-                <div className="mb-2 col-md-12">
+                {/* <div className="mb-2 col-md-12">
                   <label className="form-label">Description (one point per line)</label>
                   <textarea
                     className="form-control"
@@ -557,9 +663,19 @@ const persistSection = async (updatedSections, newSection, index) => {
                     onChange={handleBlockFormChange}
                     required
                   ></textarea>
-                </div>
+                </div> */}
 
-                {blockForm.pointsText && (
+                <div className="mb-3 col-md-12">
+  <label className="form-label">Description</label>
+  <CKEditorComponent
+    key={editorKey}
+    withTickIcon
+    pageData={blockForm.description}
+    setPageData={(val) => setBlockForm((p) => ({ ...p, description: val }))}
+  />
+</div>
+
+                {/* {blockForm.pointsText && (
                   <div className="col-md-12 mb-3 p-3 bg-white border rounded">
                     <small className="text-muted d-block mb-2">Preview</small>
                     {blockForm.pointsText
@@ -585,7 +701,7 @@ const persistSection = async (updatedSections, newSection, index) => {
                         </div>
                       ))}
                   </div>
-                )}
+                )} */}
 
                 <div className="mb-3 col-md-6">
                   <label className="form-label">Image Resize (%)</label>

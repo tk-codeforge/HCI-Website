@@ -53,9 +53,12 @@ const DEFAULT_LOCATIONS = [
   },
 ];
 
-export default function MapSection({ locations: locationsProp, heading: headingProp }) {
+// export default function MapSection({ locations: locationsProp, heading: headingProp }) {
+export default function MapSection({ locations: locationsProp, heading: headingProp, headingTag: headingTagProp }) {
   const locations = locationsProp && locationsProp.length ? locationsProp : DEFAULT_LOCATIONS;
   const heading = headingProp || "Explore us on Map";
+  const HeadingTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(headingTagProp) ? headingTagProp : "h2";
+const lockLook = HeadingTag !== "h2";
   // Set the first location as the default active map
   const [activeLocation, setActiveLocation] = useState(locations[0]);
 
@@ -63,7 +66,21 @@ export default function MapSection({ locations: locationsProp, heading: headingP
     <section className="container my-5 map">
       <div className="row mx-0">
         <div className="col-lg-6 pe-lg-4">
-          <h2 className="pb-4">{heading}</h2>
+          {/* <h2 className="pb-4">{heading}</h2> */}
+          {lockLook && (
+  <style>{`
+    .map .map-heading {
+      font-family: var(--font-outfit), sans-serif;
+      font-weight: 600 !important;
+      font-size: 50px;
+      color: inherit;
+    }
+    @media screen and (max-width: 767px) {
+      .map .map-heading { font-size: 32px !important; }
+    }
+  `}</style>
+)}
+<HeadingTag className={`pb-4${lockLook ? " map-heading" : ""}`}>{heading}</HeadingTag>
           
           {/* Render Locations List */}
           {locations.map((loc, index) => {

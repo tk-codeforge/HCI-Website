@@ -9,12 +9,15 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 // 🌟 FIX: A tiny 1x1 transparent pixel to trick the backend into overwriting the old image
 const TRANSPARENT_PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+
 export default function ManageTheWayWeWork() {
   const [contentId, setContentId] = useState(null);
   console.log("contentId =", contentId);
 
   const [heading, setHeading] = useState("The Way We Work");
   const [headingColor, setHeadingColor] = useState("#ffffff");
+  const [headingTag, setHeadingTag] = useState("h2");
 
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [backgroundPreview, setBackgroundPreview] = useState("");
@@ -49,6 +52,7 @@ export default function ManageTheWayWeWork() {
 
       setHeading(content.heading || "The Way We Work");
       setHeadingColor(content.headingColor || "#ffffff"); 
+      setHeadingTag(content.headingTag || "h2");
       setBgSize(content.bgSize || "cover");               
       
       const hydratedCards = (content.cards || []).map((card) => ({
@@ -144,6 +148,7 @@ export default function ManageTheWayWeWork() {
         JSON.stringify({
           heading,
           headingColor,
+          headingTag,
           bgSize,
           bg_image: finalBgImage, 
           cards: updatedCards,
@@ -228,7 +233,7 @@ export default function ManageTheWayWeWork() {
 
         {/* Heading Settings */}
         <div className="card shadow-sm border-0 mb-4">
-          <div className="card-body row">
+          {/* <div className="card-body row">
             <div className="col-md-8">
               <label className="form-label fw-bold">Section Heading</label>
               <input
@@ -247,7 +252,40 @@ export default function ManageTheWayWeWork() {
                 title="Choose heading color"
               />
             </div>
-          </div>
+          </div> */}
+
+          <div className="card-body row g-3">
+  <div className="col-md-6">
+    <label className="form-label fw-bold">Section Heading</label>
+    <input
+      className="form-control"
+      value={heading}
+      onChange={(e) => setHeading(e.target.value)}
+    />
+  </div>
+  <div className="col-md-3">
+    <label className="form-label fw-bold">Heading Tag</label>
+    <select
+      className="form-select"
+      value={headingTag}
+      onChange={(e) => setHeadingTag(e.target.value)}
+    >
+      {HEADING_TAGS.map((t) => (
+        <option key={t} value={t}>{t.toUpperCase()}</option>
+      ))}
+    </select>
+  </div>
+  <div className="col-md-3">
+    <label className="form-label fw-bold">Heading Color</label>
+    <input
+      type="color"
+      className="form-control form-control-color w-100"
+      value={headingColor}
+      onChange={(e) => setHeadingColor(e.target.value)}
+      title="Choose heading color"
+    />
+  </div>
+</div>
         </div>
 
         {/* Background Settings */}

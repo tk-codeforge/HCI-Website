@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import api from "@/utils/api";
+import DOMPurify from "isomorphic-dompurify";
+
+const TITLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const HomeAbout3D = () => {
     const [data, setData] = useState(null);
@@ -22,6 +25,7 @@ const HomeAbout3D = () => {
     }, []);
 
     if (loading || !data) return null;
+    const TitleTag = TITLE_TAGS.includes(data.title_tag) ? data.title_tag : "h1";
 
     return (
         <section className="about-3d-wrapper py-5 my-lg-5">
@@ -70,13 +74,18 @@ const HomeAbout3D = () => {
 
                     {/* RIGHT SIDE: Text Content */}
                     <div className="col-lg-6 col-md-12 mt-3 mt-lg-0 text-center text-lg-start">
-                        <h2 className="fw-bold mb-4 text-dark" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: "1.2" }}>
+                        <TitleTag className="fw-bold mb-4 text-dark" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: "1.2" }}>
                             {data.title}
-                        </h2>
+                        </TitleTag>
                         
-                        <p className="text-muted font-poppins mb-5" style={{ fontSize: "16px", lineHeight: "1.8" }}>
+                        {/* <p className="text-muted font-poppins mb-5" style={{ fontSize: "16px", lineHeight: "1.8" }}>
                             {data.description}
-                        </p>
+                        </p> */}
+                        <div
+    className="text-muted font-poppins mb-5 about-3d-description"
+    style={{ fontSize: "16px", lineHeight: "1.8" }}
+    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(data.description || "") }}
+/>
 
                         <div className="d-flex justify-content-center justify-content-lg-start">
     <a 

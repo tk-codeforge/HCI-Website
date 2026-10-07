@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import BackgroundImageRow from "../components/BackgroundImageRow";
 import TeamMediaGallery from "../components/TeamMediaGallery";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -146,6 +147,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function TeamGallerys() {
+  const seo = await getSeoData();
 
   const bannerRecord = await getBannerData();
 const bgHeading = bannerRecord?.banner_heading || "Teams";
@@ -156,6 +158,7 @@ const teamMediaItems = teamPageMedia?.json_content?.items || [];
 const hasMedia = teamMediaItems.length > 0;
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* 1. RESTORED ORIGINAL IMAGE BANNER */}
         {/* <BackgroundImageRow

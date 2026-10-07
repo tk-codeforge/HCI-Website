@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCmsExperienceCenterDto } from './dto/create-cms-experience-center.dto';
@@ -51,6 +52,22 @@ async create(dto: CreateCmsExperienceCenterDto, imageName: string | null) {
     ...center,
     image: center.image ? `${baseUrl}${center.image}` : null,
   };
+}
+
+private slugify(text = '') {
+  return text.toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+async findBySlug(slug: string) {
+  const centers = await this.cmsExperienceCenterRepository.find();
+  const match = centers.find(
+    (c) => `experience-center-${this.slugify(c.title)}` === slug,
+  );
+  if (!match) throw new NotFoundException('Experience center not found');
+  return this.formatRecord(match);
 }
 
 async findAll() {

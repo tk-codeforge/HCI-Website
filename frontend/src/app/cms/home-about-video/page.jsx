@@ -4,6 +4,17 @@ import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+
+const TITLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+// Set this to whatever tag HomeAbout3D renders the title with today,
+// so nothing changes on the live site until someone picks a different tag.
+const DEFAULT_TITLE_TAG = "h2";
 
 const CmsHomeAboutVideo = () => {
     const authToken = useSelector((state) => state.auth.authToken);
@@ -12,6 +23,7 @@ const CmsHomeAboutVideo = () => {
 
     const [formData, setFormData] = useState({
         title: "",
+        title_tag: DEFAULT_TITLE_TAG,
         description: "",
         show_video_desktop: true,
         show_video_mobile: true,
@@ -29,6 +41,7 @@ const CmsHomeAboutVideo = () => {
                 if (res.data) {
                     setFormData({
                         title: res.data.title || "",
+                        title_tag: res.data.title_tag || DEFAULT_TITLE_TAG,
                         description: res.data.description || "",
                         show_video_desktop: res.data.show_video_desktop,
                         show_video_mobile: res.data.show_video_mobile,
@@ -51,6 +64,7 @@ const CmsHomeAboutVideo = () => {
 
         const data = new FormData();
         data.append("title", formData.title);
+        data.append("title_tag", formData.title_tag); 
         data.append("description", formData.description);
         data.append("show_video_desktop", formData.show_video_desktop);
         data.append("show_video_mobile", formData.show_video_mobile);
@@ -90,14 +104,38 @@ const CmsHomeAboutVideo = () => {
                                 
                                 <div className="col-12"><h5 className="text-primary fw-bold">1. Text Content</h5></div>
                                 
-                                <div className="col-md-12">
+                                {/* <div className="col-md-12">
                                     <label className="form-label fw-bold">Title</label>
                                     <input type="text" className="form-control" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} required />
                                 </div>
                                 <div className="col-md-12">
                                     <label className="form-label fw-bold">Description</label>
                                     <textarea className="form-control" rows="4" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} required />
-                                </div>
+                                </div> */}
+
+                                <div className="col-md-9">
+    <label className="form-label fw-bold">Title</label>
+    <input type="text" className="form-control" value={formData.title}
+        onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+</div>
+
+<div className="col-md-3">
+    <label className="form-label fw-bold">Title Tag</label>
+    <select className="form-select" value={formData.title_tag}
+        onChange={(e) => setFormData({ ...formData, title_tag: e.target.value })}>
+        {TITLE_TAGS.map((t) => (
+            <option key={t} value={t}>{t.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+
+<div className="col-md-12">
+    <label className="form-label fw-bold">Description</label>
+    <CKEditorComponent
+        pageData={formData.description}
+        setPageData={(val) => setFormData((prev) => ({ ...prev, description: val }))}
+    />
+</div>
 
                                 <div className="col-12 mt-5"><h5 className="text-primary fw-bold">2. Media Uploads</h5></div>
 

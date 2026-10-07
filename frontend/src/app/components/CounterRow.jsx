@@ -4,6 +4,9 @@ import CountUp from "react-countup";
 import Image from "next/image";
 
 const CounterRow = (props) => {
+  const HeadingTag = ["h1","h2","h3","h4","h5","h6"].includes(props.titleHeadingTagCounter)
+    ? props.titleHeadingTagCounter
+    : "h2";
   return (
     <div className="modern-excellence-wrapper w-100 py-5">
       <style
@@ -262,13 +265,13 @@ const CounterRow = (props) => {
       <div className="container">
         {/* HEADING */}
         <div className="section-heading-wrapper text-center">
-          <h2 className="h2 font_about fw-bolder section-main-heading mb-0">
+          <HeadingTag className="h2 fw-bolder section-main-heading mb-0">
             {props.titleHeadingCounter}
             <span className={props.subHeadingClassCounter}>
               {" "}
               {props.subHeadingCounter}
             </span>
-          </h2>
+          </HeadingTag>
         </div>
 
         {/* MAIN GRID */}

@@ -27,6 +27,11 @@ export class CmsExperienceCenterController {
     return this.cmsExperienceCenterService.findAll();
   }
 
+  @Get('by-slug/:slug')
+findBySlug(@Param('slug') slug: string) {
+  return this.cmsExperienceCenterService.findBySlug(slug);
+}
+
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.cmsExperienceCenterService.findOne(+id);

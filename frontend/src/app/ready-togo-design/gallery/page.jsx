@@ -2,7 +2,8 @@ import GalleryDetail from "../../components/GalleryDetail";
 import MainLayout from "../../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 const BASE_URL = "https://hcinterior.in";
@@ -50,6 +51,7 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
   const galleryData = await getGalleryData(id);
 
   if (!galleryData) return notFound();
+  const seo = await getGallerySeo({ basePath: "/ready-togo-design/gallery", id });
 
   const images = galleryData?.child_images ?? [];
   const title = galleryData?.child_content?.title ?? "Ready to go Gallery";
@@ -58,6 +60,7 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
   if (images.length === 0) {
     return (
       <MainLayout>
+         <JsonLd data={seo?.custom_schema} />
         <main className="container my-5 py-5 text-center">
            <h2 className="font-outfit text-muted">No images found for this gallery.</h2>
         </main>

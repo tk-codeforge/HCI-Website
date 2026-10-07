@@ -221,6 +221,7 @@ import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg } from "../components/MediaImage";
 import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -375,6 +376,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function SpaceSavingFurniture() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("spacesaving-furniture");
   const exclusiveDesignData = await getSpaceSavingFurnitureData();
 
@@ -432,6 +434,7 @@ const bannerStyle = bannerImage
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <section className="container my-5">
           <div className="text-center row mx-0 mb-3 mb-lg-5"> */}

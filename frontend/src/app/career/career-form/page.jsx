@@ -702,6 +702,7 @@ import React from "react";
 import MainLayout from "../../layouts/MainLayout";
 import CareerFormClient from "./CareerFormClient";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../../components/JsonLd";
 
 // Regenerate the page data every 60 seconds
 export const revalidate = 60;
@@ -836,6 +837,7 @@ async function getActiveJobs() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function CareerFormPage({ searchParams }) {
+  const seo = await getSeoData();
   // In Next.js 14, searchParams is an object, not a promise.
   const jobId = searchParams?.jobId || null;
 
@@ -850,6 +852,7 @@ export default async function CareerFormPage({ searchParams }) {
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <CareerFormClient
         cmsSettings={cmsSettings}
         jobId={jobId}

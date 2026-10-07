@@ -6,6 +6,9 @@ import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
+const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const safeTag = (t, fallback) => (TAGS.includes(t) ? t : fallback);
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -138,6 +141,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Services() {
+  const seo = await getSeoData();
   const rawPageDataList = await getServiceData();
 
   // Fetch CMS page data (Banner & Custom Content)
@@ -217,6 +221,8 @@ if (!hasCustomContent && rawPageDataList && Array.isArray(rawPageDataList)) {
 const bannerDesc = cmsData?.banner?.description || cmsData?.bannerDescription || "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
 const bannerHeadingColor = cmsData?.bannerHeadingColor || "#ffffff";
 const bannerDescriptionColor = cmsData?.bannerDescriptionColor || "#ffffff";
+const bannerHeadingTag = safeTag(cmsData?.bannerHeadingTag, "h1"); // use the tag the banner renders today as the fallback
+const bannerDescriptionSize = Number(cmsData?.bannerDescriptionSize) || 14;
   let rawBannerImg =
   cmsData?.banner?.image ||
   cmsData?.bg_image ||
@@ -228,6 +234,7 @@ const hasCustomBanner =
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <style dangerouslySetInnerHTML={{__html: `
 .services-page-wrapper .secbgbesclass {
   border-left: none !important;
@@ -355,7 +362,7 @@ const hasCustomBanner =
 .services-page-wrapper .secbgbesclass {
   color: var(--services-description-color, #ffffff) !important;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
-  font-size: 1.25rem;
+  font-size: var(--services-description-size, 14px) !important;
 }
   @media (max-width: 768px) {
   .services-page-wrapper {
@@ -394,14 +401,17 @@ const hasCustomBanner =
   style={{
     "--services-heading-color": bannerHeadingColor,
     "--services-description-color": bannerDescriptionColor,
+    "--services-description-size": `${bannerDescriptionSize}px`,
     ...(hasCustomBanner ? { "--services-bg-image": `url(${rawBannerImg})` } : {}),
   }}
 >
         <BackgroundImageRow
   sectionBgImages={"sectionbg services"}
   sectionBgHeading={bannerHeading}
+  headingTag={bannerHeadingTag}
   secBgHeadingClass="sec_bgheading_lass"
   sectionBgDescription={bannerDesc}
+     descriptionFontSize={bannerDescriptionSize}
   secBgDesClass="secbgbesclass"
   noDivider
   bgImageUrl={hasCustomBanner ? rawBannerImg : undefined}
@@ -436,6 +446,7 @@ const hasCustomBanner =
               //   ? (item?.image || fallbackImg) 
               //   : (fallbackImg); // Enforces strict array fallback order for cities
               const itemImage = item?.image || null;
+              const CardTag = safeTag(item?.headingTag, "h2");
 
               const btnText = item?.button_text || item?.buttonText || "Read More";
 
@@ -478,9 +489,9 @@ const hasCustomBanner =
                     <div className={`col-lg-6 ${isEven ? 'order-lg-2' : 'order-lg-1'} ps-lg-5`}>
   <span className="service-badge font-quicksand">Premium Interiors</span>
   
-  <h2 className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(2rem, 3vw, 2.5rem)', lineHeight: '1.2' }}>
-    {titleText}
-  </h2>
+  <CardTag className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(2rem, 3vw, 2.5rem)', lineHeight: '1.2' }}>
+  {titleText}
+</CardTag>
   
   {/* Apply the CSS class directly here */}
   <div 

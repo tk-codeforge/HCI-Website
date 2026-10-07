@@ -277,6 +277,7 @@ import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -433,6 +434,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function ReclaimedWood() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("reclaimed-wood");
   const exclusiveDesignData = await getReclaimedWoodData();
 
@@ -490,6 +492,7 @@ const bannerStyle = bannerImage
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}

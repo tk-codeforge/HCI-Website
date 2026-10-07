@@ -2,6 +2,7 @@ import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading
 import MainLayout from "../layouts/MainLayout";
 import PortfolioCard from "../components/PortfolioCard";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 // export const metadata = {
 //   title: "Design Excellence Award - High Creation Interior",
 //   description:
@@ -103,6 +104,7 @@ export async function generateMetadata() {
 
 // const Awards = () => {
   export default async function Awards() {
+    const seo = await getSeoData();
     const bannerRecord = await getBannerData();
 const bgHeading = bannerRecord?.banner_heading || "Awards Gallery";
 const bgDescription = bannerRecord?.banner_description || "";
@@ -117,6 +119,7 @@ const bgDescription = bannerRecord?.banner_description || "";
           <link rel="canonical" href="https://hcinterior.in/awards" />	
       </head> */}
       <MainLayout>
+        <JsonLd data={seo?.custom_schema} />
         <main>
         <style dangerouslySetInnerHTML={{ __html: `
             .force-white-heading {

@@ -8,6 +8,9 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
 const PAGE_TYPE = "what_we_offer";
 
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const EYEBROW_TAGS = ["span", "h1", "h2", "h3", "h4", "h5", "h6"];
+
 export default function ManageWhatWeOfferPage() {
   return (
     <AuthMainLayout>
@@ -28,6 +31,8 @@ function ManageWhatWeOfferContent() {
   // alongside heading/headingColor in the same json_content blob.
   const [spanText, setSpanText] = useState("Explore");
   const [spanColor, setSpanColor] = useState("#ff914d");
+  const [headingTag, setHeadingTag] = useState("h2");
+const [spanTag, setSpanTag] = useState("span");
   const [bgImage, setBgImage] = useState(""); 
   const [bgImageFile, setBgImageFile] = useState(null);
   const [bgImagePreview, setBgImagePreview] = useState(""); 
@@ -59,6 +64,8 @@ function ManageWhatWeOfferContent() {
           setSpanText(content.spanText || "Explore");
           setSpanColor(content.spanColor || "#ff914d");
           // Read image from json_content or record table
+          setHeadingTag(content.headingTag || "h2");
+setSpanTag(content.spanTag || "span");
           setBgImage(content.bg_image || content.image || record.image || "");
           setBgImageRemoved(false);
           setBgSize(content.bgSize || "cover");
@@ -121,9 +128,11 @@ function ManageWhatWeOfferContent() {
       // 🌟 NEW: spanText/spanColor now saved alongside heading/headingColor
       const payload = { 
         heading, 
-        headingColor, 
+        headingColor,
+        headingTag,  
         spanText,
         spanColor,
+        spanTag,
         bgSize, 
         bg_image: bgImage, 
         image: bgImage, 
@@ -194,27 +203,57 @@ function ManageWhatWeOfferContent() {
       </div>
 
       {/* Main Settings */}
-      <div className="card shadow-sm border-0 mb-5 rounded-4">
-        <div className="card-body p-4">
-          <div className="row g-4">
-            <div className="col-md-8">
+      <div className="card shadow-sm border-0 mb-4">
+        <div className="card-body">
+          <div className="row g-3">
+            {/* <div className="col-md-8">
               <label className="form-label fw-bold">Section Heading</label>
               <input type="text" className="form-control form-control-lg rounded-pill" value={heading} onChange={(e) => setHeading(e.target.value)} />
             </div>
             <div className="col-md-4">
               <label className="form-label fw-bold">Heading Color</label>
               <input type="color" className="form-control form-control-color border-0 p-0" value={headingColor} onChange={(e) => setHeadingColor(e.target.value)} style={{ width: "100%", height: "45px", borderRadius: "30px", cursor: "pointer" }} />
-            </div>
+            </div> */}
+
+            <div className="col-md-5">
+  <label className="form-label fw-bold">Section Heading</label>
+  <input type="text" className="form-control form-control-lg rounded-pill" value={heading} onChange={(e) => setHeading(e.target.value)} />
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Tag</label>
+  <select className="form-select form-select-lg rounded-pill" value={headingTag} onChange={(e) => setHeadingTag(e.target.value)}>
+    {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+  </select>
+</div>
+<div className="col-md-4">
+  <label className="form-label fw-bold">Heading Color</label>
+  <input type="color" className="form-control form-control-color border-0 p-0" value={headingColor} onChange={(e) => setHeadingColor(e.target.value)} style={{ width: "100%", height: "45px", borderRadius: "30px", cursor: "pointer" }} />
+</div>
             {/* 🌟 NEW: Span / Eyebrow Text + Color, same layout pattern as
                 Section Heading / Heading Color above. */}
-            <div className="col-md-8">
+            {/* <div className="col-md-8">
               <label className="form-label fw-bold">Span / Eyebrow Text</label>
               <input type="text" className="form-control form-control-lg rounded-pill" value={spanText} onChange={(e) => setSpanText(e.target.value)} placeholder="e.g. Explore" />
             </div>
             <div className="col-md-4">
               <label className="form-label fw-bold">Span Color</label>
               <input type="color" className="form-control form-control-color border-0 p-0" value={spanColor} onChange={(e) => setSpanColor(e.target.value)} style={{ width: "100%", height: "45px", borderRadius: "30px", cursor: "pointer" }} />
-            </div>
+            </div> */}
+
+            <div className="col-md-5">
+  <label className="form-label fw-bold">Span / Eyebrow Text</label>
+  <input type="text" className="form-control form-control-lg rounded-pill" value={spanText} onChange={(e) => setSpanText(e.target.value)} placeholder="e.g. Explore" />
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Span Tag</label>
+  <select className="form-select form-select-lg rounded-pill" value={spanTag} onChange={(e) => setSpanTag(e.target.value)}>
+    {EYEBROW_TAGS.map((t) => <option key={t} value={t}>{t === "span" ? "span (default)" : t.toUpperCase()}</option>)}
+  </select>
+</div>
+<div className="col-md-4">
+  <label className="form-label fw-bold">Span Color</label>
+  <input type="color" className="form-control form-control-color border-0 p-0" value={spanColor} onChange={(e) => setSpanColor(e.target.value)} style={{ width: "100%", height: "45px", borderRadius: "30px", cursor: "pointer" }} />
+</div>
             <div className="col-md-8 mt-4">
               <label className="form-label fw-bold">Background Image</label>
               <input type="file" accept="image/*" className="form-control" onChange={(e) => {

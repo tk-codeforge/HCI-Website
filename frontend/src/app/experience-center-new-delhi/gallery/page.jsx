@@ -1,7 +1,8 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,10 @@ export default async function NewDelhiGalleryPage({ searchParams }) {
   }
 
   if (!galleryData) return notFound();
-
-  return <GalleryClient galleryData={galleryData} />;
+  const seo = await getGallerySeo({ basePath: "/experience-center-new-delhi/gallery", id });
+  return (
+    <>
+      <JsonLd data={seo?.custom_schema} /> <GalleryClient galleryData={galleryData} />
+      </>
+  );
 }

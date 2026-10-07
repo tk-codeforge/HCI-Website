@@ -101,6 +101,10 @@ findChildren(@Param('parent_asset_id') parentAssetId: number) {
     );
   }
 
+  @Delete('by-slug/:parent_slug')
+removeBySlug(@Param('parent_slug') parentSlug: string) {
+  return this.experienceCenterAssetService.removeBySlug(parentSlug);
+}
   // Matches: api.delete(`${EP.children}/${img.id}`)
   @Delete(':id')
   remove(@Param('id') id: number) {

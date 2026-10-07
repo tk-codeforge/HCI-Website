@@ -250,6 +250,8 @@ import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout"; 
 import { FaTrash, FaPlus, FaSave } from "react-icons/fa";
 
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+
 // 🌟 Pre-defined list of icons matching your theme
 const AVAILABLE_ICONS = [
   "FaShieldAlt", "FaClock", "FaCheckCircle", "FaHome", 
@@ -267,6 +269,7 @@ export default function ManageWhyChooseUs() {
   // { heading, headingColor, cards } json_content blob — mirrors the pattern
   // already used by What We Offer / The Way We Work heading colors.
   const [headingColor, setHeadingColor] = useState("#222222");
+  const [headingTag, setHeadingTag] = useState("h2");
 
   useEffect(() => {
     fetchData();
@@ -307,6 +310,7 @@ export default function ManageWhyChooseUs() {
       } else {
         setCards(Array.isArray(json.cards) ? json.cards : []);
         setHeading(json.heading || "Why Choose us");
+        setHeadingTag(json.headingTag || "h2");
         // 🌟 NEW: hydrate heading color, defaulting for records saved before
         // this field existed so nothing breaks for older data.
         setHeadingColor(json.headingColor || "#222222");
@@ -333,6 +337,7 @@ export default function ManageWhyChooseUs() {
       const res = await api.post("/cms-content/home_page_content_why_choose_us", {
         heading,
         headingColor,
+        headingTag,
         cards: defaultCards
       });
 
@@ -372,7 +377,7 @@ export default function ManageWhyChooseUs() {
       setSaving(true);
       // We use the standard PATCH endpoint to replace the whole JSON blob at once
       const res = await api.patch(`/cms-content/${contentId}`, {
-        json_content: { heading, headingColor, cards }
+        json_content: { heading, headingColor, headingTag, cards }
       });
 
       if (res.status === 200 || res.status === 201) {
@@ -423,7 +428,7 @@ export default function ManageWhyChooseUs() {
 
               <div className="card shadow-sm border-0 mb-4">
   <div className="card-body">
-    <div className="row g-3">
+    {/* <div className="row g-3">
       <div className="col-md-9">
         <label className="form-label fw-bold">
           Section Heading
@@ -439,8 +444,6 @@ export default function ManageWhyChooseUs() {
         />
       </div>
 
-      {/* 🌟 NEW: Heading Color picker, same pattern as the other CMS
-          heading-management pages (color input + hex value in state). */}
       <div className="col-md-3">
         <label className="form-label fw-bold">
           Heading Color
@@ -452,7 +455,45 @@ export default function ManageWhyChooseUs() {
           onChange={(e) => setHeadingColor(e.target.value)}
         />
       </div>
-    </div>
+    </div> */}
+
+    <div className="row g-3">
+  <div className="col-md-6">
+    <label className="form-label fw-bold">Section Heading</label>
+    <input
+      type="text"
+      className="form-control"
+      value={heading}
+      onChange={(e) => setHeading(e.target.value)}
+      placeholder="Enter section heading"
+      style={{ borderRadius: "8px" }}
+    />
+  </div>
+
+  <div className="col-md-3">
+    <label className="form-label fw-bold">Heading Tag</label>
+    <select
+      className="form-select"
+      value={headingTag}
+      onChange={(e) => setHeadingTag(e.target.value)}
+      style={{ borderRadius: "8px" }}
+    >
+      {HEADING_TAGS.map((t) => (
+        <option key={t} value={t}>{t.toUpperCase()}</option>
+      ))}
+    </select>
+  </div>
+
+  <div className="col-md-3">
+    <label className="form-label fw-bold">Heading Color</label>
+    <input
+      type="color"
+      className="form-control form-control-color w-100"
+      value={headingColor}
+      onChange={(e) => setHeadingColor(e.target.value)}
+    />
+  </div>
+</div>
   </div>
 </div>
               {cards.map((card, index) => (

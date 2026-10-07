@@ -13,6 +13,9 @@ const CKEditorComponent = dynamic(
   () => import("@/app/components/CKEditorComponent"),
   { ssr: false }
 );
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const EYEBROW_SIZES = Array.from({ length: 11 }, (_, i) => 10 + i); // 10px to 20px
+const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i);    // 10px to 30px
 
 const DEFAULT_CATEGORIES = [
   { enabled: true, title: "Modular / Wooden Work", duration: "10 Years" },
@@ -40,9 +43,13 @@ const DEFAULT_FORM = {
   hero: {
     enabled: true,
     eyebrow: "OUR WARRANTY COMMITMENT",
+    eyebrowSize: "12px",
     heading: "Quality backed by clear warranty terms.",
+    headingTag: "h1",
     description:
       "Understand your applicable warranty coverage, conditions and claim process.",
+  descriptionSize: "16px",
+
   },
   summary: {
     enabled: true,
@@ -919,7 +926,7 @@ const removeContactItem = (index) => {
                       </label>
                     </div>
 
-                    <div className="row g-3">
+                    {/* <div className="row g-3">
                       <div className="col-lg-4">
                         <label className="form-label fw-semibold">
                           Eyebrow
@@ -971,7 +978,83 @@ const removeContactItem = (index) => {
                           }
                         />
                       </div>
-                    </div>
+                    </div> */}
+
+                    <div className="row g-3 align-items-start">
+  <div className="col-lg-3">
+    <label className="form-label fw-semibold">Eyebrow</label>
+    <input
+      className="form-control"
+      value={formData.hero.eyebrow || ""}
+      onChange={(event) => updateNested("hero", "eyebrow", event.target.value)}
+    />
+  </div>
+
+  <div className="col-lg-2">
+    <label className="form-label fw-semibold">Eyebrow Size</label>
+    <select
+      className="form-select"
+      value={formData.hero.eyebrowSize || ""}
+      onChange={(event) =>
+        updateNested("hero", "eyebrowSize", event.target.value ? Number(event.target.value) : "")
+      }
+    >
+      <option value="">Default</option>
+      {EYEBROW_SIZES.map((s) => (
+        <option key={s} value={s}>{s}px</option>
+      ))}
+    </select>
+  </div>
+
+  <div className="col-lg-5">
+    <label className="form-label fw-semibold">Heading</label>
+    <input
+      className="form-control"
+      value={formData.hero.heading || ""}
+      onChange={(event) => updateNested("hero", "heading", event.target.value)}
+    />
+  </div>
+
+  <div className="col-lg-2">
+    <label className="form-label fw-semibold">Heading Tag</label>
+    <select
+      className="form-select"
+      value={formData.hero.headingTag || ""}
+      onChange={(event) => updateNested("hero", "headingTag", event.target.value)}
+    >
+      <option value="">Default</option>
+      {HEADING_TAGS.map((t) => (
+        <option key={t} value={t}>{t.toUpperCase()}</option>
+      ))}
+    </select>
+  </div>
+
+  <div className="col-lg-9">
+    <label className="form-label fw-semibold">Description</label>
+    <textarea
+      className="form-control"
+      rows={4}
+      value={formData.hero.description || ""}
+      onChange={(event) => updateNested("hero", "description", event.target.value)}
+    />
+  </div>
+
+  <div className="col-lg-3">
+    <label className="form-label fw-semibold">Description Font Size</label>
+    <select
+      className="form-select"
+      value={formData.hero.descriptionSize || ""}
+      onChange={(event) =>
+        updateNested("hero", "descriptionSize", event.target.value ? Number(event.target.value) : "")
+      }
+    >
+      <option value="">Default</option>
+      {DESC_SIZES.map((s) => (
+        <option key={s} value={s}>{s}px</option>
+      ))}
+    </select>
+  </div>
+</div>
                   </section>
                 )}
 

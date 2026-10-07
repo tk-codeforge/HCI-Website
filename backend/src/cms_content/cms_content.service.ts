@@ -642,8 +642,11 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
         return this.cmsContentRepository.update(id, {
           json_content: {
             top_title: updateCmsContentDto?.json_content?.top_title || "",
+            top_title_tag: updateCmsContentDto?.json_content?.top_title_tag || "", 
             top_description: updateCmsContentDto?.json_content?.top_description || "",
+            top_description_tag: updateCmsContentDto?.json_content?.top_description_tag || "",
             mid_sub_title: updateCmsContentDto?.json_content?.mid_sub_title || "",
+            mid_sub_title_tag: updateCmsContentDto?.json_content?.mid_sub_title_tag || "",
             mid_sub_description: updateCmsContentDto?.json_content?.mid_sub_description || "",
             mid_image: imagePath ? basename(imagePath) : exitingContent.json_content.mid_image,
             background_color: updateCmsContentDto?.json_content?.background_color || exitingContent.json_content.background_color || "",

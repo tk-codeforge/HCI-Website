@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import MainLayout from "../layouts/MainLayout";
 import EstimatorClient from "./EstimatorClient";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 
 export const revalidate = 60; 
@@ -102,9 +103,11 @@ export async function generateMetadata() {
 }
 
 
-export default function Estimater() {
+export default async function Estimater() {
+  const seo = await getSeoData();
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       {/* 🌟 Wrapped in Suspense to safely use search parameters */}
       <Suspense fallback={<div className="text-center p-5 mt-5">Loading Calculator...</div>}>
         <EstimatorClient />

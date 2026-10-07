@@ -50,6 +50,21 @@ import {
 */
 
 const PAGE_KEY = "contact_page";
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const EYEBROW_TAGS = ["span", "h1", "h2", "h3", "h4", "h5", "h6"];
+// Approximate sizes so the preview visibly follows the chosen tag
+const PREVIEW_SIZES = { h1: "2.5rem", h2: "2rem", h3: "1.75rem", h4: "1.5rem", h5: "1.25rem", h6: "1rem" };
+const PreviewHeading = ({ tag, styles, children }) => {
+    const ref = React.useRef(null);
+    React.useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        Object.entries(styles).forEach(([prop, value]) =>
+            el.style.setProperty(prop, String(value), "important")
+        );
+    });
+    return React.createElement(tag, { ref }, children);
+};
 
 // Icons the admin can pick from for any card / section icon.
 const ICON_MAP = {
@@ -83,6 +98,7 @@ const DEFAULT_CONTENT = {
         heading: "Let's Design Your Dream Space",
         headingColor: "#ffffff",
         eyebrow: "Get in Touch",
+        eyebrowTag: "span",
         description:
             "For inquiries regarding any interior design service or expert advice, our team is ready to help you bring your vision to life.",
         descriptionColor: "#ffffff",
@@ -141,6 +157,7 @@ const DEFAULT_CONTENT = {
     },
     mapSection: {
         heading: "Explore us on Map",
+        headingTag: "h2",
         locations: [
             {
                 id: uid(),
@@ -207,6 +224,7 @@ const CmsContactPage = () => {
     const [mapLocForm, setMapLocForm] = useState(EMPTY_MAP_LOC);
     const [mapLocIndex, setMapLocIndex] = useState(null);
     const [mapHeading, setMapHeading] = useState(DEFAULT_CONTENT.mapSection.heading);
+    const [mapHeadingTag, setMapHeadingTag] = useState(DEFAULT_CONTENT.mapSection.headingTag);
 
     // ----------------------------------------------------------------------
     // Fetch existing content
@@ -256,6 +274,7 @@ const CmsContactPage = () => {
                 setEcHeading(merged.experienceCenters.heading);
                 setEcIcon(merged.experienceCenters.icon);
                 setMapHeading(merged.mapSection.heading);
+                setMapHeadingTag(merged.mapSection.headingTag || "h2");
                 setSelectedId(contentData?.id || null);
             }
         } catch (err) {
@@ -421,7 +440,8 @@ const CmsContactPage = () => {
     // ----------------------------------------------------------------------
     const handleMapMetaSubmit = (e) => {
         e.preventDefault();
-        persist({ ...content, mapSection: { ...content.mapSection, heading: mapHeading } }, "Map section updated.");
+        // persist({ ...content, mapSection: { ...content.mapSection, heading: mapHeading } }, "Map section updated.");
+        persist({ ...content, mapSection: { ...content.mapSection, heading: mapHeading, headingTag: mapHeadingTag } }, "Map section updated.");
     };
 
     const openAddMapLoc = () => {
@@ -480,7 +500,7 @@ const CmsContactPage = () => {
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleBannerSubmit}>
-                            <div className="row mb-3">
+                            {/* <div className="row mb-3">
                                 <div className="col-md-3">
                                     <label className="form-label">Eyebrow Text</label>
                                     <input
@@ -519,7 +539,36 @@ const CmsContactPage = () => {
                                         required
                                     />
                                 </div>
-                            </div>
+                            </div> */}
+
+                            <div className="row mb-3">
+    <div className="col-md-3">
+        <label className="form-label">Eyebrow Text</label>
+        <input type="text" className="form-control" name="eyebrow"
+            value={bannerDraft.eyebrow} onChange={handleBannerChange} placeholder="e.g. Get in Touch" />
+    </div>
+    <div className="col-md-2">
+        <label className="form-label">Eyebrow Tag</label>
+        <select className="form-select" name="eyebrowTag" value={bannerDraft.eyebrowTag || "span"} onChange={handleBannerChange}>
+            {EYEBROW_TAGS.map((tag) => (
+                <option key={tag} value={tag}>{tag === "span" ? "span (default)" : tag.toUpperCase()}</option>
+            ))}
+        </select>
+    </div>
+    <div className="col-md-2">
+        <label className="form-label">Heading Tag</label>
+        <select className="form-select" name="headingTag" value={bannerDraft.headingTag} onChange={handleBannerChange}>
+            {HEADING_TAGS.map((tag) => (
+                <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+            ))}
+        </select>
+    </div>
+    <div className="col-md-5">
+        <label className="form-label">Heading Text</label>
+        <input type="text" className="form-control" name="heading"
+            value={bannerDraft.heading} onChange={handleBannerChange} required />
+    </div>
+</div>
 
                             <div className="row mb-3">
                                 <div className="col-md-8">
@@ -599,19 +648,36 @@ const CmsContactPage = () => {
                                     background: `linear-gradient(135deg, ${bannerDraft.bgColorStart} 0%, ${bannerDraft.bgColorEnd} 100%)`,
                                 }}
                             >
-                                <span style={{ color: bannerDraft.headingColor, opacity: 0.85, fontWeight: 600 }}>
-                                    {bannerDraft.eyebrow}
-                                </span>
-                                <div
-                                    style={{
-                                        color: bannerDraft.headingColor,
-                                        fontWeight: 700,
-                                        fontSize: "2rem",
-                                        margin: "8px 0",
-                                    }}
-                                >
-                                    {bannerDraft.heading}
-                                </div>
+                                {/* <small style={{ display: "block", color: "#94a3b8", marginBottom: 8 }}>
+    Eyebrow &lt;{bannerDraft.eyebrowTag || "span"}&gt; · Heading &lt;{bannerDraft.headingTag || "h1"}&gt;
+</small> */}
+<PreviewHeading
+    tag={bannerDraft.eyebrowTag || "span"}
+    styles={{
+        color: bannerDraft.headingColor,
+        opacity: 0.85,
+        "font-weight": 600,
+        "font-size": "1rem",
+        "line-height": 1.2,
+        margin: 0,
+        "font-family": "inherit",
+    }}
+>
+    {bannerDraft.eyebrow}
+</PreviewHeading>
+<PreviewHeading
+    tag={bannerDraft.headingTag || "h1"}
+    styles={{
+        color: bannerDraft.headingColor,
+        "font-weight": 700,
+        "font-size": PREVIEW_SIZES[bannerDraft.headingTag] || "2rem",
+        "line-height": 1.2,
+        margin: "8px 0",
+        "font-family": "inherit",
+    }}
+>
+    {bannerDraft.heading}
+</PreviewHeading>
                                 <div
                                     style={{
                                         color: bannerDraft.descriptionColor,
@@ -793,7 +859,7 @@ const CmsContactPage = () => {
                     </div>
                     <div className="card-body">
                         <form onSubmit={handleMapMetaSubmit} className="row g-3 align-items-end mb-4">
-                            <div className="col-md-8">
+                            {/* <div className="col-md-8">
                                 <label className="form-label">Section Heading</label>
                                 <input
                                     type="text"
@@ -806,7 +872,25 @@ const CmsContactPage = () => {
                                 <button className="btn btn-primary w-100" type="submit">
                                     Save Heading
                                 </button>
-                            </div>
+                            </div> */}
+
+                            <div className="col-md-5">
+    <label className="form-label">Section Heading</label>
+    <input type="text" className="form-control" value={mapHeading} onChange={(e) => setMapHeading(e.target.value)} />
+</div>
+<div className="col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select className="form-select" value={mapHeadingTag} onChange={(e) => setMapHeadingTag(e.target.value)}>
+        {HEADING_TAGS.map((tag) => (
+            <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+<div className="col-md-4">
+    <button className="btn btn-primary w-100" type="submit">
+        Save Heading
+    </button>
+</div>
                         </form>
 
                         <div className="d-flex justify-content-end mb-2">

@@ -207,14 +207,23 @@ import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+import DOMPurify from "isomorphic-dompurify";
 
 import dynamic from "next/dynamic";
 const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
 
 const CMS_KEY = "cancellation_policy";
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-const MIN_FONT_SIZE = 10;
-const MAX_FONT_SIZE = 30;
+const escapeHtml = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Old closing notes were two plain lines; convert them so nothing is lost
+const legacyNoteToHtml = (c) => {
+    const l1 = (c?.line1 || "").trim();
+    const l2 = (c?.line2 || "").trim();
+    return (
+        (l1 ? `<p>${escapeHtml(l1)}</p>` : "") +
+        (l2 ? `<p><strong><span style="color:#dc3545;">${escapeHtml(l2)}</span></strong></p>` : "")
+    );
+};
 
 const emptyHeading = {
     heading_text: "",
@@ -222,7 +231,6 @@ const emptyHeading = {
     subheading_text: "",
     subheading_tag: "h3",
     description_text: "",
-    description_font_size: 16,
 };
 
 
@@ -289,7 +297,8 @@ const CmsCancellationPolicy = () => {
 
     // Section 4: closing / footer note (shared across all cards)
     const [footerNoteId, setFooterNoteId] = useState(null);
-    const [footerNote, setFooterNote] = useState(emptyFooterNote);
+    // const [footerNote, setFooterNote] = useState(emptyFooterNote);
+    const [footerNoteHtml, setFooterNoteHtml] = useState("");
     const [footerNoteSaving, setFooterNoteSaving] = useState(false);
 
     const [tableId, setTableId] = useState(null);
@@ -313,7 +322,6 @@ const [tableSaving, setTableSaving] = useState(false);
                     subheading_text: headingRecord.json_content?.subheading_text || "",
                     subheading_tag: headingRecord.json_content?.subheading_tag || "h3",
                     description_text: headingRecord.json_content?.description_text || "",
-                    description_font_size: headingRecord.json_content?.description_font_size || 16,
                 });
             } else {
                 setHeadingId(null);
@@ -342,16 +350,24 @@ if (tableRecord) {
             setCards(cardRecords);
 
             const footerNoteRecord = list.find((item) => item.json_content?.section === "footer_note");
+            // if (footerNoteRecord) {
+            //     setFooterNoteId(footerNoteRecord.id);
+            //     setFooterNote({
+            //         line1: footerNoteRecord.json_content?.line1 || "",
+            //         line2: footerNoteRecord.json_content?.line2 || "",
+            //     });
+            // } else {
+            //     setFooterNoteId(null);
+            //     setFooterNote(emptyFooterNote);
+            // }
+
             if (footerNoteRecord) {
-                setFooterNoteId(footerNoteRecord.id);
-                setFooterNote({
-                    line1: footerNoteRecord.json_content?.line1 || "",
-                    line2: footerNoteRecord.json_content?.line2 || "",
-                });
-            } else {
-                setFooterNoteId(null);
-                setFooterNote(emptyFooterNote);
-            }
+    setFooterNoteId(footerNoteRecord.id);
+    setFooterNoteHtml(footerNoteRecord.json_content?.note_html ?? legacyNoteToHtml(footerNoteRecord.json_content));
+} else {
+    setFooterNoteId(null);
+    setFooterNoteHtml("");
+}
         } catch (err) {
             toast.error(err.message ?? "Failed to fetch data. Please try again.");
         } finally {
@@ -500,14 +516,37 @@ const handleCardBodyChange = (cardLocalId, html) => {
     };
 
     // ---------------- CLOSING / FOOTER NOTE ----------------
-    const handleFooterNoteChange = (e) => {
-        const { name, value } = e.target;
-        setFooterNote((prev) => ({ ...prev, [name]: value }));
-    };
+    // const handleFooterNoteChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setFooterNote((prev) => ({ ...prev, [name]: value }));
+    // };
+
+    //     const handleSaveFooterNote = async () => {
+    //     setFooterNoteSaving(true);
+    //     const sectionData = { section: "footer_note", ...footerNote };
+    //     try {
+    //         let response;
+    //         if (footerNoteId) {
+    //             response = await api.patch(`/cms-content/${footerNoteId}`, { json_content: sectionData }, { headers: authHeaders });
+    //         } else {
+    //             response = await api.post(`/cms-content/${CMS_KEY}`, sectionData, { headers: authHeaders });
+    //             if (response.data?.id) setFooterNoteId(response.data.id);
+    //         }
+    //         if (response.status === 200 || response.status === 201) {
+    //             toast.success("Closing note saved.");
+    //         } else {
+    //             toast.error("Error saving closing note. Please try again.");
+    //         }
+    //     } catch (err) {
+    //         toast.error(err.message ?? "Error saving closing note. Please try again.");
+    //     } finally {
+    //         setFooterNoteSaving(false);
+    //     }
+    // };
 
         const handleSaveFooterNote = async () => {
         setFooterNoteSaving(true);
-        const sectionData = { section: "footer_note", ...footerNote };
+        const sectionData = { section: "footer_note", note_html: footerNoteHtml };
         try {
             let response;
             if (footerNoteId) {
@@ -591,7 +630,7 @@ const handleCardBodyChange = (cardLocalId, html) => {
                                     </select>
                                 </div>
 
-                                <div className="col-md-9">
+                                {/* <div className="col-md-9">
                                     <label className="form-label">Description</label>
                                     <textarea
                                         className="form-control"
@@ -624,7 +663,15 @@ const handleCardBodyChange = (cardLocalId, html) => {
                                         value={heading.description_font_size}
                                         onChange={handleHeadingChange}
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="col-12">
+    <label className="form-label">Description</label>
+    <CKEditorComponent
+        pageData={heading.description_text}
+        setPageData={(val) => setHeading((prev) => ({ ...prev, description_text: val }))}
+    />
+</div>
 
                                 <div className="col-12 border-top pt-3 mt-2">
                                     <p className="text-muted small mb-1">Preview:</p>
@@ -638,12 +685,17 @@ const handleCardBodyChange = (cardLocalId, html) => {
                                         { className: "mb-2", style: { color: "#ff914d" } },
                                         heading.subheading_text || "Sub heading preview"
                                     )}
-                                    <p
+                                    {/* <p
                                         className="text-muted mb-0"
                                         style={{ fontSize: `${heading.description_font_size}px` }}
                                     >
                                         {heading.description_text || "Description preview text."}
-                                    </p>
+                                    </p> */}
+
+                                    <div
+    className="text-muted"
+    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(heading.description_text || "<p>Description preview text.</p>") }}
+/>
                                 </div>
 
                                 <div className="col-12 d-flex justify-content-end">
@@ -735,7 +787,7 @@ const handleCardBodyChange = (cardLocalId, html) => {
                         <div className="card mb-5 shadow-sm">
                             <div className="card-header fw-bold">Closing Note</div>
                             <div className="card-body">
-                                <div className="mb-3">
+                                {/* <div className="mb-3">
                                     <label className="form-label">Line 1 (normal text)</label>
                                     <textarea
                                         className="form-control"
@@ -764,7 +816,24 @@ const handleCardBodyChange = (cardLocalId, html) => {
                                         <p className="mb-1">{footerNote.line1 || "Line 1 preview text."}</p>
                                         <p className="mb-0 fw-bold text-danger">{footerNote.line2 || "Line 2 preview text."}</p>
                                     </div>
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3">
+    <label className="form-label">Closing Note</label>
+    <CKEditorComponent
+        pageData={footerNoteHtml}
+        setPageData={setFooterNoteHtml}
+    />
+</div>
+
+<div className="border-top pt-3 mb-3">
+    <p className="text-muted small mb-1">Preview:</p>
+    <div
+        className="alert alert-warning border-warning mb-0"
+        role="alert"
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(footerNoteHtml || "<p>Closing note preview.</p>") }}
+    />
+</div>
 
                                 <div className="d-flex justify-content-end">
                                     <button

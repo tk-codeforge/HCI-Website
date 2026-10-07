@@ -1,6 +1,11 @@
 "use client";
 import React, { useEffect } from "react";
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
+import DOMPurify from "isomorphic-dompurify";
+
+const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const safeTag = (t, fallback) => (TAGS.includes(t) ? t : fallback);
+const hasHtml = (s) => /<[a-z][\s\S]*>/i.test(s || "");
 
 export default function HowItsWorksClient({ displaySteps, bannerData }) {
   useEffect(() => {
@@ -102,10 +107,64 @@ export default function HowItsWorksClient({ displaySteps, bannerData }) {
           background-size: cover !important;
           background-position: center !important;
         }
+
+                .step-desc {
+          font-family: var(--font-poppins), sans-serif;
+          font-size: 1.05rem;
+          line-height: 1.6;
+        }
+        .step-desc p { margin: 0 0 1rem; }
+        .step-row-light .step-desc { color: #555555; }
+        .step-row-dark .step-desc { color: #e0e0e0; }
+        /* A bulleted list in the editor gets the same tick as the old points */
+        .step-desc ul { list-style: none; padding: 0; margin: 0 0 1rem; }
+        .step-desc ul li {
+          position: relative;
+          padding-left: 35px;
+          margin-bottom: 1rem;
+          font-family: var(--font-poppins), sans-serif;
+          font-size: 1.05rem;
+          line-height: 1.6;
+        }
+        .step-desc ul li::before {
+          content: '✔';
+          position: absolute;
+          left: 0;
+          top: 2px;
+          color: #ff914d;
+          font-size: 1.1rem;
+          background: rgba(255, 145, 77, 0.15);
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+        }
+        /* Tick button lines: draw the same badge and hide the image */
+        .step-desc p:has(img[alt="Tick icon"]) { position: relative; padding-left: 35px; margin-bottom: 1rem; }
+        .step-desc p:has(img[alt="Tick icon"])::before {
+          content: '✔';
+          position: absolute;
+          left: 0;
+          top: 2px;
+          color: #ff914d;
+          font-size: 1.1rem;
+          background: rgba(255, 145, 77, 0.15);
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+        }
+        .step-desc p:has(img[alt="Tick icon"]) img[alt="Tick icon"] { display: none; }
+
         @media (max-width: 767px) {
           .step-row-wrapper { padding: 3rem 0; }
           .step-title { font-size: 1.6rem; }
           .step-list li { font-size: 0.95rem; margin-bottom: 0.8rem; }
+          .step-desc, .step-desc ul li { font-size: 0.95rem; }
           .step-img { max-width: 280px; }
         }
       `}} />
@@ -123,6 +182,8 @@ export default function HowItsWorksClient({ displaySteps, bannerData }) {
         <BackgroundImageWithHeading
           sectionBgImages={"contact_wrapper services"}
           sectionBgHeading={bannerData.heading} 
+          headingTag={safeTag(bannerData.headingTag, "h1")}
+descriptionFontSize={bannerData.descriptionSize}
           secBgHeadingClass="sec_bgheading_lass force-white-heading" 
           sectionBgDescription={bannerData.description}
           secBgDesClass={"text-center bg-transparent"}
@@ -134,12 +195,20 @@ export default function HowItsWorksClient({ displaySteps, bannerData }) {
           const isImageLeft = index % 2 === 0;
           const isDarkTheme = index % 2 !== 0; 
 
-          const pointsToRender = step.points 
-            ? step.points 
-            : (step.description ? step.description.split('\n').filter(p => p.trim() !== '') : []);
+          // const pointsToRender = step.points 
+          //   ? step.points 
+          //   : (step.description ? step.description.split('\n').filter(p => p.trim() !== '') : []);
+
+          const isHtmlDesc = hasHtml(step.description);
+const pointsToRender = isHtmlDesc
+  ? []
+  : step.points
+    ? step.points
+    : (step.description ? step.description.split('\n').filter(p => p.trim() !== '') : []);
           
           const stepNumDisplay = step.stepNumber || (index + 1 < 10 ? '0' + (index + 1) : index + 1);
           const targetId = step.id || `step-${index + 1}`;
+          const StepTag = safeTag(step.headingTag, "h2");
 
           return (
             <div className={`step-row-wrapper ${isDarkTheme ? 'step-row-dark' : 'step-row-light'}`} id={targetId} key={index}>
@@ -167,15 +236,26 @@ export default function HowItsWorksClient({ displaySteps, bannerData }) {
                     <div className="step-content px-2 px-md-0">
                       <span className="step-badge">Step {stepNumDisplay}</span>
                       
-                      <h2 className="step-title">
-                        {step.title}
-                      </h2>
-                      
-                      <ul className="step-list">
-                        {pointsToRender.map((point, i) => (
-                          <li key={i}>{point}</li>
-                        ))}
-                      </ul>
+                      <StepTag className="step-title">
+  {step.title}
+</StepTag>
+
+{isHtmlDesc ? (
+  <div
+    className="step-desc"
+    dangerouslySetInnerHTML={{
+      __html: DOMPurify.sanitize(
+        step.description.replace(/(<img[^>]*alt="Tick icon"[^>]*>)(\s|&nbsp;)+/gi, "$1")
+      ),
+    }}
+  />
+) : (
+  <ul className="step-list">
+    {pointsToRender.map((point, i) => (
+      <li key={i}>{point}</li>
+    ))}
+  </ul>
+)}
                     </div>
                   </div>
 

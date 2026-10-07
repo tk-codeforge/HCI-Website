@@ -5,6 +5,7 @@ import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -166,6 +167,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function ResidentialProjects({ searchParams }) {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("residential-projects", "project-gallery");
   const params = await searchParams;
   const currentPage = Number(params?.page) || 1;
@@ -228,6 +230,7 @@ const bannerStyle = bannerImage
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* EXACT ORIGINAL HERO SECTION RESTORED */}
         {/* <section className="container my-5">

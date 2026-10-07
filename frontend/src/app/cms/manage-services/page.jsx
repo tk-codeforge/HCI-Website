@@ -5,6 +5,15 @@ import { toast } from "react-toastify";
 import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import { FaSave, FaPlus, FaTrash, FaArrowUp, FaArrowDown } from "react-icons/fa";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i); // 10px to 30px
 
 const PAGE_TYPE = "services_page";
 
@@ -22,6 +31,9 @@ function ManageServicesContent() {
   const [contentId, setContentId] = useState(null);
   const [bannerHeadingColor, setBannerHeadingColor] = useState("#ffffff");
 const [bannerDescriptionColor, setBannerDescriptionColor] = useState("#ffffff");
+const [bannerHeadingTag, setBannerHeadingTag] = useState("h1");
+const [bannerDescriptionSize, setBannerDescriptionSize] = useState(14);
+const [editorVersion, setEditorVersion] = useState(0);
 
   // Banner States
   const [bannerHeading, setBannerHeading] = useState("Services");
@@ -54,9 +66,12 @@ const [bannerDescriptionColor, setBannerDescriptionColor] = useState("#ffffff");
 setBannerDescription(content.bannerDescription || "");
 setBannerHeadingColor(content.bannerHeadingColor || "#ffffff");
 setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
+setBannerHeadingTag(content.bannerHeadingTag || "h1");
+setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 14);
           setBgImage(content.bg_image || content.image || record.image || "");
           setBgImageRemoved(false);
           setServices(Array.isArray(content.services) ? content.services : []);
+          setEditorVersion((v) => v + 1);
         }
       }
     } catch (err) {
@@ -101,6 +116,7 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
     const updated = [...services];
     updated.splice(index, 1);
     setServices(updated);
+    setEditorVersion((v) => v + 1);
     
     const updatedImages = { ...serviceImages };
     delete updatedImages[index];
@@ -114,6 +130,7 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
   const updated = [...services];
   [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
   setServices(updated);
+  setEditorVersion((v) => v + 1);
 
   // Keep any pending File uploads in serviceImages aligned with the new positions
   setServiceImages((prev) => {
@@ -137,6 +154,8 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
   bannerDescription,
   bannerHeadingColor,
   bannerDescriptionColor,
+  bannerHeadingTag,
+bannerDescriptionSize,
   bg_image: bgImage, 
   image: bgImage, 
   services 
@@ -213,7 +232,7 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
         </div>
         <div className="card-body p-4">
           <div className="row g-4">
-            <div className="col-md-12">
+            {/* <div className="col-md-12">
               <label className="form-label fw-bold">Banner Heading</label>
               <input type="text" className="form-control form-control-lg rounded-pill" value={bannerHeading} onChange={(e) => setBannerHeading(e.target.value)} />
             </div>
@@ -229,6 +248,36 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
 </div>
 
 <div className="col-md-6">
+  <label className="form-label fw-bold">Description Color</label>
+  <input type="color" className="form-control form-control-color w-100" value={bannerDescriptionColor} onChange={(e) => setBannerDescriptionColor(e.target.value)} />
+</div> */}
+
+<div className="col-md-6">
+  <label className="form-label fw-bold">Banner Heading</label>
+  <input type="text" className="form-control" value={bannerHeading} onChange={(e) => setBannerHeading(e.target.value)} />
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Tag</label>
+  <select className="form-select" value={bannerHeadingTag} onChange={(e) => setBannerHeadingTag(e.target.value)}>
+    {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+  </select>
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Color</label>
+  <input type="color" className="form-control form-control-color w-100" value={bannerHeadingColor} onChange={(e) => setBannerHeadingColor(e.target.value)} />
+</div>
+
+<div className="col-md-6">
+  <label className="form-label fw-bold">Banner Description</label>
+  <textarea rows={3} className="form-control" value={bannerDescription} onChange={(e) => setBannerDescription(e.target.value)} />
+</div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Description Size (px)</label>
+  <select className="form-select" value={bannerDescriptionSize} onChange={(e) => setBannerDescriptionSize(Number(e.target.value))}>
+    {DESC_SIZES.map((s) => <option key={s} value={s}>{s}px</option>)}
+  </select>
+</div>
+<div className="col-md-3">
   <label className="form-label fw-bold">Description Color</label>
   <input type="color" className="form-control form-control-color w-100" value={bannerDescriptionColor} onChange={(e) => setBannerDescriptionColor(e.target.value)} />
 </div>
@@ -310,15 +359,34 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
                 )}
               </div>
 
-              <div className="col-md-12">
+              {/* <div className="col-md-12">
                 <label className="form-label">Heading</label>
                 <input className="form-control" value={service.title} onChange={(e) => handleServiceChange(index, "title", e.target.value)} placeholder="e.g. Interior Designer in Noida for Home in 2026" />
-              </div>
+              </div> */}
+              <div className="col-md-9">
+  <label className="form-label">Heading</label>
+  <input className="form-control" value={service.title} onChange={(e) => handleServiceChange(index, "title", e.target.value)} placeholder="e.g. Interior Designer in Noida for Home in 2026" />
+</div>
+<div className="col-md-3">
+  <label className="form-label">Heading Tag</label>
+  <select className="form-select" value={service.headingTag || "h2"} onChange={(e) => handleServiceChange(index, "headingTag", e.target.value)}>
+    {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+  </select>
+</div>
 
-              <div className="col-12">
+              {/* <div className="col-12">
                 <label className="form-label">Description (HTML supported)</label>
                 <textarea rows={4} className="form-control" value={service.description} onChange={(e) => handleServiceChange(index, "description", e.target.value)} />
-              </div>
+              </div> */}
+
+              <div className="col-12">
+  <label className="form-label">Description</label>
+  <CKEditorComponent
+    key={`${index}-${editorVersion}`}
+    pageData={service.description || ""}
+    setPageData={(val) => handleServiceChange(index, "description", val)}
+  />
+</div>
 
               <div className="col-md-6">
                 <label className="form-label">Button Text</label>

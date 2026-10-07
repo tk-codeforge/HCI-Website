@@ -1,7 +1,8 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 // Force dynamic because we use searchParams (?id=...)
 export const dynamic = "force-dynamic";
@@ -69,7 +70,13 @@ export default async function ExperienceCenterGalleryPage({ searchParams }) {
   }
 
   if (!galleryData) return notFound();
+  const seo = await getGallerySeo({ basePath: "/experience-center-noida/gallery", id: galleryId,});
 
   // Pass data to Client Component for rendering
-  return <GalleryClient galleryData={galleryData} />;
+  return (
+    <>
+      <JsonLd data={seo?.custom_schema} /> 
+      <GalleryClient galleryData={galleryData} />
+       </>
+  );
 }

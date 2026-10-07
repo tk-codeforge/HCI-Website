@@ -476,6 +476,8 @@ import PortfolioCard from "../../components/PortfolioCard";
 import ExperienceForm from "../../components/ExperienceForm";
 import { notFound } from "next/navigation";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { getCenterSlugMap, centerGalleryHref } from "@/utils/slugEdit";
+import JsonLd from "../../components/JsonLd";
 
 // Force dynamic because we are rendering based on dynamic params
 export const dynamic = "force-dynamic";
@@ -556,12 +558,22 @@ async function getSeoData(slug) {
   }
 }
 
+async function getCenter(slug) {
+  const res = await fetch(
+    `${getBaseUrl()}/cms-experience-center/by-slug/${encodeURIComponent(slug)}`,
+    { cache: "no-store" }
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Center lookup failed: ${res.status}`);
+  return res.json();
+}
+
 export async function generateMetadata({ params }) {
   const { "experience-center": slug } = await params;
 
   // Same guard the page itself uses: invalid slugs are not indexed
-  if (!slug || !slug.startsWith("experience-center-")) {
-    return { title: "Custom Experience Center", robots: { index: false, follow: false } };
+  if (!slug?.startsWith("experience-center-") || !(await getCenter(slug))) {
+    return { title: "Page not found", robots: { index: false, follow: false } };
   }
 
   const seo = await getSeoData(slug);
@@ -599,46 +611,72 @@ export async function generateMetadata({ params }) {
 }
 
 // --- MAIN SERVER COMPONENT ---
+// export default async function CustomExperienceCenterPage({ params }) {
+//   // CORRECTED: Next.js maps the param to the exact folder name
+//   const slug = params?.["experience-center"];
+
+//   if (!slug) {
+//     return notFound();
+//   }
+
+//   // SAFETY CHECK: extra guard so this route only renders slugs that were
+//   // actually generated as experience centers.
+//   if (!slug.startsWith("experience-center-")) {
+//     return notFound();
+//   }
+
+//   let experienceData = [];
+//   let experienceDataVideo = [];
+
+//   try {
+//     const baseURL = getBaseUrl();
+
+//     const [dataRes, videoRes] = await Promise.all([
+//       fetch(`${baseURL}/experience-center-assets/experience_center/${slug}`, { next: { revalidate: 60 } }),
+//       fetch(`${baseURL}/experience-center-assets/experience_center_video/${slug}`, { next: { revalidate: 60 } }),
+//     ]);
+
+//     if (dataRes.ok) experienceData = await dataRes.json();
+//     if (videoRes.ok) experienceDataVideo = await videoRes.json();
+//   } catch (err) {
+//     console.error(`Experience Center Fetch Error for ${slug}:`, err);
+//     return notFound();
+//   }
+
 export default async function CustomExperienceCenterPage({ params }) {
-  // CORRECTED: Next.js maps the param to the exact folder name
-  const slug = params?.["experience-center"];
+  const seo = await getSeoData();
+  const { "experience-center": slug } = await params;
+  if (!slug?.startsWith("experience-center-")) return notFound();
 
-  if (!slug) {
-    return notFound();
-  }
+  if (!(await getCenter(slug))) return notFound();   // <-- the actual fix
 
-  // SAFETY CHECK: extra guard so this route only renders slugs that were
-  // actually generated as experience centers.
-  if (!slug.startsWith("experience-center-")) {
-    return notFound();
-  }
+  // const baseURL = getBaseUrl();
+  // const [dataRes, videoRes] = await Promise.all([
+  //   fetch(`${baseURL}/experience-center-assets/experience_center/${slug}`, { cache: "no-store" }),
+  //   fetch(`${baseURL}/experience-center-assets/experience_center_video/${slug}`, { cache: "no-store" }),
+  // ]);
 
-  let experienceData = [];
-  let experienceDataVideo = [];
-
-  try {
     const baseURL = getBaseUrl();
+  const [dataRes, videoRes, slugMap] = await Promise.all([
+    fetch(`${baseURL}/experience-center-assets/experience_center/${slug}`, { cache: "no-store" }),
+    fetch(`${baseURL}/experience-center-assets/experience_center_video/${slug}`, { cache: "no-store" }),
+    getCenterSlugMap(slug),
+  ]);
+  if (!dataRes.ok || !videoRes.ok) throw new Error("Asset fetch failed");
 
-    const [dataRes, videoRes] = await Promise.all([
-      fetch(`${baseURL}/experience-center-assets/experience_center/${slug}`, { next: { revalidate: 60 } }),
-      fetch(`${baseURL}/experience-center-assets/experience_center_video/${slug}`, { next: { revalidate: 60 } }),
-    ]);
-
-    if (dataRes.ok) experienceData = await dataRes.json();
-    if (videoRes.ok) experienceDataVideo = await videoRes.json();
-  } catch (err) {
-    console.error(`Experience Center Fetch Error for ${slug}:`, err);
-    return notFound();
-  }
+  const experienceData = await dataRes.json();
+  const experienceDataVideo = await videoRes.json();
 
   // Cards 8+ (index 7 onward) — no cap. Laid out two per row (col-lg-6
   // each); if the trailing row would only have one image left, it spans
   // the full width instead, so a lone extra image never sits half-empty.
   const extraImages = experienceData.slice(7);
-    const galleryLink = (item) => `/${slug}/gallery?id=${item?.id}`;
+    // const galleryLink = (item) => `/${slug}/gallery?id=${item?.id}`;
+      const galleryLink = (item) => centerGalleryHref(slug, slugMap, item?.id);
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* Video Section */}
         <section className="video_wrapper conatiner-fluid">

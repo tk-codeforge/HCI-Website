@@ -1,7 +1,8 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,12 @@ export default async function GurugramGalleryPage({ searchParams }) {
   }
 
   if (!galleryData) return notFound();
+const seo = await getGallerySeo({ basePath: "/experience-center-noida-extension/gallery", id });
+   return (
+    <>
+      <JsonLd data={seo?.custom_schema} />
+      <GalleryClient galleryData={galleryData} />
+      </>
+  );
 
-  return <GalleryClient galleryData={galleryData} />;
 }

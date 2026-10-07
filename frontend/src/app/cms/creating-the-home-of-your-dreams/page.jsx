@@ -4,10 +4,45 @@ import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+
+const TitleRow = ({ label, name, tagName, placeholder, defaultTag, value, tagValue, onChange }) => (
+    <>
+        <div className="mb-3 col-md-9">
+            <label className="form-label">{label}</label>
+            <input type="text" className="form-control" name={name} placeholder={placeholder}
+                value={value} onChange={onChange} required />
+        </div>
+        <div className="mb-3 col-md-3">
+            <label className="form-label">Heading Tag</label>
+            <select className="form-select" name={tagName} value={tagValue || ""} onChange={onChange}>
+                <option value="">{`Default (${defaultTag.toUpperCase()})`}</option>
+                {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+            </select>
+        </div>
+    </>
+);
+
+const DescriptionEditor = ({ label, ready, value, onChange }) => (
+    <div className="mb-3 col-md-12">
+        <label className="form-label">{label}</label>
+        {ready
+            ? <CKEditorComponent pageData={value} setPageData={onChange} />
+            : <div className="text-muted">Loading editor...</div>}
+    </div>
+);
 
 const CmsAboutUs = () => {
     const authToken = useSelector((state) => state.auth.authToken);
     const [loading, setLoading] = useState(false);
+    const [ready, setReady] = useState(false);
 
     // State for first section
     const [formData, setFormData] = useState({
@@ -83,6 +118,9 @@ const CmsAboutUs = () => {
             if (response.data && response.data.json_content) {
                 setForm({
                     top_title: response.data.json_content?.top_title || "",
+                    top_title_tag: response.data.json_content?.top_title_tag || "",
+                    mid_sub_title_tag: response.data.json_content?.mid_sub_title_tag || "",
+                    top_description_tag: response.data.json_content?.top_description_tag || "",
                     top_description: response.data.json_content?.top_description || "",
                     mid_sub_title: response.data.json_content?.mid_sub_title || "",
                     mid_sub_description: response.data.json_content?.mid_sub_description || "",
@@ -97,14 +135,25 @@ const CmsAboutUs = () => {
         }
     }, [authToken]);
 
-    useEffect(() => {
-        fetchContent("creating_the_home_of_your_dreams", setFormData, setSelectedId);
-        fetchContent("creating_the_home_of_your_dreams_2", setFormData_2, setSelectedId_2);
-        fetchContent("creating_the_home_of_your_dreams_3", setFormData_3, setSelectedId_3);
-        fetchContent("creating_the_home_of_your_dreams_4", setFormData_4, setSelectedId_4);
-        fetchContent("creating_the_home_of_your_dreams_5", setFormData_5, setSelectedId_5);
-        fetchContent("creating_the_home_of_your_dreams_6", setFormData_6, setSelectedId_6);
-    }, [fetchContent]);
+    // useEffect(() => {
+    //     fetchContent("creating_the_home_of_your_dreams", setFormData, setSelectedId);
+    //     fetchContent("creating_the_home_of_your_dreams_2", setFormData_2, setSelectedId_2);
+    //     fetchContent("creating_the_home_of_your_dreams_3", setFormData_3, setSelectedId_3);
+    //     fetchContent("creating_the_home_of_your_dreams_4", setFormData_4, setSelectedId_4);
+    //     fetchContent("creating_the_home_of_your_dreams_5", setFormData_5, setSelectedId_5);
+    //     fetchContent("creating_the_home_of_your_dreams_6", setFormData_6, setSelectedId_6);
+    // }, [fetchContent]);
+
+useEffect(() => {
+    Promise.all([
+        fetchContent("creating_the_home_of_your_dreams", setFormData, setSelectedId),
+        fetchContent("creating_the_home_of_your_dreams_2", setFormData_2, setSelectedId_2),
+        fetchContent("creating_the_home_of_your_dreams_3", setFormData_3, setSelectedId_3),
+        fetchContent("creating_the_home_of_your_dreams_4", setFormData_4, setSelectedId_4),
+        fetchContent("creating_the_home_of_your_dreams_5", setFormData_5, setSelectedId_5),
+        fetchContent("creating_the_home_of_your_dreams_6", setFormData_6, setSelectedId_6),
+    ]).finally(() => setReady(true));
+}, [fetchContent]);
 
     // Handle input change for text fields and image
     const handleInputChange = (e, setFormData) => {
@@ -125,6 +174,9 @@ const CmsAboutUs = () => {
         formDataToSend.append("json_content[top_description]", formData.top_description);
         formDataToSend.append("json_content[mid_sub_title]", formData.mid_sub_title);
         formDataToSend.append("json_content[mid_sub_description]", formData.mid_sub_description);
+        formDataToSend.append("json_content[top_title_tag]", formData.top_title_tag || "");
+formDataToSend.append("json_content[mid_sub_title_tag]", formData.mid_sub_title_tag || "");
+formDataToSend.append("json_content[top_description_tag]", formData.top_description_tag || "");
         formDataToSend.append("json_content[mid_image]", formData.mid_image);
 
         try {
@@ -156,7 +208,7 @@ const CmsAboutUs = () => {
                 ) : (
                     <form onSubmit={(e) => handleSubmit(e, selectedId, formData, () => fetchContent("creating_the_home_of_your_dreams", setFormData, setSelectedId))}>
                         <div className="modal-body row">
-                            <div className="mb-3 col-md-12">
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Top Title</label>
                                 <input
                                     type="text"
@@ -191,7 +243,16 @@ const CmsAboutUs = () => {
                                     onChange={(e) => handleInputChange(e, setFormData)}
                                     required
                                 />
-                            </div>
+                            </div> */}
+
+                            <TitleRow label="Top Title" name="top_title" tagName="top_title_tag" placeholder="Top Title" defaultTag="h3"
+    value={formData.top_title} tagValue={formData.top_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData)} />
+<DescriptionEditor label="Top Description" ready={ready} value={formData.top_description}
+    onChange={(val) => setFormData((p) => ({ ...p, top_description: val }))} />
+<TitleRow label="Banner Title 2" name="mid_sub_title" tagName="mid_sub_title_tag" placeholder="Banner Title 2" defaultTag="h3"
+    value={formData.mid_sub_title} tagValue={formData.mid_sub_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData)} />
                             <div className="row mb-3">
                                 <div className="col-md-6">
                                     <label className="form-label">Banner Image</label>
@@ -225,7 +286,7 @@ const CmsAboutUs = () => {
                 ) : (
                     <form onSubmit={(e) => handleSubmit(e, selectedId_2, formData_2, () => fetchContent("creating_the_home_of_your_dreams_2", setFormData_2, setSelectedId_2))}>
                         <div className="modal-body row">
-                            <div className="mb-3 col-md-12">
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Banner  Title 1</label>
                                 <input
                                     type="text"
@@ -259,7 +320,39 @@ const CmsAboutUs = () => {
                                     onChange={(e) => handleInputChange(e, setFormData_2)}
                                     required
                                 ></textarea>
-                            </div>
+                            </div> */}
+
+                            {/* <TitleRow label="Banner Title 1" name="top_title" tagName="top_title_tag" placeholder="Top Title" defaultTag="h2"
+    value={formData_2.top_title} tagValue={formData_2.top_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData_2)} />
+<div className="mb-3 col-md-12">
+    <label className="form-label">Text 2</label>
+    <input className="form-control" name="top_description" placeholder="Top Description"
+        value={formData_2.top_description} onChange={(e) => handleInputChange(e, setFormData_2)} />
+</div>
+<DescriptionEditor label="Description" ready={ready} value={formData_2.mid_sub_title}
+    onChange={(val) => setFormData_2((p) => ({ ...p, mid_sub_title: val }))} /> */}
+
+    <div className="mb-3 col-md-12">
+    <label htmlFor="top_title" className="form-label">Banner Title 1</label>
+    <input type="text" className="form-control" name="top_title" placeholder="Top Title"
+        value={formData_2.top_title} onChange={(e) => handleInputChange(e, setFormData_2)} />
+</div>
+<div className="mb-3 col-md-9">
+    <label className="form-label">Text 2</label>
+    <input className="form-control" name="top_description" placeholder="Top Description"
+        value={formData_2.top_description} onChange={(e) => handleInputChange(e, setFormData_2)} />
+</div>
+<div className="mb-3 col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select className="form-select" name="top_description_tag" value={formData_2.top_description_tag || ""}
+        onChange={(e) => handleInputChange(e, setFormData_2)}>
+        <option value="">Default</option>
+        {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+    </select>
+</div>
+<DescriptionEditor label="Description" ready={ready} value={formData_2.mid_sub_title}
+    onChange={(val) => setFormData_2((p) => ({ ...p, mid_sub_title: val }))} />
                             <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Button Link </label>
                                 <input
@@ -308,7 +401,7 @@ const CmsAboutUs = () => {
                 ) : (
                     <form onSubmit={(e) => handleSubmit(e, selectedId_3, formData_3, () => fetchContent("creating_the_home_of_your_dreams_3", setFormData_3, setSelectedId_3))}>
                         <div className="modal-body row">
-                            <div className="mb-3 col-md-12">
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Banner  Title 1</label>
                                 <input
                                     type="text"
@@ -330,7 +423,13 @@ const CmsAboutUs = () => {
                                     value={formData_3.top_description}
                                     onChange={(e) => handleInputChange(e, setFormData_3)}
                                 /> 
-                            </div>
+                            </div> */}
+
+                            <TitleRow label="Banner Title 1" name="top_title" tagName="top_title_tag" placeholder="Top Title" defaultTag="h3"
+    value={formData_3.top_title} tagValue={formData_3.top_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData_3)} />
+<DescriptionEditor label="Description" ready={ready} value={formData_3.top_description}
+    onChange={(val) => setFormData_3((p) => ({ ...p, top_description: val }))} />
                             <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Video 1</label>
                                 <input
@@ -376,7 +475,7 @@ const CmsAboutUs = () => {
                 ) : (
                     <form onSubmit={(e) => handleSubmit(e, selectedId_4, formData_4, () => fetchContent("creating_the_home_of_your_dreams_4", setFormData_4, setSelectedId_4))}>
                         <div className="modal-body row">
-                            <div className="mb-3 col-md-12">
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">   Heading</label>
                                 <input
                                     type="text"
@@ -398,7 +497,13 @@ const CmsAboutUs = () => {
                                     value={formData_4.top_description}
                                     onChange={(e) => handleInputChange(e, setFormData_4)}
                                 ></textarea> 
-                            </div>
+                            </div> */}
+
+                            <TitleRow label="Heading" name="top_title" tagName="top_title_tag" placeholder="Heading" defaultTag="h3"
+    value={formData_4.top_title} tagValue={formData_4.top_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData_4)} />
+<DescriptionEditor label="Description" ready={ready} value={formData_4.top_description}
+    onChange={(val) => setFormData_4((p) => ({ ...p, top_description: val }))} />
                             <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Button Link</label>
                                 <input
@@ -430,7 +535,7 @@ const CmsAboutUs = () => {
                 ) : (
                     <form onSubmit={(e) => handleSubmit(e, selectedId_5, formData_5, () => fetchContent("creating_the_home_of_your_dreams_5", setFormData_5, setSelectedId_5))}>
                         <div className="modal-body row">
-                            <div className="mb-3 col-md-12">
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">   Heading</label>
                                 <input
                                     type="text"
@@ -452,7 +557,13 @@ const CmsAboutUs = () => {
                                     value={formData_5.top_description}
                                     onChange={(e) => handleInputChange(e, setFormData_5)}
                                 ></textarea> 
-                            </div>
+                            </div> */}
+
+                            <TitleRow label="Heading" name="top_title" tagName="top_title_tag" placeholder="Heading" defaultTag="h3"
+    value={formData_5.top_title} tagValue={formData_5.top_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData_5)} />
+<DescriptionEditor label="Description" ready={ready} value={formData_5.top_description}
+    onChange={(val) => setFormData_5((p) => ({ ...p, top_description: val }))} />
                             <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Button Link</label>
                                 <input
@@ -484,7 +595,7 @@ const CmsAboutUs = () => {
                 ) : (
                     <form onSubmit={(e) => handleSubmit(e, selectedId_6, formData_6, () => fetchContent("creating_the_home_of_your_dreams_6", setFormData_6, setSelectedId_6))}>
                         <div className="modal-body row">
-                            <div className="mb-3 col-md-12">
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">   Heading</label>
                                 <input
                                     type="text"
@@ -495,8 +606,12 @@ const CmsAboutUs = () => {
                                     onChange={(e) => handleInputChange(e, setFormData_6)}
                                     required
                                 />
-                            </div>
-                            <div className="mb-3 col-md-12">
+                            </div> */}
+
+                            <TitleRow label="Heading" name="top_title" tagName="top_title_tag" placeholder="Heading" defaultTag="h2"
+    value={formData_6.top_title} tagValue={formData_6.top_title_tag}
+    onChange={(e) => handleInputChange(e, setFormData_6)} />
+                            {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="top_description" className="form-label">Description</label>
                                 <textarea
                                     className="form-control"
@@ -506,7 +621,10 @@ const CmsAboutUs = () => {
                                     value={formData_6.top_description}
                                     onChange={(e) => handleInputChange(e, setFormData_6)}
                                 ></textarea> 
-                            </div>
+                            </div> */}
+
+                            <DescriptionEditor label="Description" ready={ready} value={formData_6.top_description}
+    onChange={(val) => setFormData_6((p) => ({ ...p, top_description: val }))} />
                             <div className="mb-3 col-md-12">
                                 <label htmlFor="top_title" className="form-label">Button Link</label>
                                 <input

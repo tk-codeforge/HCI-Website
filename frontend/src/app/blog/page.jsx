@@ -8,6 +8,7 @@ import { FaArrowRight, FaCalendarAlt, FaUserCircle } from "react-icons/fa";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaImg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
 
 // 🌟 IMPORT OUR GLOBAL PREMIUM TEXT EXPANDER
 import ExpandableRichText from "../components/ModernPara";
@@ -122,6 +123,7 @@ async function getHeadingDescriptionData() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Blog({ searchParams }) {
+  const seo = await getSeoData();
   const page = searchParams?.page || "1";
   const rawBlogs = await getBlogsData(page);
   
@@ -196,6 +198,7 @@ const bannerStyle = bannerImage
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       {/* --- INJECT PREMIUM MODERN STYLES --- */}
       <style dangerouslySetInnerHTML={{__html: `
         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }

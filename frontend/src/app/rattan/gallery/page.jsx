@@ -1,5 +1,6 @@
 import GalleryClient from "./GalleryClient";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
@@ -10,6 +11,13 @@ export async function generateMetadata({ searchParams }) {
   });
 }
 
-export default function GalleryPage() {
-  return <GalleryClient />;
+export default async function GalleryPage({ searchParams }) {
+   const id = searchParams?.id;
+  const seo = await getGallerySeo({ basePath: "/rattan/gallery", id });
+   return (
+    <>
+      <JsonLd data={seo?.custom_schema} /> 
+      <GalleryClient />
+       </>
+  );
 }

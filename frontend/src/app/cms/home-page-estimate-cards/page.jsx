@@ -5,12 +5,34 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const SPAN_TAGS = ["span", "strong", "em"];
+
+const readRecord = (res) => {
+    if (!res?.data) return null;
+    return Array.isArray(res.data) ? res.data[0] : res.data;
+};
+
 const EstimateCardsCms = () => {
     const authToken = useSelector((state) => state.auth.authToken);
     const [pagesList, setPagesList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [draggedItemIndex, setDraggedItemIndex] = useState(null);
     const [selectedId, setSelectedId] = useState(null);
+
+    const [bannerId, setBannerId] = useState(null);
+const [bannerLoaded, setBannerLoaded] = useState(false);
+const [bannerSaving, setBannerSaving] = useState(false);
+const [banner, setBanner] = useState({
+    heading: "", heading_tag: "h2", span_tag: "span", sub_heading: "",
+});
 
     const [formData, setFormData] = useState({
         title: "", link: "/estimator-for-home", image: null, item_index: null, action: "add", is_active: true,
@@ -66,6 +88,51 @@ const EstimateCardsCms = () => {
     }, [authToken]);
 
     useEffect(() => { fetchContent(); }, [fetchContent]);
+
+    const fetchBanner = useCallback(async () => {
+    try {
+        const res = await api.get("/cms-content/home_page_estimate_banner").catch(() => null);
+        const rec = readRecord(res);
+        const json = rec?.json_content || {};
+        setBannerId(rec?.id || null);
+        setBanner({
+            heading: json.heading || "",
+            heading_tag: json.heading_tag || "h2",
+            span_tag: json.span_tag || "span",
+            sub_heading: json.sub_heading || "",
+        });
+    } finally {
+        setBannerLoaded(true);
+    }
+}, []);
+
+useEffect(() => { fetchBanner(); }, [fetchBanner]);
+
+const handleBannerSave = async () => {
+    setBannerSaving(true);
+    try {
+        // Fetch fresh and merge: PATCH replaces the whole json_content,
+        // so other banner fields (rotating_words, is_active, etc.) must be kept.
+        const freshRes = await api.get("/cms-content/home_page_estimate_banner").catch(() => null);
+        const fresh = readRecord(freshRes);
+        const merged = { ...(fresh?.json_content || {}), ...banner };
+        const id = fresh?.id || bannerId;
+        const cfg = { headers: { Authorization: `Bearer ${authToken}` } };
+
+        if (id) {
+            await api.patch(`/cms-content/${id}`, { json_content: merged }, cfg);
+        } else {
+            // create() stores the body as-is, so send it flat
+            await api.post(`/cms-content/home_page_estimate_banner`, merged, cfg);
+        }
+        toast.success("Section heading saved.");
+        fetchBanner();
+    } catch (err) {
+        toast.error("Failed to save section heading.");
+    } finally {
+        setBannerSaving(false);
+    }
+};
 
     const handleInputChange = (e) => {
         const { name, value, files, type, checked } = e.target;
@@ -160,12 +227,76 @@ const EstimateCardsCms = () => {
     return (
         <AuthMainLayout>
             <div className="container my-5">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                {/* <div className="d-flex justify-content-between align-items-center mb-4">
                     <h1 className="text-center mb-0" style={{ color: '#ff914d' }}>CMS - Estimate Marquee Cards</h1>
                     <button onClick={handleAddNewClick} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNewpageModal" style={{ backgroundColor: '#ff914d', borderColor: '#ff914d' }}>
                         + Add New Card
                     </button>
-                </div>
+                </div> */}
+
+                <div className="mb-4">
+    <h1 className="text-center mb-0" style={{ color: '#ff914d' }}>CMS - Estimate Marquee Cards</h1>
+</div>
+
+                <div className="card shadow-sm border-0 mb-4">
+    <div className="card-body">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="fw-bold mb-0">Section Heading &amp; Description</h5>
+            <button className="btn btn-success btn-sm" disabled={bannerSaving} onClick={handleBannerSave}>
+                {bannerSaving ? "Saving..." : "Save"}
+            </button>
+        </div>
+
+        <div className="row g-3">
+            <div className="col-md-6">
+                <label className="form-label fw-bold">Heading Text</label>
+                <input className="form-control" value={banner.heading}
+                    onChange={(e) => setBanner((p) => ({ ...p, heading: e.target.value }))}
+                    placeholder="Get an estimate for your" />
+            </div>
+
+            <div className="col-md-3">
+                <label className="form-label fw-bold">Heading Tag</label>
+                <select className="form-select" value={banner.heading_tag}
+                    onChange={(e) => setBanner((p) => ({ ...p, heading_tag: e.target.value }))}>
+                    {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+                </select>
+            </div>
+
+            {/* <div className="col-md-3">
+                <label className="form-label fw-bold">Rotating Word Tag</label>
+                <select className="form-select" value={banner.span_tag}
+                    onChange={(e) => setBanner((p) => ({ ...p, span_tag: e.target.value }))}>
+                    {SPAN_TAGS.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <small className="text-muted">Inline tags only, because it sits inside the heading.</small>
+            </div> */}
+
+            <div className="col-12">
+                <label className="form-label fw-bold">Description</label>
+                {bannerLoaded ? (
+                    <CKEditorComponent
+                        pageData={banner.sub_heading}
+                        setPageData={(val) => setBanner((p) => ({ ...p, sub_heading: val }))}
+                    />
+                ) : <div className="text-muted">Loading...</div>}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div className="d-flex justify-content-between align-items-center mb-3">
+    <h5 className="fw-bold mb-0">Cards</h5>
+    <button
+        onClick={handleAddNewClick}
+        className="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#addNewpageModal"
+        style={{ backgroundColor: '#ff914d', borderColor: '#ff914d' }}
+    >
+        + Add New Card
+    </button>
+</div>
 
                 {loading ? <div className="text-center">Loading...</div> : (
                     <div className="table-responsive bg-white rounded-3 shadow-sm border p-3">

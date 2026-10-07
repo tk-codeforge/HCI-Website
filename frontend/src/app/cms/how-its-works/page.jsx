@@ -5,6 +5,27 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 import { FaCheck } from "react-icons/fa";
+import dynamic from "next/dynamic";
+
+const CKEditorComponent = dynamic(
+    () => import("../../components/CKEditorComponent"),
+    { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
+);
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i); // 10px to 30px
+
+const escapeHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const hasHtml = (s) => /<[a-z][\s\S]*>/i.test(s || "");
+const plainText = (s) => (s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+// Old descriptions were one point per line. Turn them into a bulleted list so they keep their ticks.
+const textToHtml = (s) => {
+    if (!s) return "";
+    if (hasHtml(s)) return s;
+    const items = s.split("\n").map((l) => l.trim()).filter(Boolean)
+        .map((l) => `<li>${escapeHtml(l)}</li>`).join("");
+    return items ? `<ul>${items}</ul>` : "";
+};
 
 // 🌟 Fallback layout — auto-applied based on odd/even position, same logic as the
 // "What We Offer" page. Step 1, 3, 5 ... => WHITE background, image LEFT.
@@ -33,6 +54,8 @@ const CmsHowItsWorks = () => {
         headingColor: "#ffffff",
         description: "",
         descriptionColor: "#ffffff",
+        headingTag: "h1",
+descriptionSize: 20,
         bgImage: null,
         previewImage: "",
     });
@@ -40,6 +63,7 @@ const CmsHowItsWorks = () => {
     // Step Form State
     const [formData, setFormData] = useState({
         title: "",
+        headingTag: "h2",
         step_no: "",
         description: "",
         image_size: 100, // resizing (percentage)
@@ -50,6 +74,7 @@ const CmsHowItsWorks = () => {
     });
 
     const [selectedId, setSelectedId] = useState(null);
+    const [editorKey, setEditorKey] = useState(0);
 
 //     const fetchContentManagerPages = useCallback(async () => {
 //         setLoading(true);
@@ -133,6 +158,8 @@ const fetchContentManagerPages = useCallback(async () => {
                 headingColor: content.bannerHeadingColor || "#ffffff",
                 description: content.bannerDescription || "",
                 descriptionColor: content.bannerDescriptionColor || "#ffffff",
+                headingTag: content.bannerHeadingTag || "h1",
+descriptionSize: Number(content.bannerDescriptionSize) || 20,
                 bgImage: null,
                 previewImage: content.bg_image || "",
             });
@@ -174,6 +201,8 @@ const fetchContentManagerPages = useCallback(async () => {
         bannerHeadingColor: bannerData.headingColor,
         bannerDescription: bannerData.description,
         bannerDescriptionColor: bannerData.descriptionColor,
+        bannerHeadingTag: bannerData.headingTag,
+bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         bg_image: bannerData.previewImage || "",
         steps: pagesList,
     }));
@@ -218,11 +247,16 @@ const handleRemoveStepImage = () => {
     // Handle form submission for steps
     const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!plainText(formData.description)) {
+    toast.error("Description is required.");
+    return;
+}
 
     const updatedSteps = [...pagesList];
 updatedSteps[formData.item_index] = {
     ...updatedSteps[formData.item_index],
     title: formData.title,
+    headingTag: formData.headingTag || "h2",
     step_no: formData.step_no || String(formData.item_index + 1).padStart(2, "0"),
     description: formData.description,
     image_size: formData.image_size || 100,
@@ -238,6 +272,8 @@ updatedSteps[formData.item_index] = {
         bannerHeadingColor: bannerData.headingColor,
         bannerDescription: bannerData.description,
         bannerDescriptionColor: bannerData.descriptionColor,
+        bannerHeadingTag: bannerData.headingTag,
+bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         bg_image: bannerData.previewImage || "",
         steps: updatedSteps,
     }));
@@ -255,7 +291,9 @@ updatedSteps[formData.item_index] = {
         });
         fetchContentManagerPages();
         toast.success("Step updated successfully.");
-        setFormData({ title: "", step_no: "", description: "", image_size: 100, image: null, item_index: null });
+        setFormData({ title: "", step_no: "", description: "", 
+            headingTag: formData.headingTag || "h2",
+            image_size: 100, image: null, item_index: null });
         document.getElementById('addNewpageModalClose').click();
     } catch (error) {
         toast.error(error.message ?? "Error submitting form.");
@@ -264,10 +302,12 @@ updatedSteps[formData.item_index] = {
 
     // Set form data when edit button is clicked
     const handleEditClick = (item, index) => {
+        setEditorKey((k) => k + 1);
     setFormData({
         title: item.title || "",
+headingTag: item.headingTag || "h2",
         step_no: item.step_no || String(index + 1).padStart(2, "0"),
-        description: item.description || (item.points ? item.points.join("\n") : ""),
+        description: textToHtml(item.description || (item.points ? item.points.join("\n") : "")),
         image_size: item.image_size || 100,
         image: null,
         preview: typeof item.image === "string" ? item.image : "",
@@ -289,6 +329,8 @@ const handleDeleteStep = async (index) => {
             bannerHeadingColor: bannerData.headingColor,
             bannerDescription: bannerData.description,
             bannerDescriptionColor: bannerData.descriptionColor,
+            bannerHeadingTag: bannerData.headingTag,
+bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
             bg_image: bannerData.previewImage && !bannerData.previewImage.startsWith("blob:")
                 ? bannerData.previewImage : "",
             steps: updatedSteps,
@@ -322,7 +364,7 @@ const handleDeleteStep = async (index) => {
                     <div className="card-body">
                         <form onSubmit={handleBannerSubmit}>
     {/* Row 1 — heading + description */}
-<div className="row align-items-start mb-3">
+{/* <div className="row align-items-start mb-3">
     <div className="col-md-6">
         <label className="form-label">Banner Heading</label>
         <input type="text" className="form-control" name="heading"
@@ -338,7 +380,7 @@ const handleDeleteStep = async (index) => {
     </div>
 </div>
 
-{/* Row 2 — colors */}
+
 <div className="row align-items-start mb-3">
     <div className="col-md-6">
         <label className="form-label">Heading Color</label>
@@ -347,6 +389,48 @@ const handleDeleteStep = async (index) => {
     </div>
 
     <div className="col-md-6">
+        <label className="form-label">Description Color</label>
+        <input type="color" className="form-control form-control-color w-100"
+            name="descriptionColor" value={bannerData.descriptionColor} onChange={handleBannerChange} />
+    </div>
+</div> */}
+
+{/* Row 1 — heading + tag + color */}
+<div className="row align-items-start mb-3">
+    <div className="col-md-6">
+        <label className="form-label">Banner Heading</label>
+        <input type="text" className="form-control" name="heading"
+            placeholder="e.g. Our Design Process"
+            value={bannerData.heading} onChange={handleBannerChange} required />
+    </div>
+    <div className="col-md-3">
+        <label className="form-label">Heading Tag</label>
+        <select className="form-select" name="headingTag" value={bannerData.headingTag} onChange={handleBannerChange}>
+            {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+        </select>
+    </div>
+    <div className="col-md-3">
+        <label className="form-label">Heading Color</label>
+        <input type="color" className="form-control form-control-color w-100"
+            name="headingColor" value={bannerData.headingColor} onChange={handleBannerChange} />
+    </div>
+</div>
+
+{/* Row 2 — description + size + color */}
+<div className="row align-items-start mb-3">
+    <div className="col-md-6">
+        <label className="form-label">Banner Description</label>
+        <textarea className="form-control" name="description" rows="2"
+            placeholder="e.g. A step-by-step look at how we bring your vision to life."
+            value={bannerData.description} onChange={handleBannerChange} />
+    </div>
+    <div className="col-md-3">
+        <label className="form-label">Description Size (px)</label>
+        <select className="form-select" name="descriptionSize" value={bannerData.descriptionSize} onChange={handleBannerChange}>
+            {DESC_SIZES.map((s) => <option key={s} value={s}>{s}px</option>)}
+        </select>
+    </div>
+    <div className="col-md-3">
         <label className="form-label">Description Color</label>
         <input type="color" className="form-control form-control-color w-100"
             name="descriptionColor" value={bannerData.descriptionColor} onChange={handleBannerChange} />
@@ -393,8 +477,10 @@ const handleDeleteStep = async (index) => {
                         data-bs-target="#addNewpageModal"
                         onClick={() => {
     // Reset form for a completely new entry
+    setEditorKey((k) => k + 1);
     setFormData({
         title: "",
+        headingTag: "h2",
         step_no: String(pagesList.length + 1).padStart(2, "0"),
         description: "",
         image_size: 100,
@@ -445,7 +531,7 @@ const handleDeleteStep = async (index) => {
                                             <td>{item.title}</td>
                                             <td>
                                                 {/* Truncate long descriptions for table view */}
-                                                {item.description ? item.description.substring(0, 50) + "..." : "..."}
+                                                {plainText(item.description) ? plainText(item.description).substring(0, 50) + "..." : "..."}
                                             </td>
                                             <td>
                                                 <span
@@ -520,7 +606,7 @@ const handleDeleteStep = async (index) => {
                                     <small className="text-muted">Shown as &ldquo;STEP {formData.step_no || "01"}&rdquo;</small>
                                 </div>
 
-                                <div className="mb-3 col-md-9">
+                                {/* <div className="mb-3 col-md-9">
                                     <label className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -531,12 +617,24 @@ const handleDeleteStep = async (index) => {
                                         onChange={handleInputChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-6">
+    <label className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
+<div className="mb-3 col-md-3">
+    <label className="form-label">Title Tag</label>
+    <select className="form-select" name="headingTag" value={formData.headingTag} onChange={handleInputChange}>
+        {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+    </select>
+</div>
 
                                 {/* Paragraph textarea — each line becomes a tick-point on the public page,
                                     same tick + paragraph structure used on the What We Offer page. The
                                     tick icon itself is fixed and not editable. */}
-                                <div className="mb-2 col-md-12">
+                                {/* <div className="mb-2 col-md-12">
                                     <label className="form-label">Description (one point per line)</label>
                                     <textarea
                                         className="form-control"
@@ -547,11 +645,21 @@ const handleDeleteStep = async (index) => {
                                         onChange={handleInputChange}
                                         required
                                     ></textarea>
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-12">
+    <label className="form-label">Description</label>
+    <CKEditorComponent
+        key={editorKey}
+        withTickIcon
+        pageData={formData.description}
+        setPageData={(val) => setFormData((p) => ({ ...p, description: val }))}
+    />
+</div>
 
                                 {/* Live-style preview of how each line will render, so the fixed
                                     tick + paragraph structure is visible while editing */}
-                                {formData.description && (
+                                {/* {formData.description && (
                                     <div className="col-md-12 mb-3 p-3 bg-white border rounded">
                                         <small className="text-muted d-block mb-2">Preview</small>
                                         {formData.description.split("\n").filter(Boolean).map((line, i) => (
@@ -574,7 +682,7 @@ const handleDeleteStep = async (index) => {
                                             </div>
                                         ))}
                                     </div>
-                                )}
+                                )} */}
 
                                 <div className="mb-3 col-md-6">
                                     <label className="form-label">Image Resize (%)</label>

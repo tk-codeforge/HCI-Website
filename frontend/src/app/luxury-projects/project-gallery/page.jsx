@@ -1,7 +1,9 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
+
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,7 @@ export async function generateMetadata({ searchParams }) {
 export default async function LuxuryProjectsPage({ searchParams }) {
   const id = searchParams?.id;
   if (!id) return notFound();
+  const seo = await getGallerySeo({ basePath: "/luxury-projects/project-gallery", id });
 
   let portfolioData = null;
   try {
@@ -49,5 +52,10 @@ export default async function LuxuryProjectsPage({ searchParams }) {
 
   if (!portfolioData) return notFound();
 
-  return <GalleryClient portfolioData={portfolioData} />;
+ return (
+    <>
+      <JsonLd data={seo?.custom_schema} /> 
+      <GalleryClient portfolioData={portfolioData} />
+      </>
+  );
 }

@@ -2,7 +2,8 @@ import GalleryDetail from "../../components/GalleryDetail";
 import MainLayout from "../../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 const BASE_URL = "https://hcinterior.in";
@@ -50,12 +51,15 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
   const galleryData = await getGalleryData(id);
 
   if (!galleryData) return notFound();
+  
+   const seo = await getGallerySeo({ basePath: "/furniture/gallery", id });
 
   const images = galleryData?.child_images ?? [];
   const title = galleryData?.child_content?.title ?? "Furniture Gallery";
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         <section className="container my-5">
           <div className="row g-4 mx-0">

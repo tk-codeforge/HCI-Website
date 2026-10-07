@@ -1,4 +1,3 @@
-import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import MainLayout from "../layouts/MainLayout";
 // import PortfolioCard from "../components/PortfolioCard";
 // import BgImageCard from "../components/BgImageCard";
@@ -173,11 +172,13 @@ import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // };
 
 // export default Designidea;
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import BgImageCard from "../components/BgImageCard";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -329,6 +330,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function DesignerChoice() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("designer-choice");
   const designIdea = await getDesignerChoices();
 
@@ -398,6 +400,7 @@ const headingBlock = (
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <div className="container">
           <div className="text-center mt-3 mx-0 row"> */}

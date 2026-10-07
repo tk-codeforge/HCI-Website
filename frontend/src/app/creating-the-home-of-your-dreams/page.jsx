@@ -1,5 +1,6 @@
 import HCLandingClient from "./HCLandingClient";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 const ROUTE = "/creating-the-home-of-your-dreams"; // ← the real path of this page
 
@@ -55,6 +56,12 @@ export async function generateMetadata() {
   };
 }
 
-export default function Page() {
-  return <HCLandingClient />;
-}
+export default async function Page() {
+  const seo = await getSeoData();
+  return (
+    <>
+      <JsonLd data={seo?.custom_schema} />
+      <HCLandingClient />
+    </>
+  );
+  }

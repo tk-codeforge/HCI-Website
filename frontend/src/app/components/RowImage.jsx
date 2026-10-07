@@ -1,10 +1,13 @@
 import Image from "next/image";
+import DOMPurify from "isomorphic-dompurify";
 
 const RowImage = (props) => {
   const imageColLg = Number(props.imageColLg ?? 12);
   const imageColXl = Number(props.imageColXl ?? imageColLg);
   const imageColMd = Number(props.imageColMd ?? 12);
   const imageCol = Number(props.imageCol ?? 12);
+
+  const SubTag = ["h1", "h2", "h3", "h4", "h5", "h6"].includes(props.subHeadingTag) ? props.subHeadingTag : null;
 
   return (
     <div className="container">
@@ -23,11 +26,28 @@ const RowImage = (props) => {
         <div className={`d-flex align-items-center col-lg-${12 - imageColLg} col-md-${12 - imageColMd} col-${12 - imageCol}`}>
           <div className={props.divclass}>
             {/* 🌟 SEO FIX: Changed to h2 but kept the h3 visual size */}
-            <h2 className="h3">
+            {/* <h2 className="h3">
               {props.titleHeading}
               <span className={props.subHeadingClass}>{props.subHeading}</span>
             </h2>
-            <p>{props.description}</p>
+            <p>{props.description}</p> */}
+
+            {SubTag ? (
+  <>
+    {props.titleHeading ? <div className="h3 rowimage-title">{props.titleHeading}</div> : null}
+    <SubTag className={props.subHeadingClass}>{props.subHeading}</SubTag>
+  </>
+) : (
+  <h2 className="h3">
+    {props.titleHeading}
+    <span className={props.subHeadingClass}>{props.subHeading}</span>
+  </h2>
+)}
+{props.descriptionHtml ? (
+  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(props.descriptionHtml) }} />
+) : (
+  <p>{props.description}</p>
+)}
             {props.textAboutBtn ? (
               <a 
                 className={props.textAboutBtnCLass} 

@@ -1,7 +1,8 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 // Force dynamic rendering because we rely on searchParams (e.g. ?id=123)
 export const dynamic = "force-dynamic";
@@ -49,6 +50,7 @@ export default async function ResidentialProjectsGallery({ searchParams }) {
     // Ideally redirect or show 404 if no ID
     return notFound();
   }
+  const seo = await getGallerySeo({ basePath: "/residential-projects/project-gallery", id });
 
   let portfolioData = null;
 
@@ -62,5 +64,10 @@ export default async function ResidentialProjectsGallery({ searchParams }) {
   }
 
   // Pass the data to the Client Component
-  return <GalleryClient portfolioData={portfolioData} />;
+  return (
+    <>
+      <JsonLd data={seo?.custom_schema} /> 
+      <GalleryClient portfolioData={portfolioData} />
+      </>
+  );
 }

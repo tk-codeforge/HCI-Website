@@ -2,6 +2,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
+import DOMPurify from "isomorphic-dompurify";
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const SPAN_TAGS = ["span", "strong", "em"];
+
 const HIDE_DELAY_MS = 3000;
 
 export default function EstimateCalculator({ estimateSectionData }) {
@@ -41,6 +46,9 @@ export default function EstimateCalculator({ estimateSectionData }) {
 
     const headingBase = estimateSectionData?.heading || "Get an estimate for your";
     const subHeading = estimateSectionData?.sub_heading || "Select your property type to calculate the cost of your interiors.";
+
+    const HeadingTag = HEADING_TAGS.includes(estimateSectionData?.heading_tag) ? estimateSectionData.heading_tag : "h2";
+const RotatingTag = SPAN_TAGS.includes(estimateSectionData?.span_tag) ? estimateSectionData.span_tag : "span";
 
     const defaultPropertyCards = [
         {
@@ -210,16 +218,32 @@ export default function EstimateCalculator({ estimateSectionData }) {
                 @media (min-width: 769px) {
                     .estimate-arrow { display: none; }
                 }
+
+                .rotating-text { font-style: normal; }
+.estimate-subheading p { margin: 0 0 0.5rem; }
+.estimate-subheading p:last-child { margin-bottom: 0; }
             `}} />
             <div className="estimate-container">
-                <h2 className="estimate-section-title">
+                {/* <h2 className="estimate-section-title">
                     {headingBase} <span className="rotating-text-wrapper">
                         <span key={currentWordIndex} className="rotating-text">
                             {rotatingWords[currentWordIndex]}
                         </span>
                     </span>
                 </h2>
-                <p className="estimate-subheading">{subHeading}</p>
+                <p className="estimate-subheading">{subHeading}</p> */}
+
+                <HeadingTag className="estimate-section-title">
+    {headingBase} <span className="rotating-text-wrapper">
+        <RotatingTag key={currentWordIndex} className="rotating-text">
+            {rotatingWords[currentWordIndex]}
+        </RotatingTag>
+    </span>
+</HeadingTag>
+<div
+    className="estimate-subheading"
+    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(subHeading) }}
+/>
 
                 <div className={`property-grid-wrap ${showArrows ? "estimate-arrows-active" : ""}`}>
                     <div className="estimate-arrow estimate-arrow-left" onClick={() => scrollGrid("left")}>

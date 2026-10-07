@@ -519,6 +519,7 @@ import React from "react";
 import MainLayout from "../layouts/MainLayout";
 import CareerClient from "./CareerClient";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -661,6 +662,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Career() {
+  const seo = await getSeoData();
   const jobPostList = await getJobPostList();
   const cmsContent = await getCmsCareerData();
 
@@ -693,6 +695,7 @@ export default async function Career() {
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <CareerClient pageData={pageData} jobPostList={jobPostList} />
     </MainLayout>
   );

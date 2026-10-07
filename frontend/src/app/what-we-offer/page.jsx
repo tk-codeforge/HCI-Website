@@ -390,6 +390,7 @@ import MainLayout from "../layouts/MainLayout";
 import WhatWeOfferClient from "./WhatWeOfferClient";
 import ScrollToHash from "../components/ScrollToHash";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 export const revalidate = 60;
 
@@ -561,6 +562,7 @@ const FALLBACK_OFFERINGS = [
 ];
 
 export default async function WhatWeOffer() {
+  const seo = await getSeoData();
   let rawCmsContent = await getWhatWeOfferContent();
   
   // Safely parse if backend returned a string instead of an object
@@ -581,6 +583,8 @@ export default async function WhatWeOffer() {
     headingColor: cmsContent?.bannerHeadingColor || "#ffffff",
     description: cmsContent?.bannerDescription || "We provide bespoke interior design solutions tailored to your vision.",
     descriptionColor: cmsContent?.bannerDescriptionColor || "#ffffff",
+    headingTag: cmsContent?.bannerHeadingTag || undefined,
+descriptionSize: Number(cmsContent?.bannerDescriptionSize) || 20,
     bgImage: cmsContent?.bg_image || "",
   };
 
@@ -599,6 +603,8 @@ export default async function WhatWeOffer() {
             title: section.heading || fallback?.title || `Offering ${index + 1}`,
             img: section.image || FALLBACK_IMAGES[index] || interiorDesignPlanningImg,
             imageSize: section.imageSize || 100,
+            headingTag: section.headingTag || "h2",
+description: section.description || "",
             points: points.length ? points : fallback?.points || [],
           };
         })
@@ -607,11 +613,14 @@ export default async function WhatWeOffer() {
           title: offer.title,
           img: FALLBACK_IMAGES[index],
           imageSize: 100,
+          headingTag: "h2",
+description: "",
           points: offer.points,
         }));
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <ScrollToHash />
       <WhatWeOfferClient OFFERINGS={OFFERINGS} bannerData={bannerData} />
     </MainLayout>

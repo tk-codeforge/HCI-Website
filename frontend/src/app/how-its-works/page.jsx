@@ -494,6 +494,17 @@ export async function generateMetadata() {
   };
 }
 
+function parseSchema(raw) {
+  if (!raw) return null;
+  try {
+    const obj = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return JSON.stringify(obj).replace(/</g, "\\u003c");
+  } catch (e) {
+    console.error("Invalid schema JSON:", e);
+    return null;
+  }
+}
+
 async function getCmsData() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/cms-content/how_it_works`, {
@@ -511,6 +522,9 @@ export default async function HowItsWorkPage() {
   const cmsResponse = await getCmsData();
   const content = cmsResponse?.json_content || {};
 
+  const seo = await getSeoData(); // the same function your generateMetadata uses
+  const schemaJson = parseSchema(seo?.custom_schema);
+
   const displaySteps = (Array.isArray(content.steps) && content.steps.length > 0)
     ? content.steps
     : stepsData;
@@ -520,11 +534,19 @@ export default async function HowItsWorkPage() {
     headingColor: content.bannerHeadingColor || "#ffffff",
     description: content.bannerDescription || "",
     descriptionColor: content.bannerDescriptionColor || "#ffffff",
+    headingTag: content.bannerHeadingTag || "h1",
+descriptionSize: Number(content.bannerDescriptionSize) || 20,
     image: content.bg_image || "contact_wrapper services",
   };
 
   return (
     <MainLayout>
+      {schemaJson && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schemaJson }}
+        />
+      )}
       <HowItsWorksClient displaySteps={displaySteps} bannerData={bannerData} />
     </MainLayout>
   );

@@ -6,6 +6,7 @@ import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import PortfolioCard from "../components/PortfolioCard";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; 
@@ -123,6 +124,7 @@ export async function generateMetadata() {
 
 // --- MAIN COMPONENT ---
 export default async function Experience() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("experience-center-noida-extension");
   // const rawData = await getExperienceCenterData();
   // const exclusiveDesignData = Array.isArray(rawData) ? rawData : (rawData?.data || []);
@@ -135,6 +137,7 @@ export default async function Experience() {
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* Banner & Form Section */}
         {/* <section className="container mt-5 mb-5">

@@ -1,4 +1,5 @@
 "use client";
+import { useMemo } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import DOMPurify from 'isomorphic-dompurify';
 import {
@@ -45,6 +46,9 @@ import { Plugin, ButtonView } from 'ckeditor5';
 const ARROW_SVG_MARKUP = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" fill="%23333333"/></svg>`;
 const ARROW_DATA_URI = `data:image/svg+xml,${encodeURIComponent(ARROW_SVG_MARKUP)}`;
 
+const TICK_SVG_MARKUP = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#ff914d" fill-opacity="0.18"/><path d="M7 12.6l3.4 3.4L17.2 8.8" fill="none" stroke="#ff914d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const TICK_DATA_URI = `data:image/svg+xml,${encodeURIComponent(TICK_SVG_MARKUP)}`;
+
 class InsertArrowIcon extends Plugin {
     init() {
         const editor = this.editor;
@@ -75,6 +79,31 @@ class InsertArrowIcon extends Plugin {
                 });
             });
 
+            return button;
+        });
+    }
+}
+
+class InsertTickIcon extends Plugin {
+    init() {
+        const editor = this.editor;
+        const selection = editor.model.document.selection;
+
+        editor.ui.componentFactory.add('insertTickIcon', (locale) => {
+            const button = new ButtonView(locale);
+            button.set({
+                label: 'Insert Tick Icon',
+                withText: false,
+                tooltip: true,
+                icon: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+            });
+            button.bind('isEnabled').to(selection, 'isCollapsed');
+            button.on('execute', () => {
+                editor.model.change((writer) => {
+                    const imageElement = writer.createElement('imageInline', { src: TICK_DATA_URI, alt: 'Tick icon' });
+                    editor.model.insertContent(imageElement, selection.getFirstPosition());
+                });
+            });
             return button;
         });
     }
@@ -204,7 +233,7 @@ const editorConfig = {
         TableToolbar,
         Undo
     ],
-    extraPlugins: [CustomUploadAdapterPlugin, InsertArrowIcon],
+    extraPlugins: [CustomUploadAdapterPlugin, InsertArrowIcon, InsertTickIcon],
     toolbar: {
         items: [
             'undo', 'redo', '|',
@@ -231,7 +260,8 @@ const editorConfig = {
             { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
             { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' },
             { model: 'heading4', view: 'h4', title: 'Heading 4', class: 'ck-heading_heading4' },
-            { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' }
+            { model: 'heading5', view: 'h5', title: 'Heading 5', class: 'ck-heading_heading5' },
+            { model: 'heading6', view: 'h6', title: 'Heading 6', class: 'ck-heading_heading6' }
         ]
     },
     link: {
@@ -313,7 +343,15 @@ const editorConfig = {
     }
 };
 
-const CKEditorComponent = ({ pageData, setPageData }) => {
+const CKEditorComponent = ({ pageData, setPageData , withTickIcon = false}) => {
+
+    const config = useMemo(
+        () =>
+            withTickIcon
+                ? { ...editorConfig, toolbar: { ...editorConfig.toolbar, items: [...editorConfig.toolbar.items, 'insertTickIcon'] } }
+                : editorConfig,
+        [withTickIcon]
+    );
     return (
         <CKEditor
             editor={ClassicEditor}
@@ -322,7 +360,8 @@ const CKEditorComponent = ({ pageData, setPageData }) => {
                 const data = editor.getData();
                 setPageData(data);
             }}
-            config={editorConfig}
+            // config={editorConfig}
+            config={config}
         />
     );
 };

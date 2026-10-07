@@ -6,6 +6,9 @@ import { FaSave } from "react-icons/fa";
 import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 
+const EYEBROW_TAGS = ["span", "h1", "h2", "h3", "h4", "h5", "h6"];
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+
 const HEADING_DEFS = [
   {
     key: "ready_to_go_designs",
@@ -49,6 +52,8 @@ const defaultEntry = () => ({
   color: "#222222",
   spanText: "",
   spanColor: "#ff914d",
+  spanTag: "span",
+  headingTag: "h2",
 });
 
 export default function ManageHomePageHeadings() {
@@ -94,6 +99,8 @@ export default function ManageHomePageHeadings() {
           color: source.color || "#222222",
           spanText: source.spanText || "",
           spanColor: source.spanColor || "#ff914d",
+          spanTag: source.spanTag || "span",
+          headingTag: source.headingTag || "h2",
         };
       });
 
@@ -188,6 +195,8 @@ export default function ManageHomePageHeadings() {
         color: source.color || "#222222",
         spanText: source.spanText || "",
         spanColor: source.spanColor || "#ff914d",
+        spanTag: source.spanTag || "span",
+        headingTag: source.headingTag || "h2",
       };
     });
     setEntries(hydrated);
@@ -233,7 +242,7 @@ export default function ManageHomePageHeadings() {
 
         {HEADING_DEFS.map((def) => {
           const entry = entries[def.key];
-          const PreviewTag = def.tag;
+          const PreviewTag = entry.headingTag || def.tag;
           const isSaving = !!savingKeys[def.key];
 
           return (
@@ -261,48 +270,56 @@ export default function ManageHomePageHeadings() {
                       they're stacked visually on the live site. */}
                   {def.hasSpan && (
                     <>
-                      <div className="col-md-9">
-                        <label className="form-label fw-bold">Span / Eyebrow Text</label>
-                        <input
-                          className="form-control"
-                          value={entry.spanText}
-                          onChange={(e) => handleEntryChange(def.key, "spanText", e.target.value)}
-                          placeholder="e.g. Explore"
-                        />
-                      </div>
+                      <div className="col-md-6">
+  <label className="form-label fw-bold">Span / Eyebrow Text</label>
+  <input className="form-control" value={entry.spanText}
+    onChange={(e) => handleEntryChange(def.key, "spanText", e.target.value)}
+    placeholder="e.g. Explore" />
+</div>
 
-                      <div className="col-md-3">
-                        <label className="form-label fw-bold">Span Color</label>
-                        <input
-                          type="color"
-                          className="form-control form-control-color w-100"
-                          value={entry.spanColor}
-                          onChange={(e) => handleEntryChange(def.key, "spanColor", e.target.value)}
-                        />
-                      </div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Span Tag</label>
+  <select className="form-select" value={entry.spanTag}
+    onChange={(e) => handleEntryChange(def.key, "spanTag", e.target.value)}>
+    {EYEBROW_TAGS.map((t) => (
+      <option key={t} value={t}>{t === "span" ? "span (default)" : t.toUpperCase()}</option>
+    ))}
+  </select>
+</div>
+
+<div className="col-md-3">
+  <label className="form-label fw-bold">Span Color</label>
+  <input type="color" className="form-control form-control-color w-100"
+    value={entry.spanColor}
+    onChange={(e) => handleEntryChange(def.key, "spanColor", e.target.value)} />
+</div>
                     </>
                   )}
 
                   {def.hasHeading && (
                     <>
-                      <div className="col-md-9">
-                        <label className="form-label fw-bold">Heading Text</label>
-                        <input
-                          className="form-control"
-                          value={entry.text}
-                          onChange={(e) => handleEntryChange(def.key, "text", e.target.value)}
-                        />
-                      </div>
+                      <div className="col-md-6">
+  <label className="form-label fw-bold">Heading Text</label>
+  <input className="form-control" value={entry.text}
+    onChange={(e) => handleEntryChange(def.key, "text", e.target.value)} />
+</div>
 
-                      <div className="col-md-3">
-                        <label className="form-label fw-bold">Heading Color</label>
-                        <input
-                          type="color"
-                          className="form-control form-control-color w-100"
-                          value={entry.color}
-                          onChange={(e) => handleEntryChange(def.key, "color", e.target.value)}
-                        />
-                      </div>
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Tag</label>
+  <select className="form-select" value={entry.headingTag}
+    onChange={(e) => handleEntryChange(def.key, "headingTag", e.target.value)}>
+    {HEADING_TAGS.map((t) => (
+      <option key={t} value={t}>{t.toUpperCase()}</option>
+    ))}
+  </select>
+</div>
+
+<div className="col-md-3">
+  <label className="form-label fw-bold">Heading Color</label>
+  <input type="color" className="form-control form-control-color w-100"
+    value={entry.color}
+    onChange={(e) => handleEntryChange(def.key, "color", e.target.value)} />
+</div>
                     </>
                   )}
                 </div>
@@ -310,14 +327,15 @@ export default function ManageHomePageHeadings() {
                 {/* Live preview using the fixed tag + chosen colors */}
                 <div className="mt-3 p-3 bg-light rounded">
                   <small className="text-muted d-block mb-2">Preview</small>
-                  {def.hasSpan && entry.spanText && (
-                    <div
-                      className="fw-bold mb-1"
-                      style={{ color: entry.spanColor, fontSize: "0.85rem", textTransform: "uppercase" }}
-                    >
-                      {entry.spanText}
-                    </div>
-                  )}
+                  {def.hasSpan && entry.spanText &&
+  React.createElement(
+    entry.spanTag || "span",
+    {
+      className: "fw-bold d-block mb-1",
+      style: { color: entry.spanColor, fontSize: "0.85rem", textTransform: "uppercase", margin: 0 },
+    },
+    entry.spanText
+  )}
                   {def.hasHeading &&
                     React.createElement(
                       PreviewTag,

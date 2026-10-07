@@ -73,6 +73,7 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import MainLayout from "../layouts/MainLayout";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -222,6 +223,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Terms() {
+  const seo = await getSeoData();
   const pageData = await getTermsContent();
 
 const bannerRecord = await getBannerData();
@@ -230,6 +232,7 @@ const bgDescription = bannerRecord?.banner_description || "Get all the informati
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <BackgroundImageWithHeading
           sectionBgImages={"contact_wrapper terms_and_condition"}

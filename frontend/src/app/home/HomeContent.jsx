@@ -5,6 +5,8 @@ import {
   FaStar, FaAward, FaTrophy
 } from "react-icons/fa";
 
+import DOMPurify from "isomorphic-dompurify";
+
 const ICON_MAP = {
   FaShieldAlt, FaClock, FaCheckCircle, FaHome, 
   FaMapMarkerAlt, FaGem, FaUser, FaTools, 
@@ -71,10 +73,12 @@ async function getRemainingData() {
       whatWeOfferData = {
         heading: json.heading || "What We Offer",
         headingColor: json.headingColor || "#23236b",
+        headingTag: json.headingTag || "h2",
         // 🌟 NEW: eyebrow span above the heading, previously hardcoded as a
         // literal "Explore" string in JSX below with no CMS backing at all.
         spanText: json.spanText || "Explore",
         spanColor: json.spanColor || "#ff914d",
+        spanTag: json.spanTag || "span",
         bg_image: json.bg_image || json.image || record?.image || "",
         bgSize: json.bgSize || "cover",
         cards: Array.isArray(json.cards) ? json.cards : [],
@@ -83,6 +87,7 @@ async function getRemainingData() {
 
 let theWayWeWorkData = {
   heading: "The Way We Work",
+  headingTag: "h2",
   bg_image: "",
   cards: [],
 };
@@ -94,23 +99,25 @@ if (theWayWeWorkRaw) {
   theWayWeWorkData = {
     heading: json.heading || "The Way We Work",
     headingColor: json.headingColor || "#ffffff", // Extract global heading color
+    headingTag: json.headingTag || "h2",
     bg_image: json.bg_image || "",
     bgSize: json.bgSize || "cover",               // Extract background size
     cards: Array.isArray(json.cards) ? json.cards : [],
   };
 }
   
-    let whyChooseUsData = { heading: "Why Choose us", headingColor: "#222222", cards: [] };
+    let whyChooseUsData = { heading: "Why Choose us", headingColor: "#222222", headingTag: "h2", cards: [] };
     if (whyChooseUsRaw) {
       const record = Array.isArray(whyChooseUsRaw) ? whyChooseUsRaw[0] : whyChooseUsRaw;
       const json = record?.json_content;
 
       if (Array.isArray(json)) {
-        whyChooseUsData = { heading: "Why Choose us", headingColor: "#222222", cards: json };
+        whyChooseUsData = { heading: "Why Choose us", headingColor: "#222222", headingTag: "h2", cards: json };
       } else if (json && typeof json === "object") {
         whyChooseUsData = {
           heading: json.heading || "Why Choose us",
           headingColor: json.headingColor || "#222222",
+          headingTag: json.headingTag || "h2",
           cards: Array.isArray(json.cards) ? json.cards : [],
         };
       }
@@ -164,6 +171,7 @@ if (furnitureFactoryRaw) {
   furnitureFactoryData = {
     heading: json.heading || "Large Modular Furniture Factories",
     headingColor: json.headingColor || "#000000",
+    headingTag: json.headingTag || "h2",
     description: json.description || "",
     buttonText: json.buttonText || "View More",
     buttonLink: json.buttonLink || "/furniture/",
@@ -182,7 +190,7 @@ if (furnitureFactoryRaw) {
   } catch (err) {
     return {
       designIdea: [], h3d_gallery: [], content: [], blogs: [],
-      theWayWeWorkData: { heading: "The Way We Work", bg_image: "", cards: [] },
+      theWayWeWorkData: { heading: "The Way We Work", headingTag: "h2", bg_image: "", cards: [] },
       furnitureFactoryData: { heading: "Large Modular Furniture Factories", headingColor: "#000000", description: "", buttonText: "View More", buttonLink: "/furniture/", video: "", image1: "", image1Caption: "", image2: "", image2Caption: "" },
       whyChooseUsData: { heading: "Why Choose us", headingColor: "#222222", cards: [] },
       estimateBannerData: null, estimateCardsData: [], whatWeOfferData: null, headingsData: {}  };
@@ -196,6 +204,12 @@ const formatDate = (dateString) => {
   return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
 };
 
+const EYEBROW_TAGS = ["span", "h1", "h2", "h3", "h4", "h5", "h6"];
+const safeTag = (t) => (EYEBROW_TAGS.includes(t) ? t : "span");
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const safeHeadingTag = (t) => (HEADING_TAGS.includes(t) ? t : "h2");
+
 export default async function HomeContent() {
   const { designIdea, h3d_gallery, content, blogs, theWayWeWorkData, whyChooseUsData, estimateBannerData,estimateCardsData,whatWeOfferData, headingsData , furnitureFactoryData} = await getRemainingData();
   const readyToGoDesignsHeading = headingsData?.ready_to_go_designs || {};
@@ -203,6 +217,19 @@ export default async function HomeContent() {
   const celebratingExcellenceHeading = headingsData?.celebrating_excellence || {};
   const blogsHeading = headingsData?.blogs || {};
   const whatPeopleSayHeading = headingsData?.what_people_say || {};
+
+  const RtgdSpanTag = safeTag(readyToGoDesignsHeading.spanTag);
+const DcSpanTag   = safeTag(designersChoiceHeading.spanTag);
+const WpsSpanTag  = safeTag(whatPeopleSayHeading.spanTag);
+const RtgdHeadingTag  = safeHeadingTag(readyToGoDesignsHeading.headingTag);
+const DcHeadingTag    = safeHeadingTag(designersChoiceHeading.headingTag);
+const BlogsHeadingTag = safeHeadingTag(blogsHeading.headingTag);
+const CounterHeadingTag = safeHeadingTag(celebratingExcellenceHeading.headingTag);
+const WhyHeadingTag = safeHeadingTag(whyChooseUsData.headingTag);
+const WayWorkHeadingTag = safeHeadingTag(theWayWeWorkData.headingTag);
+const OfferHeadingTag = safeHeadingTag(whatWeOfferData?.headingTag);
+const OfferSpanTag = safeTag(whatWeOfferData?.spanTag);
+const FactoryHeadingTag = safeHeadingTag(furnitureFactoryData.headingTag);
 
   const offerCards = Array.isArray(whatWeOfferData?.cards) ? whatWeOfferData.cards : [];
   const safeEstimateCards = Array.isArray(estimateCardsData) ? estimateCardsData : [];
@@ -383,7 +410,11 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
         .savedesign .cardoffer .card-title { font-size: 1.25rem !important; font-weight: 700 !important; padding: 1rem 0.5rem !important; }
         .savedesign .cardoffer { display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
 
-        .estimate-fix-wrapper h2, .estimate-fix-wrapper h3, .estimate-fix-wrapper span { font-weight: 800 !important; }
+        // .estimate-fix-wrapper h2, .estimate-fix-wrapper h3, .estimate-fix-wrapper span { font-weight: 800 !important; }
+
+        .estimate-fix-wrapper h1, .estimate-fix-wrapper h2, .estimate-fix-wrapper h3,
+.estimate-fix-wrapper h4, .estimate-fix-wrapper h5, .estimate-fix-wrapper h6,
+.estimate-fix-wrapper span { font-weight: 800 !important; }
 
         /* Robust Marquee Fix */
         .marquee-container-fix {
@@ -496,10 +527,10 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
         <div className="container">
           <div className="mb-4 text-center">
              {/* 🌟 NEW: span text/color now come from CMS instead of a hardcoded "Explore" literal */}
-             <span className="font_stylish text-orange-force d-block mb-1 what-we-offer-span-color">{whatWeOfferData?.spanText || "Explore"}</span>
-             <h2 className="h2 font_about mb-0 fw-bold what-we-offer-main-heading">
-               {whatWeOfferData?.heading || "What we Offer"}
-             </h2>
+             <OfferSpanTag className="text-orange-force d-block mb-1 what-we-offer-span-color">{whatWeOfferData?.spanText || "Explore"}</OfferSpanTag>
+<OfferHeadingTag className="h2 mb-0 fw-bold what-we-offer-main-heading">
+  {whatWeOfferData?.heading || "What we Offer"}
+</OfferHeadingTag>
           </div>
           
           <CarouselRow className="mx-0 row g-4 mobile-scroll-row">
@@ -565,9 +596,9 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
 
         <div className="container">
           <div className="mb-5 text-center">
-            <h2 className="h2 font_about fw-bold mb-0 way-work-main-heading">
+            <WayWorkHeadingTag className="h2 fw-bold mb-0 way-work-main-heading">
               {theWayWeWorkData.heading}
-            </h2>
+            </WayWorkHeadingTag>
           </div>
 
           {/* <div className="row g-4 justify-content-center"> */}
@@ -767,7 +798,7 @@ const targetId = `step-${index + 1}`;
           {whyChooseUsData.headingColor && (
             <style>{`.why-choose-us-heading-color { color: ${whyChooseUsData.headingColor} !important; }`}</style>
           )}
-          <div className="container mb-5"><div className="text-center"><h2 className="h2 font_about fw-bold mb-0 why-choose-us-heading-color">{whyChooseUsData.heading}</h2></div></div>
+          <div className="container mb-5"><div className="text-center"><WhyHeadingTag className="h2 fw-bold mb-0 why-choose-us-heading-color">{whyChooseUsData.heading}</WhyHeadingTag></div></div>
           
           <div className="marquee-container-fix">
             <div className="marquee-content-fix">
@@ -814,8 +845,8 @@ const targetId = `step-${index + 1}`;
                 {readyToGoDesignsHeading.color && (
                   <style>{`.rtgd-heading-color { color: ${readyToGoDesignsHeading.color} !important; }`}</style>
                 )}
-                <span className="font_stylish text-orange-force mb-0 rtgd-span-color">{readyToGoDesignsHeading.spanText || "Ready To Go Designs"}</span>
-                <h2 className="h2 font_about fw-bold mb-0 rtgd-heading-color">{readyToGoDesignsHeading.text || "with Our Exclusive Design Choices"}</h2>
+                <RtgdSpanTag className="text-orange-force mb-0 rtgd-span-color">{readyToGoDesignsHeading.spanText || "Ready To Go Designs"}</RtgdSpanTag>
+                <RtgdHeadingTag className="h2 fw-bold mb-0 rtgd-heading-color">{readyToGoDesignsHeading.text || "with Our Exclusive Design Choices"}</RtgdHeadingTag>
               </div>
             </div>
             <SliderCard />
@@ -835,8 +866,8 @@ const targetId = `step-${index + 1}`;
                  {designersChoiceHeading.color && (
                    <style>{`.dc-heading-color { color: ${designersChoiceHeading.color} !important; }`}</style>
                  )}
-                 <span className="font_stylish text-orange-force d-block mb-1 dc-span-color">{designersChoiceHeading.spanText || "Designer's Choice:"}</span>
-                 <h2 className="h2 font_about fw-bold mb-0 dc-heading-color">{designersChoiceHeading.text || "Exclusive Design Specials"}</h2>
+                 <DcSpanTag className="text-orange-force d-block mb-1 dc-span-color">{designersChoiceHeading.spanText || "Designer's Choice:"}</DcSpanTag>
+                 <DcHeadingTag className="h2 fw-bold mb-0 dc-heading-color">{designersChoiceHeading.text || "Exclusive Design Specials"}</DcHeadingTag>
                </div>
             </div>
             {/* <div className="mt-4 row g-4 mx-0 mobile-scroll-row">
@@ -891,6 +922,7 @@ const targetId = `step-${index + 1}`;
           ImgCounter={content[13]?.json_content?.image} 
           imgAltCounter={content[13]?.json_content?.title} 
           titleHeadingCounter={celebratingExcellenceHeading.text || "Celebrating Excellence:"}
+          titleHeadingTagCounter={CounterHeadingTag}
           titleHeadingColorCounter={celebratingExcellenceHeading.color || undefined}
           subHeadingCounter=""
           counterEnd={content[12]?.json_content?.title} 
@@ -1049,7 +1081,7 @@ const targetId = `step-${index + 1}`;
                 {furnitureFactoryData.headingColor && (
                   <style>{`.furniture-factory-heading-color { color: ${furnitureFactoryData.headingColor} !important; }`}</style>
                 )}
-                <h2 className="h2 font_about fw-bold mb-3 furniture-factory-heading-color">
+                {/* <h2 className="h2 font_about fw-bold mb-3 furniture-factory-heading-color">
                   {furnitureFactoryData.heading}
                 </h2>
                 <p
@@ -1057,7 +1089,16 @@ const targetId = `step-${index + 1}`;
                   style={{ fontSize: `${furnitureFactoryData.descriptionFontSize || 16}px` }}
                 >
                   {furnitureFactoryData.description}
-                </p>
+                </p> */}
+
+                <FactoryHeadingTag className="h2 fw-bold mb-3 furniture-factory-heading-color">
+  {furnitureFactoryData.heading}
+</FactoryHeadingTag>
+<div
+  className="mb-4 text-secondary factory-description"
+  style={{ fontSize: `${furnitureFactoryData.descriptionFontSize || 16}px` }}
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(furnitureFactoryData.description || "") }}
+/>
 <div className="text-center text-lg-start">
                  <a href={furnitureFactoryData.buttonLink || "/furniture/"}
                   className="btn-factory-cta"
@@ -1105,7 +1146,7 @@ const targetId = `step-${index + 1}`;
             {blogsHeading.color && (
               <style>{`.blogs-heading-color { color: ${blogsHeading.color} !important; }`}</style>
             )}
-            <h2 className="h2 pb-4 text-center font_about fw-bold blogs-heading-color">{blogsHeading.text || "Blogs"}</h2>
+            <BlogsHeadingTag className="h2 pb-4 text-center fw-bold blogs-heading-color">{blogsHeading.text || "Blogs"}</BlogsHeadingTag>
             <CarouselRow className="row g-2 g-lg-4 justify-content-center mx-1 mobile-scroll-row">
               {blogs.map((blog, index) => (
                 // <div key={index} className="col-lg-4 col-md-6 col-12">
@@ -1127,7 +1168,7 @@ const targetId = `step-${index + 1}`;
           {whatPeopleSayHeading.spanColor && (
             <style>{`.wps-span-color { color: ${whatPeopleSayHeading.spanColor} !important; }`}</style>
           )}
-          <div className="mb-5 text-center"><span className="font_stylish text-orange-force wps-span-color">{whatPeopleSayHeading.spanText || "What People Say"}</span></div>
+          <div className="mb-5 text-center"><WpsSpanTag className="text-orange-force wps-span-color">{whatPeopleSayHeading.spanText || "What People Say"}</WpsSpanTag></div>
           <VideoTestimonialSlider />
         </section>
       </LazySection>

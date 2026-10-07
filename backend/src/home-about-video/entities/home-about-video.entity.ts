@@ -8,6 +8,9 @@ export class HomeAboutVideo {
   @Column({ default: "Let''s build your dream space." }) // Added an extra apostrophe here
 title: string;
 
+@Column({ type: 'varchar', length: 2, default: 'h1' })
+title_tag: string;
+
   @Column({ type: 'text', nullable: true })
   description: string;
 

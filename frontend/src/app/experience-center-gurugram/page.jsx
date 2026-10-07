@@ -515,6 +515,7 @@ import PortfolioCard from "../components/PortfolioCard";
 // import ExperienceForm from "./ExperienceForm";
 import ExperienceForm from "../components/ExperienceForm";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -670,12 +671,14 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function ExperienceGurugram() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("experience-center-gurugram");
   const experienceData = await getExperienceData();
   const experienceDataVideo = await getExperienceDataVideo();
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* Video Section */}
         <section className="video_wrapper conatiner-fluid">

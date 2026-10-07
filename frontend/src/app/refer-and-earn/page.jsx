@@ -2,6 +2,7 @@ import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading
 import MainLayout from "../layouts/MainLayout";
 import BoxIcon from "../components/BoxIcon";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 const getBaseUrl = () => {
   return process.env.NODE_ENV === "development"
@@ -90,6 +91,7 @@ export async function generateMetadata() {
 }
 // const ReferEarn = () => {
 export default async function ReferEarn() {
+  const seo = await getSeoData();
   const bannerRecord = await getBannerData();
   const pageRecord = await getPageContent();
   const bgHeading = bannerRecord?.banner_heading || "Refer & Earn";
@@ -157,6 +159,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
           secBgDesClass={"text-center text-white"}
         /> */}
         <MainLayout>
+          <JsonLd data={seo?.custom_schema} />
         <BackgroundImageWithHeading
   sectionBgImages={"contact_wrapper refer_and_earn_banner"}
   sectionBgHeading={bgHeading}

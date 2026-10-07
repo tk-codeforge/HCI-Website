@@ -14,6 +14,14 @@ import api from "@/utils/api";
 import { image } from "@nextui-org/theme";
 import { buildLeadMetadata } from "@/utils/leadForms";
 import { MediaImg } from "../components/MediaImage";
+import DOMPurify from "isomorphic-dompurify";
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const pickTag = (t, fallback) => (HEADING_TAGS.includes(t) ? t : fallback);
+const dynSize = (t) => (HEADING_TAGS.includes(t) ? `dyn-size dyn-${t}` : "");
+const Html = ({ html, className, style }) => (
+  <div className={className} style={style} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html || "") }} />
+);
 
 const HCLandingPage = () => {
   const pathname = usePathname();
@@ -245,6 +253,13 @@ const HCLandingPage = () => {
     setIsModalOpen(isOpen);
   }, []);
 
+  const S1TopTag = pickTag(data1?.top_title_tag, "h3");
+const S1MidTag = pickTag(data1?.mid_sub_title_tag, "h3");
+const S2SubTag = HEADING_TAGS.includes(data2?.top_description_tag) ? data2.top_description_tag : undefined;
+const S3Tag = pickTag(data3?.top_title_tag, "h3");
+const S4Tag = pickTag(data4?.top_title_tag, "h3");
+const S6Tag = pickTag(data6?.top_title_tag, "h2");
+
   return (
     <MainLayout>
     <div>
@@ -259,7 +274,7 @@ const HCLandingPage = () => {
         .bgsectionroom .designercard * { font-weight: 800 !important; }
 
         /* Modern & Clean Typography Overrides (Scaled down headings) */
-        .font_about, .about_wrapper h1, .about_wrapper h2, .about_wrapper h3 {
+        .font_about, .about_wrapper .rowimage-title, .about_wrapper h1, .about_wrapper h2, .about_wrapper h3, .about_wrapper h4, .about_wrapper h5, .about_wrapper h6 {
           font-family: var(--font-poppins), sans-serif !important;
           font-size: clamp(1.5rem, 2vw, 2.1rem) !important; /* Scaled down for a cleaner look */
           font-weight: 500 !important;
@@ -277,6 +292,15 @@ const HCLandingPage = () => {
           color: #555 !important;
           font-weight: 400 !important;
         }
+          .dream6-sub p { margin: 0; }
+
+          /* Tag-driven sizes for sections 1 & 2, applied only when a tag is chosen in the CMS */
+.dyn-size.dyn-h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem) !important; }
+.dyn-size.dyn-h2 { font-size: clamp(2rem, 3.8vw, 3rem) !important; }
+.dyn-size.dyn-h3 { font-size: clamp(1.75rem, 3vw, 2.4rem) !important; }
+.dyn-size.dyn-h4 { font-size: clamp(1.5rem, 2.4vw, 1.9rem) !important; }
+.dyn-size.dyn-h5 { font-size: 1.35rem !important; }
+.dyn-size.dyn-h6 { font-size: 1.1rem !important; }
 
         .about_wrapper .our_experts_text_land {
           text-align: left !important;
@@ -369,7 +393,7 @@ const HCLandingPage = () => {
               <div className="row">
                 <div className="col-lg-7 d-flex align-items-center">
                   <div className="pe-lg-5 text-white">
-                    <h3 className="fw-lighter fs-3 pb-0 mb-0 home_subhead" style={{ color: "#ffffff" }}>
+                    {/* <h3 className="fw-lighter fs-3 pb-0 mb-0 home_subhead" style={{ color: "#ffffff" }}>
                     {data1?.top_title}
                     </h3>
                     <h3 className="letheading home_banner_heading mt-2" style={{ color: "#ffffff" }}>
@@ -377,7 +401,15 @@ const HCLandingPage = () => {
                     </h3>
                     <p className="text-dark fw-medium fs-6 mt-3">
                     {data1?.top_description}
-                    </p>
+                    </p> */}
+
+                    <S1TopTag className={`fw-lighter fs-3 pb-0 mb-0 home_subhead ${dynSize(data1?.top_title_tag)}`} style={{ color: "#ffffff" }}>
+  {data1?.top_title}
+</S1TopTag>
+<S1MidTag className={`letheading home_banner_heading mt-2 ${dynSize(data1?.mid_sub_title_tag)}`} style={{ color: "#ffffff" }}>
+  {data1?.mid_sub_title}
+</S1MidTag>
+<Html className="text-dark fw-medium fs-6 mt-3" html={data1?.top_description} />
                   </div>
                 </div>
                 <div className="col-lg-5">
@@ -483,10 +515,12 @@ const HCLandingPage = () => {
               ImgAboutClass={"aboout_img object-fit-contain w-100"}
               imgAlt="About"
               titleHeading=  {data2?.top_title}
+             subHeadingTag={S2SubTag}
               subHeading= {data2?.top_description}
-              subHeadingClass="our_experts_text_land pt-3"
+              subHeadingClass={`our_experts_text_land pt-3 ${dynSize(data2?.top_description_tag)}`}
               desClass="team_description hc_landing_desc"
-              description= {data2?.mid_sub_title}
+              // description= {data2?.mid_sub_title}
+              descriptionHtml={data2?.mid_sub_title}
               textAboutBtn="READ MORE"
               btnLink={data2?.mid_sub_description}
               textAboutBtnCLass="read_morebtn"
@@ -497,12 +531,15 @@ const HCLandingPage = () => {
             <div className="container">
               <div className="row py-5 mx-0 g-4">
                 <center>
-                  <h3 className="font_about text-left pb-2">
+                  {/* <h3 className="font_about text-left pb-2">
                   {data3?.top_title}
                   </h3>
                   <p className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start">
                   {data3?.top_description}
-                  </p>
+                  </p> */}
+
+                  <S3Tag className="text-left pb-2">{data3?.top_title}</S3Tag>
+<Html className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start" html={data3?.top_description} />
                 </center>
                 <div className="col-lg-6 col-md-6 col-12">
                   <VideoBox
@@ -524,10 +561,13 @@ const HCLandingPage = () => {
             <div className="container ">
               <div className="row position-relative mx-0">
                 <center>
-                  <h3 className="pb-3 font_about">{data4?.top_title}   </h3>
-                  <p className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start">
+                  {/* <h3 className="pb-3 font_about">{data4?.top_title}   </h3> */}
+                  <S4Tag className="pb-3">{data4?.top_title}</S4Tag>
+                  {/* <p className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start">
                   {data4?.top_description}
-                  </p>
+                  </p> */}
+
+                  <Html className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start" html={data4?.top_description} />
                   <div className="my-2">
                     <a href={data4?.mid_sub_title} className="read_morebtn py-2">
                       Let’s Connect
@@ -543,7 +583,7 @@ const HCLandingPage = () => {
             <div className="row mx-0 mb-4 text-center">
               <div className="col-12 px-0">
                 <span className="font_stylish text-orange-force d-block mb-1">{`Designer's Choice:`}</span>
-                <h2 className="h2 font_about fw-bold mb-0 text-center">Exclusive Design Specials</h2>
+                <h2 className="h2 fw-bold mb-0 text-center">Exclusive Design Specials</h2>
               </div>
             </div>
             {/* ── Cards Grid ── */}
@@ -637,7 +677,7 @@ const HCLandingPage = () => {
                     ✦   Your Dream Awaits
                   </p>
 
-                  <h2 style={{
+                  <S6Tag style={{
                     fontFamily: "var(--font-poppins), sans-serif",
                     fontWeight: 800,
                     fontSize: "clamp(1.8rem, 4vw, 3rem)",
@@ -646,8 +686,8 @@ const HCLandingPage = () => {
                     marginBottom: "0.2rem",
                   }}>
                     {data6?.top_title || "Bring Your Dream Home to Life"}
-                  </h2>
-                  <h2 style={{
+                  </S6Tag>
+                  {/* <h2 style={{
                     fontFamily: "var(--font-poppins), sans-serif",
                     fontWeight: 700,
                     fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
@@ -656,7 +696,20 @@ const HCLandingPage = () => {
                     marginBottom: "2rem",
                   }}>
                     {data6?.top_description || "with Our Experts"}
-                  </h2>
+                  </h2> */}
+
+                  <Html
+  className="dream6-sub"
+  html={data6?.top_description || "with Our Experts"}
+  style={{
+    fontFamily: "var(--font-poppins), sans-serif",
+    fontWeight: 700,
+    fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
+    lineHeight: 1.15,
+    color: "#ff914d",
+    marginBottom: "2rem",
+  }}
+/>
 
                   <a href={data6?.mid_sub_title} className="read_morebtn py-2 px-4">
                     {`Let's Connect`}

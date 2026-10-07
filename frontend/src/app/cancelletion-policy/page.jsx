@@ -2,6 +2,7 @@ import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading
 import MainLayout from "../layouts/MainLayout";
 import DOMPurify from "isomorphic-dompurify";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60;
@@ -212,6 +213,7 @@ export async function generateMetadata() {
 }
 
 export default async function CancelletionPolicy() {
+  const seo = await getSeoData();
 
   const bannerRecord = await getBannerData();
   const bgHeading = bannerRecord?.banner_heading || "Cancellation Policy";
@@ -227,7 +229,6 @@ const subheadingText = headingRecord?.subheading_text || "Our Cancellation & Ref
 const descriptionText =
   headingRecord?.description_text ||
   "All charges are applicable due to resource allocation, design efforts, and operational planning already undertaken by the company to ensure the highest quality for your project.";
-const descriptionFontSize = headingRecord?.description_font_size || 16;
 
 const cmsRows =
   cmsList
@@ -275,9 +276,12 @@ const footerLine2 =
   footerNoteRecord?.line2 ||
   "Discount is not applicable in any type of either partial or full cancellation";
 
+  const footerNoteHtml = footerNoteRecord?.note_html ? DOMPurify.sanitize(footerNoteRecord.note_html) : null;
+
   const tableHtml = DOMPurify.sanitize(getTableHtml(cmsList));
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       {/* <BackgroundImageWithHeading
         sectionBgImages={"contact_wrapper cancelation_policy_banner"}
         sectionBgHeading="Cancellation Policy"
@@ -301,6 +305,9 @@ const footerLine2 =
 <style>{`
   .card-cms-content p { margin-bottom: 0.5rem; }
   .card-cms-content p:last-child { margin-bottom: 0; }
+    .footer-note-cms p { margin-bottom: 0.25rem; }
+  .footer-note-cms p:last-child { margin-bottom: 0; }
+  .cancel-desc p:last-child { margin-bottom: 0; }
   .cms-table-wrapper table { width: 100%; border-collapse: collapse; }
   .cms-table-wrapper th, .cms-table-wrapper td { border: 1px solid #dee2e6; padding: 0.75rem; vertical-align: middle; }
   .cms-table-wrapper thead th { background-color: #f8f9fa; font-weight: bold; }
@@ -328,9 +335,11 @@ const footerLine2 =
                   efforts, and operational planning already undertaken by the
                   company to ensure the highest quality for your project.
                 </p> */}
-                <p className="text-muted lead" style={{ fontSize: `${descriptionFontSize}px` }}>
-  {descriptionText}
-</p>
+                <div
+  className="text-muted lead cancel-desc"
+  style={{ fontSize: "16px" }}
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(descriptionText) }}
+/>
               </div>
             </div>
           </div>
@@ -655,10 +664,23 @@ const footerLine2 =
  {               "Discount is not applicable in any type of either partial or full cancellation"
             }            </p>
             </div> */}
-            <div className="alert alert-warning border-warning" role="alert">
+            {/* <div className="alert alert-warning border-warning" role="alert">
   <p className="mb-1">{footerLine1}</p>
   <p className="mb-0 fw-bold text-danger">{footerLine2}</p>
-</div>
+</div> */}
+
+{footerNoteHtml ? (
+  <div
+    className="alert alert-warning border-warning footer-note-cms"
+    role="alert"
+    dangerouslySetInnerHTML={{ __html: footerNoteHtml }}
+  />
+) : (
+  <div className="alert alert-warning border-warning" role="alert">
+    <p className="mb-1">{footerLine1}</p>
+    <p className="mb-0 fw-bold text-danger">{footerLine2}</p>
+  </div>
+)}
           </div>
         </div>
       </section>

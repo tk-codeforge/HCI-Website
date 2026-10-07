@@ -133,9 +133,24 @@ export async function generateMetadata() {
   };
 }
 
+// helper: safely parse the CMS value
+function parseSchema(raw) {
+  if (!raw) return null;
+  try {
+    const obj = typeof raw === "string" ? JSON.parse(raw) : raw;
+    // escape "<" so content can't break out of the script tag
+    return JSON.stringify(obj).replace(/</g, "\\u003c");
+  } catch (e) {
+    console.error("Invalid schema JSON:", e);
+    return null;
+  }
+}
+
 // --- MAIN SERVER COMPONENT ---
 export default async function AboutUs() {
   const formData = await getAboutUsContent();
+  const seo = await getSeoData();                 // reuses the same cached fetch
+  const schemaJson = parseSchema(seo?.custom_schema);
 
         const TopTitleTag = formData?.top_title_tag || "h2";
         const SubTitleTag = formData?.mid_sub_title_tag || "h3";
@@ -143,6 +158,12 @@ export default async function AboutUs() {
 
   return (
     <MainLayout>
+      {schemaJson && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schemaJson }}
+        />
+      )}
       <main>
         {/* Background Section */}
         {/* <BackgroundImageRow

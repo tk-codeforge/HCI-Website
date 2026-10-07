@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import PortfolioCard from "../components/PortfolioCard";
 import BackgroundImageRow from "../components/BackgroundImageRow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -129,6 +130,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function DesignIdea() {
+  const seo = await getSeoData();
   const slugMap = await getGallerySlugMap("design-idea");
   const designIdea = await getDesignIdeas();
   const bannerRecord = await getBannerData();
@@ -149,6 +151,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         <BackgroundImageRow
           sectionBgImages={"contact_wrapper design_gallery_banner"}

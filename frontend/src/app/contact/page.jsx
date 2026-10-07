@@ -4,6 +4,11 @@ import ContactForm from "./ContactForm";
 import MapSection from "../components/MapSection";
 import { FaPhoneAlt, FaEnvelope, FaBuilding, FaStore, FaTools, FaMapMarkerAlt, FaWhatsapp, FaClock, FaFax, FaGlobe, FaUser, FaHome, FaWarehouse, FaIndustry } from "react-icons/fa";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import JsonLd from "../components/JsonLd";
+
+const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const safeTag = (t, fallback) => (TAGS.includes(t) ? t : fallback);
+const safeEyebrowTag = (t) => (t === "span" || TAGS.includes(t) ? t : "span");
 
 const ICON_MAP = { FaPhoneAlt, FaEnvelope, FaBuilding, FaStore, FaTools, FaMapMarkerAlt, FaWhatsapp, FaClock, FaFax, FaGlobe, FaUser, FaHome, FaWarehouse, FaIndustry };
 const RenderIcon = ({ name }) => { const Cmp = ICON_MAP[name] || FaPhoneAlt; return <Cmp />; };
@@ -174,6 +179,7 @@ export async function generateMetadata() {
 // --- MAIN SERVER COMPONENT ---
 // export default function Contact() {
 export default async function Contact() {
+  const seo = await getSeoData();
   const {
   banner = DEFAULT_CONTACT_CONTENT.banner,
   cards = DEFAULT_CONTACT_CONTENT.cards,
@@ -182,6 +188,7 @@ export default async function Contact() {
 } = await getContactPageContent();
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <style dangerouslySetInnerHTML={{__html: `
         .contact-hero {
           background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -267,6 +274,13 @@ export default async function Contact() {
           box-shadow: 0 20px 40px rgba(0,0,0,0.06);
           border: 1px solid rgba(0,0,0,0.02);
         }
+                  .contact-hero .hero-eyebrow {
+          display: inline;
+          margin: 0;
+          line-height: inherit;
+          font-size: inherit;
+          font-weight: inherit !important;
+        }
 
         .hero-dynamic-text {
   color: var(--hero-text-color) !important;
@@ -292,7 +306,16 @@ export default async function Contact() {
                 <p className="font-poppins text-white-50 mx-auto" style={{ maxWidth: '600px', fontSize: '1.1rem' }}>
                   For inquiries regarding any interior design service or expert advice, our team is ready to help you bring your vision to life.
                 </p> */}
-                <span className="font_stylish hero-dynamic-text" style={{ opacity: 0.9, "--hero-text-color": banner.headingColor || "#ffffff" }}>{banner.eyebrow}</span>
+                {/* <span className="font_stylish hero-dynamic-text" style={{ opacity: 0.9, "--hero-text-color": banner.headingColor || "#ffffff" }}>{banner.eyebrow}</span> */}
+
+                {React.createElement(
+  safeEyebrowTag(banner.eyebrowTag),
+  {
+    className: `hero-dynamic-text${safeEyebrowTag(banner.eyebrowTag) !== "span" ? " hero-eyebrow" : ""}`,
+    style: { opacity: 0.9, "--hero-text-color": banner.headingColor || "#ffffff" },
+  },
+  banner.eyebrow
+)}
 {React.createElement(
   banner.headingTag || "h1",
   { className: "font-outfit fw-bold mb-3 hero-dynamic-text", style: { fontSize: 'clamp(2.5rem, 5vw, 4rem)', "--hero-text-color": banner.headingColor || "#ffffff" } },
@@ -498,7 +521,8 @@ export default async function Contact() {
 
         {/* --- MAP SECTION --- */}
         <div className="mt-5">
-          <MapSection locations={mapSection?.locations ?? []} heading={mapSection?.heading} />
+          {/* <MapSection locations={mapSection?.locations ?? []} heading={mapSection?.heading} /> */}
+          <MapSection locations={mapSection?.locations ?? []} heading={mapSection?.heading} headingTag={safeTag(mapSection?.headingTag, "h2")} />
         </div>
         
       </main>

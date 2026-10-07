@@ -1,7 +1,8 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
-import { buildGalleryMetadata } from "@/utils/gallerySeo";
+import JsonLd from "../../components/JsonLd";
+import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,12 @@ export default async function FaridabadGalleryPage({ searchParams }) {
   }
 
   if (!galleryData) return notFound();
+  const seo = await getGallerySeo({ basePath: "/experience-center-faridabad/gallery", id });
 
-  return <GalleryClient galleryData={galleryData} />;
+  return (
+    <>
+    <JsonLd data={seo?.custom_schema} />
+  <GalleryClient galleryData={galleryData} />
+  </>
+  );
 }

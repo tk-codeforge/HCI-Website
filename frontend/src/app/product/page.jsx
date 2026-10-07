@@ -5,6 +5,7 @@ import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { getSlugMap, galleryHref, PRODUCT_GALLERY_TYPE } from "@/utils/slugEdit";
 import { MediaBg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -156,6 +157,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Product() {
+  const seo = await getSeoData();
   // const slugMap = await getGallerySlugMap("product");
   const [productList, headingData, slugMap] = await Promise.all([
     getProductList(),
@@ -214,6 +216,7 @@ const bannerStyle = bannerImage
 );
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <section className="container my-5">
           <div className="text-center mb-5 row mx-0"> */}
