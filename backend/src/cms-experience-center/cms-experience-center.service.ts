@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCmsExperienceCenterDto } from './dto/create-cms-experience-center.dto';
@@ -23,6 +23,7 @@ export class CmsExperienceCenterService {
   // }
 
 async create(dto: CreateCmsExperienceCenterDto, imageName: string | null) {
+  await this.assertUniqueSlug(dto.title);
   const newRecord = this.cmsExperienceCenterRepository.create({
     ...dto,
     image: imageName,
@@ -51,6 +52,19 @@ async create(dto: CreateCmsExperienceCenterDto, imageName: string | null) {
     ...center,
     image: center.image ? `${baseUrl}${center.image}` : null,
   };
+}
+
+private async assertUniqueSlug(title: string, excludeId?: number) {
+  const slug = this.slugify(title);
+  const all = await this.cmsExperienceCenterRepository.find();   // includes inactive pages
+  const clash = all.find((c) => c.id !== excludeId && this.slugify(c.title) === slug);
+  if (clash) {
+    throw new ConflictException(
+      clash.is_active
+        ? 'A page with this name already exists'
+        : 'A deleted page with this name exists. Restore it or choose a different name',
+    );
+  }
 }
 
 private slugify(text = '') {
@@ -85,6 +99,9 @@ async findOne(id: number) {
     if (!existingRecord) {
       throw new Error('Record not found');
     }
+if (updateCmsExperienceCenterDto.title !== undefined) {
+  await this.assertUniqueSlug(updateCmsExperienceCenterDto.title, id);
+}
 
     if (imageName) {
       // const imageName = basename(imagePath); 

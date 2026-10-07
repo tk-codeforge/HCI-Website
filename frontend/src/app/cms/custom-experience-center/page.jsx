@@ -2715,6 +2715,7 @@ function SeoModal({ center, onClose }) {
     include_in_sitemap: true,
     sitemap_change_frequency: "monthly",
     sitemap_priority: "0.8",
+    custom_schema: "",
     status: "active",
   });
   const [seoId, setSeoId] = useState(null);
@@ -2744,6 +2745,12 @@ function SeoModal({ center, onClose }) {
             canonical_url: found.canonical_url || prev.canonical_url,
             keywords: found.keywords ?? "",
             ...parseRobots(found.meta_robots),
+            custom_schema:
+  typeof found.custom_schema === "string"
+    ? found.custom_schema
+    : found.custom_schema
+    ? JSON.stringify(found.custom_schema, null, 2)
+    : "",
             include_in_sitemap: found.include_in_sitemap !== false,
             sitemap_change_frequency: found.sitemap_change_frequency || "monthly",
             sitemap_priority: found.sitemap_priority || "0.8",
@@ -2774,6 +2781,14 @@ function SeoModal({ center, onClose }) {
       toast.error("Meta description must be 160 characters or less.");
       return;
     }
+    if (seo.custom_schema.trim()) {
+  try {
+    JSON.parse(seo.custom_schema);
+  } catch {
+    toast.error("Custom schema is not valid JSON.");
+    return;
+  }
+}
 
     setSaving(true);
     try {
@@ -2799,6 +2814,7 @@ function SeoModal({ center, onClose }) {
         include_in_sitemap: !!seo.include_in_sitemap,
         sitemap_change_frequency: seo.sitemap_change_frequency,
         sitemap_priority: String(seo.sitemap_priority),
+        custom_schema: seo.custom_schema.trim(),
         status: seo.status,
       };
 
@@ -2903,6 +2919,18 @@ function SeoModal({ center, onClose }) {
                     onChange={(e) => set("keywords", e.target.value)}
                   />
                 </div>
+
+                <div className="mb-3">
+  <label className="form-label fw-bold">Custom Schema.org (JSON Format)</label>
+  <textarea
+    className="form-control font-monospace"
+    rows="6"
+    placeholder='{ "@context": "https://schema.org", "@type": "WebPage" }'
+    value={seo.custom_schema}
+    onChange={(e) => set("custom_schema", e.target.value)}
+  />
+  <div className="form-text">Must be valid JSON. Leave empty for no page schema.</div>
+</div>
 
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">

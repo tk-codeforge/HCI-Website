@@ -648,7 +648,7 @@ export default async function CustomExperienceCenterPage({ params }) {
   if (!slug?.startsWith("experience-center-")) return notFound();
 
   if (!(await getCenter(slug))) return notFound();   // <-- the actual fix
-  const seo = await getSeoData();
+  const seo = await getSeoData(slug);
 
   // const baseURL = getBaseUrl();
   // const [dataRes, videoRes] = await Promise.all([
