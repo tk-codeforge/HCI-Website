@@ -5,6 +5,26 @@ import AuthMainLayout from "../../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 import { getCmsAccess, getPublishWorkflowMessage } from "@/utils/cmsAccess";
+import dynamic from "next/dynamic";
+const CKEditorComponent = dynamic(() => import("../../../components/CKEditorComponent"), { ssr: false });
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null, status: null };
+
+// Table preview: CKEditor saves HTML, so show it as plain text in the truncated cell
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 
 
 const CmsProjectPortfolio = () => {
@@ -14,12 +34,15 @@ const CmsProjectPortfolio = () => {
     const { canPublish } = getCmsAccess(user);
     const [pagesList, setPagesList] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        image: null,
-        status: null,
-    });
+    // const [formData, setFormData] = useState({
+    //     title: "",
+    //     description: "",
+    //     image: null,
+    //     status: null,
+    // });
+
+    const [formData, setFormData] = useState(EMPTY_FORM);
+const [editorKey, setEditorKey] = useState(0);
     const [selectedId, setSelectedId] = useState(null);
     const selectedPage = pagesList?.find(page => page.id === selectedId);
     const slug = window?.location?.pathname.split('/').pop();
@@ -58,12 +81,20 @@ const CmsProjectPortfolio = () => {
         }
     };
 
+    const handleDescriptionChange = (data) => {
+    setFormData((prev) => ({ ...prev, description: data }));
+};
+
+const isDescriptionEmpty = (html) =>
+    !html || html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim() === "";
+
     // Handle form submission
     const handleEditSubmit = async (e) => {
         e.preventDefault();
 
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "h2");
         formDataToSend.append("description", formData.description);
         formDataToSend.append("status", formData.status);
         if (formData.image) {
@@ -86,12 +117,15 @@ const CmsProjectPortfolio = () => {
             if (response.status === 200) {
                 fetchContentManagerPages();
                 toast.success("Form submitted successfully.");
-                setFormData({
-                    title: "",
-                    description: "",
-                    image: null,
-                    status: null,
-                });
+                // setFormData({
+                //     title: "",
+                //     description: "",
+                //     image: null,
+                //     status: null,
+                // });
+
+                setFormData(EMPTY_FORM);
+setEditorKey((k) => k + 1);
 
                 // Close modal and clear form data
                 document.getElementById('editNewpageModalClose').click();
@@ -110,6 +144,7 @@ const CmsProjectPortfolio = () => {
 
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "h2");
         formDataToSend.append("description", formData.description);
         formDataToSend.append("status", formData.status);
         formDataToSend.append("type", slug);
@@ -133,13 +168,15 @@ const CmsProjectPortfolio = () => {
             if (response.status === 201) {
                 fetchContentManagerPages();
                 toast.success("Form submitted successfully.");
-                setFormData({
-                    title: "",
-                    description: "",
-                    image: null,
-                    status: null,
-                });
+                // setFormData({
+                //     title: "",
+                //     description: "",
+                //     image: null,
+                //     status: null,
+                // });
 
+                setFormData(EMPTY_FORM);
+setEditorKey((k) => k + 1);
                 // Close modal and clear form data
                 document.getElementById('addNewpageModalClose').click();
 
@@ -158,13 +195,23 @@ const CmsProjectPortfolio = () => {
         if (!canPublish && item.status) {
             toast.info("Editing an active portfolio project will save it as inactive until an admin republishes it.");
         }
-        setSelectedId(item.id);
-        setFormData({
-            title: item.title,
-            description: item.description,
-            image: null, // Reset image field
-            status: nextStatus,
-        });
+        // setSelectedId(item.id);
+        // setFormData({
+        //     title: item.title,
+        //     description: item.description,
+        //     image: null, // Reset image field
+        //     status: nextStatus,
+        // });
+
+        setEditorKey((k) => k + 1);
+setSelectedId(item.id);
+setFormData({
+    title: item.title ?? "",
+    title_tag: item.title_tag || "h2",
+    description: item.description ?? "",
+    image: null,
+    status: nextStatus,
+});
     };
 
 
@@ -218,7 +265,8 @@ const CmsProjectPortfolio = () => {
                 {pagesList?.length > 0 &&
                     <div className="d-flex justify-content-end mb-3">
                         <button
-                            onClick={() => setFormData({ title: "", description: "", image: null, status: canPublish })} // Clear form data
+                            // onClick={() => setFormData({ title: "", description: "", image: null, status: canPublish })} // Clear form data
+                            onClick={() => { setFormData({ ...EMPTY_FORM, status: canPublish }); setEditorKey((k) => k + 1); }}
                             type="button"
                             className="btn btn-primary"
                             data-bs-toggle="modal"
@@ -258,7 +306,8 @@ const CmsProjectPortfolio = () => {
                                         </td>
                                         <td>
                                             <span className="d-inline-block text-truncate" style={{ width: "250px" }}>
-                                                {item.description}
+                                                {/* {item.description} */}
+                                                {stripHtml(item.description)}
                                             </span>
                                         </td>
                                         <td>
@@ -284,7 +333,8 @@ const CmsProjectPortfolio = () => {
             </div>
 
             <div className="modal fade" id="addNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
+                {/* <div className="modal-dialog"> */}
+                <div className="modal-dialog modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Add</h1>
@@ -293,7 +343,7 @@ const CmsProjectPortfolio = () => {
                         <form onSubmit={handleAddSubmit}>
                             <div className="modal-body row">
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -304,10 +354,24 @@ const CmsProjectPortfolio = () => {
                                         onChange={handleInputChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        {HEADING_TAGS.map((tag) => (
+            <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+<div className="mb-3 col-md-9">
+    <label className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Description</label>
-                                    <input
+                                    {/* <input
                                         type="text"
                                         className="form-control"
                                         name="description"
@@ -315,7 +379,9 @@ const CmsProjectPortfolio = () => {
                                         value={formData.description}
                                         onChange={handleInputChange}
                                         required
-                                    />
+                                    /> */}
+
+                                    <CKEditorComponent key={editorKey} pageData={formData.description} setPageData={handleDescriptionChange} />
                                 </div>
 
                                 <div className="mb-3 col-md-12">
@@ -358,7 +424,8 @@ const CmsProjectPortfolio = () => {
             </div>
 
             <div className="modal fade" id="editNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
+                {/* <div className="modal-dialog"> */}
+                <div className="modal-dialog modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Edit</h1>
@@ -367,7 +434,7 @@ const CmsProjectPortfolio = () => {
                         <form onSubmit={handleEditSubmit}>
                             <div className="modal-body row">
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -378,10 +445,24 @@ const CmsProjectPortfolio = () => {
                                         onChange={handleInputChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        {HEADING_TAGS.map((tag) => (
+            <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+<div className="mb-3 col-md-9">
+    <label className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Description</label>
-                                    <input
+                                    {/* <input
                                         type="text"
                                         className="form-control"
                                         name="description"
@@ -389,7 +470,8 @@ const CmsProjectPortfolio = () => {
                                         value={formData.description}
                                         onChange={handleInputChange}
                                         required
-                                    />
+                                    /> */}
+                                    <CKEditorComponent key={editorKey} pageData={formData.description} setPageData={handleDescriptionChange} />
                                 </div>
 
                                 <div className="mb-3 col-md-12">

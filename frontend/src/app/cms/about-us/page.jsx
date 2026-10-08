@@ -4,11 +4,13 @@ import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+import dynamic from "next/dynamic";
+const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
 
 const CmsAboutUs = () => {
 
     const authToken = useSelector((state) => state.auth.authToken);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
         banner_heading: "About Us",
         banner_heading_tag: "h1",
@@ -18,13 +20,11 @@ const CmsAboutUs = () => {
         top_title: "",
         top_title_tag: "h2",
         top_description: "",
-        top_description_font_size: "16",
         mid_sub_title: "",
         mid_sub_title_tag: "h3",
         mid_sub_span_title: "",
         mid_sub_span_title_tag: "h4",
         mid_sub_description: "",
-        mid_sub_description_font_size: "16",
         mid_image: null,
         mid_image_size: "100"
     });
@@ -83,13 +83,11 @@ const CmsAboutUs = () => {
                 top_title: content.top_title || "",
                 top_title_tag: content.top_title_tag || "h2",
                 top_description: content.top_description || "",
-                top_description_font_size: content.top_description_font_size || "16",
                 mid_sub_title: content.mid_sub_title || "",
                 mid_sub_title_tag: content.mid_sub_title_tag || "h3",
                 mid_sub_span_title: content.mid_sub_span_title || "",
                     mid_sub_span_title_tag: content.mid_sub_span_title_tag || "h4",
                 mid_sub_description: content.mid_sub_description || "",
-                mid_sub_description_font_size: content.mid_sub_description_font_size || "16",
                 // Ensure we get the image correctly depending on nesting level
                 mid_image: pageData.json_content.mid_image || content.mid_image || "",
                 mid_image_size: content.mid_image_size || pageData.json_content.mid_image_size || "100"
@@ -148,9 +146,7 @@ const CmsAboutUs = () => {
         formDataToSend.append("json_content[mid_sub_span_title_tag]", formData.mid_sub_span_title_tag);
 
     formDataToSend.append("json_content[top_title_tag]", formData.top_title_tag);
-formDataToSend.append("json_content[top_description_font_size]", formData.top_description_font_size);
 formDataToSend.append("json_content[mid_sub_title_tag]", formData.mid_sub_title_tag);
-formDataToSend.append("json_content[mid_sub_description_font_size]", formData.mid_sub_description_font_size);
 formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size || "100");
 
 
@@ -296,28 +292,11 @@ formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size ||
     </select>
 </div>
 
-<div className="mb-3 col-md-8">
-    <label htmlFor="top_description" className="form-label">Top Description</label>
-    <textarea
-        className="form-control"
-        name="top_description"
-        placeholder="Top Description"
-        rows="4"
-        value={formData.top_description}
-        onChange={handleInputChange}
-    ></textarea>
-</div>
-
-<div className="mb-3 col-md-4">
-    <label className="form-label">Top Description Font Size (px)</label>
-    <input
-        type="number"
-        className="form-control"
-        name="top_description_font_size"
-        value={formData.top_description_font_size}
-        onChange={handleInputChange}
-        min="10"
-        max="30"
+<div className="mb-3 col-md-12">
+    <label className="form-label">Top Description</label>
+    <CKEditorComponent
+        pageData={formData.top_description}
+        setPageData={(val) => setFormData((prev) => ({ ...prev, top_description: val }))}
     />
 </div>
                                 <div className="mb-3 col-md-8">
@@ -369,28 +348,11 @@ formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size ||
     </select>
 </div>
 
-<div className="mb-3 col-md-8">
-    <label htmlFor="mid_sub_description" className="form-label">Mid Sub Description</label>
-    <textarea
-        className="form-control"
-        name="mid_sub_description"
-        placeholder="Mid Sub Description"
-        rows="4"
-        value={formData.mid_sub_description}
-        onChange={handleInputChange}
-    ></textarea>
-</div>
-
-<div className="mb-3 col-md-4">
-    <label className="form-label">Mid Sub Description Font Size (px)</label>
-    <input
-        type="number"
-        className="form-control"
-        name="mid_sub_description_font_size"
-        value={formData.mid_sub_description_font_size}
-        onChange={handleInputChange}
-        min="10"
-        max="30"
+<div className="mb-3 col-md-12">
+    <label className="form-label">Mid Sub Description</label>
+    <CKEditorComponent
+        pageData={formData.mid_sub_description}
+        setPageData={(val) => setFormData((prev) => ({ ...prev, mid_sub_description: val }))}
     />
 </div>
                                 

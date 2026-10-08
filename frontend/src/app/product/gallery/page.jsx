@@ -16,7 +16,7 @@ export default async function GalleryPage({ searchParams }) {
   const seo = await getGallerySeo({ basePath: "/product/gallery", id });
    return (
     <>
-      <JsonLd data={seo?.custom_schema} /> <GalleryClient />;
+      <JsonLd data={seo?.custom_schema} /> <GalleryClient />
     </>
   );
 }

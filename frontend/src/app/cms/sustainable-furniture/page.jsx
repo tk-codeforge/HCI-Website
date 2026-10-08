@@ -5,6 +5,10 @@ import { toast } from "react-toastify";
 import { FaSave, FaPlus, FaTrash } from "react-icons/fa";
 import api from "@/utils/api";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
+import dynamic from "next/dynamic";
+const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const PAGE_TYPE = "sustainable_furniture";
 
@@ -24,6 +28,7 @@ function ManageSustainableFurnitureContent() {
 
   const [cards, setCards] = useState([]);
   const [cardImages, setCardImages] = useState({}); // index -> File
+  const [editorKey, setEditorKey] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -41,6 +46,7 @@ function ManageSustainableFurnitureContent() {
           const content = record.json_content || {};
 
           setCards(Array.isArray(content.cards) ? content.cards : []);
+setEditorKey((k) => k + 1);
         }
       }
     } catch (err) {
@@ -51,11 +57,19 @@ function ManageSustainableFurnitureContent() {
     }
   };
 
+  // const handleCardChange = (index, field, value) => {
+  //   const updated = [...cards];
+  //   updated[index] = { ...updated[index], [field]: value };
+  //   setCards(updated);
+  // };
+
   const handleCardChange = (index, field, value) => {
-    const updated = [...cards];
+  setCards((prev) => {
+    const updated = [...prev];
     updated[index] = { ...updated[index], [field]: value };
-    setCards(updated);
-  };
+    return updated;
+  });
+};
 
   const handleImageChange = (index, file) => {
     if (!file) return;
@@ -73,6 +87,7 @@ function ManageSustainableFurnitureContent() {
       ...cards,
       {
         title: "",
+        titleTag: "h2",
         description: "",
         buttonText: "View More",
         buttonLink: "",
@@ -119,6 +134,7 @@ const deleteCard = async (index) => {
     // 3. Update the UI state instantly
     setCards(updatedCards);
     setCardImages(updatedImages);
+    setEditorKey((k) => k + 1);
 
     // 4. Immediately trigger the backend save
     try {
@@ -261,23 +277,50 @@ const deleteCard = async (index) => {
                   )}
                 </div>
 
-                <div className="col-md-12">
+                {/* <div className="col-md-12">
                   <label className="form-label">Title</label>
                   <input
                     className="form-control"
                     value={card.title}
                     onChange={(e) => handleCardChange(index, "title", e.target.value)}
                   />
-                </div>
+                </div> */}
+
+                <div className="col-md-3">
+  <label className="form-label">Heading Tag</label>
+  <select
+    className="form-select"
+    value={card.titleTag || "h2"}
+    onChange={(e) => handleCardChange(index, "titleTag", e.target.value)}
+  >
+    {HEADING_TAGS.map((tag) => (
+      <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+    ))}
+  </select>
+</div>
+
+<div className="col-md-9">
+  <label className="form-label">Title</label>
+  <input
+    className="form-control"
+    value={card.title}
+    onChange={(e) => handleCardChange(index, "title", e.target.value)}
+  />
+</div>
 
                 <div className="col-12">
                   <label className="form-label">Description</label>
-                  <textarea
+                  {/* <textarea
                     rows={3}
                     className="form-control"
                     value={card.description}
                     onChange={(e) => handleCardChange(index, "description", e.target.value)}
-                  />
+                  /> */}
+                  <CKEditorComponent
+  key={`${editorKey}-${index}`}
+  pageData={card.description || ""}
+  setPageData={(data) => handleCardChange(index, "description", data)}
+/>
                 </div>
 
                 <div className="col-md-6">

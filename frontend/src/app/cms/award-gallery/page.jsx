@@ -5,6 +5,11 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 import { getCmsAccess, getDeletePermissionMessage } from "@/utils/cmsAccess";
+import dynamic from "next/dynamic";
+const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const plainText = (s) => (s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
 const CmsDesignGallery = () => {
     const user = useSelector((state) => state.auth.user);
@@ -14,9 +19,11 @@ const CmsDesignGallery = () => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
+        title_tag: "",
         description: "",
         image: null,
     });
+    const [editorKey, setEditorKey] = useState(0);
     const [selectedId, setSelectedId] = useState(null);
     const selectedPage = pagesList?.find(page => page.id === selectedId);
 
@@ -60,6 +67,7 @@ const CmsDesignGallery = () => {
         const formDataToSend = new FormData();
         formDataToSend.append("page_type", "award_gallery");
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -101,6 +109,7 @@ const CmsDesignGallery = () => {
 
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -119,8 +128,10 @@ const CmsDesignGallery = () => {
             if (response.status === 200) {
                 fetchContentManagerPages();
                 toast.success("Form submitted successfully.");
+                setEditorKey((k) => k + 1);
                 setFormData({
                     title: "",
+                    title_tag: "",
                     description: "",
                     image: null,
                 });
@@ -138,15 +149,26 @@ const CmsDesignGallery = () => {
     };
 
     // Set form data when edit button is clicked
-    const handleEditClick = (item) => {
-        console.log("edit item here",item);
-        setSelectedId(item.id);
-        setFormData({
-            title: item.child_content?.title,
-            description: item.child_content?.description,
-            image: null, // Reset image field
-        });
-    };
+    // const handleEditClick = (item) => {
+    //     console.log("edit item here",item);
+    //     setSelectedId(item.id);
+    //     setFormData({
+    //         title: item.child_content?.title,
+    //         description: item.child_content?.description,
+    //         image: null, // Reset image field
+    //     });
+    // };
+
+const handleEditClick = (item) => {
+    setSelectedId(item.id);
+    setFormData({
+        title: item.child_content?.title || "",
+        title_tag: item.child_content?.title_tag || "",
+        description: item.child_content?.description || "",
+        image: null,
+    });
+    setEditorKey((k) => k + 1);
+};
 
     const handleChildImageChange = async (index, e) => {
         e.preventDefault();
@@ -232,7 +254,11 @@ const CmsDesignGallery = () => {
             <div className="container my-5">
                 <h1 className="mb-4 text-center">CMS - Award Gallery</h1>
                 <div className="d-flex justify-content-end mb-3">
-                    <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGalleryModal">
+                    <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGalleryModal"
+    onClick={() => {
+        setFormData({ title: "", title_tag: "", description: "", image: null });
+        setEditorKey((k) => k + 1);
+    }}>
                         Add Gallery
                     </button>
                 </div>
@@ -264,7 +290,8 @@ const CmsDesignGallery = () => {
                 <img src={item?.child_content?.image} alt={item?.child_content.title} height="80" decoding="async"  loading="lazy" />
             </td>
             <td>{item?.child_content.title}</td>
-            <td>{item?.child_content?.description}</td>
+            {/* <td>{item?.child_content?.description}</td> */}
+            <td>{plainText(item?.child_content?.description).slice(0, 80)}</td>
             <td>
                 <button onClick={() => handleManageChild(item.id)} type="button" className="btn btn-info me-1" data-bs-toggle="modal" data-bs-target="#manageChildModal">
                     Manage Child
@@ -295,7 +322,7 @@ const CmsDesignGallery = () => {
 
               {/* Add Gallery Modal */}
               <div className="modal fade" id="addGalleryModal" tabIndex="-1" aria-hidden="true">
-                <div className="modal-dialog">
+                <div className="modal-dialog modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5">Add Gallery</h1>
@@ -303,14 +330,36 @@ const CmsDesignGallery = () => {
                         </div>
                         <form onSubmit={handleAddSubmit}>
                             <div className="modal-body">
-                                <div className="mb-3">
+                                {/* <div className="mb-3">
                                     <label className="form-label">Title</label>
                                     <input type="text" className="form-control" name="title" value={formData.title} onChange={handleInputChange} required />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Description</label>
                                     <input type="text" className="form-control" name="description" value={formData.description} onChange={handleInputChange}   />
-                                </div>
+                                </div> */}
+
+                                <div className="row">
+    <div className="mb-3 col-md-9">
+        <label className="form-label">Title</label>
+        <input type="text" className="form-control" name="title" value={formData.title} onChange={handleInputChange} required />
+    </div>
+    <div className="mb-3 col-md-3">
+        <label className="form-label">Title Tag</label>
+        <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+            <option value="">Default</option>
+            {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+        </select>
+    </div>
+    <div className="mb-3 col-md-12">
+        <label className="form-label">Description</label>
+        <CKEditorComponent
+            key={editorKey}
+            pageData={formData.description}
+            setPageData={(val) => setFormData((prev) => ({ ...prev, description: val }))}
+        />
+    </div>
+</div>
                                 <div className="mb-3">
                                     <label className="form-label">Image</label>
                                     <input type="file" className="form-control" name="image" accept="image/*" onChange={handleInputChange} required />
@@ -325,7 +374,7 @@ const CmsDesignGallery = () => {
             </div>
 
             <div className="modal fade" id="addNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
+                <div className="modal-dialog modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Edit</h1>
@@ -334,7 +383,7 @@ const CmsDesignGallery = () => {
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body row">
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label htmlFor="title" className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -357,7 +406,28 @@ const CmsDesignGallery = () => {
                                         onChange={handleInputChange}
                                    
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-9">
+    <label htmlFor="title" className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
+<div className="mb-3 col-md-3">
+    <label className="form-label">Title Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        <option value="">Default</option>
+        {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+    </select>
+</div>
+<div className="mb-3 col-md-12">
+    <label className="form-label">Description</label>
+    <CKEditorComponent
+        key={editorKey}
+        pageData={formData.description}
+        setPageData={(val) => setFormData((prev) => ({ ...prev, description: val }))}
+    />
+</div>
 
 
                                 <div className="mb-3 col-md-12">

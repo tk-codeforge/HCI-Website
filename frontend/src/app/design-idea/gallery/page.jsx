@@ -4,9 +4,11 @@ import { defaultAltText } from "@/utils/helper";
 import { notFound } from "next/navigation";
 import JsonLd from "../../components/JsonLd";
 import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
+import DOMPurify from "isomorphic-dompurify";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 const BASE_URL = "https://hcinterior.in";
+const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 // --- SERVER SIDE DATA FETCHING ---
 async function getGalleryData(id) {
@@ -62,14 +64,29 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
   const staticImages = images.slice(0, 6);
   const extraImages = images.slice(6);
   const title = galleryData?.child_content?.title ?? "Design Idea Gallery";
+  const rawTag = galleryData?.child_content?.title_tag;
+const TitleTag = TAGS.includes(rawTag) ? rawTag : "h4"; // h4 is what the page renders today
+const description = galleryData?.child_content?.description || "";
 
   return (
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
       <main>
+        <style>{`.gallery-desc p:last-child { margin-bottom: 0; }`}</style>
         <section className="container my-5">
           <div className="row g-4 mx-0">
-            <h4 className="ps-3 mt-3">{title}</h4>
+            <div className="col-12 text-center mt-3">
+  <TitleTag className="h4" style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 600 }}>
+    {title}
+  </TitleTag>
+  {description && (
+    <div
+      className="gallery-desc mx-auto"
+      style={{ maxWidth: "820px" }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+    />
+  )}
+</div>
             
             {/* Static Fields for First 6 Images */}
             <div className="col-lg-6">

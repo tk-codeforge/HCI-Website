@@ -5,13 +5,29 @@ import { defaultAltText } from "@/utils/helper";
 
 export default function GalleryClient({ portfolioData }) {
   const images = portfolioData?.child_images ?? [];
+  const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const savedTag = portfolioData?.title_tag;
+const TitleTag = HEADING_TAGS.includes(savedTag) ? savedTag : "h4";
+const galleryTitle = portfolioData?.title ?? "Luxury Projects";
+const galleryDescription = portfolioData?.description;
 
   return (
     <MainLayout>
       <main>
         <section className="container my-5">
           <div className="row g-4 mx-0">
-            <h4 className="ps-3 mt-3">{portfolioData?.title ?? "Luxury Projects Gallery"}</h4>
+            {/* <h4 className="ps-3 mt-3">{portfolioData?.title ?? "Luxury Projects Gallery"}</h4> */}
+
+            <div className="col-12 text-center mt-3">
+  <TitleTag className="mb-3">{galleryTitle}</TitleTag>
+  {galleryDescription && (
+    <div
+      className="gallery-description mx-auto"
+      style={{ maxWidth: "900px" }}
+      dangerouslySetInnerHTML={{ __html: galleryDescription }}
+    />
+  )}
+</div>
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={portfolioData?.child_images?.[0]?.image ?? "/images/detail-img/1.webp"}

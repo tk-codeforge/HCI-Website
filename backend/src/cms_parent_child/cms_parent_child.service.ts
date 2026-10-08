@@ -474,6 +474,7 @@ export class CmsParentChildService {
       page_type: createCmsParentChildDto.page_type,
       child_content: {
         title: createCmsParentChildDto.title,
+        title_tag: createCmsParentChildDto.title_tag || "",
         description: createCmsParentChildDto.description,
         image: imagePath,
       },
@@ -500,11 +501,16 @@ export class CmsParentChildService {
     }
     const baseUrl = `${process.env.BASE_URL}/uploads/parent-child/`;
 
+    // const updatedChildContent = {
+    //   title: parentChild.child_content.title,
+    //   description: parentChild.child_content.description,
+    //   image: parentChild.child_content.image ? `${baseUrl}${parentChild.child_content.image}` : null,
+    // };
+
     const updatedChildContent = {
-      title: parentChild.child_content.title,
-      description: parentChild.child_content.description,
-      image: parentChild.child_content.image ? `${baseUrl}${parentChild.child_content.image}` : null,
-    };
+  ...parentChild.child_content,
+  image: parentChild.child_content.image ? `${baseUrl}${parentChild.child_content.image}` : null,
+};
 
     const updatedChildImages = parentChild.child_images.map(imageObj => ({
       ...imageObj,

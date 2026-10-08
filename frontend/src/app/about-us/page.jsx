@@ -2,6 +2,7 @@ import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import BackgroundImageRow from "../components/BackgroundImageRow";
 import MainLayout from "../layouts/MainLayout";
 import { MediaImg } from "../components/MediaImage";
+import DOMPurify from "isomorphic-dompurify";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; 
@@ -165,6 +166,7 @@ export default async function AboutUs() {
         />
       )}
       <main>
+        <style>{`.about-rich p:last-child { margin-bottom: 0; }`}</style>
         {/* Background Section */}
         {/* <BackgroundImageRow
           sectionBgImages="contact_wrapper about_us_banner"
@@ -219,10 +221,11 @@ export default async function AboutUs() {
                   )}
                 </div>
               </div>
-              <p className="px-lg-5 pt-4 team_description"
-              style={{ fontSize: formData?.top_description_font_size ? `${formData.top_description_font_size}px` : undefined }}>
-                {formData?.top_description}
-              </p>
+              <div
+  className="px-lg-5 pt-4 team_description about-rich"
+  style={{ fontSize: formData?.top_description_font_size ? `${formData.top_description_font_size}px` : "16px" }}
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formData?.top_description || "") }}
+/>
             </center>
           </div>
         </section>
@@ -240,7 +243,11 @@ export default async function AboutUs() {
                         {formData?.mid_sub_span_title || "Interior designing Company?"}
                       </SubSpanTitleTag>
                     </div>
-                    <p style={{color:"#FFF", fontSize: formData?.mid_sub_description_font_size ? `${formData.mid_sub_description_font_size}px` : undefined}}>{formData?.mid_sub_description}</p>
+                    <div
+  className="about-rich"
+  style={{ color: "#FFF", fontSize: formData?.mid_sub_description_font_size ? `${formData.mid_sub_description_font_size}px` : "16px" }}
+  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formData?.mid_sub_description || "") }}
+/>
                   </div>
                 </div>
               </div>

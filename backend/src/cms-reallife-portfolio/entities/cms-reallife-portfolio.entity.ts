@@ -22,4 +22,7 @@ export class CmsReallifePortfolio {
 
     @UpdateDateColumn()
     updated_at: Date;
+
+    @Column({ type: 'varchar', length: 10, nullable: true, default: null })
+title_tag: string | null;
 }

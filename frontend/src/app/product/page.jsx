@@ -16,6 +16,21 @@ const getBaseUrl = () => {
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 };
 
+// CMS descriptions are saved as HTML (CKEditor). Cards expect plain text.
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
 // --- HELPER: Fetch Product Data ---
 async function getProductList() {
   try {
@@ -272,7 +287,8 @@ const bannerStyle = bannerImage
                       product?.child_content?.title || "Product Image"
                     }
                     portfolioTitle={product?.child_content?.title}
-                    wallpaperDescriptiion={product?.child_content?.description}
+                    // wallpaperDescriptiion={product?.child_content?.description}
+                    wallpaperDescriptiion={stripHtml(product?.child_content?.description)}
                     descriptionClass="team_description mb-0 pb-2 pb-lg-0"
                     textBtnWallpaper="View Design"
                     // btnHrefWallpaper={pageGalleryHref("product", slugMap, product.id)}

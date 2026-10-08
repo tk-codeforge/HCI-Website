@@ -289,6 +289,21 @@ const getBaseUrl = () => {
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 };
 
+// CMS descriptions are saved as HTML (CKEditor). Cards expect plain text.
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
 // --- HELPER: Fetch Reclaimed Wood Data ---
 async function getReclaimedWoodData() {
   try {
@@ -546,7 +561,8 @@ const bannerStyle = bannerImage
                       design?.child_content?.title ?? defaultAltText
                     }
                     portfolioTitle={design?.child_content?.title}
-                    wallpaperDescriptiion={design?.child_content?.description}
+                    // wallpaperDescriptiion={design?.child_content?.description}
+                    wallpaperDescriptiion={stripHtml(design?.child_content?.description)}
                     descriptionClass="team_description mb-0"
                     textBtnWallpaper="View Design"
                     btnHrefWallpaper={pageGalleryHref("reclaimed-wood", slugMap, design?.id)}

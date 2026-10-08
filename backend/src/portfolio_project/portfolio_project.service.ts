@@ -7,6 +7,12 @@ import { Repository } from 'typeorm';
 import { basename } from 'path';
 import { resolveBooleanPublishState } from '../auth/utils/cms-access.util';
 
+const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+const normalizeTitleTag = (tag: any): string | null =>
+  typeof tag === 'string' && HEADING_TAGS.includes(tag.toLowerCase())
+    ? tag.toLowerCase()
+    : null;
+
 @Injectable()
 export class PortfolioProjectService {
 
@@ -27,6 +33,7 @@ export class PortfolioProjectService {
     const resolvedStatus = resolveBooleanPublishState(createPortfolioProjectDto?.status, user);
     const newRecord = this.portfolioProjectRepository.create({
       ...createPortfolioProjectDto,
+        title_tag: normalizeTitleTag(createPortfolioProjectDto.title_tag),
       status:
         typeof resolvedStatus === 'boolean'
           ? resolvedStatus
@@ -134,6 +141,9 @@ export class PortfolioProjectService {
     }
 
     await this.portfolioProjectRepository.update(id, updatePortfolioProjectDto);
+        if (updatePortfolioProjectDto.title_tag !== undefined) {
+      updatePortfolioProjectDto.title_tag = normalizeTitleTag(updatePortfolioProjectDto.title_tag);
+    }
     return this.portfolioProjectRepository.findOne({ where: { id } });
   }
 

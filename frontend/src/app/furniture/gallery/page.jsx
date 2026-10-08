@@ -56,6 +56,10 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
 
   const images = galleryData?.child_images ?? [];
   const title = galleryData?.child_content?.title ?? "Furniture Gallery";
+  const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const savedTag = galleryData?.child_content?.title_tag;
+const TitleTag = HEADING_TAGS.includes(savedTag) ? savedTag : "h4";
+const description = galleryData?.child_content?.description;
 
   return (
     <MainLayout>
@@ -63,7 +67,17 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
       <main>
         <section className="container my-5">
           <div className="row g-4 mx-0">
-            <h4 className="ps-3 mt-3">{title}</h4>
+            {/* <h4 className="ps-3 mt-3">{title}</h4> */}
+            <div className="col-12 text-center mt-3">
+  <TitleTag className="mb-3">{title}</TitleTag>
+  {description && (
+    <div
+      className="gallery-description mx-auto"
+      style={{ maxWidth: "900px" }}
+      dangerouslySetInnerHTML={{ __html: description }}
+    />
+  )}
+</div>
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[0]?.image ?? "/images/detail-img/1.webp"}

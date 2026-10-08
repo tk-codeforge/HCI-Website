@@ -1,4 +1,3 @@
-import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import { useCallback, useEffect, useState } from "react";
 // import WallpaperCard from "../components/WallpaperCard";
 // import MainLayout from "../layouts/MainLayout";
@@ -280,7 +279,9 @@ import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
-import { MediaBg } from "../components/MediaImage";
+import { MediaBg, MediaImg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
+
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -291,6 +292,21 @@ const getBaseUrl = () => {
     ? process.env.NEXT_PUBLIC_API_DEV_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 };
+
+// CMS descriptions are saved as HTML (CKEditor). Cards expect plain text.
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 
 // --- HELPER: Fetch Rattan Furniture Data ---
 async function getRattanData() {
@@ -438,7 +454,7 @@ export async function generateMetadata() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function SustainableFurniture() {
-  const slugMap = await getGallerySlugMap("rattan");
+  const seo = await getSeoData();
   const exclusiveDesignData = await getRattanData();
 
    const headingData = await getHeadingDescriptionData();
@@ -495,6 +511,7 @@ const bannerStyle = bannerImage
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main>
         {/* <div
   className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
@@ -531,13 +548,14 @@ const bannerStyle = bannerImage
             <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
           </div>
         )} 
+        
 <section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (
                 <div key={index} className="col-lg-4 col-md-6 col-12">
                   <WallpaperCard
-                    linkTagWallpaper={pageGalleryHref("rattan", slugMap, design?.id)}
+                    linkTagWallpaper={`/rattan/gallery?id=${design?.id}`}
                     wallpaperCard="wallpapercard"
                     imgWallpaper={
                       design?.child_content?.image ?? "/images/Bhk/1bhk.png"
@@ -547,10 +565,11 @@ const bannerStyle = bannerImage
                       design?.child_content?.title ?? defaultAltText
                     }
                     portfolioTitle={design?.child_content?.title}
-                    wallpaperDescriptiion={design?.child_content?.description}
+                    // wallpaperDescriptiion={design?.child_content?.description}
+                    wallpaperDescriptiion={stripHtml(design?.child_content?.description)}
                     descriptionClass="team_description mb-0"
                     textBtnWallpaper="View Design"
-                    btnHrefWallpaper={pageGalleryHref("rattan", slugMap, design?.id)}
+                    btnHrefWallpaper={`/rattan/gallery?id=${design?.id}`}
                   />
                 </div>
               ))

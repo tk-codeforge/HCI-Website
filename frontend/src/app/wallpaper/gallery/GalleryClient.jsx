@@ -33,6 +33,11 @@ const WallpapersGallery = () => {
   }, []);
 
   const images = galleryData?.child_images ?? [];
+  const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const savedTag = galleryData?.child_content?.title_tag;
+const TitleTag = HEADING_TAGS.includes(savedTag) ? savedTag : "h4";
+const galleryTitle = galleryData?.child_content?.title ?? "Wallpapers";
+const galleryDescription = galleryData?.child_content?.description;
   
   return (
     <div>
@@ -47,9 +52,19 @@ const WallpapersGallery = () => {
         <main>
           <section className="container my-5">
             <div className="row g-4 mx-0">
-              <h4 className="ps-3 mt-3">
+              {/* <h4 className="ps-3 mt-3">
                 {galleryData?.child_content?.title ?? "wallpapers"}
-              </h4>
+              </h4> */}
+              <div className="col-12 text-center mt-3">
+  <TitleTag className="mb-3">{galleryTitle}</TitleTag>
+  {galleryDescription && (
+    <div
+      className="gallery-description mx-auto"
+      style={{ maxWidth: "900px" }}
+      dangerouslySetInnerHTML={{ __html: galleryDescription }}
+    />
+  )}
+</div>
               <div className="col-lg-6">
                 <GalleryDetail
                   imgGalUrl={

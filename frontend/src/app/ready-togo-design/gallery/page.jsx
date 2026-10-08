@@ -55,12 +55,15 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
 
   const images = galleryData?.child_images ?? [];
   const title = galleryData?.child_content?.title ?? "Ready to go Gallery";
+  const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const savedTag = galleryData?.child_content?.title_tag;
+const TitleTag = HEADING_TAGS.includes(savedTag) ? savedTag : "h1";
+const description = galleryData?.child_content?.description;
 
   // If there are no images, show a graceful fallback
   if (images.length === 0) {
     return (
       <MainLayout>
-         <JsonLd data={seo?.custom_schema} />
         <main className="container my-5 py-5 text-center">
            <h2 className="font-outfit text-muted">No images found for this gallery.</h2>
         </main>
@@ -70,13 +73,24 @@ const ResidentialProjectsGallery = async ({ searchParams }) => {
 
   return (
     <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
       <main className="bg-light pb-5">
         
         {/* Modern Header Section */}
         <section className="py-5 bg-white border-bottom shadow-sm mb-5">
           <div className="container text-center">
-             <h1 className="font-outfit fw-bold text-dark mb-2">{title}</h1>
-             <p className="font-poppins text-muted mb-0">Explore our exclusive, ready-to-execute designs.</p>
+             {/* <h1 className="font-outfit fw-bold text-dark mb-2">{title}</h1>
+             <p className="font-poppins text-muted mb-0">Explore our exclusive, ready-to-execute designs.</p> */}
+             <TitleTag className="font-outfit fw-bold text-dark mb-2">{title}</TitleTag>
+{description ? (
+  <div
+    className="gallery-description font-poppins text-muted mx-auto"
+    style={{ maxWidth: "900px" }}
+    dangerouslySetInnerHTML={{ __html: description }}
+  />
+) : (
+  <p className="font-poppins text-muted mb-0">Explore our exclusive, ready-to-execute designs.</p>
+)}
           </div>
         </section>
 

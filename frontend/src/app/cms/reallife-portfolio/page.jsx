@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const CmsRealLifePortfolio = () => {
 
@@ -12,6 +13,7 @@ const CmsRealLifePortfolio = () => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
+        title_tag: "",
         style: "",
         room_dimension: "",
         image: null,
@@ -56,6 +58,7 @@ const CmsRealLifePortfolio = () => {
       
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "");
         formDataToSend.append("style", formData.style);
         formDataToSend.append("room_dimension", formData.room_dimension);
         if (formData.image) {
@@ -77,6 +80,7 @@ const CmsRealLifePortfolio = () => {
                 toast.success("Page updated successfully.");
                 setFormData({
                     title: "",
+                    title_tag: "",
                     style: "",
                     room_dimension: "",
                     image: null,
@@ -104,6 +108,7 @@ const CmsRealLifePortfolio = () => {
         setSelectedId(item.id);
         setFormData({
             title: item.title,
+            title_tag: item.title_tag || "",
             style: item.style,
             room_dimension: item.room_dimension,
             image: null, // Reset image field
@@ -166,7 +171,7 @@ const CmsRealLifePortfolio = () => {
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body row">
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                 <label htmlFor="title" className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -177,7 +182,20 @@ const CmsRealLifePortfolio = () => {
                                         onChange={handleInputChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-9">
+    <label htmlFor="title" className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
+<div className="mb-3 col-md-3">
+    <label className="form-label">Title Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        <option value="">Default</option>
+        {HEADING_TAGS.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+    </select>
+</div>
                                 <div className="mb-3 col-md-12">
                                 <label htmlFor="style" className="form-label">Style</label>
                                     <input

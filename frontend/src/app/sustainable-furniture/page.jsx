@@ -90,6 +90,21 @@ const getBaseUrl = () => {
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 };
 
+// CMS descriptions are saved as HTML (CKEditor). Cards expect plain text.
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
 // --- HELPER: Fetch SEO Data ---
 // async function getSeoData() {
 //   try {
@@ -388,7 +403,8 @@ export default async function SustainableFurniture() {
         wallpaperImgClass="wallpaperclass"
         altWallpaper={card.title}
         portfolioTitle={card.title}
-        wallpaperDescriptiion={card.description}
+        // wallpaperDescriptiion={card.description}
+        wallpaperDescriptiion={stripHtml(card.description)}
         descriptionClass="team_description mb-0"
         textBtnWallpaper={card.buttonText}
         btnHrefWallpaper={card.buttonLink}

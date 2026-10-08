@@ -17,6 +17,9 @@ export class PortfolioProject {
     @Column()
     title: string;
 
+        @Column({ type: 'varchar', length: 10, nullable: true, default: null })
+    title_tag: string | null;
+
     @Column()
     description: string;
 

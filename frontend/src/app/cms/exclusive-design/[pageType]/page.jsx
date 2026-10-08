@@ -5,16 +5,23 @@ import AuthMainLayout from "../../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 import { Modal } from "bootstrap";
+import dynamic from "next/dynamic";
+const CKEditorComponent = dynamic(() => import("../../../components/CKEditorComponent"), { ssr: false });
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null };
 
 const CmsReadyToGoDesign = () => {
     const authToken = useSelector((state) => state.auth.authToken);
     const [pagesList, setPagesList] = useState();
     const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        image: null,
-    });
+    // const [formData, setFormData] = useState({
+    //     title: "",
+    //     description: "",
+    //     image: null,
+    // });
+    const [formData, setFormData] = useState(EMPTY_FORM);
+const [editorKey, setEditorKey] = useState(0);
     const [selectedId, setSelectedId] = useState(null);
     const selectedPage = pagesList?.find(page => page.id === selectedId);
     const slug = window.location.pathname.split('/').pop();
@@ -53,12 +60,20 @@ const CmsReadyToGoDesign = () => {
         }
     };
 
+    const handleDescriptionChange = (data) => {
+    setFormData((prev) => ({ ...prev, description: data }));
+};
+
+const isDescriptionEmpty = (html) =>
+    !html || html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim() === "";
+
     // Handle form submission
     const handleEditSubmit = async (e) => {
         e.preventDefault();
 
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "h2");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -77,11 +92,14 @@ const CmsReadyToGoDesign = () => {
             if (response.status === 200) {
                 fetchContentManagerPages();
                 toast.success("Form submitted successfully.");
-                setFormData({
-                    title: "",
-                    description: "",
-                    image: null,
-                });
+                // setFormData({
+                //     title: "",
+                //     description: "",
+                //     image: null,
+                // });
+
+                setFormData(EMPTY_FORM);
+setEditorKey((k) => k + 1);
 
                 // Close modal and clear form data
             document.getElementById('editNewpageModalClose').click();
@@ -101,6 +119,7 @@ const CmsReadyToGoDesign = () => {
         const formDataToSend = new FormData();
         formDataToSend.append("page_type", slug);
         formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "h2");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -119,11 +138,14 @@ const CmsReadyToGoDesign = () => {
             if (response.status === 201) {
                 fetchContentManagerPages();
                 toast.success("Form submitted successfully.");
-                setFormData({
-                    title: "",
-                    description: "",
-                    image: null,
-                });
+                // setFormData({
+                //     title: "",
+                //     description: "",
+                //     image: null,
+                // });
+
+                setFormData(EMPTY_FORM);
+setEditorKey((k) => k + 1);
 
                 // Close modal and clear form data
                 document.getElementById('addNewpageModalClose').click();
@@ -138,13 +160,22 @@ const CmsReadyToGoDesign = () => {
 
     // Set form data when edit button is clicked
     const handleEditClick = (item) => {
-        console.log("edit item here",item);
-        setSelectedId(item.id);
-        setFormData({
-            title: item.child_content?.title,
-            description: item.child_content?.description,
-            image: null, // Reset image field
-        });
+        // console.log("edit item here",item);
+        // setSelectedId(item.id);
+        // setFormData({
+        //     title: item.child_content?.title,
+        //     description: item.child_content?.description,
+        //     image: null, // Reset image field
+        // });
+
+        setEditorKey((k) => k + 1);
+setSelectedId(item.id);
+setFormData({
+    title: item.child_content?.title ?? "",
+    title_tag: item.child_content?.title_tag || "h2",
+    description: item.child_content?.description ?? "",
+    image: null,
+});
     };
 
     const handleChildImageChange = async (index, e) => {
@@ -192,7 +223,8 @@ const CmsReadyToGoDesign = () => {
                 <h1 className="mb-4 text-center">CMS - Exclusive Design</h1>
                 <div className="d-flex justify-content-end mb-3">
                     <button
-                        onClick={() => setFormData({ title: "", description: "", image: null })}
+                        // onClick={() => setFormData({ title: "", description: "", image: null })}
+                        onClick={() => { setFormData(EMPTY_FORM); setEditorKey((k) => k + 1); }}
                         type="button"
                         className="btn btn-primary"
                         data-bs-toggle="modal"
@@ -227,7 +259,8 @@ const CmsReadyToGoDesign = () => {
                                             <img src={item?.child_content?.image} alt={item?.child_content.title} height="80" decoding="async"  loading="lazy" />
                                         </td>
                                         <td>{item?.child_content.title}</td>
-                                        <td>{item?.child_content?.description}</td>
+                                        {/* <td>{item?.child_content?.description}</td> */}
+                                        <td dangerouslySetInnerHTML={{ __html: item?.child_content?.description ?? "" }} />
                                         <td>
                                             <button onClick={()=> handleManageChild(item.id)} type="button" className="btn btn-info me-1" data-bs-toggle="modal" data-bs-target="#manageChildModal">
                                                 Manage Child
@@ -245,7 +278,8 @@ const CmsReadyToGoDesign = () => {
             </div>
 
             <div className="modal fade" id="addNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
+                {/* <div className="modal-dialog"> */}
+                <div className="modal-dialog modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Add New Page</h1>
@@ -254,7 +288,7 @@ const CmsReadyToGoDesign = () => {
                         <form onSubmit={handleAddSubmit}>
                             <div className="modal-body row">
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label htmlFor="title" className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -265,10 +299,24 @@ const CmsReadyToGoDesign = () => {
                                         onChange={handleInputChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-3">
+    <label htmlFor="title_tag" className="form-label">Heading Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        {HEADING_TAGS.map((tag) => (
+            <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+<div className="mb-3 col-md-9">
+    <label htmlFor="title" className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
                                 <div className="mb-3 col-md-12">
                                     <label htmlFor="description" className="form-label">Description</label>
-                                    <input
+                                    {/* <input
                                         type="text"
                                         className="form-control"
                                         name="description"
@@ -276,7 +324,9 @@ const CmsReadyToGoDesign = () => {
                                         value={formData.description}
                                         onChange={handleInputChange}
                                         required
-                                    />
+                                    /> */}
+
+                                    <CKEditorComponent key={editorKey} pageData={formData.description} setPageData={handleDescriptionChange} />
                                 </div>
 
 
@@ -303,7 +353,8 @@ const CmsReadyToGoDesign = () => {
             </div>
 
             <div className="modal fade" id="editNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
+                {/* <div className="modal-dialog"> */}
+                <div className="modal-dialog modal-xl">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h1 className="modal-title fs-5" id="exampleModalLabel">Edit</h1>
@@ -312,7 +363,7 @@ const CmsReadyToGoDesign = () => {
                         <form onSubmit={handleEditSubmit}>
                             <div className="modal-body row">
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label htmlFor="title" className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -323,10 +374,24 @@ const CmsReadyToGoDesign = () => {
                                         onChange={handleInputChange}
                                         required
                                     />
-                                </div>
+                                </div> */}
+
+                                <div className="mb-3 col-md-3">
+    <label htmlFor="title_tag" className="form-label">Heading Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        {HEADING_TAGS.map((tag) => (
+            <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+<div className="mb-3 col-md-9">
+    <label htmlFor="title" className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
                                 <div className="mb-3 col-md-12">
                                     <label htmlFor="description" className="form-label">Description</label>
-                                    <input
+                                    {/* <input
                                         type="text"
                                         className="form-control"
                                         name="description"
@@ -334,7 +399,9 @@ const CmsReadyToGoDesign = () => {
                                         value={formData.description}
                                         onChange={handleInputChange}
                                         required
-                                    />
+                                    /> */}
+
+                                    <CKEditorComponent key={editorKey} pageData={formData.description} setPageData={handleDescriptionChange} />
                                 </div>
 
 
