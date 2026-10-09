@@ -30,12 +30,14 @@ export async function buildGalleryMetadata({
 
   // 1) the item itself (for default title). Missing item => do not index.
   let itemTitle = fallbackTitle || "Gallery";
+    let itemImage = "";
   if (itemApi) {
     const item = await getJson(itemApi, { next: { revalidate: 60 } });
     if (!item) {
       return { title: "Gallery", robots: { index: false, follow: false } };
     }
     itemTitle = item?.child_content?.title || item?.title || item?.name || itemTitle;
+    itemImage = item?.child_content?.image || item?.child_images?.[0]?.image || "";
   }
 
   // 2) slug URL of this item, or null if no slug has been set yet
@@ -61,6 +63,12 @@ const candidates = [slugPath, `${basePath}?id=${id}`].filter(Boolean);
     fallbackDescription ||
     `Explore our ${itemTitle} designs by High Creation Interior.`;
 
+      const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
+  const ogImages = seo?.og_image
+    ? [{ url: seo.og_image, width: 1200, height: 630 }]
+    : [{ url: itemImage || "/images/new_hc_logo.png" }];
+
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
     fallbackPath: slugPath || `${basePath}?id=${id}`,
@@ -73,12 +81,20 @@ const candidates = [slugPath, `${basePath}?id=${id}`].filter(Boolean);
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    openGraph: {
-      title,
-      description,
+    // openGraph: {
+    //   title,
+    //   description,
+    //   url: canonical,
+    //   type: "website",
+    //   ...(seo?.og_image && { images: [{ url: seo.og_image, width: 1200, height: 630 }] }),
+    // },
+
+        openGraph: {
+      title: ogTitle,
+      description: ogDescription,
       url: canonical,
       type: "website",
-      ...(seo?.og_image && { images: [{ url: seo.og_image, width: 1200, height: 630 }] }),
+      images: ogImages,
     },
   };
 }

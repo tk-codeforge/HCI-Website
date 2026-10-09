@@ -11,11 +11,23 @@ import {
     SITEMAP_CHANGE_FREQUENCY_OPTIONS
 } from "@/utils/seoHelpers";
 
+import GlobalSeoForm from "@/app/components/GlobalSeoForm";
+import { getCmsAccess, getPublishWorkflowMessage } from "@/utils/cmsAccess";
+import { cityUrlMap } from "@/utils/cityRoutes";
+
 const CKEditorComponent = dynamic(() => import('@/app/components/CKEditorComponent'), { ssr: false });
+
+const Counter = ({ value = "", limit }) => (
+    <small className={value.length > limit ? "text-danger" : value.length >= limit - 10 ? "text-warning" : "text-muted"}>
+        {value.length}/{limit} characters
+    </small>
+);
 
 const CmsCity = () => {
 
     const authToken = useSelector((state) => state.auth.authToken);
+    const user = useSelector((state) => state.auth.user);
+    const { canPublish } = getCmsAccess(user);
     const [pagesList, setPagesList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -30,17 +42,24 @@ const CmsCity = () => {
         banner_subtitle: "",
         banner_image: null,
     });
-    const [formSeoContentData, setFormSeoContentData] = useState({
-        meta_title: "",
-        meta_description: "",
-        meta_keywords: "",
-        canonical_url: "",
-        meta_robots_index: "index",
-        meta_robots_follow: "follow",
-        include_in_sitemap: true,
-        sitemap_change_frequency: DEFAULT_SITEMAP_CHANGE_FREQUENCY,
-        sitemap_priority: String(DEFAULT_SITEMAP_PRIORITY)
-    });
+    // const [formSeoContentData, setFormSeoContentData] = useState({
+    //     meta_title: "",
+    //     meta_description: "",
+    //     meta_keywords: "",
+    //     canonical_url: "",
+    //     meta_robots_index: "index",
+    //     meta_robots_follow: "follow",
+    //     include_in_sitemap: true,
+    //     sitemap_change_frequency: DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+    //     sitemap_priority: String(DEFAULT_SITEMAP_PRIORITY),
+    //     og_title: "",
+    //     og_description: "",
+    //     og_image: "",
+    //     custom_schema: ""
+    // });
+
+    const [seoRow, setSeoRow] = useState(null);           // existing seo_tag row (null = will be created)
+    const [seoFormData, setSeoFormData] = useState(null);  // data handed to GlobalSeoForm
     const [selectedId, setSelectedId] = useState(null);
 
     const fetchContentManagerPages = useCallback(async () => {
@@ -169,66 +188,183 @@ const CmsCity = () => {
         setFormData((prevData) => ({ ...prevData, side_description: data }));
     }
 
-    const handleManageSeoContentClick = (id, item) => {
-        setSelectedId(id);
-        setFormSeoContentData({
-            meta_title: item?.meta_title ?? "",
-            meta_description: item?.meta_description ?? "",
-            meta_keywords: item?.meta_keywords ?? "",
-            canonical_url: item?.canonical_url ?? "",
-            meta_robots_index: item?.meta_robots_index ?? "index",
-            meta_robots_follow: item?.meta_robots_follow ?? "follow",
-            include_in_sitemap: item?.include_in_sitemap ?? true,
-            sitemap_change_frequency: item?.sitemap_change_frequency ?? DEFAULT_SITEMAP_CHANGE_FREQUENCY,
-            sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY)
+    // const handleManageSeoContentClick = (id, item) => {
+    //     setSelectedId(id);
+    //     let schemaText = "";
+    //     if (item?.custom_schema) {
+    //         if (typeof item.custom_schema === "string") {
+    //             try { schemaText = JSON.stringify(JSON.parse(item.custom_schema), null, 2); }
+    //             catch (e) { schemaText = item.custom_schema; }
+    //         } else {
+    //             schemaText = JSON.stringify(item.custom_schema, null, 2);
+    //         }
+    //     }
+    //     setFormSeoContentData({
+    //         meta_title: item?.meta_title ?? "",
+    //         meta_description: item?.meta_description ?? "",
+    //         meta_keywords: item?.meta_keywords ?? "",
+    //         canonical_url: item?.canonical_url ?? "",
+    //         meta_robots_index: item?.meta_robots_index ?? "index",
+    //         meta_robots_follow: item?.meta_robots_follow ?? "follow",
+    //         include_in_sitemap: item?.include_in_sitemap ?? true,
+    //         sitemap_change_frequency: item?.sitemap_change_frequency ?? DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+    //         sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+    //         og_title: item?.og_title ?? "",
+    //         og_description: item?.og_description ?? "",
+    //         og_image: item?.og_image ?? "",
+    //         custom_schema: schemaText
+    //     });
+    // };
+
+    // const handleSeoContentInputChange = (e) => {
+    //     const { name, value, type, checked } = e.target;
+    //     setFormSeoContentData((prevData) => ({
+    //         ...prevData,
+    //         [name]: type === "checkbox" ? checked : value
+    //     }));
+    // };
+
+    // const handleSeoContentSubmit = async (e) => {
+    //     e.preventDefault();
+    //             if (formSeoContentData.meta_title.length > 60) { toast.error("Meta title must be 60 characters or less."); return; }
+    //     if (formSeoContentData.meta_description.length > 160) { toast.error("Meta description must be 160 characters or less."); return; }
+    //     if (formSeoContentData.og_title.length > 60) { toast.error("OG title must be 60 characters or less."); return; }
+    //     if (formSeoContentData.og_description.length > 200) { toast.error("OG description must be 200 characters or less."); return; }
+
+    //     let customSchema = null;
+    //     if (formSeoContentData.custom_schema && formSeoContentData.custom_schema.trim() !== "") {
+    //         try {
+    //             customSchema = JSON.parse(formSeoContentData.custom_schema);
+    //         } catch (err) {
+    //             toast.error("Invalid JSON in Custom Schema. Please check your formatting.");
+    //             return;
+    //         }
+    //     }
+
+    //     const formDataToSend = {
+    //         meta_title: formSeoContentData.meta_title,
+    //         meta_description: formSeoContentData.meta_description,
+    //         meta_keywords: formSeoContentData.meta_keywords,
+    //         canonical_url: formSeoContentData.canonical_url,
+    //         meta_robots_index: formSeoContentData.meta_robots_index,
+    //         meta_robots_follow: formSeoContentData.meta_robots_follow,
+    //         include_in_sitemap: formSeoContentData.include_in_sitemap,
+    //         sitemap_change_frequency: formSeoContentData.sitemap_change_frequency,
+    //         sitemap_priority: formSeoContentData.sitemap_priority,
+    //         og_title: formSeoContentData.og_title,
+    //         og_description: formSeoContentData.og_description,
+    //         og_image: formSeoContentData.og_image,
+    //         custom_schema: customSchema,
+    //     };
+
+    //     try {
+    //         // Send POST request to save form data
+    //         const response = await api.patch(`/cms-city/seo-content/${selectedId}`, formDataToSend, {
+    //             headers: {
+    //                 Authorization: `Bearer ${authToken}`, // Send auth token
+    //             },
+    //         });
+
+    //         // Handle success response
+    //         if (response.status === 200) {
+    //             fetchContentManagerPages();
+    //             toast.success("SEO Content saved successfully.");
+    //             // Close modal and clear form data
+    //             document.getElementById('seoContentModalClose').click();
+    //         } else {
+    //             toast.error("Error submitting form. Please try again.");
+    //         }
+    //     } catch (error) {
+    //         toast.error(error.response?.data?.message ?? "Error submitting form. Please try again.");
+    //         console.error("Error:", error);
+    //     }
+    // }
+
+        const normPath = (v) => {
+        let p = String(v || "").trim().toLowerCase().replace(/^https?:\/\/(www\.)?hcinterior\.in/, "").split(/[?#]/)[0];
+        if (!p.startsWith("/")) p = "/" + p;
+        if (p.length > 1) p = p.replace(/\/+$/, "");
+        return p;
+    };
+
+    const handleManageSeoContentClick = async (item) => {
+        setSelectedId(item.id);
+        setSeoRow(null);
+        setSeoFormData(null);
+
+        const path = cityUrlMap[item.city_type] || `/interior-designers-in-${item.city_type}`;
+        const p = normPath(path);
+        const keys = [p];
+        if (p.startsWith("/interior-designers-in-")) keys.push("/services-detail/" + p.replace("/interior-designers-in-", ""));
+
+        try {
+            const { data } = await api.get("/seo-tag", { headers: { Authorization: `Bearer ${authToken}` } });
+            // the row the website reads: newest active match, else newest match
+            const match = (Array.isArray(data) ? data : [])
+                .filter((r) => keys.includes(normPath(r.page_name)))
+                .sort((x, y) =>
+                    (y.status === "active") - (x.status === "active") ||
+                    new Date(y.updated_at) - new Date(x.updated_at) ||
+                    y.id - x.id)[0];
+            if (match) {
+                setSeoRow(match);
+                const nextStatus = !canPublish && match.status === "active" ? "inactive" : (match.status || "active");
+                if (!canPublish && match.status === "active") {
+                    toast.info("Editing an active SEO record will save it as inactive until an admin republishes it.");
+                }
+                setSeoFormData({ ...match, status: nextStatus });
+                return;
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message ?? "Could not load SEO data. Please try again.");
+            return;
+        }
+
+        // No seo_tag row yet: prefill from the old seo_content so nothing is lost on first save
+        const sc = item.seo_content || {};
+        let schema = null;
+        if (sc.custom_code) {
+            try { schema = JSON.parse(String(sc.custom_code).replace(/<script[^>]*>/gi, "").replace(/<\/script>/gi, "")); }
+            catch (e) { schema = null; }
+        }
+        setSeoFormData({
+            page_name: path,
+            meta_title: sc.meta_title ?? "",
+            meta_description: sc.meta_description ?? "",
+            keywords: sc.meta_keywords ?? "",
+            canonical_url: sc.canonical_url ?? "",
+            meta_robots: `${sc.meta_robots_index || "index"}, ${sc.meta_robots_follow || "follow"}`,
+            include_in_sitemap: sc.include_in_sitemap ?? true,
+            sitemap_change_frequency: sc.sitemap_change_frequency || DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+            sitemap_priority: String(sc.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+            custom_schema: schema,
+            status: canPublish ? "active" : "inactive",
         });
     };
 
-    const handleSeoContentInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormSeoContentData((prevData) => ({
-            ...prevData,
-            [name]: type === "checkbox" ? checked : value
-        }));
-    };
-
-    const handleSeoContentSubmit = async (e) => {
-        e.preventDefault();
-
-        const formDataToSend = {
-            meta_title: formSeoContentData.meta_title,
-            meta_description: formSeoContentData.meta_description,
-            meta_keywords: formSeoContentData.meta_keywords,
-            canonical_url: formSeoContentData.canonical_url,
-            meta_robots_index: formSeoContentData.meta_robots_index,
-            meta_robots_follow: formSeoContentData.meta_robots_follow,
-            include_in_sitemap: formSeoContentData.include_in_sitemap,
-            sitemap_change_frequency: formSeoContentData.sitemap_change_frequency,
-            sitemap_priority: formSeoContentData.sitemap_priority,
-        };
+    const handleSeoSubmit = async (formattedData) => {
+        if ((formattedData.meta_title || "").length > 60) { toast.error("Meta title must be 60 characters or less."); return; }
+        if ((formattedData.meta_description || "").length > 160) { toast.error("Meta description must be 160 characters or less."); return; }
+        if ((formattedData.og_title || "").length > 60) { toast.error("OG title must be 60 characters or less."); return; }
+        if ((formattedData.og_description || "").length > 200) { toast.error("OG description must be 200 characters or less."); return; }
 
         try {
-            // Send POST request to save form data
-            const response = await api.patch(`/cms-city/seo-content/${selectedId}`, formDataToSend, {
-                headers: {
-                    Authorization: `Bearer ${authToken}`, // Send auth token
-                },
-            });
-
-            // Handle success response
-            if (response.status === 200) {
-                fetchContentManagerPages();
-                toast.success("SEO Content saved successfully.");
-                // Close modal and clear form data
-                document.getElementById('seoContentModalClose').click();
-            } else {
-                toast.error("Error submitting form. Please try again.");
+            if (!canPublish && formattedData.status === "active") {
+                toast.info(getPublishWorkflowMessage("This SEO record"));
             }
+            const headers = { Authorization: `Bearer ${authToken}` };
+            if (seoRow) {
+                await api.patch(`/seo-tag/${seoRow.id}`, formattedData, { headers });
+            } else {
+                await api.post("/seo-tag", formattedData, { headers });
+            }
+            toast.success("SEO saved successfully.");
+            document.getElementById("seoContentModalClose").click();
         } catch (error) {
-            toast.error(error.response?.data?.message ?? "Error submitting form. Please try again.");
-            console.error("Error:", error);
+            const msg = error.response?.data?.message;
+            toast.error(Array.isArray(msg) ? msg.join(", ") : msg ?? "Error saving SEO. Please try again.");
         }
-    }
+    };
 
     // Derived from existing pagesList + selectedId — no new state added.
     const currentEditItem = pagesList.find((p) => p.id === selectedId);
@@ -284,7 +420,7 @@ const CmsCity = () => {
                                             {item.banner_image && <img src={item.banner_image} alt="Banner Image" height="80" decoding="async" loading="lazy" />}
                                         </td>
                                         <td width={150}>
-                                            <button onClick={() => handleManageSeoContentClick(item.id, item.seo_content)} className="btn btn-info text-nowrap" type="button" data-bs-toggle="modal" data-bs-target="#seoContentModal">SEO Content</button>
+                                            <button onClick={() => handleManageSeoContentClick(item)} className="btn btn-info text-nowrap" type="button" data-bs-toggle="modal" data-bs-target="#seoContentModal">SEO Content</button>
                                         </td>
                                         <td>
                                             <button onClick={() => handleEditClick(item)} type="button" className="read_morebtn" data-bs-toggle="modal" data-bs-target="#addNewpageModal">
@@ -456,7 +592,7 @@ const CmsCity = () => {
                             <h1 className="modal-title fs-5" id="seoContentModalLabel">Manage SEO Content</h1>
                             <button type="button" id="seoContentModalClose" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form onSubmit={handleSeoContentSubmit}>
+                        {/* <form onSubmit={handleSeoContentSubmit}>
                             <div className="modal-body row">
                                 
                                 <div className="mb-3 col-md-12">
@@ -468,8 +604,9 @@ const CmsCity = () => {
                                         placeholder="Meta Title"
                                         value={formSeoContentData?.meta_title}
                                         onChange={handleSeoContentInputChange}
-                                        required
+                                        required maxLength={60}
                                     />
+                                    <Counter value={formSeoContentData.meta_title} limit={60} />
                                 </div>
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Meta Description</label>
@@ -480,8 +617,10 @@ const CmsCity = () => {
                                         value={formSeoContentData?.meta_description}
                                         onChange={handleSeoContentInputChange}
                                         rows="3"
-                                        required
-                                    ></textarea>
+                                        required maxLength={160}
+                                    >
+                                        <Counter value={formSeoContentData.meta_description} limit={160} />
+                                    </textarea>
                                 </div>
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Canonical URL</label>
@@ -505,6 +644,32 @@ const CmsCity = () => {
                                         onChange={handleSeoContentInputChange}
                                     />
                                 </div>
+
+                                <div className="mb-3 col-md-12">
+    <label className="form-label">OG Title <small className="text-muted">(social share title; blank uses Meta Title)</small></label>
+    <input type="text" className="form-control" name="og_title" value={formSeoContentData.og_title} onChange={handleSeoContentInputChange} maxLength={60} placeholder={formSeoContentData.meta_title} />
+    <Counter value={formSeoContentData.og_title} limit={60} />
+</div>
+<div className="mb-3 col-md-12">
+    <label className="form-label">OG Description <small className="text-muted">(blank uses Meta Description)</small></label>
+    <textarea className="form-control" name="og_description" rows="2" value={formSeoContentData.og_description} onChange={handleSeoContentInputChange} maxLength={200} placeholder={formSeoContentData.meta_description} />
+    <Counter value={formSeoContentData.og_description} limit={200} />
+</div>
+
+<div className="mb-3 col-md-12">
+    <label className="form-label">OG Image URL</label>
+    <input type="text" className="form-control" name="og_image" placeholder="https://..." value={formSeoContentData.og_image} onChange={handleSeoContentInputChange} />
+    <small className="text-muted d-block">Recommended 1200×630 px. Blank uses the city banner.</small>
+    {formSeoContentData.og_image && (
+        <img key={formSeoContentData.og_image} src={formSeoContentData.og_image} alt="OG preview" className="mt-2 border rounded"
+             style={{ maxWidth: "100%", maxHeight: 120, objectFit: "cover" }}
+             onError={(e) => (e.currentTarget.style.display = "none")} />
+    )}
+</div>
+<div className="mb-3 col-md-12">
+    <label className="form-label">Custom Schema.org (JSON Format)</label>
+    <textarea className="form-control font-monospace" name="custom_schema" rows="4" placeholder='{ "@context": "https://schema.org", "@type": "LocalBusiness" }' value={formSeoContentData.custom_schema} onChange={handleSeoContentInputChange} />
+</div>
                                 <div className="mb-3 col-md-6">
                                     <label className="form-label">Search Engine Indexing</label>
                                     <select
@@ -580,7 +745,15 @@ const CmsCity = () => {
                                     </button>
                                 </div>
                             </div>
-                        </form>
+                        </form> */}
+
+                        <div className="modal-body">
+    {seoFormData ? (
+        <GlobalSeoForm initialData={seoFormData} onSubmit={handleSeoSubmit} canPublish={canPublish} />
+    ) : (
+        <div className="text-center py-4">Loading...</div>
+    )}
+</div>
                     </div>
                 </div>
             </div>

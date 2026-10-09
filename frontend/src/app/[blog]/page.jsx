@@ -1814,14 +1814,50 @@ export async function generateMetadata({ params }) {
     fallbackPath: `/${slug}`,
   });
 
+  // return {
+  //   title: seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior",
+  //   description: seoData?.description || data?.seo_content?.meta_description || "",
+  //   keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+  //   alternates: { canonical: canonicalUrl },
+  //   robots,
+  //   openGraph: seoData?.openGraph || null,
+  //   twitter: seoData?.twitter || null,
+  // };
+
+    const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+  const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+  // share image: SEO Manager OG image > this page's own image > site logo
+  const fallbackImage =
+    data?.image || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+  const og = seoData?.openGraph;
+  const ogImages = og?.images?.length
+    ? og.images
+    : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
   return {
-    title: seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior",
-    description: seoData?.description || data?.seo_content?.meta_description || "",
+    title,
+    description,
     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
     alternates: { canonical: canonicalUrl },
     robots,
-    openGraph: seoData?.openGraph || null,
-    twitter: seoData?.twitter || null,
+    openGraph: {
+      title: og?.title || title,
+      description: og?.description || description,
+      url: canonicalUrl,
+      siteName: "High Creation Interior",
+      locale: "en_IN",
+      type: "website",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seoData?.twitter?.title || og?.title || title,
+      description: seoData?.twitter?.description || og?.description || description,
+      images: seoData?.twitter?.images?.length
+        ? seoData.twitter.images
+        : ogImages.map((i) => i.url),
+    },
   };
 }
 

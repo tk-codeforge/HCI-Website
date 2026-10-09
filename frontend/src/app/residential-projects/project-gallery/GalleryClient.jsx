@@ -32,13 +32,13 @@ const galleryDescription = portfolioData?.description;
 
             <div className="col-12 text-center mt-3">
   <TitleTag className="mb-3">{galleryTitle}</TitleTag>
-  {galleryDescription && (
+  {/* {galleryDescription && (
     <div
       className="gallery-description mx-auto"
       style={{ maxWidth: "900px" }}
       dangerouslySetInnerHTML={{ __html: galleryDescription }}
     />
-  )}
+  )} */}
 </div>
             
             {/* Gallery Grid - Preserving your exact layout */}

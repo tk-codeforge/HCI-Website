@@ -676,19 +676,20 @@ import * as FaIcons from "react-icons/fa";
 import { getBackendImageUrl } from "@/utils/helper";
 import { SidebarForm, BottomContactForm } from "./CityForms";
 import { getPageSEO } from "@/utils/getSEO";
+import { cityUrlMap } from "@/utils/cityRoutes";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 
-const cityUrlMap = {
-  "noida": "/interior-designers-in-noida",
-  "greater_noida": "/interior-designers-in-greater-noida",
-  "delhi": "/interior-designers-in-delhi",
-  "gurugram": "/interior-designers-in-gurgaon",
-  "faridabad": "/best-interior-designers-in-faridabad",
-  "ghaziabad": "/interior-designers-in-ghaziabad",
-  "manesar": "/interior-designers-in-manesar",
-  "dwarka": "/interior-designers-in-dwarka",
-};
+// const cityUrlMap = {
+//   "noida": "/interior-designers-in-noida",
+//   "greater_noida": "/interior-designers-in-greater-noida",
+//   "delhi": "/interior-designers-in-delhi",
+//   "gurugram": "/interior-designers-in-gurgaon",
+//   "faridabad": "/best-interior-designers-in-faridabad",
+//   "ghaziabad": "/interior-designers-in-ghaziabad",
+//   "manesar": "/interior-designers-in-manesar",
+//   "dwarka": "/interior-designers-in-dwarka",
+// };
 
 // City Banner Map for dynamic nearby cities images
 const cityBannerMap = {
@@ -786,7 +787,8 @@ const parseJsonSafe = (data) => {
 // --- SEO METADATA ---
 export async function generateMetadata({ searchParams }) {
   const city = searchParams?.city && searchParams.city !== "undefined" ? searchParams.city : "delhi";
-  const fallbackPath = cityUrlMap[city] || `/services-detail/${city}`;
+  // const fallbackPath = cityUrlMap[city] || `/services-detail/${city}`;
+  const fallbackPath = cityUrlMap[city] || `/interior-designers-in-${city}`;
   
   const [pageData, seoData] = await Promise.all([
     getCityData(city),
@@ -800,20 +802,57 @@ export async function generateMetadata({ searchParams }) {
 
   if (!pageData) return { title: "Services", robots: { index: false, follow: true } };
 
+  // return {
+  //   title: seoData?.title || pageData?.seo_content?.meta_title || `${pageData.main_title} - Services`,
+  //   description: seoData?.description || pageData?.seo_content?.meta_description || "Best Interior Design Services",
+  //   keywords: seoData?.keywords || pageData?.seo_content?.meta_keywords || "",
+  //   alternates: { canonical: canonicalUrl },
+  //   robots: seoData?.robots || getRobotsDirectives(pageData?.seo_content),
+  //   openGraph: seoData?.openGraph || null,
+  //   twitter: seoData?.twitter || null,
+  // };
+
+    const title =
+    seoData?.title || pageData?.seo_content?.meta_title || `${pageData.main_title} - Services`;
+  const description =
+    seoData?.description || pageData?.seo_content?.meta_description || "Best Interior Design Services";
+
+  // share image: SEO Manager OG image > this city's hero banner > logo
+  const og = seoData?.openGraph;
+  const ogImages = og?.images?.length
+    ? og.images
+    : [{ url: pageData?.banner_image ? getBackendImageUrl(pageData.banner_image) : "/images/new_hc_logo.png" }];
+
   return {
-    title: seoData?.title || pageData?.seo_content?.meta_title || `${pageData.main_title} - Services`,
-    description: seoData?.description || pageData?.seo_content?.meta_description || "Best Interior Design Services",
+    title,
+    description,
     keywords: seoData?.keywords || pageData?.seo_content?.meta_keywords || "",
     alternates: { canonical: canonicalUrl },
     robots: seoData?.robots || getRobotsDirectives(pageData?.seo_content),
-    openGraph: seoData?.openGraph || null,
-    twitter: seoData?.twitter || null,
+    openGraph: {
+      title: og?.title || title,
+      description: og?.description || description,
+      url: canonicalUrl,
+      siteName: "High Creation Interior",
+      locale: "en_IN",
+      type: "website",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seoData?.twitter?.title || og?.title || title,
+      description: seoData?.twitter?.description || og?.description || description,
+      images: seoData?.twitter?.images?.length
+        ? seoData.twitter.images
+        : ogImages.map((i) => i.url),
+    },
   };
 }
 
 const ServicesDetailPage = async ({ searchParams }) => {
   const city = searchParams?.city && searchParams.city !== "undefined" ? searchParams.city : "delhi";
-  const fallbackPath = cityUrlMap[city] || `/services-detail/${city}`;
+  // const fallbackPath = cityUrlMap[city] || `/services-detail/${city}`;
+  const fallbackPath = cityUrlMap[city] || `/interior-designers-in-${city}`;
 
   // Fetch Data + Global SEO schemas + Dynamic Excellence Stats concurrently
   const [pageData, recentBlogs, seoData, excellenceStats] = await Promise.all([

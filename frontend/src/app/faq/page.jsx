@@ -128,6 +128,9 @@ export async function generateMetadata() {
     seo?.meta_description ||
    "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
 
+   const ogTitle = seo?.og_title || title;
+const ogDescription = seo?.og_description || description;
+
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
     fallbackPath: "/faq",
@@ -142,14 +145,24 @@ export async function generateMetadata() {
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    openGraph: {
-      title,
-      description,
+    // openGraph: {
+    //   title,
+    //   description,
+    //   url: canonical,
+    //   type: "website",
+    //   ...(seo?.og_image && {
+    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
+    //   }),
+    // },
+
+        openGraph: {
+      title: ogTitle,
+      description: ogDescription,
       url: canonical,
       type: "website",
-      ...(seo?.og_image && {
-        images: [{ url: seo.og_image, width: 1200, height: 630 }],
-      }),
+      images: seo?.og_image
+        ? [{ url: seo.og_image, width: 1200, height: 630 }]
+        : [{ url: "/images/new_hc_logo.png" }],
     },
   };
 }

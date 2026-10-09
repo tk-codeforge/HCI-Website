@@ -30,6 +30,9 @@ export async function generateMetadata() {
     seo?.meta_title || "Creating the home of your dreams. - High Creation Interior";
   const description = seo?.meta_description || "High Creation Interior offers the best interior design services in Delhi NCR. Transform your space with our expert designers."
 
+  const ogTitle = seo?.og_title || title;
+const ogDescription = seo?.og_description || description;
+
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
     fallbackPath: ROUTE,
@@ -44,14 +47,24 @@ export async function generateMetadata() {
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    openGraph: {
-      title,
-      ...(description && { description }),
+    // openGraph: {
+    //   title,
+    //   ...(description && { description }),
+    //   url: canonical,
+    //   type: "website",
+    //   ...(seo?.og_image && {
+    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
+    //   }),
+    // },
+
+        openGraph: {
+      title: ogTitle,
+      description: ogDescription,
       url: canonical,
       type: "website",
-      ...(seo?.og_image && {
-        images: [{ url: seo.og_image, width: 1200, height: 630 }],
-      }),
+      images: seo?.og_image
+        ? [{ url: seo.og_image, width: 1200, height: 630 }]
+        : [{ url: "/images/new_hc_logo.png" }],
     },
   };
 }

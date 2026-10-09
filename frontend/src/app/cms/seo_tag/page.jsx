@@ -47,6 +47,10 @@ const validateSeoLengths = (data) => {
         toast.error("Meta description must be 160 characters or less.");
         return false;
     }
+
+    if ((data.og_title || "").length > 60) { toast.error("OG title must be 90 characters or less."); return false; }
+    if ((data.og_description || "").length > 200) { toast.error("OG description must be 200 characters or less."); return false; }
+
     return true;
 };
 

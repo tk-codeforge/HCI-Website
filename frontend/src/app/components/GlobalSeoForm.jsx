@@ -25,6 +25,8 @@ export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
         canonical_url: "",
         meta_robots: "index, follow",
         og_image: "",
+        og_title: "",
+        og_description: "",
         keywords: "",
         custom_schema: "", 
         include_in_sitemap: true,
@@ -54,6 +56,8 @@ export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
                 canonical_url: initialData.canonical_url || initialData.meta_can_tag || "",
                 meta_robots: initialData.meta_robots || "index, follow",
                 og_image: initialData.og_image || "",
+                og_title: initialData.og_title || "",
+                og_description: initialData.og_description || "",
                 keywords: initialData.keywords || "",
                 custom_schema: parsedSchema,
                 include_in_sitemap: initialData.include_in_sitemap ?? true,
@@ -124,6 +128,17 @@ if (formData.meta_description.length > DESC_LIMIT) {
                 <Counter value={formData.meta_description} limit={DESC_LIMIT} />
             </div>
 
+            <div className="mb-3 col-md-12">
+    <label className="form-label">OG Title <small className="text-muted">(social share title; blank uses Meta Title)</small></label>
+    <input type="text" className="form-control" name="og_title" value={formData.og_title} onChange={handleInputChange} maxLength={60} placeholder={formData.meta_title} />
+    <small className="text-muted">{formData.og_title.length}/60 characters</small>
+</div>
+<div className="mb-3 col-md-12">
+    <label className="form-label">OG Description <small className="text-muted">(blank uses Meta Description)</small></label>
+    <textarea className="form-control" name="og_description" rows="2" value={formData.og_description} onChange={handleInputChange} maxLength={200} placeholder={formData.meta_description} />
+    <small className="text-muted">{formData.og_description.length}/200 characters</small>
+</div>
+
             <div className="mb-3 col-md-6">
                 <label className="form-label">Meta Robots</label>
                 <select className="form-control" name="meta_robots" value={formData.meta_robots} onChange={handleInputChange}>
@@ -137,6 +152,12 @@ if (formData.meta_description.length > DESC_LIMIT) {
             <div className="mb-3 col-md-6">
                 <label className="form-label">OG Image URL</label>
                 <input type="text" className="form-control" name="og_image" placeholder="https://..." value={formData.og_image} onChange={handleInputChange} />
+                <small className="text-muted d-block">Recommended 1200×630 px.</small>
+{formData.og_image && (
+    <img key={formData.og_image} src={formData.og_image} alt="OG preview" className="mt-2 border rounded"
+         style={{ maxWidth: "100%", maxHeight: 120, objectFit: "cover" }}
+         onError={(e) => (e.currentTarget.style.display = "none")} />
+)}
             </div>
 
             <div className="mb-3 col-md-12">

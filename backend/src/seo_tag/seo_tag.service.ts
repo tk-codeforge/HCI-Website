@@ -150,11 +150,18 @@ export class SeoTagService {
     // 🌟 FIX: Use || instead of ?? so empty strings ("") trigger the fallback
     const effectiveTitle = meta_title || title;
     const effectiveCanonical = canonical_url || meta_can_tag;
-    const effectiveOgImage = og_image || meta_image;
+    // const effectiveOgImage = og_image || meta_image;
 
     if (effectiveTitle) result.meta_title = effectiveTitle;
     if (effectiveCanonical) result.canonical_url = effectiveCanonical;
-    if (effectiveOgImage) result.og_image = effectiveOgImage;
+    // if (effectiveOgImage) result.og_image = effectiveOgImage;
+
+        for (const key of ['og_title', 'og_description'] as const) {
+      if (rest[key] !== undefined) (result as any)[key] = String(rest[key] ?? '').trim() || null;
+    }
+    if (og_image !== undefined || meta_image !== undefined) {
+      (result as any).og_image = String(og_image || meta_image || '').trim() || null;
+    }
 
     return result;
   }
@@ -260,13 +267,25 @@ export class SeoTagService {
 //   return record;
 // }
 
-  private normalizeKey(value: string): string {
-    let p = String(value || '').trim().toLowerCase()
-      .replace(/^https?:\/\/(www\.)?hcinterior\.in/, '')
-      .split(/[?#]/)[0];
-    if (!p.startsWith('/')) p = '/' + p;
-    if (p.length > 1) p = p.replace(/\/+$/, '');
-    return p === '/home' ? '/' : p;
+  // private normalizeKey(value: string): string {
+  //   let p = String(value || '').trim().toLowerCase()
+  //     .replace(/^https?:\/\/(www\.)?hcinterior\.in/, '')
+  //     .split(/[?#]/)[0];
+  //   if (!p.startsWith('/')) p = '/' + p;
+  //   if (p.length > 1) p = p.replace(/\/+$/, '');
+  //   return p === '/home' ? '/' : p;
+  // }
+
+    private normalizeKey(value: string): string {
+    const [raw, ...q] = String(value || '').trim().toLowerCase()
+      .replace(/^\/?https?:\/\/(www\.)?hcinterior\.in/, '')
+      .split('#')[0]
+      .split('?');
+    let path = raw.startsWith('/') ? raw : '/' + raw;
+    if (path.length > 1) path = path.replace(/\/+$/, '');
+    if (path === '/home') path = '/';
+    const query = q.join('?');
+    return query ? `${path}?${query}` : path;
   }
 
   async findByPageName(page_name: string): Promise<SeoTag> {

@@ -150,6 +150,9 @@ export async function generateMetadata() {
     seo?.meta_description ||
     "Make a call on +91 7070701373 for top notch interior designing services in Noida. Address : H-56, 1st Floor, Sector-63, Noida, Uttar Pradesh- 201301";
 
+    const ogTitle = seo?.og_title || title;
+const ogDescription = seo?.og_description || description;
+
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
     fallbackPath: "/contact",
@@ -164,14 +167,24 @@ export async function generateMetadata() {
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    openGraph: {
-      title,
-      description,
+    // openGraph: {
+    //   title,
+    //   description,
+    //   url: canonical,
+    //   type: "website",
+    //   ...(seo?.og_image && {
+    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
+    //   }),
+    // },
+
+        openGraph: {
+      title: ogTitle,
+      description: ogDescription,
       url: canonical,
       type: "website",
-      ...(seo?.og_image && {
-        images: [{ url: seo.og_image, width: 1200, height: 630 }],
-      }),
+      images: seo?.og_image
+        ? [{ url: seo.og_image, width: 1200, height: 630 }]
+        : [{ url: "/images/new_hc_logo.png" }],
     },
   };
 }

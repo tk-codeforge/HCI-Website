@@ -22,6 +22,9 @@ export async function getPageSEO(pageUrlIdentifier) {
           const metaDescription = pageSeo.meta_description || "";
           const canonicalTag = pageSeo.canonical_url || pageSeo.meta_can_tag || "";
           const keywords = pageSeo.keywords || pageSeo.meta_keywords || "";
+
+          const ogTitle = pageSeo.og_title || metaTitle;
+          const ogDescription = pageSeo.og_description || metaDescription;
   
           let cleanCanonical = getCanonicalUrl({
             metaCanonicalTag: canonicalTag,
@@ -39,8 +42,10 @@ export async function getPageSEO(pageUrlIdentifier) {
                 googleBot: { index, follow, 'max-video-preview': -1, 'max-image-preview': 'large', 'max-snippet': -1 } 
             },
             openGraph: {
-              title: metaTitle,
-              description: metaDescription,
+              // title: metaTitle,
+              // description: metaDescription,
+               title: ogTitle,              
+              description: ogDescription,   
               url: cleanCanonical,
               siteName: "High Creation Interior",
               images: pageSeo.og_image ? [{ url: pageSeo.og_image, width: 1200, height: 630 }] : [],
@@ -50,8 +55,8 @@ export async function getPageSEO(pageUrlIdentifier) {
             // 🌟 ADDED FOR 90+ SCORE: Twitter Cards
             twitter: {
               card: "summary_large_image",
-              title: metaTitle,
-              description: metaDescription,
+              title: ogTitle,               
+              description: ogDescription, 
               images: pageSeo.og_image ? [pageSeo.og_image] : [],
             },
             customSchema: pageSeo.custom_schema || null,

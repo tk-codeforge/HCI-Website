@@ -46,6 +46,16 @@ export class CreateSeoTagDto {
     og_image?: string;
     // ------------------
 
+    @IsString()
+    @IsOptional()
+    @MaxLength(60)
+    og_title?: string;
+
+    @IsString()
+    @IsOptional()
+    @MaxLength(200)
+    og_description?: string;
+
     @IsBoolean()
     @IsOptional()
     include_in_sitemap?: boolean;

@@ -238,6 +238,9 @@ export async function generateMetadata() {
     seo?.meta_description ||
    "Elevate your home with High Creation Interior's sustainable furniture, combining eco-friendly materials and timeless designs for a greener, stylish living space.";
 
+   const ogTitle = seo?.og_title || title;
+const ogDescription = seo?.og_description || description;
+
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
     fallbackPath: "/sustainable-furniture",
@@ -252,14 +255,24 @@ export async function generateMetadata() {
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    openGraph: {
-      title,
-      description,
+    // openGraph: {
+    //   title,
+    //   description,
+    //   url: canonical,
+    //   type: "website",
+    //   ...(seo?.og_image && {
+    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
+    //   }),
+    // },
+
+        openGraph: {
+      title: ogTitle,
+      description: ogDescription,
       url: canonical,
       type: "website",
-      ...(seo?.og_image && {
-        images: [{ url: seo.og_image, width: 1200, height: 630 }],
-      }),
+      images: seo?.og_image
+        ? [{ url: seo.og_image, width: 1200, height: 630 }]
+        : [{ url: "/images/new_hc_logo.png" }],
     },
   };
 }

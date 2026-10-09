@@ -21,6 +21,12 @@ export class SeoTag {
     @Column({ nullable: true })
     og_image: string;
 
+    @Column({ nullable: true })
+    og_title: string;
+
+    @Column({ type: 'text', nullable: true })
+    og_description: string;
+
     @Column({ nullable: true, default: 'index, follow' })
     meta_robots: string;
 
