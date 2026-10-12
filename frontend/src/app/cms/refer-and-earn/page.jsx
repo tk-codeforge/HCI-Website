@@ -222,6 +222,18 @@ import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
 
 // Display names + fixed field types, matching the ACTUAL fields on the
 // public Refer & Earn form (page.jsx): Friend's Name, Friend's Number,
@@ -256,6 +268,7 @@ const CmsReferAndEarn = () => {
         description: "",
         description_font_size: 16,
         image: null,
+        image_alt: "",
         item_index: null,
     });
     const [selectedId, setSelectedId] = useState(null);
@@ -268,6 +281,7 @@ const CmsReferAndEarn = () => {
         main_description_font_size: 16,
         form_heading: "Refer and Earn",
         form_image: null,
+        form_image_alt: "",
         form_bg_color: "#ff914d",
         form_heading_color: "#000000",
         submit_button_text: "Submit Now",
@@ -330,6 +344,7 @@ const CmsReferAndEarn = () => {
                     form_image: null,
                     form_heading: isObject ? data.form_heading || "Refer and Earn" : "Refer and Earn",
       form_image: null,
+      form_image_alt: isObject ? data.form_image_alt || "" : "",
       form_heading_color: extractHex(isObject ? data.form_heading_color : null, "#000000"),
                     form_bg_color: extractHex(isObject ? data.form_bg_color : null, "#ffc5a1"),
                     submit_button_text: isObject ? data.submit_button_text || "Submit Now" : "Submit Now",
@@ -354,6 +369,10 @@ const CmsReferAndEarn = () => {
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "image" && files.length > 0) {
+            if (!validateImage(files[0])) {
+    e.target.value = "";
+    return;
+}
             setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -369,6 +388,7 @@ const CmsReferAndEarn = () => {
         formDataToSend.append("description", formData.description);
         formDataToSend.append("description_font_size", formData.description_font_size);
         formDataToSend.append("item_index", formData.item_index);
+        formDataToSend.append("image_alt", (formData.image_alt || "").trim());
         if (formData.image) {
             formDataToSend.append("image", formData.image);
         }
@@ -389,6 +409,7 @@ const CmsReferAndEarn = () => {
                     description: "",
                     description_font_size: 16,
                     image: null,
+                    image_alt: "",
                     item_index: null,
                 });
 
@@ -409,6 +430,7 @@ const CmsReferAndEarn = () => {
             description: item.description,
             description_font_size: item.description_font_size || 16,
             image: null,
+            image_alt: item.image_alt || "",
             item_index: index,
         });
     };
@@ -417,6 +439,10 @@ const CmsReferAndEarn = () => {
     const handlePageContentChange = (e) => {
         const { name, value, files } = e.target;
         if (files && files.length > 0) {
+            if (!validateImage(files[0])) {
+    e.target.value = "";
+    return;
+}
             setPageContent((prev) => ({ ...prev, [name]: files[0] }));
         } else {
             setPageContent((prev) => ({ ...prev, [name]: value }));
@@ -465,6 +491,7 @@ const CmsReferAndEarn = () => {
   pageContentToSend.append("submit_button_bg_color", pageContent.submit_button_bg_color);
   pageContentToSend.append("submit_button_color", pageContent.submit_button_color);
   pageContentToSend.append("form_fields", JSON.stringify(pageContent.form_fields));
+  pageContentToSend.append("form_image_alt", (pageContent.form_image_alt || "").trim());
         if (pageContent.form_image instanceof File) {
             pageContentToSend.append("form_image", pageContent.form_image);
         }
@@ -562,7 +589,7 @@ const CmsReferAndEarn = () => {
                                     type="file"
                                     className="form-control"
                                     name="form_image"
-                                    accept="image/*"
+                                    accept="image/webp"
                                     onChange={handlePageContentChange}
                                 />
                             </div>
@@ -586,6 +613,20 @@ const CmsReferAndEarn = () => {
                                     onChange={handlePageContentChange}
                                 />
                             </div>
+
+                            <div className="col-md-4 mb-3">
+    <label className="form-label">Form Image Alt Text</label>
+    <input
+        type="text"
+        className="form-control"
+        name="form_image_alt"
+        maxLength={125}
+        placeholder="Describe the form image (for SEO)"
+        value={pageContent.form_image_alt || ""}
+        onChange={handlePageContentChange}
+    />
+    <div className="form-text">Image: only .webp, max 200 KB.</div>
+</div>
 
                             <hr className="my-3" />
                             <div className="col-md-6 mb-3">
@@ -729,7 +770,7 @@ const CmsReferAndEarn = () => {
                                         <td>{item.title}</td>
                                         <td>{item.description}</td>
                                         <td>
-                                            <img src={item?.image} alt={item.title} height="80" decoding="async"  loading="lazy" />
+                                            <img src={item?.image} alt={item.image_alt || item.title} height="80" decoding="async"  loading="lazy" />
                                         </td>
                                         <td>
                                             <button onClick={() => handleEditClick(item, index)} type="button" className="read_morebtn" data-bs-toggle="modal" data-bs-target="#addNewpageModal">
@@ -800,9 +841,22 @@ const CmsReferAndEarn = () => {
                                         type="file"
                                         className="form-control"
                                         name="image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
                                     />
+                                    <div className="mb-3 col-md-12">
+    <label className="form-label">Image Alt Text</label>
+    <input
+        type="text"
+        className="form-control"
+        name="image_alt"
+        maxLength={125}
+        placeholder="Describe the card image (for SEO)"
+        value={formData.image_alt || ""}
+        onChange={handleInputChange}
+    />
+    <div className="form-text">Image: only .webp, max 200 KB.</div>
+</div>
                                 </div>
 
                                 <div className="m-auto mt-2 col-12 d-flex justify-content-center">

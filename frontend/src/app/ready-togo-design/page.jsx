@@ -346,9 +346,7 @@ const bannerStyle = bannerImage
         </section> */}
 
                 {bannerImage ? (
-          <MediaBg
-            src={bannerImage}
-            fallbackAlt={headingText}
+                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
             className="py-5 border-bottom shadow-sm mb-5 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -382,6 +380,7 @@ const bannerStyle = bannerImage
 
                       <MediaImg
   src={design?.child_content?.image ?? "/images/Bhk/1bhk.png"}
+    alt={design?.child_content?.image_alt}
   fallbackAlt={design?.child_content?.title ?? defaultAltText}
   className="rtd-img"
 />

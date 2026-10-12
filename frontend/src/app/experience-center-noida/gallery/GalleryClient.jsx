@@ -98,7 +98,8 @@ export default function GalleryClient({ galleryData }) {
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[0]?.image ?? "/images/detail-img/1.webp"}
-                imgGalAlt={defaultAltText}
+                                imgGalAlt={galleryData?.child_content?.title || defaultAltText}
+                imgGalCmsAlt={images[0]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images} // Pass all images here
               />
@@ -106,7 +107,8 @@ export default function GalleryClient({ galleryData }) {
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[1]?.image ?? "/images/detail-img/6.webp"}
-                imgGalAlt={defaultAltText}
+                                imgGalAlt={galleryData?.child_content?.title || defaultAltText}
+                imgGalCmsAlt={images[1]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images} // Pass all images here
               />
@@ -114,7 +116,8 @@ export default function GalleryClient({ galleryData }) {
             <div className="col-lg-12">
               <GalleryDetail
                 imgGalUrl={images[2]?.image ?? "/images/detail-img/3.webp"}
-                imgGalAlt={defaultAltText}
+                                imgGalAlt={galleryData?.child_content?.title || defaultAltText}
+                imgGalCmsAlt={images[2]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img2"
                 images={images} // Pass all images here
               />

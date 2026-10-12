@@ -11,6 +11,18 @@ const CAREER_FORM_PAGE_TYPE = "career_form";
 const CMS_BASE = "/cms-parent-child";
 // const CMS_SETTINGS_ENDPOINT = `${CMS_BASE}/page-type/${CAREER_FORM_PAGE_TYPE}`;
 const CMS_SETTINGS_ENDPOINT = `${CMS_BASE}/${CAREER_FORM_PAGE_TYPE}`;
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 const CKEditorComponent = dynamic(
   () => import("../../components/CKEditorComponent"),
   { ssr: false }
@@ -26,6 +38,7 @@ const emptySettingsForm = () => ({
   banner_heading: "Career Form",
   banner_image: null,
   banner_image_preview: "",
+    banner_image_alt: "",
   form_bg_color: "#ffffff",
   form_font_color: "#1a1a1a",
   form_heading: "Apply Now",
@@ -126,6 +139,7 @@ if (content.job_texts) {
           id: record.id,
           banner_heading: content.title || prev.banner_heading,
           banner_image_preview: content.image || "",
+                    banner_image_alt: content.image_alt || "",
           form_bg_color: content.bg_color || prev.form_bg_color,
           form_font_color: content.font_color || prev.form_font_color,
           form_heading: content.form_heading || prev.form_heading,
@@ -160,7 +174,11 @@ if (content.job_texts) {
   };
 
   const handleBannerImageChange = (e) => {
-    const file = e.target.files?.[0] || null;
+        const file = e.target.files?.[0] || null;
+    if (file && !validateImage(file)) {
+      e.target.value = "";
+      return;
+    }
     setSettingsForm((prev) => ({
       ...prev,
       banner_image: file,
@@ -199,6 +217,7 @@ if (content.job_texts) {
     const payload = new FormData();
     payload.append("page_type", CAREER_FORM_PAGE_TYPE);
     payload.append("title", settingsForm.banner_heading);
+        payload.append("image_alt", settingsForm.banner_image_alt || "");
     payload.append("bg_color", settingsForm.form_bg_color);
     payload.append("font_color", settingsForm.form_font_color);
     payload.append("form_heading", settingsForm.form_heading);
@@ -508,7 +527,7 @@ const handleSubmit = async (e) => {
                   <>
                     <h6 className="fw-bold mb-3">Banner</h6>
                     <div className="row g-3 mb-4">
-                      <div className="col-md-6">
+                      {/* <div className="col-md-6">
                         <label className="form-label">Banner Heading</label>
                         <input
                           type="text"
@@ -534,6 +553,48 @@ const handleSubmit = async (e) => {
                             style={{ maxHeight: 70 }}
                           />
                         )}
+                      </div> */}
+
+                                            <div className="col-md-4">
+                        <label className="form-label">Banner Heading</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="banner_heading"
+                          value={settingsForm.banner_heading}
+                          onChange={handleSettingsFieldChange}
+                        />
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label">
+                          Banner Image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/webp"
+                          className="form-control"
+                          onChange={handleBannerImageChange}
+                        />
+                        {settingsForm.banner_image_preview && (
+                          <img
+                            src={settingsForm.banner_image_preview}
+                            alt={settingsForm.banner_image_alt || "Banner preview"}
+                            className="mt-2 rounded border"
+                            style={{ maxHeight: 70 }}
+                          />
+                        )}
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label">Banner Image Alt Text</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="banner_image_alt"
+                          value={settingsForm.banner_image_alt || ""}
+                          onChange={handleSettingsFieldChange}
+                          placeholder="Describe the image (for SEO)"
+                          maxLength={125}
+                        />
                       </div>
                     </div>
 

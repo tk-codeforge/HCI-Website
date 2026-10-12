@@ -40,6 +40,7 @@ const DEFAULT_FORM = {
   banner_heading_tag: "h1",
   banner_description_font_size: 16,
   banner_image: "",
+    banner_alt: "",
   hero: {
     enabled: true,
     eyebrow: "OUR WARRANTY COMMITMENT",
@@ -249,6 +250,7 @@ export default function CmsWarranty() {
           Number(banner?.banner_description_font_size) ||
           DEFAULT_FORM.banner_description_font_size,
         banner_image: banner?.banner_image || "",
+                banner_alt: banner?.banner_alt || "",
       });
 
       setBannerPreview(banner?.banner_image || "");
@@ -294,15 +296,21 @@ export default function CmsWarranty() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image.");
-      return;
-    }
+    if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed for banners.");
+    return;
+  }
+  if (file.size > 200 * 1024) {
+    toast.error(
+      `Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`
+    );
+    return;
+  }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Banner image must be 5 MB or smaller.");
-      return;
-    }
+    // if (file.size > 5 * 1024 * 1024) {
+    //   toast.error("Banner image must be 5 MB or smaller.");
+    //   return;
+    // }
 
     setBannerImageFile(file);
     setBannerPreview(URL.createObjectURL(file));
@@ -473,6 +481,7 @@ const removeContactItem = (index) => {
       String(formData.banner_description_font_size || 16)
     );
     payload.append("banner_key", "warranty");
+        payload.append("banner_alt", (formData.banner_alt || "").trim());
 
     if (bannerImageFile) {
       payload.append("banner_image", bannerImageFile);
@@ -1232,6 +1241,7 @@ const removeContactItem = (index) => {
                       <div className="col-lg-7">
                         <label className="form-label fw-semibold">
                           Banner Image
+                          <small className="text-muted fw-normal">(.webp only, max 200 KB)</small>
                         </label>
 
                         <div className="input-group">
@@ -1241,17 +1251,31 @@ const removeContactItem = (index) => {
 
                           <input
                             type="file"
-                            accept="image/*"
+                            accept="image/webp"
                             className="form-control"
                             onChange={handleBannerImageChange}
                           />
                         </div>
+                                                {bannerPreview && (
+                          <div className="mt-3">
+                            <label className="form-label fw-semibold">
+                              Banner Alt Text
+                            </label>
+                            <input
+                              className="form-control"
+                              value={formData.banner_alt || ""}
+                              onChange={(e) => setField("banner_alt", e.target.value)}
+                              placeholder="Describe the banner image (for SEO & accessibility)"
+                              maxLength={125}
+                            />
+                          </div>
+                        )}
 
                         {bannerPreview && (
                           <div className="mt-3 border rounded overflow-hidden">
                             <img
                               src={bannerPreview}
-                              alt="Warranty banner preview"
+                              alt={formData.banner_alt || "Warranty banner preview"}
                               style={{
                                 display: "block",
                                 width: "100%",

@@ -254,9 +254,7 @@ const bannerImage = headingData?.bannerImage || "";
           </div> */}
 
                   {bannerImage ? (
-          <MediaBg
-            src={bannerImage}
-            fallbackAlt={headingText}
+                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -286,6 +284,7 @@ const bannerImage = headingData?.bannerImage || "";
                       imgWallpaper={safeImage}
                       wallpaperImgClass="wallpaperclass"
                       altWallpaper={safeTitle}
+                                            cmsAltWallpaper={design?.child_content?.image_alt}
                       portfolioTitle={safeTitle !== defaultAltText ? safeTitle : "Furniture Design"}
                       wallpaperDescriptiion={safeDescription}
                       descriptionClass="team_description mb-0"

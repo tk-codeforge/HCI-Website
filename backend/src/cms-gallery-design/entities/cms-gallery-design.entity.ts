@@ -32,6 +32,9 @@ export class CmsGalleryDesign {
     @Column({ nullable: true })
     banner_image: string;
 
+        @Column({ nullable: true })
+    banner_alt: string;
+
     @Column({ nullable: true })
 banner_heading_tag: string;
 

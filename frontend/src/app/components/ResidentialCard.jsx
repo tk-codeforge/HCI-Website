@@ -126,7 +126,8 @@ const ResidentialCard = (props) => {
 
   // Accepts both spellings (resiImgAlt / resiImgALt)
   const imgAlt = props.resiImgAlt ?? props.resiImgALt ?? "Residential Project";
-   const libraryAlt = useMediaAlt(props.resiImgUrl, imgAlt);
+  const libraryAlt = useMediaAlt(props.resiImgUrl, imgAlt);
+  const finalAlt = props.cmsAltResi || libraryAlt;
 
   return (
     <div className="h-100">
@@ -154,7 +155,7 @@ const ResidentialCard = (props) => {
             <img
               src={displayImage}
               // alt={imgAlt}
-              alt={libraryAlt}
+                            alt={finalAlt}
               className={`w-100 h-100 ${props.resiImgClass || ""}`}
               style={{ objectFit: "cover", transition: "transform 0.5s ease" }}
               onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.08)")}

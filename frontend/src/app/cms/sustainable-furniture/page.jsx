@@ -11,6 +11,18 @@ const CKEditorComponent = dynamic(() => import("../../components/CKEditorCompone
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const PAGE_TYPE = "sustainable_furniture";
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 
 export default function ManageSustainableFurniturePage() {
   return (
@@ -73,6 +85,7 @@ setEditorKey((k) => k + 1);
 
   const handleImageChange = (index, file) => {
     if (!file) return;
+        if (!validateImage(file)) return;
 
     setCardImages((prev) => ({ ...prev, [index]: file }));
 
@@ -92,6 +105,7 @@ setEditorKey((k) => k + 1);
         buttonText: "View More",
         buttonLink: "",
         image: "",
+                imageAlt: "",
       },
     ]);
   };
@@ -253,29 +267,44 @@ const deleteCard = async (index) => {
           <div key={index} className="card shadow-sm border-0 mb-4 rounded-4">
             <div className="card-body p-4">
               <div className="row g-3">
-                <div className="col-md-12">
-                  <label className="form-label fw-bold text-primary">Card Image</label>
+                                <div className="col-md-6">
+                  <label className="form-label fw-bold text-primary">
+                    Card Image{" "}
+                    <small className="text-muted fw-normal">(.webp only, max 200 KB)</small>
+                  </label>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/webp"
                     className="form-control"
                     onChange={(e) => handleImageChange(index, e.target.files?.[0])}
                   />
-                  {previewSrc && (
-                    <div className="mt-3">
-                      <div
-                        className="overflow-hidden rounded-3 shadow-sm"
-                        style={{ maxWidth: "300px", height: "150px" }}
-                      >
-                        <img
-                          src={previewSrc}
-                          alt="Preview"
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
+
+                <div className="col-md-6">
+                  <label className="form-label fw-bold">Image Alt Text</label>
+                  <input
+                    className="form-control"
+                    value={card.imageAlt || ""}
+                    onChange={(e) => handleCardChange(index, "imageAlt", e.target.value)}
+                    placeholder="Describe the image (for SEO & accessibility)"
+                    maxLength={125}
+                  />
+                </div>
+
+                {previewSrc && (
+                  <div className="col-12">
+                    <div
+                      className="overflow-hidden rounded-3 shadow-sm"
+                      style={{ maxWidth: "300px", height: "150px" }}
+                    >
+                      <img
+                        src={previewSrc}
+                        alt={card.imageAlt || "Preview"}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* <div className="col-md-12">
                   <label className="form-label">Title</label>

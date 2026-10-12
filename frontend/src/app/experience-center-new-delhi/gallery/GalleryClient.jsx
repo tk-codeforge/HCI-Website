@@ -33,7 +33,8 @@ export default function GalleryClient({ galleryData }) {
     <div key={index} className={isFull ? "col-lg-12" : "col-lg-6"}>
       <GalleryDetail
         imgGalUrl={item.image ?? `/images/detail-img/${index + 1}.webp`}
-        imgGalAlt={defaultAltText}
+        imgGalAlt={galleryData?.child_content?.title || defaultAltText}
+        imgGalCmsAlt={item.image_alt}
         imgGalImgClass={isFull ? "w-100 detail_gal_img2" : "w-100 detail_gal_img"}
         images={all}
       />

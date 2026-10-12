@@ -12,6 +12,19 @@ const CKEditorComponent = dynamic(
     { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
 );
 
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
+
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i); // 10px to 30px
 
@@ -58,6 +71,7 @@ const CmsHowItsWorks = () => {
 descriptionSize: 20,
         bgImage: null,
         previewImage: "",
+        bgImageAlt: "",
     });
 
     // Step Form State
@@ -69,6 +83,7 @@ descriptionSize: 20,
         image_size: 100, // resizing (percentage)
         image: null,
         preview: "",
+        image_alt: "",
         imageRemoved: false,
         item_index: null,
     });
@@ -162,6 +177,7 @@ const fetchContentManagerPages = useCallback(async () => {
 descriptionSize: Number(content.bannerDescriptionSize) || 20,
                 bgImage: null,
                 previewImage: content.bg_image || "",
+                bgImageAlt: content.bg_image_alt || "",
             });
 
             setSelectedId(contentData?.id || null);
@@ -181,6 +197,10 @@ descriptionSize: Number(content.bannerDescriptionSize) || 20,
     const handleBannerChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "bgImage" && files.length > 0) {
+        if (!validateImage(files[0])) {
+    e.target.value = "";
+    return;
+}
         setBannerData((prev) => ({
             ...prev,
             bgImage: files[0],
@@ -204,6 +224,7 @@ descriptionSize: Number(content.bannerDescriptionSize) || 20,
         bannerHeadingTag: bannerData.headingTag,
 bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         bg_image: bannerData.previewImage || "",
+        bg_image_alt: (bannerData.bgImageAlt || "").trim(),
         steps: pagesList,
     }));
     if (bannerData.bgImage) formData.append("image", bannerData.bgImage);
@@ -229,6 +250,10 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
     const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
+        if (!validateImage(files[0])) {
+    e.target.value = "";
+    return;
+}
         setFormData((prevData) => ({
             ...prevData,
             image: files[0],
@@ -241,7 +266,7 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
 };
 
 const handleRemoveStepImage = () => {
-    setFormData((prev) => ({ ...prev, image: null, preview: "", imageRemoved: true }));
+    setFormData((prev) => ({ ...prev, image: null, preview: "", image_alt: "", imageRemoved: true }));
 };
 
     // Handle form submission for steps
@@ -264,6 +289,7 @@ updatedSteps[formData.item_index] = {
         ? ""
         : (typeof updatedSteps[formData.item_index]?.image === "string"
             ? updatedSteps[formData.item_index].image : ""),
+            image_alt: (formData.image_alt || "").trim(),
 };
 
     const formDataToSend = new FormData();
@@ -275,6 +301,7 @@ updatedSteps[formData.item_index] = {
         bannerHeadingTag: bannerData.headingTag,
 bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         bg_image: bannerData.previewImage || "",
+        bg_image_alt: (bannerData.bgImageAlt || "").trim(),
         steps: updatedSteps,
     }));
 
@@ -292,7 +319,7 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         fetchContentManagerPages();
         toast.success("Step updated successfully.");
         setFormData({ title: "", step_no: "", description: "", 
-            headingTag: formData.headingTag || "h2",
+            headingTag: formData.headingTag || "h2", image_alt: "",
             image_size: 100, image: null, item_index: null });
         document.getElementById('addNewpageModalClose').click();
     } catch (error) {
@@ -311,6 +338,7 @@ headingTag: item.headingTag || "h2",
         image_size: item.image_size || 100,
         image: null,
         preview: typeof item.image === "string" ? item.image : "",
+        image_alt: item.image_alt || "",
         imageRemoved: false,
         item_index: index,
     });
@@ -333,6 +361,7 @@ const handleDeleteStep = async (index) => {
 bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
             bg_image: bannerData.previewImage && !bannerData.previewImage.startsWith("blob:")
                 ? bannerData.previewImage : "",
+                bg_image_alt: (bannerData.bgImageAlt || "").trim(),
             steps: updatedSteps,
         }));
         formDataToSend.append("image_indices", JSON.stringify([]));
@@ -348,7 +377,7 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
 };
 
     const handleRemoveBackground = () => {
-    setBannerData((prev) => ({ ...prev, bgImage: null, previewImage: "" }));
+    setBannerData((prev) => ({ ...prev, bgImage: null, previewImage: "", bgImageAlt: "" }));
 };
 
     return (
@@ -441,13 +470,17 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
 <div className="row align-items-end">
     <div className="col-md-10">
         <label className="form-label">Background Image</label>
-        <input type="file" className="form-control" name="bgImage" accept="image/*"
-            onChange={handleBannerChange} />
+        <input type="file" className="form-control" name="bgImage" accept="image/webp"
+    onChange={handleBannerChange} />
+<div className="form-text">Only .webp, max 200 KB.</div>
+<input type="text" className="form-control mt-2" name="bgImageAlt"
+    placeholder="Banner image alt text (for SEO)" maxLength={125}
+    value={bannerData.bgImageAlt || ""} onChange={handleBannerChange} />
         {bannerData.previewImage && (
     <div className="mt-2">
         <img
             src={bannerData.previewImage}
-            alt="Banner background preview"
+            alt={bannerData.bgImageAlt || "Banner background preview"}
             className="border rounded d-block mb-2"
             style={{ width: "100%", maxWidth: 400, height: 140, objectFit: "cover", backgroundColor: "#f8f9fa" }}
         />
@@ -485,6 +518,7 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         description: "",
         image_size: 100,
         image: null,
+        image_alt: "",
         preview: "",
         imageRemoved: false,
         item_index: pagesList.length, // Append to end of list
@@ -548,7 +582,7 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
                                             <td>
                                                 <img
                                                     src={item?.image || item?.img}
-                                                    alt={item.title}
+                                                    alt={item.image_alt || item.title}
                                                     height="60"
                                                     style={{ objectFit: 'contain' }}
                                                     decoding="async"
@@ -704,14 +738,18 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         type="file"
         className="form-control"
         name="image"
-        accept="image/*"
+        accept="image/webp"
         onChange={handleInputChange}
     />
+    <div className="form-text">Only .webp, max 200 KB.</div>
+<input type="text" className="form-control mt-2" name="image_alt"
+    placeholder="Image alt text (for SEO)" maxLength={125}
+    value={formData.image_alt || ""} onChange={handleInputChange} />
     {formData.preview ? (
         <div className="mt-2">
             <img
                 src={formData.preview}
-                alt="Step preview"
+                alt={formData.image_alt || "Step preview"}
                 className="border rounded d-block"
                 style={{ width: 120, height: 90, objectFit: "contain", backgroundColor: "#f8f9fa" }}
             />

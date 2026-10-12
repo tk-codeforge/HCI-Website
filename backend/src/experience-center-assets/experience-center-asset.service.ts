@@ -25,8 +25,15 @@ export class ExperienceCenterAssetService {
       created_at: row.created_at,
       updated_at: row.updated_at,
       // Shape the frontend already expects: img.child_content?.title / .image
-      child_content: {
+      // child_content: {
+      //   title: row.title,
+      //   image: row.image ? `${baseUrl}${row.image}` : null,
+      // },
+
+            child_content: {
         title: row.title,
+        title_tag: row.title_tag || 'h4',
+        image_alt: row.image_alt || '',
         image: row.image ? `${baseUrl}${row.image}` : null,
       },
     };

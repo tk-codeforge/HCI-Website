@@ -15,6 +15,14 @@ export class CreateExperienceCenterAssetDto {
   @IsString()
   title?: string;
 
+    @IsOptional()
+  @IsString()
+  image_alt?: string;
+
+  @IsOptional()
+  @IsString()
+  title_tag?: string;
+
   @IsOptional()
 @IsString()
 parent_asset_id?: string; // multipart sends it as a string; parsed to number in the service

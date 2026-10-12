@@ -12,6 +12,18 @@ const CKEditorComponent = dynamic(
 );
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
 
 const TitleRow = ({ label, name, tagName, placeholder, defaultTag, value, tagValue, onChange }) => (
     <>
@@ -125,6 +137,7 @@ const CmsAboutUs = () => {
                     mid_sub_title: response.data.json_content?.mid_sub_title || "",
                     mid_sub_description: response.data.json_content?.mid_sub_description || "",
                     mid_image: response.data.json_content?.mid_image || "",
+                                        mid_image_alt: response.data.json_content?.mid_image_alt || "",
                 });
                 setId(response.data.id);
             }
@@ -158,7 +171,13 @@ useEffect(() => {
     // Handle input change for text fields and image
     const handleInputChange = (e, setFormData) => {
         const { name, value, files } = e.target;
-        if (name === "mid_image" && files.length > 0) {
+        // if (name === "mid_image" && files.length > 0) {
+        //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+                if (name === "mid_image" && files.length > 0) {
+            if (!validateImage(files[0])) {
+                e.target.value = "";
+                return;
+            }
             setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -178,6 +197,7 @@ useEffect(() => {
 formDataToSend.append("json_content[mid_sub_title_tag]", formData.mid_sub_title_tag || "");
 formDataToSend.append("json_content[top_description_tag]", formData.top_description_tag || "");
         formDataToSend.append("json_content[mid_image]", formData.mid_image);
+                formDataToSend.append("json_content[mid_image_alt]", formData.mid_image_alt || "");
 
         try {
             const response = await api.patch(`/cms-content/update-with-image/${selectedId}`, formDataToSend, {
@@ -256,17 +276,36 @@ formDataToSend.append("json_content[top_description_tag]", formData.top_descript
                             <div className="row mb-3">
                                 <div className="col-md-6">
                                     <label className="form-label">Banner Image</label>
-                                    <input
+                                    {/* <input
                                         type="file"
                                         className="form-control"
                                         name="mid_image"
                                         accept="image/*"
                                         onChange={(e) => handleInputChange(e, setFormData)}
                                         required
+                                    /> */}
+
+                                                                        <input
+                                        type="file"
+                                        className="form-control"
+                                        name="mid_image"
+                                        accept="image/webp"
+                                        onChange={(e) => handleInputChange(e, setFormData)}
+                                        required={!formData?.mid_image}
+                                    />
+                                    <label className="form-label d-block mt-3">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="mid_image_alt"
+                                        value={formData?.mid_image_alt || ""}
+                                        onChange={(e) => handleInputChange(e, setFormData)}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
                                     />
                                 </div>
                                 <div className="col-md-6">
-                                    {typeof formData?.mid_image === 'string' && <img src={formData?.mid_image} alt="Mid Image" style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
+                                    {typeof formData?.mid_image === 'string' && <img src={formData?.mid_image} alt={formData?.mid_image_alt || "Mid Image"} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
                                 </div>
                             </div>
                             <div className="m-auto mt-2 col-12 d-flex justify-content-center">
@@ -369,17 +408,36 @@ formDataToSend.append("json_content[top_description_tag]", formData.top_descript
                             <div className="row mb-3">
                                 <div className="col-md-6">
                                     <label className="form-label">Image</label>
-                                    <input
+                                    {/* <input
                                         type="file"
                                         className="form-control"
                                         name="mid_image"
                                         accept="image/*"
                                         onChange={(e) => handleInputChange(e, setFormData_2)}
                                         required
+                                    /> */}
+
+                                                                        <input
+                                        type="file"
+                                        className="form-control"
+                                        name="mid_image"
+                                        accept="image/webp"
+                                        onChange={(e) => handleInputChange(e, setFormData_2)}
+                                        required={!formData_2?.mid_image}
+                                    />
+                                    <label className="form-label d-block mt-3">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="mid_image_alt"
+                                        value={formData_2?.mid_image_alt || ""}
+                                        onChange={(e) => handleInputChange(e, setFormData_2)}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
                                     />
                                 </div>
                                 <div className="col-md-6">
-                                    {typeof formData_2?.mid_image === 'string' && <img src={formData_2?.mid_image} alt="Mid Image" style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
+                                    {typeof formData_2?.mid_image === 'string' && <img src={formData_2?.mid_image} alt={formData?.mid_image_alt || "Mid Image"} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
                                 </div>
                             </div>
 

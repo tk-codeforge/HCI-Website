@@ -454,8 +454,9 @@ const headingBlock = (
         </div> */}
 
                 {bannerImage ? (
-          <MediaBg
-            src={bannerImage}
+            <MediaBg 
+            src={bannerImage} 
+            alt={headingData?.bannerAlt} 
             fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
@@ -481,6 +482,7 @@ const headingBlock = (
                     cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[0]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[0]?.child_content?.title}
+                                        imageAlt={staticRecords[0]?.child_content?.image_alt}
                     // descriptionBg={staticRecords[0]?.child_content?.description}
                     descriptionBg={stripHtml(staticRecords[0]?.child_content?.description)}
                   />
@@ -495,6 +497,7 @@ const headingBlock = (
                     cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[1]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[1]?.child_content?.title}
+                                        imageAlt={staticRecords[1]?.child_content?.image_alt}
                     // descriptionBg={staticRecords[1]?.child_content?.description}
                     descriptionBg={stripHtml(staticRecords[1]?.child_content?.description)}
                   />
@@ -509,6 +512,7 @@ const headingBlock = (
                     cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[2]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[2]?.child_content?.title}
+                                        imageAlt={staticRecords[2]?.child_content?.image_alt}
                     // descriptionBg={staticRecords[2]?.child_content?.description}
                     descriptionBg={stripHtml(staticRecords[2]?.child_content?.description)}
                   />
@@ -523,6 +527,7 @@ const headingBlock = (
                     cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[3]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[3]?.child_content?.title}
+                                        imageAlt={staticRecords[3]?.child_content?.image_alt}
                     // descriptionBg={staticRecords[3]?.child_content?.description}
                     descriptionBg={stripHtml(staticRecords[3]?.child_content?.description)}
                   />
@@ -537,6 +542,7 @@ const headingBlock = (
                     cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[4]?.id)}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={staticRecords[4]?.child_content?.title}
+                                        imageAlt={staticRecords[4]?.child_content?.image_alt}
                     // descriptionBg={staticRecords[4]?.child_content?.description}
                     descriptionBg={stripHtml(staticRecords[4]?.child_content?.description)}
                   />
@@ -556,6 +562,7 @@ const headingBlock = (
                   cardLinkTag={pageGalleryHref("designer-choice", slugMap, item.id)}
                   designerCardBgDiv={"designercard designercardimg1"}
                   titleBgImage={item.child_content?.title}
+                  imageAlt={item.child_content?.image_alt}
                   // descriptionBg={item.child_content?.description}
                   descriptionBg={stripHtml(item.child_content?.description)}
                 />

@@ -9,7 +9,20 @@ import dynamic from "next/dynamic";
 const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null };
+const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null, image_alt: "" };
+
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 
 const CmsDesignGallery = () => {
     const user = useSelector((state) => state.auth.user);
@@ -24,6 +37,7 @@ const CmsDesignGallery = () => {
     // });
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [selectedId, setSelectedId] = useState(null);
+        const [childAlts, setChildAlts] = useState({}); // { index: alt text draft }
     const [editorKey, setEditorKey] = useState(0);
     const selectedPage = pagesList?.find(page => page.id === selectedId);
 
@@ -54,7 +68,13 @@ const CmsDesignGallery = () => {
     // Handle input change for text fields and image
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
-        if (name === "image" && files.length > 0) {
+        // if (name === "image" && files.length > 0) {
+        //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+                if (name === "image" && files.length > 0) {
+            if (!validateImage(files[0])) {
+                e.target.value = "";
+                return;
+            }
             setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -75,6 +95,7 @@ const isDescriptionEmpty = (html) =>
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
         formDataToSend.append("title_tag", formData.title_tag || "h2");
+                formDataToSend.append("image_alt", formData.image_alt || "");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -119,6 +140,8 @@ const isDescriptionEmpty = (html) =>
         const formDataToSend = new FormData();
         formDataToSend.append("page_type", "product");
         formDataToSend.append("title", formData.title);
+                formDataToSend.append("title_tag", formData.title_tag || "h2");
+        formDataToSend.append("image_alt", formData.image_alt || "");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -164,6 +187,7 @@ const isDescriptionEmpty = (html) =>
         setFormData({
             title: item.child_content?.title,
              title_tag: item.child_content?.title_tag || "h2",
+                         image_alt: item.child_content?.image_alt ?? "",
             description: item.child_content?.description,
             image: null, // Reset image field
         });
@@ -175,10 +199,15 @@ const isDescriptionEmpty = (html) =>
         if (e.target.files.length === 0) {
             return;
         }
+                if (!validateImage(e.target.files[0])) {
+            e.target.value = "";
+            return;
+        }
 
         const childDataToSend = new FormData();
         childDataToSend.append('childImageIndex', index);
         childDataToSend.append('image', e.target.files[0]);
+                childDataToSend.append('image_alt', childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "");
 
         try {
             const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
@@ -200,9 +229,36 @@ const isDescriptionEmpty = (html) =>
         }
     }
 
+    const handleChildAltSave = async (index) => {
+        const alt = (childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "").trim();
+
+        const childDataToSend = new FormData();
+        childDataToSend.append('childImageIndex', index);
+        childDataToSend.append('image_alt', alt);
+
+        try {
+            const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.status === 200) {
+                fetchContentManagerPages();
+                toast.success("Alt text updated.");
+            } else {
+                toast.error("Error updating alt text. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message ?? "Error updating alt text. Please try again.");
+            console.error("Error:", error);
+        }
+    };
 
     const handleManageChild = (id) => {
-        setSelectedId(id);
+                setSelectedId(id);
+        setChildAlts({});
     }
 
     const deleteHandler = async (id) => {
@@ -270,7 +326,7 @@ const isDescriptionEmpty = (html) =>
                                     <tr key={item.id}>
                                         <td>{index + 1}</td>
                                         <td>
-                                            <img src={item?.child_content?.image} alt={item?.child_content.title} height="80" decoding="async"  loading="lazy" />
+                                            <img src={item?.child_content?.image} alt={item?.child_content?.image_alt || item?.child_content?.title}height="80" decoding="async"  loading="lazy" />
                                         </td>
                                         <td>{item?.child_content.title}</td>
                                         {/* <td>{item?.child_content?.description}</td> */}
@@ -344,7 +400,7 @@ const isDescriptionEmpty = (html) =>
                                 </div>
 
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label className="form-label">Image</label>
                                     <input
                                         type="file"
@@ -352,6 +408,29 @@ const isDescriptionEmpty = (html) =>
                                         name="image"
                                         accept="image/*"
                                         onChange={handleInputChange}
+                                    />
+                                </div> */}
+
+                                                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image <small className="text-muted">(.webp, max 200 KB)</small></label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        name="image"
+                                        accept="image/webp"
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO)"
+                                        maxLength={125}
                                     />
                                 </div>
 
@@ -418,14 +497,37 @@ const isDescriptionEmpty = (html) =>
                                 </div>
 
 
-                                <div className="mb-3 col-md-12">
+                                {/* <div className="mb-3 col-md-12">
                                     <label className="form-label">Image</label>
                                     <input
                                         type="file"
                                         className="form-control"
                                         name="image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
+                                    />
+                                </div> */}
+
+                                                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image <small className="text-muted">(.webp, max 200 KB)</small></label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        name="image"
+                                        accept="image/webp"
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO)"
+                                        maxLength={125}
                                     />
                                 </div>
 
@@ -455,12 +557,27 @@ const isDescriptionEmpty = (html) =>
                                         <input
                                             type="file"
                                             className="form-control"
-                                            accept="image/*"
+                                            accept="image/webp"
                                             onChange={(e) => handleChildImageChange(index, e)}
                                         />
+                                                                                <input
+                                            type="text"
+                                            className="form-control mt-2"
+                                            value={childAlts[index] ?? imageItem?.image_alt ?? ""}
+                                            onChange={(e) => setChildAlts((prev) => ({ ...prev, [index]: e.target.value }))}
+                                            placeholder="Alt text for this image"
+                                            maxLength={125}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-success mt-2"
+                                            onClick={() => handleChildAltSave(index)}
+                                        >
+                                            Save Alt Text
+                                        </button>
                                     </div>
                                     <div className="col-md-6">
-                                        {imageItem && <img src={imageItem.image} alt={`Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
+                                        {imageItem && <img src={imageItem.image} alt={`imageItem.image_alt || Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
                                     </div>
                                 </div>
                             ))}

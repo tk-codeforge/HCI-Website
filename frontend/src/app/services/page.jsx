@@ -244,6 +244,7 @@ const bannerDescriptionSize = Number(cmsData?.bannerDescriptionSize) || 14;
 
 const hasCustomBanner =
   rawBannerImg && typeof rawBannerImg === "string" && rawBannerImg.trim() !== "";
+  const bannerImageAlt = cmsData?.bg_image_alt?.trim() || bannerHeading;
 
   return (
     <MainLayout>
@@ -428,7 +429,7 @@ const hasCustomBanner =
   secBgDesClass="secbgbesclass"
   noDivider
   bgImageUrl={hasCustomBanner ? rawBannerImg : undefined}
-  bgImageAlt={bannerHeading}
+  bgImageAlt={bannerImageAlt}
   bgImageClassName="services-bg-img"
 />
 
@@ -485,7 +486,7 @@ const hasCustomBanner =
                         {itemImage ? (
                           <Image 
                             src={itemImage} 
-                            alt={titleText || defaultAltText}
+                            alt={item?.image_alt?.trim() || titleText || defaultAltText}
                             fill
                             sizes="(max-width: 768px) 100vw, 50vw"
                             style={{ objectFit: 'cover' }}

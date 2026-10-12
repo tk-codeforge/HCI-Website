@@ -21,14 +21,23 @@ const loadAltMap = () =>
 };
 
 // Replaces <img>
-export const MediaImg = ({ src, fallbackAlt = "", ...props }) => {
-  const alt = useMediaAlt(src, fallbackAlt);
-  return <img src={src} alt={alt} decoding="async" loading="lazy" {...props} />;
+// export const MediaImg = ({ src, fallbackAlt = "", ...props }) => {
+//   const alt = useMediaAlt(src, fallbackAlt);
+//   return <img src={src} alt={alt} decoding="async" loading="lazy" {...props} />;
+// };
+
+export const MediaImg = ({ src, alt: altOverride, fallbackAlt = "", ...props }) => {
+  const mapAlt = useMediaAlt(src, fallbackAlt);
+  return <img src={src} {...props} alt={altOverride || mapAlt} decoding="async" loading="lazy" />;
 };
 
 // Replaces <div style={{ backgroundImage }}> banners
-export const MediaBg = ({ src, fallbackAlt = "", style, className, children }) => {
-  const alt = useMediaAlt(src, fallbackAlt);
+// export const MediaBg = ({ src, fallbackAlt = "", style, className, children }) => {
+//   const alt = useMediaAlt(src, fallbackAlt);
+
+export const MediaBg = ({ src, alt: altOverride, fallbackAlt = "", style, className, children }) => {
+  const mapAlt = useMediaAlt(src, fallbackAlt);
+  const alt = altOverride || mapAlt;
   return (
     <div className={className} style={{ position: "relative", ...style }}>
       <img

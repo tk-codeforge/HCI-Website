@@ -83,6 +83,7 @@ const defaultEntry = (key) => ({
   descriptionColor: "#555555",
   descriptionFontSize: 16,
   bannerImage: "",
+    bannerAlt: "",
   headingShadowEnabled: false,
   headingShadowIntensity: 6,
   descriptionShadowEnabled: false,
@@ -142,6 +143,7 @@ export default function ManageHeadingDescription() {
           descriptionColor: source.descriptionColor || "#555555",
           descriptionFontSize: source.descriptionFontSize || 16,
                     bannerImage: source.bannerImage ?? "",
+                              bannerAlt: source.bannerAlt ?? "",
           headingShadowEnabled: source.headingShadowEnabled ?? false,
           headingShadowIntensity: source.headingShadowIntensity || 6,
           descriptionShadowEnabled: source.descriptionShadowEnabled ?? false,
@@ -154,11 +156,12 @@ export default function ManageHeadingDescription() {
   }),
         };
       });
-
       setEntries(hydrated);
+            return true;
     } catch (err) {
       console.log(err);
       toast.error("Failed to load heading & description data.");
+            return false;
     } finally {
       setLoading(false);
     }
@@ -176,12 +179,14 @@ export default function ManageHeadingDescription() {
 
  const handleBannerSelect = (key, file) => {
   if (!file) return;
-  if (!file.type.startsWith("image/")) {
-    toast.error("Please select an image file.");
+      if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed for banners.");
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    toast.error("Image must be smaller than 5 MB.");
+  if (file.size > 200 * 1024) {
+    toast.error(
+      `Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`
+    );
     return;
   }
   setBannerFiles((prev) => {
@@ -210,7 +215,7 @@ const handleBannerRemove = async (key, label) => {
     const { [key]: _skip, ...otherFiles } = bannerFiles; // don't re-upload this page's picked file
     const payload = {
       ...buildSectionsPayload(),
-      [key]: { ...entries[key], bannerImage: "" },
+            [key]: { ...entries[key], bannerImage: "", bannerAlt: "" },
     };
 
     await persistSections(payload, otherFiles);
@@ -493,12 +498,14 @@ const persistSections = async (localSections, filesToSend = bannerFiles) => {
 
                                     {/* ---------- Banner ---------- */}
 <div className="col-md-12">
-  <label className="form-label fw-bold">Banner Image</label>
+  <label className="form-label fw-bold">Banner Image
+    <small className="text-muted fw-normal">(.webp, max 200 KB)</small>
+  </label>
 
   <div className="d-flex align-items-center gap-3 flex-wrap">
     <input
       type="file"
-      accept="image/*"
+      accept="image/webp"
       className="form-control"
       style={{ maxWidth: 360 }}
       onChange={(e) => {
@@ -511,7 +518,7 @@ const persistSections = async (localSections, filesToSend = bannerFiles) => {
       <>
         <img
           src={bannerFiles[def.key]?.previewUrl || entry.bannerImage}
-          alt="Banner thumbnail"
+          alt={entry.bannerAlt || "Banner thumbnail"}
           style={{ height: 48, borderRadius: 4, objectFit: "cover" }}
         />
         <button
@@ -525,6 +532,19 @@ const persistSections = async (localSections, filesToSend = bannerFiles) => {
       </>
     )}
   </div>
+
+    {(bannerFiles[def.key]?.previewUrl || entry.bannerImage) && (
+    <div className="mt-2" style={{ maxWidth: 560 }}>
+      <label className="form-label fw-bold mb-1">Banner Alt Text</label>
+      <input
+        className="form-control"
+        value={entry.bannerAlt}
+        onChange={(e) => handleEntryChange(def.key, "bannerAlt", e.target.value)}
+        placeholder="Describe the banner image (for SEO & accessibility)"
+        maxLength={125}
+      />
+    </div>
+  )}
 </div>
 
                   {/* ---------- Shadows ---------- */}

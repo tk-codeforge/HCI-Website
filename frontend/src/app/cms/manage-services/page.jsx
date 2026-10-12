@@ -16,6 +16,18 @@ const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i); // 10px to 30px
 
 const PAGE_TYPE = "services_page";
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 
 export default function ManageServicesPage() {
   return (
@@ -42,6 +54,7 @@ const [editorVersion, setEditorVersion] = useState(0);
   const [bgImageFile, setBgImageFile] = useState(null);
   const [bgImagePreview, setBgImagePreview] = useState(""); 
   const [bgImageRemoved, setBgImageRemoved] = useState(false);
+  const [bgImageAlt, setBgImageAlt] = useState("");
 
   // Premium Interiors (Services List) States
   const [services, setServices] = useState([]);
@@ -69,6 +82,7 @@ setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
 setBannerHeadingTag(content.bannerHeadingTag || "h1");
 setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 14);
           setBgImage(content.bg_image || content.image || record.image || "");
+          setBgImageAlt(content.bg_image_alt || "");
           setBgImageRemoved(false);
           setServices(Array.isArray(content.services) ? content.services : []);
           setEditorVersion((v) => v + 1);
@@ -102,13 +116,14 @@ setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 14);
     setBgImage("");
     setBgImageFile(null);
     setBgImagePreview("");
+    setBgImageAlt("");
     setBgImageRemoved(true);
   };
 
   const addService = () => {
     setServices([
       ...services,
-      { title: "", description: "", buttonText: "Read More", buttonLink: "", image: "" },
+      { title: "", description: "", buttonText: "Read More", buttonLink: "", image: "", image_alt: "" },
     ]);
   };
 
@@ -158,6 +173,7 @@ setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 14);
 bannerDescriptionSize,
   bg_image: bgImage, 
   image: bgImage, 
+  bg_image_alt: bgImageAlt.trim(),
   services 
 };
       
@@ -282,7 +298,7 @@ bannerDescriptionSize,
   <input type="color" className="form-control form-control-color w-100" value={bannerDescriptionColor} onChange={(e) => setBannerDescriptionColor(e.target.value)} />
 </div>
 
-            <div className="col-md-12 mt-4">
+            {/* <div className="col-md-12 mt-4">
               <label className="form-label fw-bold">Banner Background Image</label>
               <input type="file" accept="image/*" className="form-control" onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -301,7 +317,39 @@ bannerDescriptionSize,
                   </button>
                 </div>
               )}
-            </div>
+            </div> */}
+
+            <div className="col-md-6 mt-4">
+  <label className="form-label fw-bold">Banner Background Image</label>
+  <input type="file" accept="image/webp" className="form-control" onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      if (!validateImage(file)) {
+        e.target.value = "";
+        return;
+      }
+      setBgImageFile(file);
+      setBgImagePreview(URL.createObjectURL(file));
+      setBgImageRemoved(false);
+    }} />
+  <div className="form-text">Only .webp, max 200 KB.</div>
+</div>
+<div className="col-md-6 mt-4">
+  <label className="form-label fw-bold">Banner Image Alt Text</label>
+  <input type="text" className="form-control" maxLength={125}
+    placeholder="Describe the banner image (for SEO)"
+    value={bgImageAlt} onChange={(e) => setBgImageAlt(e.target.value)} />
+</div>
+{displayedBgImage && (
+  <div className="col-md-12 mt-3">
+    <div className="overflow-hidden rounded-3 shadow-sm" style={{ maxWidth: "400px", height: "200px" }}>
+      <img src={displayedBgImage} alt={bgImageAlt || "Preview"} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    </div>
+    <button type="button" className="btn btn-outline-danger btn-sm mt-2 d-flex align-items-center gap-2" onClick={deleteBgImage}>
+      <FaTrash /> Remove Background Image
+    </button>
+  </div>
+)}
           </div>
         </div>
       </div>
@@ -345,7 +393,7 @@ bannerDescriptionSize,
             </div>
             <div className="row g-3">
               
-              <div className="col-md-12">
+              {/* <div className="col-md-12">
                 <label className="form-label fw-bold text-primary">Location / Interior Image</label>
                 <input type="file" accept="image/*" className="form-control" onChange={(e) => handleImageChange(index, e.target.files?.[0])} />
                 {(service.image || serviceImages[index]) && (
@@ -357,7 +405,36 @@ bannerDescriptionSize,
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
+
+              <div className="col-md-6">
+  <label className="form-label fw-bold text-primary">Location / Interior Image</label>
+  <input type="file" accept="image/webp" className="form-control" onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (file && !validateImage(file)) {
+        e.target.value = "";
+        return;
+      }
+      handleImageChange(index, file);
+    }} />
+  <div className="form-text">Only .webp, max 200 KB.</div>
+</div>
+<div className="col-md-6">
+  <label className="form-label fw-bold text-primary">Image Alt Text</label>
+  <input type="text" className="form-control" maxLength={125}
+    placeholder="Describe the image (for SEO)"
+    value={service.image_alt || ""}
+    onChange={(e) => handleServiceChange(index, "image_alt", e.target.value)} />
+</div>
+{(service.image || serviceImages[index]) && (
+  <div className="col-md-12">
+    <img
+      src={serviceImages[index] ? URL.createObjectURL(serviceImages[index]) : service.image}
+      alt={service.image_alt || "Service"}
+      style={{ width: "150px", height: "100px", objectFit: "cover", borderRadius: "10px" }}
+    />
+  </div>
+)}
 
               {/* <div className="col-md-12">
                 <label className="form-label">Heading</label>

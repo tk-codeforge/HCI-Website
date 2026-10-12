@@ -188,7 +188,7 @@ descriptionFontSize={bannerData.descriptionSize}
           sectionBgDescription={bannerData.description}
           secBgDesClass={"text-center bg-transparent"}
           bgImageUrl={hasCustomBg ? bannerData.image : undefined}
-          bgImageAlt={bannerData.heading}
+         bgImageAlt={bannerData.imageAlt || bannerData.heading}
         />
 
         {displaySteps.map((step, index) => {
@@ -220,7 +220,7 @@ const pointsToRender = isHtmlDesc
                     <div className="step-img-container">
                       <img 
                         src={step.img || step.image} 
-                        alt={step.title} 
+                        alt={step.image_alt || step.title}
                         className="step-img"
                         style={{ width: step.image_size ? step.image_size + '%' : '100%' }}
                         loading="eager" 

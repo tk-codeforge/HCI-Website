@@ -10,6 +10,35 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 const TRANSPARENT_PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const MAX_IMAGE_BYTES = 200 * 1024;
+
+const validateImage = (file) => {
+  if (!file || file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error("Image must be 200 KB or smaller.");
+    return false;
+  }
+
+  return true;
+};
+
+const getMediaAlt = (image, mediaFiles) => {
+  if (typeof image !== "string" || !image) return "";
+
+  const filename = image.split(/[?#]/)[0].split("/").pop();
+
+  const media = mediaFiles.find(
+    (file) =>
+      file.filename === filename ||
+      file.url?.split(/[?#]/)[0].split("/").pop() === filename
+  );
+
+  return media?.alt_text || "";
+};
 
 export default function ManageTheWayWeWork() {
   const [contentId, setContentId] = useState(null);
@@ -22,6 +51,8 @@ export default function ManageTheWayWeWork() {
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [backgroundPreview, setBackgroundPreview] = useState("");
   const [bgSize, setBgSize] = useState("cover");
+  const [backgroundAltText, setBackgroundAltText] = useState("");
+const [mediaFiles, setMediaFiles] = useState([]);
   
   const fileInputRef = useRef(null); 
 
@@ -36,6 +67,29 @@ export default function ManageTheWayWeWork() {
   const fetchData = async () => {
     try {
       setLoading(true);
+
+      let mediaList = [];
+
+try {
+  const token = localStorage.getItem("token");
+
+  const mediaRes = await api.get(
+    "/cms-parent-child/media-library",
+    {
+      headers: {
+        Authorization: `Bearer ${token || ""}`,
+      },
+    }
+  );
+
+  mediaList = Array.isArray(mediaRes.data)
+    ? mediaRes.data
+    : [];
+
+  setMediaFiles(mediaList);
+} catch (error) {
+  console.error("Failed to load Media Library:", error);
+}
 
       const res = await api.get(
         "/cms-content/home_page_content_the_way_we_work"
@@ -53,14 +107,30 @@ export default function ManageTheWayWeWork() {
       setHeading(content.heading || "The Way We Work");
       setHeadingColor(content.headingColor || "#ffffff"); 
       setHeadingTag(content.headingTag || "h2");
-      setBgSize(content.bgSize || "cover");               
+      setBgSize(content.bgSize || "cover");  
+      setBackgroundAltText(
+  content.bg_image_alt ||
+  getMediaAlt(content.bg_image, mediaList)
+);             
       
+      // const hydratedCards = (content.cards || []).map((card) => ({
+      //   ...card,
+      //   textColor: card.textColor || "#ffffff",
+      //   iconColor: card.iconColor || "#343a40",
+      //   iconSize: card.iconSize || 120,
+      // }));
+
       const hydratedCards = (content.cards || []).map((card) => ({
-        ...card,
-        textColor: card.textColor || "#ffffff",
-        iconColor: card.iconColor || "#343a40",
-        iconSize: card.iconSize || 120,
-      }));
+  ...card,
+
+  iconAltText:
+    card.iconAltText ||
+    getMediaAlt(card.icon, mediaList),
+
+  textColor: card.textColor || "#ffffff",
+  iconColor: card.iconColor || "#343a40",
+  iconSize: card.iconSize || 120,
+}));
       setCards(hydratedCards);
 
       // 🌟 FIX: Intercept the transparent pixel so the CMS shows "No image selected" properly
@@ -81,12 +151,29 @@ export default function ManageTheWayWeWork() {
     setCards(updated);
   };
 
+  // const handleIconChange = (index, file) => {
+  //   const updated = [...cards];
+  //   updated[index].icon = file;
+  //   updated[index].preview = URL.createObjectURL(file);
+  //   setCards(updated);
+  // };
+
   const handleIconChange = (index, file) => {
-    const updated = [...cards];
-    updated[index].icon = file;
-    updated[index].preview = URL.createObjectURL(file);
-    setCards(updated);
+  if (!file) return;
+
+  if (!validateImage(file)) return;
+
+  const updated = [...cards];
+
+  updated[index] = {
+    ...updated[index],
+    icon: file,
+    preview: URL.createObjectURL(file),
+    iconAltText: "",
   };
+
+  setCards(updated);
+};
 
   const addCard = () => {
     setCards([
@@ -128,10 +215,23 @@ export default function ManageTheWayWeWork() {
 
       const formData = new FormData();
 
+      // const updatedCards = cards.map(({ preview, ...card }) => ({
+      //   ...card,
+      //   icon: typeof card.icon === "string" ? card.icon : "",
+      // }));
+
       const updatedCards = cards.map(({ preview, ...card }) => ({
-        ...card,
-        icon: typeof card.icon === "string" ? card.icon : "",
-      }));
+  ...card,
+
+  icon: typeof card.icon === "string" ? card.icon : "",
+
+  iconAltText:
+    card.iconAltText?.trim() ||
+    getMediaAlt(
+      typeof card.icon === "string" ? card.icon : "",
+      mediaFiles
+    ),
+}));
 
       // 🌟 FIX: Logic to bypass backend empty-string ignores
       let finalBgImage = backgroundPreview;
@@ -152,6 +252,9 @@ export default function ManageTheWayWeWork() {
           bgSize,
           bg_image: finalBgImage, 
           cards: updatedCards,
+           bg_image_alt:
+    backgroundAltText.trim() ||
+    getMediaAlt(backgroundPreview, mediaFiles),
         })
       );
 
@@ -293,7 +396,7 @@ export default function ManageTheWayWeWork() {
           <div className="card-body row">
             <div className="col-md-8">
               <label className="form-label fw-bold">Background Image</label>
-              <input
+              {/* <input
                 type="file"
                 className="form-control"
                 ref={fileInputRef}
@@ -305,7 +408,41 @@ export default function ManageTheWayWeWork() {
                     );
                   }
                 }}
-              />
+              /> */}
+
+              <input
+  type="file"
+  className="form-control"
+  accept=".webp,image/webp"
+  ref={fileInputRef}
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!validateImage(file)) {
+      e.target.value = "";
+      return;
+    }
+
+    setBackgroundImage(file);
+    setBackgroundPreview(URL.createObjectURL(file));
+    setBackgroundAltText("");
+  }}
+/>
+              <label className="form-label fw-bold mt-3">
+  Image Alt Text
+</label>
+
+<input
+  type="text"
+  className="form-control"
+  name="bg_image_alt"
+  value={backgroundAltText}
+  onChange={(e) => setBackgroundAltText(e.target.value)}
+  placeholder="Describe the banner image"
+  maxLength={125}
+/>
 
               {backgroundPreview ? (
                 <div className="mt-3 d-flex align-items-center gap-3">
@@ -429,6 +566,7 @@ export default function ManageTheWayWeWork() {
                   <input
                     type="file"
                     className="form-control"
+                    accept=".webp,image/webp"
                     onChange={(e) => handleIconChange(index, e.target.files[0])}
                   />
                   {(() => {
@@ -452,6 +590,21 @@ export default function ManageTheWayWeWork() {
                       )
                     );
                   })()}
+                  <label className="form-label mt-3">
+  Icon Alt Text
+</label>
+
+<input
+  type="text"
+  className="form-control"
+  name="iconAltText"
+  value={card.iconAltText ?? ""}
+  onChange={(e) =>
+    handleCardChange(index, "iconAltText", e.target.value)
+  }
+  placeholder="Describe the icon"
+  maxLength={125}
+/>
                 </div>
 
                 <div className="col-md-3">

@@ -374,6 +374,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
                     {data1?.mid_image && (
             <MediaImg
               src={data1.mid_image}
+                            alt={data1?.mid_image_alt}
               fallbackAlt={data1?.mid_sub_title || data1?.top_title || ""}
               loading="eager"
               fetchPriority="high"
@@ -513,7 +514,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
               imageCol="12"
               ImgAbout={data2?.mid_image}
               ImgAboutClass={"aboout_img object-fit-contain w-100"}
-              imgAlt="About"
+                            imgAlt={data2?.mid_image_alt || data2?.top_title || "About"}
               titleHeading=  {data2?.top_title}
              subHeadingTag={S2SubTag}
               subHeading= {data2?.top_description}
@@ -595,6 +596,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
                     cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
                     designerCardBgDiv={"designercard designercardimg1"}
                     titleBgImage={record?.child_content?.title}
+                                        imageAlt={record?.child_content?.image_alt}
                     descriptionBg={record?.child_content?.description}
                   />
                 </div>

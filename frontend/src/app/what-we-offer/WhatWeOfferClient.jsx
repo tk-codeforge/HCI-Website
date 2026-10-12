@@ -209,7 +209,7 @@ descriptionFontSize={bannerData.descriptionSize}
           sectionBgDescription={bannerData.description}
           secBgDesClass={"text-center bg-transparent"}
            bgImageUrl={bannerData.bgImage || undefined}
-          bgImageAlt={bannerData.heading}
+          bgImageAlt={bannerData.bgImageAlt || bannerData.heading}
         />
 
         {OFFERINGS.map((offer, index) => {
@@ -236,7 +236,7 @@ descriptionFontSize={bannerData.descriptionSize}
                     <div className="offer-img-container">
                       <img
                         src={offer.img}
-                        alt={offer.title}
+                        alt={offer.imgAlt || offer.title}
                         className="offer-img"
                         style={{ "--img-scale": offer.imageSize / 100 }}
                         loading="lazy"

@@ -57,7 +57,8 @@ const BackgroundImageRow = (props) => {
         {hasBgImage && (
           <MediaImg
             src={props.bgImageUrl}
-            fallbackAlt={props.bgImageAlt || props.sectionBgHeading || ""}
+            alt={props.bgImageAlt}
+            fallbackAlt={props.sectionBgHeading || ""}
             loading="eager"
             className={props.bgImageClassName}
             fetchPriority="high"

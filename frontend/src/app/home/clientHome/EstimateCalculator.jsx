@@ -270,7 +270,7 @@ const RotatingTag = SPAN_TAGS.includes(estimateSectionData?.span_tag) ? estimate
     {card?.image ? (
         <img
             src={card.image}
-            alt={card?.title || "Estimate icon"}
+                        alt={card?.image_alt || card?.title || "Estimate icon"}
             style={{
                 width: "48px",
                 height: "48px",

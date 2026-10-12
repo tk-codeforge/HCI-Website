@@ -12,4 +12,5 @@ export class CreateCmsPageDto {
     banner_title?: string;
     banner_subtitle?: string;
     banner_image?: string;
+    banner_image_alt?: string;
 }

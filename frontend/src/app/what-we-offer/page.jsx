@@ -599,6 +599,7 @@ export default async function WhatWeOffer() {
     headingTag: cmsContent?.bannerHeadingTag || undefined,
 descriptionSize: Number(cmsContent?.bannerDescriptionSize) || 20,
     bgImage: cmsContent?.bg_image || "",
+    bgImageAlt: cmsContent?.bg_image_alt || "",
   };
 
   // Content blocks
@@ -615,6 +616,7 @@ descriptionSize: Number(cmsContent?.bannerDescriptionSize) || 20,
             id: `section-${index + 1}`,
             title: section.heading || fallback?.title || `Offering ${index + 1}`,
             img: section.image || FALLBACK_IMAGES[index] || interiorDesignPlanningImg,
+            imgAlt: section.image_alt || "",
             imageSize: section.imageSize || 100,
             headingTag: section.headingTag || "h2",
 description: section.description || "",
@@ -625,6 +627,7 @@ description: section.description || "",
           id: `section-${index + 1}`,
           title: offer.title,
           img: FALLBACK_IMAGES[index],
+          imgAlt: "",
           imageSize: 100,
           headingTag: "h2",
 description: "",

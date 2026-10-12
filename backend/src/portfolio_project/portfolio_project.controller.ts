@@ -59,10 +59,11 @@ export class PortfolioProjectController {
   async updateChildImage(
     @Param('id') id: string,
     @Body('childImageIndex') childImageIndex: number,
+     @Body('image_alt') imageAlt: string | undefined,
     @UploadedFile() file: Express.Multer.File,
   ) {
     const imagePath = file ? file.path : null;
-    return this.portfolioProjectService.updateChildImage(+id, childImageIndex, imagePath);
+    return this.portfolioProjectService.updateChildImage(+id, childImageIndex, imagePath, imageAlt);
   }
 
   @UseGuards(AuthGuard('jwt'))

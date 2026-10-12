@@ -9,7 +9,20 @@ import dynamic from "next/dynamic";
 const CKEditorComponent = dynamic(() => import("../../../components/CKEditorComponent"), { ssr: false });
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null };
+const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null, image_alt: "" };
+
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 
 const CmsReadyToGoDesign = () => {
     const authToken = useSelector((state) => state.auth.authToken);
@@ -23,6 +36,7 @@ const CmsReadyToGoDesign = () => {
     const [formData, setFormData] = useState(EMPTY_FORM);
 const [editorKey, setEditorKey] = useState(0);
     const [selectedId, setSelectedId] = useState(null);
+        const [childAlts, setChildAlts] = useState({}); // { index: alt text draft }
     const selectedPage = pagesList?.find(page => page.id === selectedId);
     const slug = window.location.pathname.split('/').pop();
 
@@ -53,7 +67,13 @@ const [editorKey, setEditorKey] = useState(0);
     // Handle input change for text fields and image
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
-        if (name === "image" && files.length > 0) {
+        // if (name === "image" && files.length > 0) {
+        //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+                if (name === "image" && files.length > 0) {
+            if (!validateImage(files[0])) {
+                e.target.value = "";
+                return;
+            }
             setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -74,6 +94,7 @@ const isDescriptionEmpty = (html) =>
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
         formDataToSend.append("title_tag", formData.title_tag || "h2");
+                formDataToSend.append("image_alt", formData.image_alt || "");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -120,6 +141,7 @@ setEditorKey((k) => k + 1);
         formDataToSend.append("page_type", slug);
         formDataToSend.append("title", formData.title);
         formDataToSend.append("title_tag", formData.title_tag || "h2");
+                formDataToSend.append("image_alt", formData.image_alt || "");
         formDataToSend.append("description", formData.description);
         if (formData.image) {
             formDataToSend.append("image", formData.image);
@@ -173,6 +195,7 @@ setSelectedId(item.id);
 setFormData({
     title: item.child_content?.title ?? "",
     title_tag: item.child_content?.title_tag || "h2",
+        image_alt: item.child_content?.image_alt ?? "",
     description: item.child_content?.description ?? "",
     image: null,
 });
@@ -185,9 +208,14 @@ setFormData({
             return;
         }
 
+                if (!validateImage(e.target.files[0])) {
+            e.target.value = "";
+            return;
+        }
         const childDataToSend = new FormData();
         childDataToSend.append('childImageIndex', index);
         childDataToSend.append('image', e.target.files[0]);
+                childDataToSend.append('image_alt', childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "");
 
         try {
             const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
@@ -208,10 +236,36 @@ setFormData({
             console.error("Error:", error);
         }
     }
+    const handleChildAltSave = async (index) => {
+        const alt = (childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "").trim();
 
+        const childDataToSend = new FormData();
+        childDataToSend.append('childImageIndex', index);
+        childDataToSend.append('image_alt', alt);
+
+        try {
+            const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.status === 200) {
+                fetchContentManagerPages();
+                toast.success("Alt text updated.");
+            } else {
+                toast.error("Error updating alt text. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message ?? "Error updating alt text. Please try again.");
+            console.error("Error:", error);
+        }
+    };
 
     const handleManageChild = (id) => {
-        setSelectedId(id);
+                setSelectedId(id);
+        setChildAlts({});
     }
 
 
@@ -256,7 +310,7 @@ setFormData({
                                     <tr key={item.id}>
                                         <td>{index + 1}</td>
                                         <td>
-                                            <img src={item?.child_content?.image} alt={item?.child_content.title} height="80" decoding="async"  loading="lazy" />
+                                            <img src={item?.child_content?.image} alt={item?.child_content?.image_alt || item?.child_content?.title} height="80" decoding="async"  loading="lazy" />
                                         </td>
                                         <td>{item?.child_content.title}</td>
                                         {/* <td>{item?.child_content?.description}</td> */}
@@ -336,11 +390,22 @@ setFormData({
                                         type="file"
                                         className="form-control"
                                         name="image"
-                                        accept="image/*"
+                                                                                                                accept="image/webp"
                                         onChange={handleInputChange}
                                     />
                                 </div>
-
+                                <div className="mb-3 col-md-12">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
+                                    />
+                                </div>
                                 <div className="m-auto mt-2 col-12 d-flex justify-content-center">
                                     <button className="px-5 read_morebtn" type="submit">
                                         Save Changes
@@ -406,13 +471,28 @@ setFormData({
 
 
                                 <div className="mb-3 col-md-12">
-                                    <label className="form-label">Image</label>
+                                    <label className="form-label">Image
+                                        <small className="text-muted">(.webp only, max 200 KB)</small>
+                                    </label>
                                     <input
                                         type="file"
                                         className="form-control"
                                         name="image"
-                                        accept="image/*"
+                                                                                accept="image/webp"
                                         onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                                                <div className="mb-3 col-md-12">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
                                     />
                                 </div>
 
@@ -438,16 +518,33 @@ setFormData({
                             {selectedPage?.child_images?.map((imageItem, index) => (
                                 <div className={`row border-bottom ${index !== 0 ? 'py-2' : ''}`} key={index}>
                                     <div className="mb-2 col-md-6">
-                                        <label className="form-label">Image {index + 1}</label>
+                                        <label className="form-label">Image {index + 1}
+                                            <small className="text-muted">(.webp only, max 200 KB)</small>
+                                        </label>
                                         <input
                                             type="file"
                                             className="form-control"
-                                            accept="image/*"
+                                            accept="image/webpimage/"
                                             onChange={(e) => handleChildImageChange(index, e)}
                                         />
+                                                                                <input
+                                            type="text"
+                                            className="form-control mt-2"
+                                            value={childAlts[index] ?? imageItem?.image_alt ?? ""}
+                                            onChange={(e) => setChildAlts((prev) => ({ ...prev, [index]: e.target.value }))}
+                                            placeholder="Alt text for this image"
+                                            maxLength={125}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-success mt-2"
+                                            onClick={() => handleChildAltSave(index)}
+                                        >
+                                            Save Alt Text
+                                        </button>
                                     </div>
                                     <div className="col-md-6">
-                                        {imageItem && <img src={imageItem.image} alt={`Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
+                                        {imageItem && <img src={imageItem.image} alt={`imageItem.image_alt || Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
                                     </div>
                                 </div>
                             ))}

@@ -30,7 +30,7 @@ export default function TeamMediaGallery({ items }) {
             ) : (
               <img
                 src={item.url}
-                alt="Team media"
+                 alt={item.image_alt?.trim() || "Team media"}
                 className="team-media-image"
                 loading="lazy"
                 decoding="async"
@@ -69,7 +69,7 @@ export default function TeamMediaGallery({ items }) {
             ) : (
               <img
                 src={activeItem.url}
-                alt="Team media"
+                alt={activeItem.image_alt?.trim() || "Team media"}
                 className="team-media-lightbox-media"
               />
             )}

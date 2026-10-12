@@ -721,6 +721,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg1 design_exper"}
                   portfolioImg={experienceData[0]?.child_content?.image}
                   portfolioTitle={experienceData[0]?.child_content?.title}
+                  portfolioImgAlt={experienceData[0]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[0]?.child_content?.title_tag}
                 />
               )}
               {experienceData[1] && (
@@ -730,6 +732,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg2"}
                   portfolioImg={experienceData[1]?.child_content?.image}
                   portfolioTitle={experienceData[1]?.child_content?.title}
+                                    portfolioImgAlt={experienceData[1]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[1]?.child_content?.title_tag}
                 />
               )}
             </div>
@@ -748,6 +752,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg4"}
                   portfolioImg={experienceData[2]?.child_content?.image}
                   portfolioTitle={experienceData[2]?.child_content?.title}
+                                    portfolioImgAlt={experienceData[2]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[2]?.child_content?.title_tag}
                 />
               </div>
             )}
@@ -760,6 +766,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg5"}
                   portfolioImg={experienceData[3]?.child_content?.image}
                   portfolioTitle={experienceData[3]?.child_content?.title}
+                                    portfolioImgAlt={experienceData[3]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[3]?.child_content?.title_tag}
                 />
               </div>
             )}
@@ -772,6 +780,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg6"}
                   portfolioImg={experienceData[4]?.child_content?.image}
                   portfolioTitle={experienceData[4]?.child_content?.title}
+                                    portfolioImgAlt={experienceData[4]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[4]?.child_content?.title_tag}
                 />
               </div>
             )}
@@ -784,6 +794,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg7"}
                   portfolioImg={experienceData[5]?.child_content?.image}
                   portfolioTitle={experienceData[5]?.child_content?.title}
+                                    portfolioImgAlt={experienceData[5]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[5]?.child_content?.title_tag}
                   portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
                 />
               </div>
@@ -797,6 +809,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                   portfolioImgBg={"portfolioimgall desig_gal_bg8"}
                   portfolioImg={experienceData[6]?.child_content?.image}
                   portfolioTitle={experienceData[6]?.child_content?.title}
+                                    portfolioImgAlt={experienceData[6]?.child_content?.image_alt}
+                  portfolioTitleTag={experienceData[6]?.child_content?.title_tag}
                   portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
                 />
               </div>
@@ -819,6 +833,8 @@ export default async function CustomExperienceCenterPage({ params }) {
                     portfolioImgBg={`portfolioimgall ${bgClass}`}
                     portfolioImg={item?.child_content?.image}
                     portfolioTitle={item?.child_content?.title}
+                                        portfolioImgAlt={item?.child_content?.image_alt}
+                    portfolioTitleTag={item?.child_content?.title_tag}
                     portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
                   />
                 </div>

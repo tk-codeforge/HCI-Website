@@ -13,6 +13,7 @@ export class UpdateJsonContentChildImageDto {
     title: string;
     description: string;
     designation?: string;
+     image_alt?: string;
 }
 
 export class UpdateCmsContentHomepageBannerDto {

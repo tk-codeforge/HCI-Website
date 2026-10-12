@@ -20,6 +20,9 @@ export class PortfolioProject {
         @Column({ type: 'varchar', length: 10, nullable: true, default: null })
     title_tag: string | null;
 
+        @Column({ type: 'varchar', length: 255, nullable: true })
+    image_alt: string | null;
+
     @Column()
     description: string;
 

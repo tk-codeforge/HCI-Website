@@ -17,7 +17,7 @@ const Counter = ({ value = "", limit }) => (
   </small>
 );
 
-export default function GlobalSeoForm({ initialData, onSubmit, canPublish }) {
+export default function GlobalSeoForm({ initialData, onSubmit, canPublish, lockPageName = false }) {
     const [formData, setFormData] = useState({
         page_name: "",
         meta_title: "",
@@ -108,7 +108,7 @@ if (formData.meta_description.length > DESC_LIMIT) {
         <form onSubmit={handleFormSubmit} className="row">
             <div className="mb-3 col-md-12">
                 <label className="form-label text-primary fw-bold">Target Route / Page Name (e.g., /about-us)</label>
-                <input type="text" className="form-control" name="page_name" value={formData.page_name} onChange={handleInputChange} required />
+                <input type="text" className="form-control" name="page_name" value={formData.page_name} onChange={handleInputChange} readOnly={lockPageName} required={!lockPageName} />
             </div>
 
             <div className="mb-3 col-md-6">

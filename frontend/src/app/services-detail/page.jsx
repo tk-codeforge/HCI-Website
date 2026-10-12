@@ -677,6 +677,8 @@ import { getBackendImageUrl } from "@/utils/helper";
 import { SidebarForm, BottomContactForm } from "./CityForms";
 import { getPageSEO } from "@/utils/getSEO";
 import { cityUrlMap } from "@/utils/cityRoutes";
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const safeTag = (t, fallback) => (HEADING_TAGS.includes(t) ? t : fallback);
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 
@@ -867,6 +869,8 @@ const ServicesDetailPage = async ({ searchParams }) => {
   const customSchema = seoData?.customSchema;
   const safeDescription = pageData?.main_description ? DOMPurify.sanitize(pageData.main_description) : "";
   const safeSideDescription = pageData?.side_description ? DOMPurify.sanitize(pageData.side_description) : "";
+  const HeroTag = safeTag(pageData?.banner_title ? pageData?.banner_title_tag : pageData?.main_title_tag, "h1");
+const SideTag = safeTag(pageData?.side_title_tag, "h3");
   
   const displayCity = city.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   const faqs = parseJsonSafe(pageData.faqs);
@@ -1042,18 +1046,28 @@ const ServicesDetailPage = async ({ searchParams }) => {
         <div className="city-hero w-100">
           <Image 
             src={pageData?.banner_image ? getBackendImageUrl(pageData.banner_image) : getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg')}
+            // alt={
+            //   pageData?.banner_title ||
+            //   pageData?.main_title ||
+            //   `${displayCity} Interior Design`
+            // }
+
             alt={
-              pageData?.banner_title ||
-              pageData?.main_title ||
-              `${displayCity} Interior Design`
-            }
+  pageData?.banner_image && pageData?.banner_image_alt?.trim()
+    ? pageData.banner_image_alt.trim()
+    : pageData?.banner_title || pageData?.main_title || `${displayCity} Interior Design`
+}
             fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
           />
           <div className="container hero-content font-poppins">
             <div className="hero-badge"><FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior in ${displayCity}`}</div>
-            <h1 className="hero-main-title fw-bold mb-3 font-outfit text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}>
+            {/* <h1 className="hero-main-title fw-bold mb-3 font-outfit text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}>
               {pageData?.banner_title || pageData?.main_title || `Interior Designers in ${displayCity}`}
-            </h1>
+            </h1> */}
+
+            <HeroTag className="hero-main-title fw-bold mb-3 font-outfit text-white" style={{ textShadow: '0 4px 20px rgba(0,0,0,0.9)' }}>
+  {pageData?.banner_title || pageData?.main_title || `Interior Designers in ${displayCity}`}
+</HeroTag>
           </div>
         </div>
 
@@ -1221,7 +1235,9 @@ const ServicesDetailPage = async ({ searchParams }) => {
                 {(pageData?.side_title || safeSideDescription) && (
                   <div className="lazy-render">
                     <div className="premium-card mb-4" style={{ background: '#fffcf9' }}>
-                      <h3 className="font-outfit fw-bold h4 mb-3 text-dark">{pageData.side_title}</h3>
+                      {/* <h3 className="font-outfit fw-bold h4 mb-3 text-dark">{pageData.side_title}</h3> */}
+
+                      <SideTag className="font-outfit fw-bold h4 mb-3 text-dark">{pageData.side_title}</SideTag>
                       <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeSideDescription }} />
                     </div>
                   </div>

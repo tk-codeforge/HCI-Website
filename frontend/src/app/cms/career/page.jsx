@@ -12,6 +12,19 @@ const CKEditorComponent = dynamic(() => import("../../components/CKEditorCompone
 const TRANSPARENT_PIXEL =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
+  const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
+
 export default function ManageCareer() {
   const [contentId, setContentId] = useState(null);
 
@@ -25,6 +38,7 @@ export default function ManageCareer() {
   
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [backgroundPreview, setBackgroundPreview] = useState("");
+    const [bgImageAlt, setBgImageAlt] = useState("");
   const fileInputRef = useRef(null);
 
   // CKEditor Table Content
@@ -45,6 +59,7 @@ export default function ManageCareer() {
     imageSize: 100,
     image: null,
     preview: "",
+    imageAlt: "",
     item_index: null,
   });
 
@@ -73,6 +88,7 @@ export default function ManageCareer() {
 
       setBgHeading(content.bgHeading || "");
       setBgHeadingTag(content.bgHeadingTag || "h2");
+            setBgImageAlt(content.bgImageAlt || "");
 
       const dbImage = record.image || content.bg_image || "";
       setBackgroundPreview(dbImage === TRANSPARENT_PIXEL ? "" : dbImage);
@@ -95,6 +111,7 @@ export default function ManageCareer() {
             image: s.image || null,
             preview: "",
             imageSize: s.imageSize || 100,
+                        imageAlt: s.imageAlt || "",
           }))
         : [];
 
@@ -109,6 +126,7 @@ export default function ManageCareer() {
 
   const handleRemoveBackground = () => {
     setBackgroundImage(null);
+        setBgImageAlt("");
     setBackgroundPreview("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -124,6 +142,7 @@ export default function ManageCareer() {
       imageSize: 100,
       image: null,
       preview: "",
+            imageAlt: "",
       item_index: sections.length, 
     });
   };
@@ -137,13 +156,18 @@ export default function ManageCareer() {
       imageSize: section.imageSize || 100,
       image: null,
       preview: typeof section.image === "string" ? section.image : "",
+            imageAlt: section.imageAlt || "",
       item_index: index,
     });
   };
 
   const handleBlockFormChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "image" && files && files.length > 0) {
+        if (name === "image" && files && files.length > 0) {
+      if (!validateImage(files[0])) {
+        e.target.value = "";
+        return;
+      }
       setBlockForm((prev) => ({
         ...prev,
         image: files[0],
@@ -169,6 +193,7 @@ export default function ManageCareer() {
         description: s.description,
         descriptionFontSize: s.descriptionFontSize,
         imageSize: s.imageSize,
+                imageAlt: s.imageAlt || "",
         image: typeof s.image === "string" ? s.image : "",
       }));
 
@@ -181,6 +206,7 @@ export default function ManageCareer() {
           bannerDescFontSize,
           tableContent,
           bgHeading,
+                    bgImageAlt,
           bgHeadingTag,
           bgSize: "cover",
           bg_image: backgroundPreview.startsWith("blob:") ? "" : backgroundPreview || "",
@@ -218,6 +244,7 @@ export default function ManageCareer() {
       description: blockForm.description,
       descriptionFontSize: Number(blockForm.descriptionFontSize),
       imageSize: Number(blockForm.imageSize) || 100,
+            imageAlt: blockForm.imageAlt || "",
       image: blockForm.image instanceof File ? blockForm.image : existing?.image || null,
       preview: blockForm.image instanceof File ? blockForm.preview : "",
     };
@@ -346,6 +373,7 @@ const savePageData = async (sectionsOverride = null, successMessage = "Saved Suc
         tableContent,
         bgHeading,
         bgHeadingTag,
+                bgImageAlt,
         bgSize: "cover",
         bg_image: finalBgImage,
         sections: updatedSections,
@@ -492,7 +520,7 @@ const handleTableSave = () => savePageData(null, "Editor Content Saved Successfu
             </div>
 
             <div className="row">
-              <div className="col-md-12">
+              {/* <div className="col-md-12">
                 <label className="form-label">Banner Image</label>
                 <input
                   type="file"
@@ -515,7 +543,50 @@ const handleTableSave = () => savePageData(null, "Editor Content Saved Successfu
                     />
                   </div>
                 )}
+              </div> */}
+
+                            <div className="col-md-6">
+                <label className="form-label">
+                  Banner Image <small className="text-muted">(.webp only, max 200 KB)</small>
+                </label>
+                <input
+                  type="file"
+                  className="form-control"
+                  accept="image/webp"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    const f = e.target.files && e.target.files[0];
+                    if (!f) return;
+                    if (!validateImage(f)) {
+                      e.target.value = "";
+                      return;
+                    }
+                    setBackgroundImage(f);
+                    setBackgroundPreview(URL.createObjectURL(f));
+                  }}
+                />
               </div>
+              <div className="col-md-6">
+                <label className="form-label">Banner Image Alt Text</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={bgImageAlt}
+                  onChange={(e) => setBgImageAlt(e.target.value)}
+                  placeholder="Describe the image (for SEO & accessibility)"
+                  maxLength={125}
+                />
+              </div>
+              {backgroundPreview && (
+                <div className="col-12 mt-3">
+                  <img
+                    src={backgroundPreview}
+                    alt={bgImageAlt || "Banner Background Preview"}
+                    className="rounded border w-100"
+                    style={{ height: 160, objectFit: "cover" }}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -559,7 +630,7 @@ const handleTableSave = () => savePageData(null, "Editor Content Saved Successfu
                     <td>{index + 1}</td>
                     <td>
                       {imgSrc ? (
-                        <img src={imgSrc} alt={section.heading} height="50" style={{ objectFit: "contain" }} />
+                        <img src={imgSrc} alt={section.imageAlt || section.heading} height="50" style={{ objectFit: "contain" }} />
                       ) : (
                         <span className="text-muted small">No icon</span>
                       )}
@@ -698,7 +769,7 @@ const handleTableSave = () => savePageData(null, "Editor Content Saved Successfu
                   </div>
                 </div> */}
 
-                <div className="mb-3 col-md-6">
+                {/* <div className="mb-3 col-md-6">
                   <label className="form-label">Upload New Icon</label>
                   <input
                     type="file"
@@ -718,7 +789,45 @@ const handleTableSave = () => savePageData(null, "Editor Content Saved Successfu
                       }}
                     />
                   )}
+                </div> */}
+
+                                <div className="mb-3 col-md-6">
+                  <label className="form-label">
+                    Upload New Icon <small className="text-muted">(.webp only, max 200 KB)</small>
+                  </label>
+                  <input
+                    type="file"
+                    className="form-control"
+                    name="image"
+                    accept="image/webp"
+                    onChange={handleBlockFormChange}
+                  />
                 </div>
+                <div className="mb-3 col-md-6">
+                  <label className="form-label">Icon Alt Text</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="imageAlt"
+                    value={blockForm.imageAlt || ""}
+                    onChange={handleBlockFormChange}
+                    placeholder="Describe the icon (for accessibility)"
+                    maxLength={125}
+                  />
+                </div>
+                {blockForm.preview && (
+                  <div className="mb-3 col-12">
+                    <img
+                      src={blockForm.preview}
+                      alt={blockForm.imageAlt || "Block preview"}
+                      className="border rounded"
+                      style={{
+                        width: `${(100 * (blockForm.imageSize || 100)) / 100}px`,
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                )}
 
                 <div className="m-auto mt-2 col-12 d-flex justify-content-end">
                   <button className="btn btn-primary px-5" type="submit">

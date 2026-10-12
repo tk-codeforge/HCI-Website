@@ -462,6 +462,43 @@ const CKEditorComponent = dynamic(
     { ssr: false, loading: () => <div className="text-muted">Loading editor...</div> }
 );
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const MAX_IMAGE_BYTES = 200 * 1024;
+
+const validateImage = (file) => {
+  if (
+    !file ||
+    !file.name.toLowerCase().endsWith(".webp") ||
+    file.type !== "image/webp"
+  ) {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error("Image must not exceed 200 KB.");
+    return false;
+  }
+
+  return true;
+};
+
+const getMediaAlt = (imageUrl, mediaFiles = []) => {
+  if (typeof imageUrl !== "string" || !imageUrl) return "";
+
+  const filename = imageUrl
+    .split(/[?#]/)[0]
+    .split("/")
+    .pop()
+    .toLowerCase();
+
+  const match = mediaFiles.find(
+    (file) =>
+      file.filename?.toLowerCase() === filename ||
+      file.url?.split(/[?#]/)[0].split("/").pop()?.toLowerCase() === filename
+  );
+
+  return match?.alt_text?.trim() || "";
+};
 
 const CONTENT_KEY = "home_page_content_furniture_factory";
 
@@ -480,18 +517,21 @@ export default function ManageFurnitureFactory() {
   const [topImageFile, setTopImageFile] = useState(null);
   const [topImagePreview, setTopImagePreview] = useState("");
   const [topImageCaption, setTopImageCaption] = useState("");
+  const [topImageAlt, setTopImageAlt] = useState("");
   const topImageInputRef = useRef(null);
 
   // Image 1 (bottom-left)
   const [image1File, setImage1File] = useState(null);
   const [image1Preview, setImage1Preview] = useState("");
   const [image1Caption, setImage1Caption] = useState("");
+  const [image1Alt, setImage1Alt] = useState("");
   const image1InputRef = useRef(null);
 
   // Image 2 (bottom-right)
   const [image2File, setImage2File] = useState(null);
   const [image2Preview, setImage2Preview] = useState("");
   const [image2Caption, setImage2Caption] = useState("");
+  const [image2Alt, setImage2Alt] = useState("");
   const image2InputRef = useRef(null);
 
   // Video (media picker)
@@ -510,6 +550,17 @@ export default function ManageFurnitureFactory() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      let mediaFiles = [];
+
+try {
+  const mediaRes = await api.get("/cms-parent-child/media-library");
+
+  mediaFiles = Array.isArray(mediaRes.data)
+    ? mediaRes.data
+    : [];
+} catch (error) {
+  console.error("Failed to load Media Library alt text:", error);
+}
 
       const res = await api.get(`/cms-content/${CONTENT_KEY}`);
       if (!res.data) return;
@@ -532,12 +583,24 @@ export default function ManageFurnitureFactory() {
 
       setTopImagePreview(content.topImage || "");
       setTopImageCaption(content.topImageCaption || "");
+      setTopImageAlt(
+  content.topImageAlt ||
+  getMediaAlt(content.topImage, mediaFiles)
+);
 
       setImage1Preview(content.image1 || "");
       setImage1Caption(content.image1Caption || "");
+      setImage1Alt(
+  content.image1Alt ||
+  getMediaAlt(content.image1, mediaFiles)
+);
 
       setImage2Preview(content.image2 || "");
       setImage2Caption(content.image2Caption || "");
+      setImage2Alt(
+  content.image2Alt ||
+  getMediaAlt(content.image2, mediaFiles)
+);
 
       setVideoPreview(content.video || "");
     } catch (err) {
@@ -566,12 +629,15 @@ export default function ManageFurnitureFactory() {
       topImagePreview,
       topImageFile,
       topImageCaption,
-      image1Preview,
-      image1File,
-      image1Caption,
-      image2Preview,
-      image2File,
-      image2Caption,
+topImageAlt,
+image1Preview,
+image1File,
+image1Caption,
+image1Alt,
+image2Preview,
+image2File,
+image2Caption,
+image2Alt,
       videoPreview,
       videoFile,
       ...overrides,
@@ -595,10 +661,15 @@ export default function ManageFurnitureFactory() {
         // value to keep or clear as-is.
         topImage: values.topImagePreview.startsWith("blob:") ? "" : values.topImagePreview,
         topImageCaption: values.topImageCaption,
-        image1: values.image1Preview.startsWith("blob:") ? "" : values.image1Preview,
-        image1Caption: values.image1Caption,
-        image2: values.image2Preview.startsWith("blob:") ? "" : values.image2Preview,
-        image2Caption: values.image2Caption,
+topImageAlt: values.topImageAlt,
+
+image1: values.image1Preview.startsWith("blob:") ? "" : values.image1Preview,
+image1Caption: values.image1Caption,
+image1Alt: values.image1Alt,
+
+image2: values.image2Preview.startsWith("blob:") ? "" : values.image2Preview,
+image2Caption: values.image2Caption,
+image2Alt: values.image2Alt,
         video: values.videoPreview.startsWith("blob:") ? "" : values.videoPreview,
       })
     );
@@ -665,8 +736,13 @@ export default function ManageFurnitureFactory() {
       setRemovingKey("topImage");
       setTopImageFile(null);
       setTopImagePreview("");
+      setTopImageAlt("");
       if (topImageInputRef.current) topImageInputRef.current.value = "";
-      await persist({ topImageFile: null, topImagePreview: "" });
+      await persist({
+  topImageFile: null,
+  topImagePreview: "",
+  topImageAlt: "",
+});
       toast.success("Image removed & saved");
       fetchData();
     } catch (err) {
@@ -700,13 +776,23 @@ export default function ManageFurnitureFactory() {
       if (slot === 1) {
         setImage1File(null);
         setImage1Preview("");
+        setImage1Alt("");
         if (image1InputRef.current) image1InputRef.current.value = "";
-        await persist({ image1File: null, image1Preview: "" });
+        await persist({
+  image1File: null,
+  image1Preview: "",
+  image1Alt: "",
+});
       } else {
         setImage2File(null);
         setImage2Preview("");
+        setImage2Alt("");
         if (image2InputRef.current) image2InputRef.current.value = "";
-        await persist({ image2File: null, image2Preview: "" });
+        await persist({
+  image2File: null,
+  image2Preview: "",
+  image2Alt: "",
+});
       }
 
       toast.success("Image removed & saved");
@@ -758,57 +844,176 @@ export default function ManageFurnitureFactory() {
     );
   }
 
-  const renderImageSlot = (slotNumber) => {
-    const preview = slotNumber === 1 ? image1Preview : image2Preview;
-    const caption = slotNumber === 1 ? image1Caption : image2Caption;
-    const setCaption = slotNumber === 1 ? setImage1Caption : setImage2Caption;
-    const inputRef = slotNumber === 1 ? image1InputRef : image2InputRef;
-    const key = slotNumber === 1 ? "image1" : "image2";
-    const isRemoving = removingKey === key;
+//   const renderImageSlot = (slotNumber) => {
+//     const preview = slotNumber === 1 ? image1Preview : image2Preview;
+//     const caption = slotNumber === 1 ? image1Caption : image2Caption;
+//     const setCaption = slotNumber === 1 ? setImage1Caption : setImage2Caption;
+//     const inputRef = slotNumber === 1 ? image1InputRef : image2InputRef;
+//     const key = slotNumber === 1 ? "image1" : "image2";
+//     const isRemoving = removingKey === key;
 
-    return (
-      <div className="col-md-6">
-        <label className="form-label fw-bold">
-          Bottom Image {slotNumber} ({slotNumber === 1 ? "left" : "right"})
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          className="form-control"
-          ref={inputRef}
-          onChange={(e) => handleImageChange(slotNumber, e.target.files?.[0])}
-        />
+//     return (
+//       <div className="col-md-6">
+//         <label className="form-label fw-bold">
+//           Bottom Image {slotNumber} ({slotNumber === 1 ? "left" : "right"})
+//         </label>
+//         <input
+//           type="file"
+//           accept=".webp,image/webp"
+//           className="form-control"
+//           ref={inputRef}
+//           onChange={(e) => {
+//   const file = e.target.files?.[0];
+//   if (!file) return;
 
-        {preview ? (
-          <div className="mt-3">
-            <img
-              src={preview}
-              alt={`Image ${slotNumber} Preview`}
-              className="border"
-              style={{ width: "100%", height: "160px", objectFit: "cover" }}
-            />
-            <button
-              type="button"
-              className="btn btn-outline-danger btn-sm mt-2"
-              disabled={isRemoving}
-              onClick={() => handleRemoveImage(slotNumber)}
-            >
-              <FaTrash className="me-1" /> {isRemoving ? "Removing..." : "Remove"}
-            </button>
-          </div>
-        ) : (
-          <div className="mt-2 text-muted small">No image selected.</div>
-        )}
+//   if (!validateImage(file)) {
+//     e.target.value = "";
+//     return;
+//   }
 
-        <label className="form-label mt-3">Caption (e.g. {`"Production Unit - ${slotNumber}"`})</label>
-        <input
-          className="form-control"
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-        />
+//   handleTopImageChange(file);
+//   setTopImageAlt("");
+// }}
+//         />
+
+//         {preview ? (
+//           <div className="mt-3">
+//             <img
+//               src={preview}
+//               alt={`Image ${slotNumber} Preview`}
+//               className="border"
+//               style={{ width: "100%", height: "160px", objectFit: "cover" }}
+//             />
+//             <button
+//               type="button"
+//               className="btn btn-outline-danger btn-sm mt-2"
+//               disabled={isRemoving}
+//               onClick={() => handleRemoveImage(slotNumber)}
+//             >
+//               <FaTrash className="me-1" /> {isRemoving ? "Removing..." : "Remove"}
+//             </button>
+//           </div>
+//         ) : (
+//           <div className="mt-2 text-muted small">No image selected.</div>
+//         )}
+
+//         <label className="form-label mt-3">Caption (e.g. {`"Production Unit - ${slotNumber}"`})</label>
+//         <input
+//           className="form-control"
+//           value={caption}
+//           onChange={(e) => setCaption(e.target.value)}
+//         />
+//       </div>
+//     );
+//   };
+
+const renderImageSlot = (slotNumber) => {
+  const preview = slotNumber === 1 ? image1Preview : image2Preview;
+  const caption = slotNumber === 1 ? image1Caption : image2Caption;
+  const setCaption = slotNumber === 1 ? setImage1Caption : setImage2Caption;
+
+  const altText = slotNumber === 1 ? image1Alt : image2Alt;
+  const setAltText = slotNumber === 1 ? setImage1Alt : setImage2Alt;
+
+  const inputRef = slotNumber === 1 ? image1InputRef : image2InputRef;
+  const key = slotNumber === 1 ? "image1" : "image2";
+  const isRemoving = removingKey === key;
+
+  return (
+    <div className="col-12" key={slotNumber}>
+      <div className="row g-3 align-items-start">
+        {/* Image upload and preview */}
+        <div className="col-md-6">
+          <label className="form-label fw-bold">
+            Bottom Image {slotNumber} ({slotNumber === 1 ? "left" : "right"})
+          </label>
+
+          <input
+            type="file"
+            accept=".webp,image/webp"
+            className="form-control"
+            ref={inputRef}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+
+              if (!validateImage(file)) {
+                e.target.value = "";
+                return;
+              }
+
+              handleImageChange(slotNumber, file);
+              setAltText("");
+            }}
+          />
+
+          {preview ? (
+            <div className="mt-3">
+              <img
+                src={preview}
+                alt={
+                  altText ||
+                  caption ||
+                  `Furniture factory image ${slotNumber}`
+                }
+                className="border"
+                style={{
+                  width: "100%",
+                  height: "160px",
+                  objectFit: "cover",
+                }}
+              />
+
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm mt-2"
+                disabled={isRemoving}
+                onClick={() => handleRemoveImage(slotNumber)}
+              >
+                <FaTrash className="me-1" />
+                {isRemoving ? "Removing..." : "Remove"}
+              </button>
+            </div>
+          ) : (
+            <div className="mt-2 text-muted small">
+              No image selected.
+            </div>
+          )}
+        </div>
+
+        {/* Alt text and caption */}
+        <div className="col-md-6">
+          <label className="form-label fw-bold">
+            Image {slotNumber} Alt Text
+          </label>
+
+          <input
+            type="text"
+            className="form-control"
+            value={altText}
+            onChange={(e) => setAltText(e.target.value)}
+            placeholder={`Describe bottom image ${slotNumber}`}
+            maxLength={125}
+          />
+
+          <small className="text-muted">
+            Uses Media Library alt text when no page-specific value exists.
+          </small>
+
+          <label className="form-label mt-3">
+            Caption (optional)
+          </label>
+
+          <input
+            className="form-control"
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+          />
+        </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   return (
     <AuthMainLayout>
@@ -924,7 +1129,7 @@ export default function ManageFurnitureFactory() {
         </div>
 
         {/* 🆕 Top Image (wide banner) */}
-        <div className="card shadow-sm border-0 mb-4">
+        {/* <div className="card shadow-sm border-0 mb-4">
           <div className="card-body row g-3">
             <h6 className="fw-bold mb-2">Top Image (wide banner shown above the two images below)</h6>
             <div className="col-md-6">
@@ -935,7 +1140,24 @@ export default function ManageFurnitureFactory() {
                 ref={topImageInputRef}
                 onChange={(e) => handleTopImageChange(e.target.files?.[0])}
               />
+<div className="col-md-6">
+  <label className="form-label fw-bold">
+    Top Banner Image Alt Text
+  </label>
 
+  <input
+    type="text"
+    className="form-control"
+    value={topImageAlt}
+    onChange={(e) => setTopImageAlt(e.target.value)}
+    placeholder="Describe the top banner image"
+    maxLength={125}
+  />
+
+  <small className="text-muted">
+    Uses Media Library alt text when no page-specific value exists.
+  </small>
+</div>
               {topImagePreview ? (
                 <div className="mt-3">
                   <img
@@ -965,12 +1187,125 @@ export default function ManageFurnitureFactory() {
                 onChange={(e) => setTopImageCaption(e.target.value)}
               />
             </div>
+
             <div className="col-12 text-muted small">
               This image is optional — leave it empty to show just the two
               images below, edge-to-edge.
             </div>
           </div>
-        </div>
+        </div> */}
+
+        {/* Top Image (wide banner) */}
+<div className="card shadow-sm border-0 mb-4">
+  <div className="card-body">
+    <h6 className="fw-bold mb-3">
+      Top Image (wide banner shown above the two images below)
+    </h6>
+
+    <div className="row g-3 align-items-start">
+      {/* LEFT: Image upload, preview and caption */}
+      <div className="col-md-6">
+        <label className="form-label fw-bold">
+          Top Image
+        </label>
+
+        <input
+          type="file"
+          accept=".webp,image/webp"
+          className="form-control"
+          ref={topImageInputRef}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            if (!file) return;
+
+            if (!validateImage(file)) {
+              e.target.value = "";
+              return;
+            }
+
+            handleTopImageChange(file);
+            setTopImageAlt("");
+          }}
+        />
+
+        {topImagePreview ? (
+          <div className="mt-3">
+            <img
+              src={topImagePreview}
+              alt={
+                topImageAlt ||
+                topImageCaption ||
+                "Furniture factory banner"
+              }
+              className="border rounded"
+              style={{
+                width: "100%",
+                height: "160px",
+                objectFit: "cover",
+              }}
+            />
+
+            <button
+              type="button"
+              className="btn btn-outline-danger btn-sm mt-2"
+              disabled={removingKey === "topImage"}
+              onClick={handleRemoveTopImage}
+            >
+              <FaTrash className="me-1" />
+              {removingKey === "topImage"
+                ? "Removing..."
+                : "Remove"}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-2 text-muted small">
+            No image selected.
+          </div>
+        )}
+
+        <label className="form-label mt-3">
+          Caption (optional)
+        </label>
+
+        <input
+          className="form-control"
+          value={topImageCaption}
+          onChange={(e) =>
+            setTopImageCaption(e.target.value)
+          }
+        />
+      </div>
+
+      {/* RIGHT: Banner alt text */}
+      <div className="col-md-6">
+        <label className="form-label fw-bold">
+          Top Banner Image Alt Text
+        </label>
+
+        <input
+          type="text"
+          className="form-control"
+          value={topImageAlt}
+          onChange={(e) =>
+            setTopImageAlt(e.target.value)
+          }
+          placeholder="Describe the top banner image"
+          maxLength={125}
+        />
+
+        <small className="text-muted d-block mt-2">
+          Describe the image for accessibility and SEO.
+        </small>
+      </div>
+    </div>
+
+    <div className="text-muted small mt-3">
+      This image is optional. Leave it empty to show just
+      the two images below.
+    </div>
+  </div>
+</div>
 
         {/* Bottom Images */}
         <div className="card shadow-sm border-0 mb-4">

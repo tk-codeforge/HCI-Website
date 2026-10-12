@@ -320,6 +320,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         sectionBgDescription={description}
         secBgDesClass="text-center bg-transparent text-white"
         bgImageUrl={banner?.banner_image || undefined}
+                bgImageAlt={banner?.banner_alt}
         headingTag={banner?.banner_heading_tag || "h1"}
         descriptionFontSize={
           banner?.banner_description_font_size || 16

@@ -13,7 +13,7 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function GalleryPage({ searchParams }) {
   const id = searchParams?.id;
-  const seo = await getGallerySeo({ basePath: "/designer-choice/gallery", id });
+  const seo = await getGallerySeo({ basePath: "/wallpaper/gallery", id });
 
   return (
     <>

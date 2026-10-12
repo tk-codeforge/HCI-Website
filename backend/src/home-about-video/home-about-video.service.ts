@@ -30,6 +30,9 @@ export class HomeAboutVideoService {
 
     if (dto.title) settings.title = dto.title;
     if (dto.description) settings.description = dto.description;
+        if (dto.image_alt !== undefined) {
+      settings.image_alt = String(dto.image_alt).trim();
+    }
 
     if (dto.title) settings.title = dto.title;
 if (dto.title_tag && ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(dto.title_tag)) {

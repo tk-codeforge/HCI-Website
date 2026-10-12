@@ -73,7 +73,8 @@ const galleryDescription = galleryData?.child_content?.description;
                     galleryData?.child_images?.[0]?.image ??
                     "/images/detail-img/1.webp"
                   }
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={images[0]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images}
                 />
@@ -84,7 +85,8 @@ const galleryDescription = galleryData?.child_content?.description;
                     galleryData?.child_images?.[1]?.image ??
                     "/images/detail-img/6.webp"
                   }
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={images[1]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images}
                 />
@@ -95,7 +97,8 @@ const galleryDescription = galleryData?.child_content?.description;
                     galleryData?.child_images?.[2]?.image ??
                     "/images/detail-img/3.webp"
                   }
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={images[2]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img2"
                   images={images}
                 />
@@ -106,7 +109,8 @@ const galleryDescription = galleryData?.child_content?.description;
                     galleryData?.child_images?.[3]?.image ??
                     "/images/detail-img/4.webp"
                   }
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={images[3]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images}
                 />
@@ -117,7 +121,8 @@ const galleryDescription = galleryData?.child_content?.description;
                     galleryData?.child_images?.[4]?.image ??
                     "/images/detail-img/5.webp"
                   }
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={images[4]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images}
                 />
@@ -128,7 +133,8 @@ const galleryDescription = galleryData?.child_content?.description;
                     galleryData?.child_images?.[5]?.image ??
                     "/images/detail-img/6.webp"
                   }
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={images[5]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img2"
                   images={images}
                 />

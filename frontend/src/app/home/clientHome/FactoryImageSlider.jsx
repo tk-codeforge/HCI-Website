@@ -170,7 +170,10 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
       <div className="ffs-desktop d-none d-lg-flex">
         {topImage && (
           <div className="ffs-top ffs-box">
-            <img src={topImage.src} alt={topImage.caption || "Factory"} />
+            <img
+  src={topImage.src}
+  alt={topImage.alt || topImage.caption || "Furniture factory banner"}
+/>
             {topImage.caption && <span className="ffs-caption">{topImage.caption}</span>}
           </div>
         )}
@@ -182,7 +185,10 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
           >
             {bottomImages.map((img, idx) => (
               <div className="ffs-box" key={idx}>
-                <img src={img.src} alt={img.caption || "Factory"} />
+                <img
+  src={img.src}
+  alt={img.alt || img.caption || "Furniture factory image"}
+/>
                 {img.caption && <span className="ffs-caption">{img.caption}</span>}
               </div>
             ))}
@@ -202,7 +208,10 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
           {allSlides.map((img, idx) => (
             <div className="ffs-slide" key={idx}>
               <div className="ffs-box">
-                <img src={img.src} alt={img.caption || "Factory"} />
+               <img
+  src={img.src}
+  alt={img.alt || img.caption || "Furniture factory image"}
+/>
                 {img.caption && <span className="ffs-caption">{img.caption}</span>}
               </div>
             </div>

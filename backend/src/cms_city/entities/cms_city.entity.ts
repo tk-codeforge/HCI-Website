@@ -35,7 +35,25 @@ export class CmsCity {
 
     @Column({ nullable: true })
     banner_image: string;
+
+    @Column({ type: 'varchar', length: 255, nullable: true })
+banner_image_alt: string;
+
+@Column({ type: 'varchar', length: 255, nullable: true })
+location_image_alt: string;
+
+@Column({ type: 'varchar', length: 255, nullable: true })
+side_image_alt: string;
     // ------------------------------
+
+    @Column({ type: 'varchar', length: 2, nullable: true })
+main_title_tag: string;
+
+@Column({ type: 'varchar', length: 2, nullable: true })
+banner_title_tag: string;
+
+@Column({ type: 'varchar', length: 2, nullable: true })
+side_title_tag: string;
 
     @Column('json', { nullable: true })
     seo_content: any;

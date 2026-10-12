@@ -10,6 +10,43 @@ const PAGE_TYPE = "what_we_offer";
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 const EYEBROW_TAGS = ["span", "h1", "h2", "h3", "h4", "h5", "h6"];
+const MAX_IMAGE_BYTES = 200 * 1024;
+
+const validateImage = (file) => {
+  if (
+    !file ||
+    !file.name.toLowerCase().endsWith(".webp") ||
+    file.type !== "image/webp"
+  ) {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error("Image must not exceed 200 KB.");
+    return false;
+  }
+
+  return true;
+};
+
+const getMediaAlt = (image, mediaList = []) => {
+  if (!image || typeof image !== "string") return "";
+
+  const filename = image
+    .split(/[?#]/)[0]
+    .split("/")
+    .pop()
+    .toLowerCase();
+
+  const match = mediaList.find(
+    (file) =>
+      file.filename?.toLowerCase() === filename ||
+      file.url?.split(/[?#]/)[0].split("/").pop()?.toLowerCase() === filename
+  );
+
+  return match?.alt_text?.trim() || "";
+};
 
 export default function ManageWhatWeOfferPage() {
   return (
@@ -41,6 +78,8 @@ const [spanTag, setSpanTag] = useState("span");
 
   const [cards, setCards] = useState([]);
   const [cardIcons, setCardIcons] = useState({});
+  const [bgImageAlt, setBgImageAlt] = useState("");
+const [mediaFiles, setMediaFiles] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -49,6 +88,20 @@ const [spanTag, setSpanTag] = useState("span");
   const fetchData = async () => {
     try {
       setLoading(true);
+
+      let mediaList = [];
+
+try {
+  const mediaRes = await api.get("/cms-parent-child/media-library");
+
+  mediaList = Array.isArray(mediaRes.data)
+    ? mediaRes.data
+    : [];
+
+  setMediaFiles(mediaList);
+} catch (error) {
+  console.error("Failed to load Media Library:", error);
+}
       const res = await api.get(`/cms-content/${PAGE_TYPE}`);
 
       if (res.data) {
@@ -67,9 +120,23 @@ const [spanTag, setSpanTag] = useState("span");
           setHeadingTag(content.headingTag || "h2");
 setSpanTag(content.spanTag || "span");
           setBgImage(content.bg_image || content.image || record.image || "");
+          setBgImageAlt(
+  content.bg_image_alt ||
+    getMediaAlt(
+      content.bg_image || content.image || record.image || "",
+      mediaList
+    )
+);
           setBgImageRemoved(false);
           setBgSize(content.bgSize || "cover");
-          setCards(Array.isArray(content.cards) ? content.cards : []);
+          setCards(
+  (Array.isArray(content.cards) ? content.cards : []).map((card) => ({
+    ...card,
+    image_alt:
+      card.image_alt ||
+      getMediaAlt(card.image || card.icon || "", mediaList),
+  }))
+);
         }
       }
     } catch (err) {
@@ -136,7 +203,20 @@ setSpanTag(content.spanTag || "span");
         bgSize, 
         bg_image: bgImage, 
         image: bgImage, 
-        cards 
+       bg_image_alt:
+  bgImageAlt.trim() ||
+  (bgImageFile
+    ? ""
+    : getMediaAlt(bgImage, mediaFiles)),
+
+cards: cards.map((card, index) => ({
+  ...card,
+  image_alt:
+    card.image_alt?.trim() ||
+    (cardIcons[index]
+      ? ""
+      : getMediaAlt(card.image || card.icon || "", mediaFiles)),
+}))
       };
       
       const formData = new FormData();
@@ -254,15 +334,22 @@ setSpanTag(content.spanTag || "span");
   <label className="form-label fw-bold">Span Color</label>
   <input type="color" className="form-control form-control-color border-0 p-0" value={spanColor} onChange={(e) => setSpanColor(e.target.value)} style={{ width: "100%", height: "45px", borderRadius: "30px", cursor: "pointer" }} />
 </div>
-            <div className="col-md-8 mt-4">
+            <div className="col-md-4 mt-4">
               <label className="form-label fw-bold">Background Image</label>
-              <input type="file" accept="image/*" className="form-control" onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  setBgImageFile(file);
-                  setBgImagePreview(URL.createObjectURL(file));
-                  setBgImageRemoved(false);
-                }} />
+              <input type="file" accept=".webp,image/webp"className="form-control" onChange={(e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!validateImage(file)) {
+    e.target.value = "";
+    return;
+  }
+
+  setBgImageFile(file);
+  setBgImagePreview(URL.createObjectURL(file));
+  setBgImageAlt("");
+  setBgImageRemoved(false);
+}} />
               {displayedBgImage && (
                 <div className="mt-3">
                   <div className="overflow-hidden rounded-3 shadow-sm" style={{ maxWidth: "300px", height: "150px" }}>
@@ -278,6 +365,24 @@ setSpanTag(content.spanTag || "span");
                 </div>
               )}
             </div>
+            <div className="col-md-4 mt-4">
+  <label className="form-label fw-bold">
+    Banner Image Alt Text
+  </label>
+
+  <input
+    type="text"
+    className="form-control"
+    value={bgImageAlt || getMediaAlt(displayedBgImage, mediaFiles)}
+    onChange={(e) => setBgImageAlt(e.target.value)}
+    placeholder="Describe the banner image"
+    maxLength={125}
+  />
+
+  <small className="text-muted">
+    Uses Media Library alt text when this field is empty.
+  </small>
+</div>
             <div className="col-md-4 mt-4">
               <label className="form-label fw-bold">Background Size</label>
               <select className="form-select" value={bgSize} onChange={(e) => setBgSize(e.target.value)}>
@@ -304,19 +409,63 @@ setSpanTag(content.spanTag || "span");
           <div className="card-body p-4">
             <div className="row g-3">
               
-              <div className="col-md-12">
+             <div className="col-md-6">
                 <label className="form-label fw-bold text-primary">Card Icon / Image</label>
-                <input type="file" accept="image/*" className="form-control" onChange={(e) => handleIconChange(index, e.target.files?.[0])} />
+                <input
+  type="file"
+  accept=".webp,image/webp"
+  className="form-control"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!validateImage(file)) {
+      e.target.value = "";
+      return;
+    }
+
+    handleIconChange(index, file);
+    handleCardChange(index, "image_alt", "");
+  }}
+/>
                 {(card.icon || card.image || cardIcons[index]) && (
                   <div className="mt-2">
                     <img 
                       src={cardIcons[index] ? URL.createObjectURL(cardIcons[index]) : (card.icon || card.image)} 
-                      alt="Icon" 
+                      alt={
+  card.image_alt ||
+  getMediaAlt(card.image || card.icon || "", mediaFiles) ||
+  card.title ||
+  "Offer image"
+}
                       style={{ width: "50px", height: "50px", objectFit: "contain", padding: "5px", borderRadius: "10px" }} 
                     />
                   </div>
                 )}
               </div>
+              <div className="col-md-6">
+  <label className="form-label fw-bold text-primary">
+    Icon Image Alt Text
+  </label>
+
+  <input
+    type="text"
+    className="form-control"
+    value={
+      card.image_alt ||
+      getMediaAlt(card.image || card.icon || "", mediaFiles)
+    }
+    onChange={(e) =>
+      handleCardChange(index, "image_alt", e.target.value)
+    }
+    placeholder="Describe this card image"
+    maxLength={125}
+  />
+
+  <small className="text-muted">
+    Uses Media Library alt text when this field is empty.
+  </small>
+</div>
 
               {/* ✅ REMOVED: Icon Background Color Input */}
               

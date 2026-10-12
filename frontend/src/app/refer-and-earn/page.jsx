@@ -131,6 +131,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
   const formBgColor = contentData.form_bg_color || "#ff914d";
   const formHeadingColor = contentData.form_heading_color || "#000000";
   const formImage = contentData.form_image || "/images/refer-and-earn.jpg";
+  const formImageAlt = contentData.form_image_alt?.trim() || "Refer and earn";
 
   const submitButtonText = contentData.submit_button_text || "Submit Now";
   const submitButtonBgColor = contentData.submit_button_bg_color || "#ff914d";
@@ -180,6 +181,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
   sectionBgDescription={bgDescription}
   secBgDesClass={"text-center bg-transparent text-white"}
   bgImageUrl={bannerRecord?.banner_image}
+    bgImageAlt={bannerRecord?.banner_alt}
   headingTag={bannerRecord?.banner_heading_tag || "h1"}
   descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
   sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
@@ -239,7 +241,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
     <div className="col-12 col-lg-4 col-md-4" key={idx}>
       <BoxIcon
         iconImage={item.image}
-        iconAlt=""
+        iconAlt={item.image_alt?.trim() || item.title || ""}
         iconWidth=""
         IconBoxHeading={item.title}
         IconBoxDescription={item.description}
@@ -254,7 +256,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
                 <div className="col-lg-10">
                 <div className="row justify-content-center">
                   <div className="col-lg-5 pe-lg-0">
-                  <div
+                  {/* <div
   className="bg-image"
   style={{
     // backgroundImage: "url('/images/refer-and-earn.jpg')",
@@ -264,7 +266,17 @@ const formHeading = contentData.form_heading || "Refer and Earn";
     width: "100%",
     height: "100%",
   }}
-></div>
+></div> */}
+
+<div className="bg-image" style={{ position: "relative", width: "100%", height: "100%" }}>
+  <img
+    src={formImage}
+    alt={formImageAlt}
+    loading="lazy"
+    decoding="async"
+    style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+  />
+</div>
                   </div>
                   <div className="col-lg-7 ps-lg-0">
                     {/* <div className="refer_form " style={{ }}>

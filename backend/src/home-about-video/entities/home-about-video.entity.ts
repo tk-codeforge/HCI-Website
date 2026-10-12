@@ -17,6 +17,9 @@ title_tag: string;
   @Column({ nullable: true })
   image: string; // Fallback image
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+  image_alt: string;
+
   @Column({ nullable: true })
   video: string; // 3D MP4 Video
 

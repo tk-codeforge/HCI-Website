@@ -147,7 +147,7 @@ export class PortfolioProjectService {
     return this.portfolioProjectRepository.findOne({ where: { id } });
   }
 
-  async updateChildImage(id: number, childImageIndex: number, imagePath: string | null) {
+  async updateChildImage(id: number, childImageIndex: number, imagePath: string | null, imageAlt?: string) {
     const existingRecord = await this.portfolioProjectRepository.findOne({ where: { id } });
     if (!existingRecord) {
       throw new Error('Record not found');
@@ -162,6 +162,10 @@ export class PortfolioProjectService {
     if (imagePath) {
       const imageName = basename(imagePath); // Extract the filename from the path
       childImages.image = imageName;
+    }
+
+        if (imageAlt !== undefined) {
+      childImages.image_alt = imageAlt;
     }
 
     existingRecord.child_images[childImageIndex] = childImages;

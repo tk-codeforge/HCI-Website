@@ -15,6 +15,18 @@ const TITLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 // Set this to whatever tag HomeAbout3D renders the title with today,
 // so nothing changes on the live site until someone picks a different tag.
 const DEFAULT_TITLE_TAG = "h2";
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
 
 const CmsHomeAboutVideo = () => {
     const authToken = useSelector((state) => state.auth.authToken);
@@ -28,6 +40,7 @@ const CmsHomeAboutVideo = () => {
         show_video_desktop: true,
         show_video_mobile: true,
         image_url: "", // Just for preview
+                image_alt: "",
         video_url: ""  // Just for preview
     });
     
@@ -46,6 +59,7 @@ const CmsHomeAboutVideo = () => {
                         show_video_desktop: res.data.show_video_desktop,
                         show_video_mobile: res.data.show_video_mobile,
                         image_url: res.data.image,
+                                                image_alt: res.data.image_alt || "",
                         video_url: res.data.video
                     });
                 }
@@ -66,6 +80,7 @@ const CmsHomeAboutVideo = () => {
         data.append("title", formData.title);
         data.append("title_tag", formData.title_tag); 
         data.append("description", formData.description);
+                data.append("image_alt", formData.image_alt || "");
         data.append("show_video_desktop", formData.show_video_desktop);
         data.append("show_video_mobile", formData.show_video_mobile);
         
@@ -139,13 +154,45 @@ const CmsHomeAboutVideo = () => {
 
                                 <div className="col-12 mt-5"><h5 className="text-primary fw-bold">2. Media Uploads</h5></div>
 
-                                <div className="col-md-6">
+                                {/* <div className="col-md-6">
                                     <label className="form-label fw-bold">Fallback Image</label>
                                     {formData.image_url && <div className="mb-2"><img src={formData.image_url} alt="preview" style={{height: '80px', borderRadius: '8px'}} /></div>}
                                     <input type="file" className="form-control" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} />
                                     <small className="text-muted">Displays if video is disabled.</small>
-                                </div>
+                                </div> */}
 
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Fallback Image <small className="text-muted fw-normal">(.webp only, max 200 KB)</small>
+                                    </label>
+                                    {formData.image_url && <div className="mb-2"><img src={formData.image_url} alt={formData.image_alt || "preview"} style={{height: '80px', borderRadius: '8px'}} /></div>}
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        accept="image/webp"
+                                        onChange={(e) => {
+                                            const f = e.target.files[0];
+                                            if (!f) return;
+                                            if (!validateImage(f)) {
+                                                e.target.value = "";
+                                                setImageFile(null);
+                                                return;
+                                            }
+                                            setImageFile(f);
+                                        }}
+                                    />
+                                                                        <small className="text-muted d-block">Displays if video is disabled.</small>
+
+                                                                        <label className="form-label fw-bold d-block mt-3">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={formData.image_alt}
+                                        onChange={(e) => setFormData({ ...formData, image_alt: e.target.value })}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
+                                    />
+                                </div>
                                 <div className="col-md-6">
                                     <label className="form-label fw-bold">3D Video (MP4)</label>
                                     {formData.video_url && <div className="mb-2"><video src={formData.video_url} style={{height: '80px', borderRadius: '8px'}} muted /></div>}

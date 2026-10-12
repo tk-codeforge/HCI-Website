@@ -67,7 +67,8 @@ const BackgroundImageWithHeading = (props) => {
         {hasBgImage && (
           <MediaImg
             src={props.bgImageUrl}
-            fallbackAlt={props.bgImageAlt || props.sectionBgHeading || ""}
+                        alt={props.bgImageAlt}
+            fallbackAlt={props.sectionBgHeading || ""}
             loading="eager"
             fetchPriority="high"
             style={{

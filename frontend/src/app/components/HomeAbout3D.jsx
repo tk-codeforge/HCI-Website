@@ -47,7 +47,7 @@ const HomeAbout3D = () => {
                             ) : data.image ? (
                                 <img 
                                     src={data.image} 
-                                    alt="About High Creation" 
+                                                                        alt={data.image_alt || data.title || "About High Creation"}
                                     className="w-100 rounded-4 shadow-sm object-fit-cover" 
                                 />
                             ) : null}
@@ -65,7 +65,7 @@ const HomeAbout3D = () => {
                             ) : data.image ? (
                                 <img 
                                     src={data.image} 
-                                    alt="About High Creation" 
+                                                                        alt={data.image_alt || data.title || "About High Creation"} 
                                     className="w-100 rounded-4 shadow-sm object-fit-cover" 
                                 />
                             ) : null}

@@ -16,6 +16,7 @@ const WallpaperCard = (props) => {
 
                     <MediaImg
             src={props.imgWallpaper}
+                        alt={props.cmsAltWallpaper}
             className={`responsive-media ${props.wallpaperImgClass || ""}`}
             fallbackAlt={props.altWallpaper}
           />

@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { FaTimes, FaChevronLeft, FaChevronRight, FaExpandArrowsAlt } from "react-icons/fa";
 import { useMediaAlt } from "./MediaImage";
 
-const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalImgClass, images = [] }) => {
+const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalCmsAlt, imgGalImgClass, images = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -13,11 +13,21 @@ const GalleryDetail = ({ imgGalUrl, imgGalAlt, imgGalImgClass, images = [] }) =>
     ? (images[currentIndex]?.image ?? imgGalUrl) 
     : imgGalUrl;
 
-    const thumbAlt = useMediaAlt(imgGalUrl, imgGalAlt);
-  const lightboxAlt = useMediaAlt(
+  //   const thumbAlt = useMediaAlt(imgGalUrl, imgGalAlt);
+  // const lightboxAlt = useMediaAlt(
+  //   currentImage,
+  //   images[currentIndex]?.title || imgGalAlt || "Fullscreen view"
+  // );
+
+    const mapThumbAlt = useMediaAlt(imgGalUrl, imgGalAlt);
+  const thumbAlt = imgGalCmsAlt || mapThumbAlt;
+
+  const mapLightboxAlt = useMediaAlt(
     currentImage,
     images[currentIndex]?.title || imgGalAlt || "Fullscreen view"
   );
+  const lightboxAlt =
+    (hasImages ? images[currentIndex]?.image_alt : imgGalCmsAlt) || mapLightboxAlt;
 
   const handleNext = useCallback((e) => {
     if (e) e.stopPropagation();

@@ -323,6 +323,7 @@ const bannerStyle = bannerImage
     {bannerImage && (
     <MediaImg
       src={bannerImage}
+            alt={headingData?.bannerAlt}
       fallbackAlt={headingText}
       loading="eager"
       fetchPriority="high"

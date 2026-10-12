@@ -5,6 +5,18 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 import { getCmsAccess, getDeletePermissionMessage } from "@/utils/cmsAccess";
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
 
 
 const CmsHowItsWorks = () => {
@@ -27,6 +39,8 @@ const [teamMediaItems, setTeamMediaItems] = useState([]);
 const [newImageFile, setNewImageFile] = useState(null);
 const [newVideoFile, setNewVideoFile] = useState(null);
 const [mediaDescriptions, setMediaDescriptions] = useState({});
+const [mediaAlts, setMediaAlts] = useState({});
+const [newImageAlt, setNewImageAlt] = useState("");
 
     const fetchContentManagerPages = useCallback(async () => {
         try {
@@ -65,6 +79,12 @@ setMediaDescriptions(
         return acc;
     }, {})
 );
+setMediaAlts(
+    items.reduce((acc, item, idx) => {
+        acc[idx] = item.image_alt || "";
+        return acc;
+    }, {})
+);
         }
     } catch (err) {
         console.error("Failed to fetch team page media:", err);
@@ -79,7 +99,13 @@ setMediaDescriptions(
     // Handle input change for text fields and image
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
-        if (name === "image" && files.length > 0) {
+        // if (name === "image" && files.length > 0) {
+        //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+                if (name === "image" && files.length > 0) {
+            if (!validateImage(files[0])) {
+                e.target.value = "";
+                return;
+            }
             setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -95,6 +121,7 @@ setMediaDescriptions(
         formDataToSend.append("description", formData.description);
         formDataToSend.append("item_index", formData.item_index);
         formDataToSend.append("designation", formData.designation);
+                formDataToSend.append("image_alt", formData.image_alt || "");
         if (formData.image) {
             formDataToSend.append("json_content[mid_image]", formData.image);
         }
@@ -140,6 +167,7 @@ setMediaDescriptions(
     const formDataToSend = new FormData();
     formDataToSend.append("action", "add");
     formDataToSend.append("image", newImageFile);
+        formDataToSend.append("image_alt", newImageAlt.trim());
 
     try {
         const response = await api.patch(`/cms-content/update-team-page-media/${pageMediaId}`, formDataToSend, {
@@ -148,6 +176,7 @@ setMediaDescriptions(
         if (response.status === 200) {
             toast.success("Image added successfully.");
             setNewImageFile(null);
+                        setNewImageAlt("");
             e.target.reset();
             fetchTeamPageMedia();
         }
@@ -186,6 +215,7 @@ const handleUpdateDescription = async (index) => {
     formDataToSend.append("action", "update_description");
     formDataToSend.append("item_index", index);
     formDataToSend.append("description", mediaDescriptions[index] || "");
+        formDataToSend.append("image_alt", mediaAlts[index] || "");
 
     try {
         const response = await api.patch(
@@ -199,11 +229,11 @@ const handleUpdateDescription = async (index) => {
             }
         );
         if (response.status === 200) {
-            toast.success("Description updated.");
+            toast.success("Description & alt updated.");
             fetchTeamPageMedia();
         }
     } catch (error) {
-        toast.error(error.message ?? "Error updating description.");
+        toast.error(error.message ?? "Error updating description & alt.");
     }
 };
 
@@ -241,6 +271,7 @@ const handleDeleteMedia = async (index) => {
         formDataToSend.append("title", formData.title);
         formDataToSend.append("description", formData.description);
         formDataToSend.append("designation", formData.designation);
+                formDataToSend.append("image_alt", formData.image_alt || "");
         if (formData.image) {
             formDataToSend.append("image", formData.image);
         }
@@ -284,6 +315,8 @@ const handleDeleteMedia = async (index) => {
             title: item?.json_content?.title,
             description: item?.json_content?.description,
             designation: item?.json_content?.designation,
+            designation: item?.json_content?.designation,
+            image_alt: item?.json_content?.image_alt || "",
             image: null, // Reset image field
             item_index: index,
         });
@@ -358,7 +391,7 @@ const handleDeleteMedia = async (index) => {
                                         <td>{item?.json_content?.description}</td>
                                         <td>{item?.json_content?.designation}</td>
                                         <td>
-                                            <img src={item?.json_content?.image} alt={item?.json_content?.title} height="80" decoding="async"  loading="lazy" />
+                                            <img src={item?.json_content?.image} alt={item?.json_content?.image_alt || item?.json_content?.title} height="80" decoding="async"  loading="lazy" />
                                         </td>
                                         <td>
                                             <button onClick={() => handleEditClick(item, index)} type="button" className="read_morebtn" data-bs-toggle="modal" data-bs-target="#editNewpageModal">
@@ -540,9 +573,19 @@ const handleDeleteMedia = async (index) => {
                             <div className="card p-2 h-100 justify-content-between shadow-sm">
                                 <img
                                     src={item.url}
-                                    alt="Team media"
+                                                                        alt={item.image_alt || "Team media"}
                                     height="160"
                                     style={{ objectFit: "cover", width: "100%", borderRadius: "6px" }}
+                                />
+                                                                <input
+                                    type="text"
+                                    className="form-control form-control-sm mt-2"
+                                    placeholder="Image alt text"
+                                    maxLength={125}
+                                    value={mediaAlts[idx] || ""}
+                                    onChange={(e) =>
+                                        setMediaAlts((prev) => ({ ...prev, [idx]: e.target.value }))
+                                    }
                                 />
                                 <textarea
     className="form-control form-control-sm mt-2"
@@ -557,7 +600,7 @@ const handleDeleteMedia = async (index) => {
     className="btn btn-outline-primary btn-sm mt-2 w-100"
     onClick={() => handleUpdateDescription(idx)}
 >
-    Save Description
+    Save Description & Alt
 </button>
                                 <button className="btn btn-danger btn-sm mt-2 w-100" onClick={() => handleDeleteMedia(idx)}>
                                     Delete Image
@@ -593,8 +636,24 @@ const handleDeleteMedia = async (index) => {
                     <input
                         type="file"
                         className="form-control"
-                        accept="image/*"
-                        onChange={(e) => setNewImageFile(e.target.files[0] || null)}
+                                                accept="image/webp"
+                        onChange={(e) => {
+                            const f = e.target.files[0] || null;
+                            if (f && !validateImage(f)) {
+                                e.target.value = "";
+                                setNewImageFile(null);
+                                return;
+                            }
+                            setNewImageFile(f);
+                        }}
+                    />
+                                        <input
+                        type="text"
+                        className="form-control mt-2"
+                        placeholder="Image alt text (for SEO)"
+                        maxLength={125}
+                        value={newImageAlt}
+                        onChange={(e) => setNewImageAlt(e.target.value)}
                     />
                 </div>
                 <button className="btn btn-primary" type="submit">Save Image</button>
@@ -657,8 +716,21 @@ const handleDeleteMedia = async (index) => {
                                         type="file"
                                         className="form-control"
                                         name="image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the photo (for SEO)"
+                                        maxLength={125}
                                     />
                                 </div>
 
@@ -727,8 +799,21 @@ const handleDeleteMedia = async (index) => {
                                         type="file"
                                         className="form-control"
                                         name="image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
+                                    />
+                                </div>
+
+                                                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the photo (for SEO)"
+                                        maxLength={125}
                                     />
                                 </div>
 

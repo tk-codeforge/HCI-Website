@@ -196,7 +196,7 @@ export default async function AboutUs() {
           headingTag={formData?.banner_heading_tag || "h1"}
           descriptionFontSize={formData?.banner_description_font_size ? `${formData.banner_description_font_size}px` : undefined}
           bgImageUrl={formData?.banner_image}
-           bgImageAlt={formData?.banner_heading || "About Us"}
+                     bgImageAlt={formData?.banner_image_alt}
           sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
   sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
         />
@@ -222,6 +222,7 @@ export default async function AboutUs() {
   //                   decoding="async"  loading="lazy" />
                       <MediaImg
                       src={formData.mid_image}
+                                            alt={formData?.mid_image_alt}
                       fallbackAlt={formData?.top_title || "About Us"}
                       className="d-block"
                       style={{

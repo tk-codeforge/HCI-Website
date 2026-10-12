@@ -1,4 +1,3 @@
-import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // import { useCallback, useEffect, useState } from "react";
 // import WallpaperCard from "../components/WallpaperCard";
 // import MainLayout from "../layouts/MainLayout";
@@ -271,6 +270,7 @@ import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 // };
 
 // export default SustainableFurniture;
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import WallpaperCard from "../components/WallpaperCard";
 import { defaultAltText } from "@/utils/helper";
@@ -544,9 +544,7 @@ const bannerStyle = bannerImage
           </div> */}
 
                   {bannerImage ? (
-          <MediaBg
-            src={bannerImage}
-            fallbackAlt={headingText}
+                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -573,6 +571,7 @@ const bannerStyle = bannerImage
                     altWallpaper={
                       design?.child_content?.title ?? defaultAltText
                     }
+                                        cmsAltWallpaper={design?.child_content?.image_alt}
                     portfolioTitle={design?.child_content?.title}
                     // wallpaperDescriptiion={design?.child_content?.description}
                     wallpaperDescriptiion={stripHtml(design?.child_content?.description)}

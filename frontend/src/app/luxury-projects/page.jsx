@@ -274,9 +274,7 @@ const bannerStyle = bannerImage
          </div> */}
 
                  {bannerImage ? (
-          <MediaBg
-            src={bannerImage}
-            fallbackAlt={headingText}
+                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center mb-5"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -299,6 +297,7 @@ const bannerStyle = bannerImage
                       cardNameResid="card_product"
                       resiImgUrl={project.image}
                       resiImgALt={project.title ?? defaultAltText}
+                                            cmsAltResi={project.image_alt}
                       resiImgClass={"resi_img"}
                       residentialTitle={project.title}
                       residentialTitleClass="product_heading"

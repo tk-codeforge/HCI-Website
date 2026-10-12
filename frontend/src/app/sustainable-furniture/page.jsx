@@ -361,9 +361,7 @@ export default async function SustainableFurniture() {
           </div>
           </div> */}
         {bannerImage ? (
-          <MediaBg
-            src={bannerImage}
-            fallbackAlt={headingText}
+                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -415,7 +413,9 @@ export default async function SustainableFurniture() {
         imgWallpaper={card.image}
         wallpaperImgClass="wallpaperclass"
         altWallpaper={card.title}
+                cmsAltWallpaper={card.imageAlt}
         portfolioTitle={card.title}
+        portfolioTitleTag={card.titleTag}
         // wallpaperDescriptiion={card.description}
         wallpaperDescriptiion={stripHtml(card.description)}
         descriptionClass="team_description mb-0"

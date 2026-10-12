@@ -81,7 +81,8 @@ const description = galleryData?.child_content?.description;
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[0]?.image ?? "/images/detail-img/1.webp"}
-                imgGalAlt={defaultAltText}
+                                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={images[0]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
               />
@@ -89,7 +90,8 @@ const description = galleryData?.child_content?.description;
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[1]?.image ?? "/images/detail-img/6.webp"}
-                imgGalAlt={defaultAltText}
+                                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={images[1]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
               />
@@ -97,7 +99,8 @@ const description = galleryData?.child_content?.description;
             <div className="col-lg-12">
               <GalleryDetail
                 imgGalUrl={images[2]?.image ?? "/images/detail-img/3.webp"}
-                imgGalAlt={defaultAltText}
+                                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={images[2]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img2"
                 images={images}
               />
@@ -105,7 +108,8 @@ const description = galleryData?.child_content?.description;
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[3]?.image ?? "/images/detail-img/4.webp"}
-                imgGalAlt={defaultAltText}
+                                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={images[3]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
               />
@@ -113,7 +117,8 @@ const description = galleryData?.child_content?.description;
             <div className="col-lg-6">
               <GalleryDetail
                 imgGalUrl={images[4]?.image ?? "/images/detail-img/5.webp"}
-                imgGalAlt={defaultAltText}
+                                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={images[4]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
               />
@@ -121,7 +126,8 @@ const description = galleryData?.child_content?.description;
             <div className="col-lg-12">
               <GalleryDetail
                 imgGalUrl={images[5]?.image ?? "/images/detail-img/6.webp"}
-                imgGalAlt={defaultAltText}
+                                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={images[5]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img2"
                 images={images}
               />

@@ -148,6 +148,8 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
         secBgHeadingClass="sec_bgheading_lass"
         sectionBgDescription=""
         secBgDesClass={"text-center text-white"}
+                bgImageUrl={cmsSettings?.image}
+        bgImageAlt={cmsSettings?.image_alt}
       />
 
 <style>{`

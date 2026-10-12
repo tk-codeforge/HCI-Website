@@ -6,6 +6,8 @@ import { defaultAltText } from "@/utils/helper";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { notFound } from "next/navigation";
 import { getPageSEO } from "@/utils/getSEO"; // 👈 1. Import getPageSEO
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const safeTag = (t, fallback) => (HEADING_TAGS.includes(t) ? t : fallback);
 
 // --- GSC FIX: ISR (Update content every hour) ---
 export const revalidate = 3600; 
@@ -88,6 +90,8 @@ export default async function ServicesDetail({ params }) {
 
   // 👈 6. Extract the custom schema if the SEO team added one
   const customSchema = seoData?.custom_schema;
+  const MainTag = safeTag(pageData?.main_title_tag, "h3");
+const bannerTag = pageData?.banner_title_tag ? safeTag(pageData.banner_title_tag, "h1") : undefined;
 
   return (
     <MainLayout>
@@ -107,6 +111,7 @@ export default async function ServicesDetail({ params }) {
         <BackgroundImageWithHeading
           sectionBgImages={"contact_wrapper services"}
           sectionBgHeading={pageData?.banner_title || pageData?.main_title}
+          headingTag={bannerTag}
           secBgHeadingClass="sec_bgheading_lass"
           sectionBgDescription={pageData?.banner_subtitle || ""}
           secBgDesClass={"text-center bg-transparent"}
@@ -116,7 +121,8 @@ export default async function ServicesDetail({ params }) {
             <div className="mx-0 row justify-content-center">
               <div className="col-lg-8">
                 <center>
-                  <h3>{pageData?.main_title}</h3>
+                  {/* <h3>{pageData?.main_title}</h3> */}
+                  <MainTag>{pageData?.main_title}</MainTag>
                   <div
                     className="team_description"
                     dangerouslySetInnerHTML={{
@@ -132,7 +138,7 @@ export default async function ServicesDetail({ params }) {
                       }
                       height={500}
                       width={700}
-                      alt={pageData?.main_title ?? defaultAltText}
+                      alt={pageData?.location_image_alt?.trim() || pageData?.main_title || defaultAltText}
                       className="pt-0 pt-lg-5 w-100 object-fit-contain"
                       decoding="async"  loading="lazy" 
                     />
@@ -147,7 +153,7 @@ export default async function ServicesDetail({ params }) {
           ServicesImgUrl={
             pageData?.side_image ?? "/images/services/2-min.png"
           }
-          servicesImgAlt={pageData?.side_title ?? defaultAltText}
+          servicesImgAlt={pageData?.side_image_alt?.trim() || pageData?.side_title || defaultAltText}
           servicesImgClass="interior_img2 mt-5 mt-lg-0"
           column2="col-lg-6"
           ServicesHeading={pageData?.side_title}

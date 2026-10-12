@@ -264,6 +264,7 @@ export class CmsContentService {
     jsonContent.submit_button_text = dto.submit_button_text;
     jsonContent.submit_button_bg_color = dto.submit_button_bg_color;
     jsonContent.submit_button_color = dto.submit_button_color;
+    jsonContent.form_image_alt = dto.form_image_alt ?? jsonContent.form_image_alt ?? '';
     
     if (dto.form_fields) {
         jsonContent.form_fields = typeof dto.form_fields === 'string' ? JSON.parse(dto.form_fields) : dto.form_fields;
@@ -617,6 +618,7 @@ if (Array.isArray(jsonContent.blocks)) {
         banner_description: updateCmsContentDto?.json_content?.banner_description || exitingContent.json_content?.banner_description || "",
         banner_description_font_size: updateCmsContentDto?.json_content?.banner_description_font_size || exitingContent.json_content?.banner_description_font_size || "16",
         banner_image: updateCmsContentDto?.json_content?.banner_image || exitingContent.json_content?.banner_image || "",
+                banner_image_alt: updateCmsContentDto?.json_content?.banner_image_alt ?? exitingContent.json_content?.banner_image_alt ?? "",
 
       top_title: updateCmsContentDto?.json_content?.top_title || "",
       top_title_tag: updateCmsContentDto?.json_content?.top_title_tag || exitingContent.json_content?.top_title_tag || "h2",
@@ -627,6 +629,7 @@ if (Array.isArray(jsonContent.blocks)) {
 mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_tag || exitingContent.json_content?.mid_sub_span_title_tag || "h4",
       mid_sub_description: updateCmsContentDto?.json_content?.mid_sub_description || "",
       mid_image: imagePath ? basename(imagePath) : exitingContent.json_content.mid_image,
+            mid_image_alt: updateCmsContentDto?.json_content?.mid_image_alt ?? exitingContent.json_content?.mid_image_alt ?? "",
       mid_image_size: jsonContent?.mid_image_size ?? existingJsonContent?.mid_image_size ?? "100",
       background_color: updateCmsContentDto?.json_content?.background_color || exitingContent.json_content.background_color || "",
     },
@@ -647,6 +650,7 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
             mid_sub_title_tag: updateCmsContentDto?.json_content?.mid_sub_title_tag || "",
             mid_sub_description: updateCmsContentDto?.json_content?.mid_sub_description || "",
             mid_image: imagePath ? basename(imagePath) : exitingContent.json_content.mid_image,
+                        mid_image_alt: updateCmsContentDto?.json_content?.mid_image_alt ?? exitingContent.json_content?.mid_image_alt ?? "",
             background_color: updateCmsContentDto?.json_content?.background_color || exitingContent.json_content.background_color || "",
           },
         });
@@ -663,6 +667,7 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
             description: updateCmsContentDto?.description || "",
             designation: updateCmsContentDto?.designation || "",
             image: imagePath ? basename(imagePath) : exitingContent.json_content.image,
+                        image_alt: updateCmsContentDto?.image_alt ?? exitingContent.json_content?.image_alt ?? "",
             background_color: updateCmsContentDto?.background_color || exitingContent.json_content.background_color || "",
           },
         });
@@ -926,6 +931,9 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
 
     targetArray[itemIndex].title = updateCmsContentDto?.title || '';
     targetArray[itemIndex].description = updateCmsContentDto?.description || '';
+    if (updateCmsContentDto?.image_alt !== undefined) {
+  targetArray[itemIndex].image_alt = updateCmsContentDto.image_alt;
+}
     
     if (targetArray[itemIndex].designation) {
       targetArray[itemIndex].designation = updateCmsContentDto?.designation || '';
@@ -1112,7 +1120,7 @@ async updateTeamPageMedia(
         throw new BadRequestException('No image or video file provided');
       }
       if (imagePath) {
-        jsonContent.items.push({ type: 'image', url: basename(imagePath), description: '' });
+        jsonContent.items.push({ type: 'image', url: basename(imagePath), description: '', image_alt: dto?.image_alt || ''  });
       }
       if (videoPath) {
         jsonContent.items.push({ type: 'video', url: basename(videoPath), description: '' });
@@ -1133,6 +1141,9 @@ async updateTeamPageMedia(
         throw new BadRequestException(`Invalid item_index: ${dto?.item_index}`);
       }
       jsonContent.items[itemIndex].description = dto?.description || '';
+            if (dto?.image_alt !== undefined) {
+        jsonContent.items[itemIndex].image_alt = String(dto.image_alt).trim();
+      }
       break;
     }
 
@@ -1203,6 +1214,7 @@ async updateHeadingDescription(id: number, dto: any, files: Express.Multer.File[
         description: dto?.description || '', 
         icon_bg_color: dto?.icon_bg_color || '#ffffff', 
         font_color: dto?.font_color || '#000000', 
+                image_alt: dto?.image_alt || '',
         image: imagePath ? basename(imagePath) : null,
         icon: dto?.icon ? (dto.icon.includes('.') ? basename(dto.icon) : dto.icon) : null,
         is_active: dto?.is_active !== 'false'
@@ -1229,6 +1241,8 @@ async updateHeadingDescription(id: number, dto: any, files: Express.Multer.File[
         jsonContent[itemIndex].description = dto?.description || ''; 
         jsonContent[itemIndex].icon_bg_color = dto?.icon_bg_color || '#ffffff'; 
         jsonContent[itemIndex].font_color = dto?.font_color || '#000000'; 
+                jsonContent[itemIndex].image_alt =
+          dto?.image_alt !== undefined ? String(dto.image_alt).trim() : (jsonContent[itemIndex].image_alt || '');
         jsonContent[itemIndex].is_active = dto?.is_active !== 'false';
 
         if (dto?.icon !== undefined) {

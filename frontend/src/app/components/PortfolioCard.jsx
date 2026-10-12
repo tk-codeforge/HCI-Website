@@ -56,6 +56,7 @@
 import { MediaImg } from "./MediaImage";
 
 const PortfolioCard = (props) => {
+  const TitleTag = props.portfolioTitleTag || "h4";
   return (
     <div>
       <section className="">
@@ -74,7 +75,8 @@ const PortfolioCard = (props) => {
               {props?.portfolioImg && (
                 <MediaImg
                   src={props.portfolioImg}
-                  fallbackAlt={props.portfolioImgAlt || props.portfolioTitle || ""}
+                  alt={props.portfolioImgAlt}
+                  fallbackAlt={props.portfolioTitle || ""}
                   style={{
                     position: "absolute",
                     inset: 0,
@@ -90,7 +92,7 @@ const PortfolioCard = (props) => {
 
               <div style={{ position: "relative", zIndex: 1 }}>
                 {props.portfolioTitle ? (
-                  <h4 className="text-white mb-0">{props.portfolioTitle}</h4>
+                  <TitleTag className="text-white mb-0">{props.portfolioTitle}</TitleTag>
                 ) : null}
                 <p className={props.portfolioClassCss}>
                   {props.portfolioDescription}

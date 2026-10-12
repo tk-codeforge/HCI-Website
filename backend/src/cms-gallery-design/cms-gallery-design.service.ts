@@ -69,6 +69,7 @@ export class CmsGalleryDesignService {
     banner_heading_tag: record.banner_heading_tag,
     banner_description_font_size: record.banner_description_font_size,
     banner_image: record.banner_image ? `${baseUrl}${record.banner_image}` : null,
+        banner_alt: record.banner_alt,
   };
 }
 

@@ -5,11 +5,15 @@ import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
-import {
-    DEFAULT_SITEMAP_CHANGE_FREQUENCY,
-    DEFAULT_SITEMAP_PRIORITY,
-    SITEMAP_CHANGE_FREQUENCY_OPTIONS
-} from "@/utils/seoHelpers";
+// import {
+//     DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+//     DEFAULT_SITEMAP_PRIORITY,
+//     SITEMAP_CHANGE_FREQUENCY_OPTIONS
+// } from "@/utils/seoHelpers";
+
+import { DEFAULT_SITEMAP_CHANGE_FREQUENCY, DEFAULT_SITEMAP_PRIORITY } from "@/utils/seoHelpers";
+import GlobalSeoForm from "@/app/components/GlobalSeoForm";
+
 import {
     getCmsAccess,
     getDeletePermissionMessage,
@@ -29,7 +33,21 @@ const initialFormState = {
     content_blocks: [],
     banner_title: "",
     banner_subtitle: "",
-    banner_image: ""
+    banner_image: "",
+    banner_image_alt: ""
+};
+
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
 };
 
 const CmsPages = () => {
@@ -45,22 +63,28 @@ const CmsPages = () => {
     
     const [formData, setFormData] = useState(initialFormState);
 
-    const [formSeoContentData, setFormSeoContentData] = useState({
-        slug: "", 
-        canonical_url: "", 
-        meta_title: "", 
-        meta_description: "", 
-        meta_keywords: "", 
-        custom_code: "",
-        meta_robots_index: "index", 
-        meta_robots_follow: "follow", 
-        include_in_sitemap: true,
-        sitemap_change_frequency: DEFAULT_SITEMAP_CHANGE_FREQUENCY,
-        sitemap_priority: String(DEFAULT_SITEMAP_PRIORITY),
-        og_title: "", 
-        og_description: "", 
-        og_image: ""
-    });
+    // const [formSeoContentData, setFormSeoContentData] = useState({
+    //     slug: "", 
+    //     canonical_url: "", 
+    //     meta_title: "", 
+    //     meta_description: "", 
+    //     meta_keywords: "", 
+    //     custom_code: "",
+    //     meta_robots_index: "index", 
+    //     meta_robots_follow: "follow", 
+    //     include_in_sitemap: true,
+    //     sitemap_change_frequency: DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+    //     sitemap_priority: String(DEFAULT_SITEMAP_PRIORITY),
+    //     og_title: "", 
+    //     og_description: "", 
+    //     og_image: ""
+    // });
+
+        const [slugValue, setSlugValue] = useState("");      // URL slug: stays on the page record
+    const [originalSlug, setOriginalSlug] = useState("");
+    const [legacySeo, setLegacySeo] = useState({});      // the old seo_content, re-sent unchanged with the slug
+    const [seoRow, setSeoRow] = useState(null);          // existing seo_tag row (null = will be created)
+    const [seoFormData, setSeoFormData] = useState(null);
     
     const [selectedId, setSelectedId] = useState(null);
     const [uploadingBanner, setUploadingBanner] = useState(false); // 🆕 isolated to banner image upload
@@ -98,6 +122,10 @@ const CmsPages = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!validateImage(file)) {
+    e.target.value = "";
+    return;
+}
     const token = authToken || localStorage.getItem("token");
     const uploadData = new FormData();
     uploadData.append('banner_image', file);
@@ -273,7 +301,8 @@ const CmsPages = () => {
             content_blocks: item.content_blocks || [],
             banner_title: item.banner_title || "",
             banner_subtitle: item.banner_subtitle || "",
-            banner_image: item.banner_image || ""
+            banner_image: item.banner_image || "",
+banner_image_alt: item.banner_image_alt || ""
         });
     };
 
@@ -294,51 +323,184 @@ const CmsPages = () => {
         }
     };
 
-    const handleManageSeoContentClick = (id, item) => {
+    // const handleManageSeoContentClick = (id, item) => {
+    //     setSelectedId(id);
+    //     setFormSeoContentData({
+    //         slug: item?.slug || "", 
+    //         canonical_url: item?.canonical_url || "", 
+    //         meta_title: item?.meta_title || "", 
+    //         meta_description: item?.meta_description || "", 
+    //         meta_keywords: item?.meta_keywords || "", 
+    //         custom_code: item?.custom_code || "",
+    //         meta_robots_index: item?.meta_robots_index || "index", 
+    //         meta_robots_follow: item?.meta_robots_follow || "follow", 
+    //         include_in_sitemap: item?.include_in_sitemap ?? true,
+    //         sitemap_change_frequency: item?.sitemap_change_frequency || DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+    //         sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+    //         og_title: item?.og_title || "", 
+    //         og_description: item?.og_description || "", 
+    //         og_image: item?.og_image || "",
+    //     });
+    // };
+
+    // const handleSeoContentSubmit = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         const token = authToken || localStorage.getItem("token");
+    //         const response = await api.patch(`/cms-pages/seo-content/${selectedId}`, formSeoContentData, { headers: { Authorization: `Bearer ${token}` } });
+    //         if (response.status === 200) { 
+    //             fetchPages(); 
+    //             if (!canPublish && response.data?.status === "Pending Approval") {
+    //                 toast.info("SEO changes moved this page to Pending Approval for admin review.");
+    //             } else {
+    //                 toast.success("SEO saved.");
+    //             }
+    //             document.getElementById('seoContentModalClose').click(); 
+    //         }
+    //     } catch (error) { 
+    //         toast.error("Error saving SEO."); 
+    //     }
+    // };
+
+    // const handleSeoContentInputChange = (e) => {
+    //     const { name, value, type, checked } = e.target;
+    //     setFormSeoContentData((prevData) => ({
+    //         ...prevData,
+    //         [name]: type === "checkbox" ? checked : value
+    //     }));
+    // };
+
+        const normPath = (v) => {
+        let p = String(v || "").trim().toLowerCase().replace(/^https?:\/\/(www\.)?hcinterior\.in/, "").split(/[?#]/)[0];
+        if (!p.startsWith("/")) p = "/" + p;
+        if (p.length > 1) p = p.replace(/\/+$/, "");
+        return p;
+    };
+
+    const handleManageSeoContentClick = async (id, item) => {
         setSelectedId(id);
-        setFormSeoContentData({
-            slug: item?.slug || "", 
-            canonical_url: item?.canonical_url || "", 
-            meta_title: item?.meta_title || "", 
-            meta_description: item?.meta_description || "", 
-            meta_keywords: item?.meta_keywords || "", 
+        setSeoRow(null);
+        setSeoFormData(null);
+
+        const slug = item?.slug || "";
+        setSlugValue(slug);
+        setOriginalSlug(slug);
+        setLegacySeo({
+            canonical_url: item?.canonical_url || "",
+            meta_title: item?.meta_title || "",
+            meta_description: item?.meta_description || "",
+            meta_keywords: item?.meta_keywords || "",
             custom_code: item?.custom_code || "",
-            meta_robots_index: item?.meta_robots_index || "index", 
-            meta_robots_follow: item?.meta_robots_follow || "follow", 
+            meta_robots_index: item?.meta_robots_index || "index",
+            meta_robots_follow: item?.meta_robots_follow || "follow",
             include_in_sitemap: item?.include_in_sitemap ?? true,
             sitemap_change_frequency: item?.sitemap_change_frequency || DEFAULT_SITEMAP_CHANGE_FREQUENCY,
             sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
-            og_title: item?.og_title || "", 
-            og_description: item?.og_description || "", 
+            og_title: item?.og_title || "",
+            og_description: item?.og_description || "",
             og_image: item?.og_image || "",
+        });
+
+        const path = slug ? `/${slug}` : "";
+        if (path) {
+            try {
+                const token = authToken || localStorage.getItem("token");
+                const { data } = await api.get("/seo-tag", { headers: { Authorization: `Bearer ${token}` } });
+                // the row the website reads: newest active match, else newest match
+                const match = (Array.isArray(data) ? data : [])
+                    .filter((r) => normPath(r.page_name) === normPath(path))
+                    .sort((x, y) =>
+                        (y.status === "active") - (x.status === "active") ||
+                        new Date(y.updated_at) - new Date(x.updated_at) ||
+                        y.id - x.id)[0];
+                if (match) {
+                    setSeoRow(match);
+                    const nextStatus = !canPublish && match.status === "active" ? "inactive" : (match.status || "active");
+                    if (!canPublish && match.status === "active") {
+                        toast.info("Editing an active SEO record will save it as inactive until an admin republishes it.");
+                    }
+                    setSeoFormData({ ...match, status: nextStatus });
+                    return;
+                }
+            } catch (err) {
+                toast.error(err.response?.data?.message || "Could not load SEO data. Please try again.");
+                return;
+            }
+        }
+
+        // No seo_tag row yet: prefill from the page's old seo_content so nothing is lost on first save
+        let schema = null;
+        if (item?.custom_code) {
+            try { schema = JSON.parse(String(item.custom_code).replace(/<script[^>]*>/gi, "").replace(/<\/script>/gi, "")); }
+            catch (e) { schema = null; }
+        }
+        setSeoFormData({
+            page_name: path,
+            meta_title: item?.meta_title || "",
+            meta_description: item?.meta_description || "",
+            keywords: item?.meta_keywords || "",
+            canonical_url: item?.canonical_url || "",
+            meta_robots: `${item?.meta_robots_index || "index"}, ${item?.meta_robots_follow || "follow"}`,
+            og_title: item?.og_title || "",
+            og_description: item?.og_description || "",
+            og_image: item?.og_image || "",
+            include_in_sitemap: item?.include_in_sitemap ?? true,
+            sitemap_change_frequency: item?.sitemap_change_frequency || DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+            sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+            custom_schema: schema,
+            status: canPublish ? "active" : "inactive",
         });
     };
 
-    const handleSeoContentSubmit = async (e) => {
-        e.preventDefault();
+    const handleSeoSubmit = async (formattedData) => {
+        const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
+        if (!slug) { toast.error("URL slug is required."); return; }
+        if ((formattedData.meta_title || "").length > 60) { toast.error("Meta title must be 60 characters or less."); return; }
+        if ((formattedData.meta_description || "").length > 160) { toast.error("Meta description must be 160 characters or less."); return; }
+        if ((formattedData.og_title || "").length > 60) { toast.error("OG title must be 60 characters or less."); return; }
+        if ((formattedData.og_description || "").length > 200) { toast.error("OG description must be 200 characters or less."); return; }
+
         try {
             const token = authToken || localStorage.getItem("token");
-            const response = await api.patch(`/cms-pages/seo-content/${selectedId}`, formSeoContentData, { headers: { Authorization: `Bearer ${token}` } });
-            if (response.status === 200) { 
-                fetchPages(); 
-                if (!canPublish && response.data?.status === "Pending Approval") {
-                    toast.info("SEO changes moved this page to Pending Approval for admin review.");
-                } else {
-                    toast.success("SEO saved.");
-                }
-                document.getElementById('seoContentModalClose').click(); 
-            }
-        } catch (error) { 
-            toast.error("Error saving SEO."); 
-        }
-    };
+            const headers = { Authorization: `Bearer ${token}` };
 
-    const handleSeoContentInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormSeoContentData((prevData) => ({
-            ...prevData,
-            [name]: type === "checkbox" ? checked : value
-        }));
+            // 1) the slug defines the page URL, so it stays on the page record (only sent when it changed)
+            if (slug !== originalSlug) {
+                const res = await api.patch(
+                    `/cms-pages/seo-content/${selectedId}`,
+                    {
+                        ...legacySeo,
+                        meta_title: legacySeo.meta_title || formattedData.meta_title,
+                        meta_description: legacySeo.meta_description || formattedData.meta_description,
+                        slug,
+                    },
+                    { headers }
+                );
+                setOriginalSlug(slug);
+                if (!canPublish && res.data?.status === "Pending Approval") {
+                    toast.info("The slug change moved this page to Pending Approval for admin review.");
+                }
+            }
+
+            // 2) all SEO data goes to the global seo_tag table; its Route Path always follows the slug
+            const payload = { ...formattedData, page_name: `/${slug}` };
+            if (!canPublish && payload.status === "active") {
+                toast.info(getPublishWorkflowMessage("This SEO record"));
+            }
+            if (seoRow) {
+                await api.patch(`/seo-tag/${seoRow.id}`, payload, { headers });
+            } else {
+                const created = await api.post("/seo-tag", payload, { headers });
+                setSeoRow(created.data);
+            }
+
+            fetchPages();
+            toast.success("SEO saved.");
+            document.getElementById("seoContentModalClose").click();
+        } catch (error) {
+            const msg = error.response?.data?.message;
+            toast.error(Array.isArray(msg) ? msg.join(", ") : msg || "Error saving SEO.");
+        }
     };
 
     // --- UI Renders ---
@@ -541,7 +703,7 @@ const CmsPages = () => {
                             )}
                         </div>
                     </div> */}
-                    <div className="col-md-12 mt-3">
+                    {/* <div className="col-md-12 mt-3">
     <label className="form-label fw-bold">Banner Image</label>
     <input
         type="file"
@@ -560,6 +722,39 @@ const CmsPages = () => {
             <span className="text-muted">No banner image uploaded.</span>
         )}
     </div>
+</div> */}
+
+<div className="col-md-6 mt-3">
+    <label className="form-label fw-bold">Banner Image</label>
+    <input
+        type="file"
+        accept="image/webp"
+        className="form-control"
+        onChange={handleBannerImageChange}
+        disabled={uploadingBanner}
+    />
+    <small className="text-muted d-block mt-1">
+        {uploadingBanner ? "Uploading..." : "Only .webp, max 200 KB. Leave untouched to keep the current one."}
+    </small>
+</div>
+<div className="col-md-6 mt-3">
+    <label className="form-label fw-bold">Banner Image Alt Text</label>
+    <input
+        type="text"
+        className="form-control"
+        name="banner_image_alt"
+        maxLength={125}
+        placeholder="Describe the banner image (for SEO)"
+        value={formData.banner_image_alt || ""}
+        onChange={handleInputChange}
+    />
+</div>
+<div className="col-md-12 mt-2">
+    {formData.banner_image ? (
+        <img src={formData.banner_image} alt={formData.banner_image_alt || "Banner Image Preview"} height="80" decoding="async" loading="lazy" />
+    ) : (
+        <span className="text-muted">No banner image uploaded.</span>
+    )}
 </div>
                 </div>
             )}
@@ -602,7 +797,7 @@ const CmsPages = () => {
                                                     <span className="d-inline-block text-truncate" style={{ width: "200px" }}>{item.banner_subtitle || 'N/A'}</span>
                                                 </td>
                                                 <td>
-                                                    {item.banner_image ? <img src={item.banner_image} alt="Banner Image" height="80" decoding="async" loading="lazy" /> : 'N/A'}
+                                                    {item.banner_image ? <img src={item.banner_image} alt={item.banner_image_alt || "Banner Image"} height="80" decoding="async" loading="lazy" /> : 'N/A'}
                                                 </td>
                                                 <td>
                                                     {/* 🌟 Better Status Colors */}
@@ -686,7 +881,7 @@ const CmsPages = () => {
                             <h5 className="modal-title fw-bold">Search Engine Optimization (SEO)</h5>
                             <button type="button" id="seoContentModalClose" className="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
-                        <form onSubmit={handleSeoContentSubmit}>
+                        {/* <form onSubmit={handleSeoContentSubmit}>
                             <div className="modal-body p-4 row g-3">
                                 <div className="col-md-6">
                                     <label className="form-label fw-bold">URL Slug *</label>
@@ -709,7 +904,6 @@ const CmsPages = () => {
                                     <textarea className="form-control" name="meta_description" placeholder="Short description for search results" value={formSeoContentData.meta_description} onChange={handleSeoContentInputChange} rows="2" required></textarea>
                                 </div>
 
-                                {/* Index Control (Robots) */}
                                 <div className="col-md-6 mt-3">
                                     <label className="form-label fw-bold">Search Engine Indexing</label>
                                     <select className="form-select" name="meta_robots_index" value={formSeoContentData.meta_robots_index} onChange={handleSeoContentInputChange}>
@@ -777,7 +971,6 @@ const CmsPages = () => {
                                     <small className="text-muted">Use a value between 0.0 and 1.0.</small>
                                 </div>
 
-                                {/* Open Graph (OG) Tags */}
                                 <div className="col-md-12 mt-4">
                                     <h6 className="fw-bold text-primary border-bottom pb-2">Social Media (Open Graph) Tags</h6>
                                 </div>
@@ -806,7 +999,23 @@ const CmsPages = () => {
                             <div className="modal-footer bg-light">
                                 <button className="btn btn-info px-5 text-white fw-bold" type="submit">Save SEO Data</button>
                             </div>
-                        </form>
+                        </form> */}
+
+                        <div className="modal-body p-4">
+    <div className="mb-4">
+        <label className="form-label fw-bold">URL Slug *</label>
+        <div className="input-group">
+            <span className="input-group-text bg-light text-muted small">/</span>
+            <input type="text" className="form-control" placeholder="about-us" value={slugValue} onChange={(e) => setSlugValue(e.target.value)} />
+        </div>
+        <small className="text-muted">The SEO record below belongs to /{slugValue.trim() || "your-slug"}. Changing the slug moves the record to the new URL.</small>
+    </div>
+    {seoFormData ? (
+        <GlobalSeoForm initialData={seoFormData} onSubmit={handleSeoSubmit} canPublish={canPublish} lockPageName />
+    ) : (
+        <div className="text-center py-4">Loading...</div>
+    )}
+</div>
                     </div>
                 </div>
             </div>

@@ -116,6 +116,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
   sectionBgDescription={bgDescription}
   secBgDesClass="secbgbesclass"
   bgImageUrl={bannerRecord?.banner_image}
+            bgImageAlt={bannerRecord?.banner_alt}
   headingTag={bannerRecord?.banner_heading_tag || "h1"}
   descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
   sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}

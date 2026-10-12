@@ -6,6 +6,18 @@ import api from "@/utils/api";
 import { toast } from "react-toastify";
 import dynamic from "next/dynamic";
 const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
 
 const CmsAboutUs = () => {
 
@@ -17,6 +29,7 @@ const CmsAboutUs = () => {
         banner_description: "Get A Place Designed Exactly How You Wished",
         banner_description_font_size: "16",
         banner_image: null,
+                banner_image_alt: "",
         top_title: "",
         top_title_tag: "h2",
         top_description: "",
@@ -26,6 +39,7 @@ const CmsAboutUs = () => {
         mid_sub_span_title_tag: "h4",
         mid_sub_description: "",
         mid_image: null,
+                mid_image_alt: "",
         mid_image_size: "100"
     });
     const [selectedId, setSelectedId] = useState(null);
@@ -80,6 +94,7 @@ const CmsAboutUs = () => {
                     banner_description: content.banner_description || "",
                     banner_description_font_size: content.banner_description_font_size || "16",
                     banner_image: pageData.json_content.banner_image || content.banner_image || "",
+                                        banner_image_alt: content.banner_image_alt || "",
                 top_title: content.top_title || "",
                 top_title_tag: content.top_title_tag || "h2",
                 top_description: content.top_description || "",
@@ -90,6 +105,7 @@ const CmsAboutUs = () => {
                 mid_sub_description: content.mid_sub_description || "",
                 // Ensure we get the image correctly depending on nesting level
                 mid_image: pageData.json_content.mid_image || content.mid_image || "",
+                                mid_image_alt: content.mid_image_alt || "",
                 mid_image_size: content.mid_image_size || pageData.json_content.mid_image_size || "100"
             });
             // 3. Successfully set ID so PATCH triggers instead of POST
@@ -118,7 +134,13 @@ const CmsAboutUs = () => {
     // };
     const handleInputChange = (e) => {
     const { name, value, files } = e.target;
-    if ((name === "mid_image" || name === "banner_image") && files && files.length > 0) {
+    // if ((name === "mid_image" || name === "banner_image") && files && files.length > 0) {
+    //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+        if ((name === "mid_image" || name === "banner_image") && files && files.length > 0) {
+        if (!validateImage(files[0])) {
+            e.target.value = "";
+            return;
+        }
         setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
     } else {
         setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -135,6 +157,7 @@ const CmsAboutUs = () => {
         formDataToSend.append("json_content[banner_heading_tag]", formData.banner_heading_tag);
         formDataToSend.append("json_content[banner_description]", formData.banner_description);
         formDataToSend.append("json_content[banner_description_font_size]", formData.banner_description_font_size);
+                formDataToSend.append("json_content[banner_image_alt]", formData.banner_image_alt || "");
     
     // Keep your text fields matching the expected JSON structure
     formDataToSend.append("json_content[top_title]", formData.top_title);
@@ -148,6 +171,7 @@ const CmsAboutUs = () => {
     formDataToSend.append("json_content[top_title_tag]", formData.top_title_tag);
 formDataToSend.append("json_content[mid_sub_title_tag]", formData.mid_sub_title_tag);
 formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size || "100");
+formDataToSend.append("json_content[mid_image_alt]", formData.mid_image_alt || "");
 
 
     // FIX: Only append if it's an actual File, and use the key "image" to match the NestJS interceptor
@@ -249,7 +273,7 @@ formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size ||
     />
 </div>
 
-<div className="row mb-4">
+{/* <div className="row mb-4">
     <div className="col-md-6">
         <label className="form-label">Banner Image</label>
         <input
@@ -265,6 +289,36 @@ formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size ||
             <img src={formData.banner_image} alt="Banner Image" style={{ height: '100px', marginTop: '10px' }} />
         )}
     </div>
+</div> */}
+
+<div className="row mb-4">
+    <div className="col-md-6">
+        <label className="form-label">Banner Image <small className="text-muted">(.webp, max 200 KB)</small></label>
+        <input
+            type="file"
+            className="form-control"
+            name="banner_image"
+            accept="image/webp"
+            onChange={handleInputChange}
+        />
+    </div>
+    <div className="col-md-6">
+        <label className="form-label">Banner Image Alt Text</label>
+        <input
+            type="text"
+            className="form-control"
+            name="banner_image_alt"
+            value={formData.banner_image_alt || ""}
+            onChange={handleInputChange}
+            placeholder="Describe the image (for SEO)"
+            maxLength={125}
+        />
+    </div>
+    {typeof formData?.banner_image === 'string' && formData.banner_image && (
+        <div className="col-12">
+            <img src={formData.banner_image} alt={formData.banner_image_alt || "Banner Image"} style={{ height: '100px', marginTop: '10px' }} />
+        </div>
+    )}
 </div>
 
                                 <div className="mb-3 col-md-8">
@@ -357,7 +411,7 @@ formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size ||
 </div>
                                 
                                <div className="row mb-3">
-                               <div className="col-md-6">
+                               {/* <div className="col-md-6">
                                     <label className="form-label">Mid Image</label>
                                     <input
                                         type="file"
@@ -369,7 +423,30 @@ formDataToSend.append("json_content[mid_image_size]", formData.mid_image_size ||
                                 </div>
                                 <div className="col-md-6">
                                         {typeof formData?.mid_image === 'string' && (<img src={formData?.mid_image} alt="Mid Image" style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />)}
-                                    </div>
+                                    </div> */}
+
+                                                                   <div className="col-md-6">
+                                    <label className="form-label">Mid Image <small className="text-muted">(.webp, max 200 KB)</small></label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        name="mid_image"
+                                        accept="image/webp"
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label">Mid Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="mid_image_alt"
+                                        value={formData.mid_image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO)"
+                                        maxLength={125}
+                                    />
+                                </div>
                                     <div className="col-md-6 mt-2">
         <label className="form-label font-weight-bold">
             Mid Image Size: {formData.mid_image_size || 100} %

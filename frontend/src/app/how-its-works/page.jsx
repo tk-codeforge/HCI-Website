@@ -550,6 +550,7 @@ export default async function HowItsWorkPage() {
     headingTag: content.bannerHeadingTag || "h1",
 descriptionSize: Number(content.bannerDescriptionSize) || 20,
     image: content.bg_image || "contact_wrapper services",
+    imageAlt: content.bg_image_alt || "",
   };
 
   return (

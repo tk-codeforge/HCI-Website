@@ -108,6 +108,7 @@ const description = galleryData?.child_content?.description;
                     <GalleryDetail
                       imgGalUrl={img?.image ?? "/images/default.jpg"}
                       imgGalAlt={img?.title || defaultAltText}
+                      imgGalCmsAlt={img?.image_alt}
                       imgGalImgClass="" // Class removed as styling is now handled by the component
                       images={images} 
                     />

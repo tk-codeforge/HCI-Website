@@ -13,6 +13,18 @@ const CKEditorComponent = dynamic(
 );
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 const DESC_SIZES = Array.from({ length: 21 }, (_, i) => 10 + i); // 10px to 30px
 
 const escapeHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -63,6 +75,7 @@ const [editorKey, setEditorKey] = useState(0);
 
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [backgroundPreview, setBackgroundPreview] = useState("");
+  const [bannerImageAlt, setBannerImageAlt] = useState("");
   const fileInputRef = useRef(null);
 
   // Content blocks (odd/even alternating)
@@ -78,6 +91,7 @@ const [editorKey, setEditorKey] = useState(0);
 description: "",
     imageSize: 100,
     image: null,
+    image_alt: "",
     preview: "",
     item_index: null,
   });
@@ -112,6 +126,7 @@ setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 20);
       // 🌟 FIX: Intercept the transparent pixel so the CMS shows "No image selected" properly
       const dbImage = content.bg_image || "";
       setBackgroundPreview(dbImage === TRANSPARENT_PIXEL ? "" : dbImage);
+      setBannerImageAlt(content.bg_image_alt || "");
 
       // 🌟 FIX: Guard against json_content.sections coming back as a string or non-array
       let sectionsData = content.sections;
@@ -130,6 +145,7 @@ setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 20);
 description: s.description || "",
             points: Array.isArray(s.points) && s.points.length ? s.points : [""],
             image: s.image || null,
+            image_alt: s.image_alt || "",
             preview: "",
             imageSize: s.imageSize || 100,
           }))
@@ -148,6 +164,7 @@ description: s.description || "",
   const handleRemoveBackground = () => {
     setBackgroundImage(null);
     setBackgroundPreview("");
+    setBannerImageAlt("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -162,6 +179,7 @@ description: s.description || "",
 description: "",
       imageSize: 100,
       image: null,
+      image_alt: "",
       preview: "",
       item_index: sections.length, // append to end
     });
@@ -175,6 +193,7 @@ description: "",
 description: section.description || pointsToHtml(section.points),
       imageSize: section.imageSize || 100,
       image: null,
+      image_alt: section.image_alt || "",
       preview: typeof section.image === "string" ? section.image : "",
       item_index: index,
     });
@@ -183,6 +202,10 @@ description: section.description || pointsToHtml(section.points),
   const handleBlockFormChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files && files.length > 0) {
+      if (!validateImage(files[0])) {
+  e.target.value = "";
+  return;
+}
       setBlockForm((prev) => ({
         ...prev,
         image: files[0],
@@ -211,6 +234,7 @@ description: s.description,
       points: s.points,
       imageSize: s.imageSize,
       image: typeof s.image === "string" ? s.image : "",
+      image_alt: s.image_alt || "",
     }));
 
     formData.append(
@@ -224,6 +248,7 @@ bannerDescriptionSize,
         bannerDescriptionColor,
         bgSize: "cover",
         bg_image: backgroundPreview.startsWith("blob:") ? "" : backgroundPreview || "",
+        bg_image_alt: bannerImageAlt.trim(),
         sections: cleanedSections,
       })
     );
@@ -278,6 +303,7 @@ const newSection = {
   points: points.length ? points : [""],
   imageSize: Number(blockForm.imageSize) || 100,
   image: blockForm.image instanceof File ? blockForm.image : existing?.image || null,
+  image_alt: (blockForm.image_alt || "").trim(),
   preview: blockForm.image instanceof File ? blockForm.preview : "",
 };
 
@@ -331,6 +357,7 @@ bannerDescriptionSize,
           bannerDescriptionColor,
           bgSize: "cover", // background image always fills the banner
           bg_image: finalBgImage,
+          bg_image_alt: bannerImageAlt.trim(),
           sections: updatedSections,
         })
       );
@@ -471,7 +498,7 @@ bannerDescriptionSize,
             <div className="row">
               <div className="col-md-12">
                 <label className="form-label">Background Image</label>
-                <input
+                {/* <input
                   type="file"
                   className="form-control"
                   ref={fileInputRef}
@@ -481,12 +508,38 @@ bannerDescriptionSize,
                       setBackgroundPreview(URL.createObjectURL(e.target.files[0]));
                     }
                   }}
-                />
+                /> */}
+
+                <input
+  type="file"
+  className="form-control"
+  ref={fileInputRef}
+  accept="image/webp"
+  onChange={(e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!validateImage(file)) {
+      e.target.value = "";
+      return;
+    }
+    setBackgroundImage(file);
+    setBackgroundPreview(URL.createObjectURL(file));
+  }}
+/>
+<div className="form-text">Only .webp, max 200 KB.</div>
+<input
+  type="text"
+  className="form-control mt-2"
+  placeholder="Banner image alt text (for SEO)"
+  maxLength={125}
+  value={bannerImageAlt}
+  onChange={(e) => setBannerImageAlt(e.target.value)}
+/>
                 {backgroundPreview ? (
                   <div className="mt-3">
                     <img
                       src={backgroundPreview}
-                      alt="Banner Background Preview"
+                      alt={bannerImageAlt || "Banner Background Preview"}
                       className="rounded border w-100"
                       style={{ height: 160, objectFit: "cover" }}
                     />
@@ -567,7 +620,7 @@ bannerDescriptionSize,
                       {imgSrc ? (
                         <img
                           src={imgSrc}
-                          alt={section.heading}
+                          alt={section.image_alt || section.heading}
                           height="50"
                           style={{ objectFit: "contain" }}
                           decoding="async"
@@ -726,13 +779,23 @@ bannerDescriptionSize,
                     type="file"
                     className="form-control"
                     name="image"
-                    accept="image/*"
+                    accept="image/webp"
                     onChange={handleBlockFormChange}
                   />
+                  <div className="form-text">Only .webp, max 200 KB.</div>
+<input
+  type="text"
+  className="form-control mt-2"
+  name="image_alt"
+  placeholder="Image alt text (for SEO)"
+  maxLength={125}
+  value={blockForm.image_alt || ""}
+  onChange={handleBlockFormChange}
+/>
                   {blockForm.preview && (
                     <img
                       src={blockForm.preview}
-                      alt="Block preview"
+                      alt={blockForm.image_alt || "Block preview"}
                       className="mt-2 border rounded"
                       style={{
                         width: `${(280 * (blockForm.imageSize || 100)) / 100}px`,

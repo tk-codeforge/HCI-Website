@@ -541,7 +541,11 @@ export class CmsParentChildService {
         const updatedImageObj = {};
         for (const key in imageObj) {
           if (imageObj.hasOwnProperty(key)) {
-            updatedImageObj[key] = imageObj[key] ? `${baseUrl}${imageObj[key]}` : null;
+            // updatedImageObj[key] = imageObj[key] ? `${baseUrl}${imageObj[key]}` : null;
+                        updatedImageObj[key] =
+              key === 'image_alt'
+                ? imageObj[key]
+                : imageObj[key] ? `${baseUrl}${imageObj[key]}` : null;
           }
         }
         return updatedImageObj;
@@ -587,7 +591,7 @@ export class CmsParentChildService {
     return this.cmsParentChildRepository.findOne({ where: { id } });
   }
 
-  async updateChildImage(id: number, childImageIndex: number, imagePath: string | null) {
+  async updateChildImage(id: number, childImageIndex: number, imagePath: string | null, imageAlt?: string) {
     const existingRecord = await this.cmsParentChildRepository.findOne({ where: { id } });
     if (!existingRecord) {
       throw new Error('Record not found');
@@ -602,6 +606,9 @@ export class CmsParentChildService {
     if (imagePath) {
       const imageName = basename(imagePath); 
       childImages.image = imageName;
+    }
+    if (imageAlt !== undefined) {
+      childImages.image_alt = imageAlt;
     }
 
     existingRecord.child_images[childImageIndex] = childImages;

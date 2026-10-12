@@ -28,6 +28,12 @@ export class ExperienceCenterAsset {
   @Column({ nullable: true })
   title: string;
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+  image_alt: string;
+
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  title_tag: string;
+
   // filename only – the service builds the full URL on the way out
   @Column()
   image: string;

@@ -173,6 +173,7 @@ const bgDescription = bannerRecord?.banner_description || "Designs That Speak Be
           sectionBgDescription={bgDescription}
           secBgDesClass="secbgbesclass"
           bgImageUrl={bannerRecord?.banner_image}
+          bgImageAlt={bannerRecord?.banner_alt}
 headingTag={bannerRecord?.banner_heading_tag || "h1"}
 descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
 sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
@@ -192,6 +193,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg1"}
                     portfolioImg={staticRecords[0]?.child_content?.image}
                     portfolioTitle={staticRecords[0]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[0]?.child_content?.image_alt}
                   />
                 )}
                 {staticRecords[1] && (
@@ -201,6 +203,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg2"}
                     portfolioImg={staticRecords[1]?.child_content?.image}
                     portfolioTitle={staticRecords[1]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[1]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -214,6 +217,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg3"}
                     portfolioImg={staticRecords[2]?.child_content?.image}
                     portfolioTitle={staticRecords[2]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[2]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -227,6 +231,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg4"}
                     portfolioImg={staticRecords[3]?.child_content?.image}
                     portfolioTitle={staticRecords[3]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[3]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -240,6 +245,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg5"}
                     portfolioImg={staticRecords[4]?.child_content?.image}
                     portfolioTitle={staticRecords[4]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[4]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -253,6 +259,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg6"}
                     portfolioImg={staticRecords[5]?.child_content?.image}
                     portfolioTitle={staticRecords[5]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[5]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -266,6 +273,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg7"}
                     portfolioImg={staticRecords[6]?.child_content?.image}
                     portfolioTitle={staticRecords[6]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[6]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -279,6 +287,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                     portfolioImgBg={"portfolioimgall desig_gal_bg8"}
                     portfolioImg={staticRecords[7]?.child_content?.image}
                     portfolioTitle={staticRecords[7]?.child_content?.title}
+                                        portfolioImgAlt={staticRecords[7]?.child_content?.image_alt}
                   />
                 )}
               </div>
@@ -295,6 +304,7 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
                   portfolioImgBg={`portfolioimgall desig_gal_bg8`}
                   portfolioImg={item.child_content?.image}
                   portfolioTitle={item.child_content?.title}
+                                    portfolioImgAlt={item.child_content?.image_alt}
                 />
               </div>
             ))}

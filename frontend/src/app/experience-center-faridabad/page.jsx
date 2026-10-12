@@ -214,7 +214,9 @@ export default async function ExperienceFaridabad() {
                     "portfolioimgall desig_gal_bg1 design_exper"
                   }
                   portfolioImg={experienceData[0]?.child_content?.image}
+                  portfolioImgAlt={experienceData[0]?.child_content?.image_alt}
                   portfolioTitle={experienceData[0]?.child_content?.title}
+                  
                 />
               )}
               {experienceData[1] && (
@@ -223,6 +225,7 @@ export default async function ExperienceFaridabad() {
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg2"}
                   portfolioImg={experienceData[1]?.child_content?.image}
+                  portfolioImgAlt={experienceData[1]?.child_content?.image_alt}
                   portfolioTitle={experienceData[1]?.child_content?.title}
                 />
               )}
@@ -241,6 +244,7 @@ export default async function ExperienceFaridabad() {
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg4"}
                   portfolioImg={experienceData[2]?.child_content?.image}
+                  portfolioImgAlt={experienceData[2]?.child_content?.image_alt}
                   portfolioTitle={experienceData[2]?.child_content?.title}
                 />
               </div>
@@ -253,6 +257,7 @@ export default async function ExperienceFaridabad() {
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg5"}
                   portfolioImg={experienceData[3]?.child_content?.image}
+                  portfolioImgAlt={experienceData[3]?.child_content?.image_alt}
                   portfolioTitle={experienceData[3]?.child_content?.title}
                 />
               </div>
@@ -265,6 +270,7 @@ export default async function ExperienceFaridabad() {
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg6"}
                   portfolioImg={experienceData[4]?.child_content?.image}
+                  portfolioImgAlt={experienceData[4]?.child_content?.image_alt}
                   portfolioTitle={experienceData[4]?.child_content?.title}
                 />
               </div>
@@ -277,6 +283,7 @@ export default async function ExperienceFaridabad() {
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg7"}
                   portfolioImg={experienceData[5]?.child_content?.image}
+                  portfolioImgAlt={experienceData[5]?.child_content?.image_alt}
                   portfolioTitle={experienceData[5]?.child_content?.title}
                   portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
                 />
@@ -290,6 +297,7 @@ export default async function ExperienceFaridabad() {
                   portCard={"card_portfolio portfolio_1"}
                   portfolioImgBg={"portfolioimgall desig_gal_bg8"}
                   portfolioImg={experienceData[6]?.child_content?.image}
+                  portfolioImgAlt={experienceData[6]?.child_content?.image_alt}
                   portfolioTitle={experienceData[6]?.child_content?.title}
                   portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
                 />

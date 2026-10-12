@@ -64,6 +64,7 @@ const BgImageCard = ({
   designerCardBgDiv,
   style,
   titleBgImage,
+    imageAlt,
   descriptionBg,
   ratingBg,
   buttonShareBg,
@@ -87,6 +88,7 @@ const BgImageCard = ({
           {imageSrc && (
             <MediaImg
               src={imageSrc}
+                            alt={imageAlt}
               fallbackAlt={titleBgImage || ""}
               style={{
                 position: "absolute",

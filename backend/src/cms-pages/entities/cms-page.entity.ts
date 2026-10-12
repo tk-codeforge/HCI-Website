@@ -40,6 +40,9 @@ export class CmsPage {
     @Column({ type: 'varchar', length: 500, nullable: true })
     banner_image: string;
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+banner_image_alt: string;
+
     @Column({ type: 'json', nullable: true })
     seo_content: any;
 

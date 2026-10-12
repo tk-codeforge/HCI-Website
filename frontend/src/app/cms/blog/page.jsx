@@ -6,11 +6,14 @@ import api from "@/utils/api";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import dynamic from "next/dynamic";
-import {
-    DEFAULT_SITEMAP_CHANGE_FREQUENCY,
-    DEFAULT_SITEMAP_PRIORITY,
-    SITEMAP_CHANGE_FREQUENCY_OPTIONS
-} from "@/utils/seoHelpers";
+// import {
+//     DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+//     DEFAULT_SITEMAP_PRIORITY,
+//     SITEMAP_CHANGE_FREQUENCY_OPTIONS
+// } from "@/utils/seoHelpers";
+
+import { DEFAULT_SITEMAP_CHANGE_FREQUENCY, DEFAULT_SITEMAP_PRIORITY } from "@/utils/seoHelpers";
+import GlobalSeoForm from "@/app/components/GlobalSeoForm";
 import {
     getCmsAccess,
     getDeletePermissionMessage,
@@ -36,19 +39,25 @@ const CmsBlog = () => {
     const [pagesList, setPagesList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState(initialFormData);
-    const [formSeoContentData, setFormSeoContentData] = useState({
-        slug: "",
-        canonical_url: "",
-        meta_title: "",
-        meta_description: "",
-        meta_keywords: "",
-        custom_code: "",
-        meta_robots_index: "index",
-        meta_robots_follow: "follow",
-        include_in_sitemap: true,
-        sitemap_change_frequency: DEFAULT_SITEMAP_CHANGE_FREQUENCY,
-        sitemap_priority: String(DEFAULT_SITEMAP_PRIORITY),
-    });
+    // const [formSeoContentData, setFormSeoContentData] = useState({
+    //     slug: "",
+    //     canonical_url: "",
+    //     meta_title: "",
+    //     meta_description: "",
+    //     meta_keywords: "",
+    //     custom_code: "",
+    //     meta_robots_index: "index",
+    //     meta_robots_follow: "follow",
+    //     include_in_sitemap: true,
+    //     sitemap_change_frequency: DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+    //     sitemap_priority: String(DEFAULT_SITEMAP_PRIORITY),
+    // });
+
+        const [slugValue, setSlugValue] = useState("");      // URL slug: stays on the blog record
+    const [originalSlug, setOriginalSlug] = useState("");
+    const [legacySeo, setLegacySeo] = useState({});      // the old seo_content, re-sent unchanged with the slug
+    const [seoRow, setSeoRow] = useState(null);          // existing seo_tag row (null = will be created)
+    const [seoFormData, setSeoFormData] = useState(null);
     
     const [selectedId, setSelectedId] = useState(null);
     const [historyId, setHistoryId] = useState(null);
@@ -270,11 +279,40 @@ const CmsBlog = () => {
         }
     };
 
-    const handleManageSeoContentClick = (id, item) => {
-        // setSelectedId(id);
+    // const handleManageSeoContentClick = (id, item) => {
+    //     // setSelectedId(id);
+    //     setSeoId(id);
+    //     setFormSeoContentData({
+    //         slug: item?.slug ?? "",
+    //         canonical_url: item?.canonical_url ?? "",
+    //         meta_title: item?.meta_title ?? "",
+    //         meta_description: item?.meta_description ?? "",
+    //         meta_keywords: item?.meta_keywords ?? "",
+    //         custom_code: item?.custom_code ?? "",
+    //         meta_robots_index: item?.meta_robots_index ?? "index",
+    //         meta_robots_follow: item?.meta_robots_follow ?? "follow",
+    //         include_in_sitemap: item?.include_in_sitemap ?? true,
+    //         sitemap_change_frequency: item?.sitemap_change_frequency ?? DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+    //         sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+    //     });
+    // };
+
+        const normPath = (v) => {
+        let p = String(v || "").trim().toLowerCase().replace(/^https?:\/\/(www\.)?hcinterior\.in/, "").split(/[?#]/)[0];
+        if (!p.startsWith("/")) p = "/" + p;
+        if (p.length > 1) p = p.replace(/\/+$/, "");
+        return p;
+    };
+
+    const handleManageSeoContentClick = async (id, item) => {
         setSeoId(id);
-        setFormSeoContentData({
-            slug: item?.slug ?? "",
+        setSeoRow(null);
+        setSeoFormData(null);
+
+        const slug = item?.slug ?? "";
+        setSlugValue(slug);
+        setOriginalSlug(slug);
+        setLegacySeo({
             canonical_url: item?.canonical_url ?? "",
             meta_title: item?.meta_title ?? "",
             meta_description: item?.meta_description ?? "",
@@ -285,6 +323,52 @@ const CmsBlog = () => {
             include_in_sitemap: item?.include_in_sitemap ?? true,
             sitemap_change_frequency: item?.sitemap_change_frequency ?? DEFAULT_SITEMAP_CHANGE_FREQUENCY,
             sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+        });
+
+        const path = slug ? `/${slug}` : "";
+        if (path) {
+            try {
+                const { data } = await api.get("/seo-tag", { headers: { Authorization: `Bearer ${authToken}` } });
+                // the row the website reads: newest active match, else newest match
+                const match = (Array.isArray(data) ? data : [])
+                    .filter((r) => normPath(r.page_name) === normPath(path))
+                    .sort((x, y) =>
+                        (y.status === "active") - (x.status === "active") ||
+                        new Date(y.updated_at) - new Date(x.updated_at) ||
+                        y.id - x.id)[0];
+                if (match) {
+                    setSeoRow(match);
+                    const nextStatus = !canPublish && match.status === "active" ? "inactive" : (match.status || "active");
+                    if (!canPublish && match.status === "active") {
+                        toast.info("Editing an active SEO record will save it as inactive until an admin republishes it.");
+                    }
+                    setSeoFormData({ ...match, status: nextStatus });
+                    return;
+                }
+            } catch (err) {
+                toast.error(err.response?.data?.message ?? "Could not load SEO data. Please try again.");
+                return;
+            }
+        }
+
+        // No seo_tag row yet: prefill from the blog's old seo_content so nothing is lost on first save
+        let schema = null;
+        if (item?.custom_code) {
+            try { schema = JSON.parse(String(item.custom_code).replace(/<script[^>]*>/gi, "").replace(/<\/script>/gi, "")); }
+            catch (e) { schema = null; }
+        }
+        setSeoFormData({
+            page_name: path,
+            meta_title: item?.meta_title ?? "",
+            meta_description: item?.meta_description ?? "",
+            keywords: item?.meta_keywords ?? "",
+            canonical_url: item?.canonical_url ?? "",
+            meta_robots: `${item?.meta_robots_index ?? "index"}, ${item?.meta_robots_follow ?? "follow"}`,
+            include_in_sitemap: item?.include_in_sitemap ?? true,
+            sitemap_change_frequency: item?.sitemap_change_frequency ?? DEFAULT_SITEMAP_CHANGE_FREQUENCY,
+            sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
+            custom_schema: schema,
+            status: canPublish ? "active" : "inactive",
         });
     };
 
@@ -335,53 +419,106 @@ const CmsBlog = () => {
         }
     };
 
-    const handleSeoContentInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormSeoContentData((prevData) => ({
-            ...prevData,
-            [name]: type === "checkbox" ? checked : value
-        }));
-    };
+    // const handleSeoContentInputChange = (e) => {
+    //     const { name, value, type, checked } = e.target;
+    //     setFormSeoContentData((prevData) => ({
+    //         ...prevData,
+    //         [name]: type === "checkbox" ? checked : value
+    //     }));
+    // };
 
-    const handleSeoContentSubmit = async (e) => {
-        e.preventDefault();
+    // const handleSeoContentSubmit = async (e) => {
+    //     e.preventDefault();
 
-        const formDataToSend = {
-            slug: formSeoContentData.slug,
-            canonical_url: formSeoContentData.canonical_url,
-            meta_title: formSeoContentData.meta_title,
-            meta_description: formSeoContentData.meta_description,
-            meta_keywords: formSeoContentData.meta_keywords,
-            custom_code: formSeoContentData.custom_code,
-            meta_robots_index: formSeoContentData.meta_robots_index,
-            meta_robots_follow: formSeoContentData.meta_robots_follow,
-            include_in_sitemap: formSeoContentData.include_in_sitemap,
-            sitemap_change_frequency: formSeoContentData.sitemap_change_frequency,
-            sitemap_priority: formSeoContentData.sitemap_priority,
-        };
+    //     const formDataToSend = {
+    //         slug: formSeoContentData.slug,
+    //         canonical_url: formSeoContentData.canonical_url,
+    //         meta_title: formSeoContentData.meta_title,
+    //         meta_description: formSeoContentData.meta_description,
+    //         meta_keywords: formSeoContentData.meta_keywords,
+    //         custom_code: formSeoContentData.custom_code,
+    //         meta_robots_index: formSeoContentData.meta_robots_index,
+    //         meta_robots_follow: formSeoContentData.meta_robots_follow,
+    //         include_in_sitemap: formSeoContentData.include_in_sitemap,
+    //         sitemap_change_frequency: formSeoContentData.sitemap_change_frequency,
+    //         sitemap_priority: formSeoContentData.sitemap_priority,
+    //     };
+
+    //     try {
+    //         // const response = await api.patch(`/cms-blog/seo-content/${selectedId}`, formDataToSend, {
+    //         const response = await api.patch(`/cms-blog/seo-content/${seoId}`, formDataToSend, {
+    //             headers: { Authorization: `Bearer ${authToken}` },
+    //         });
+
+    //         if (response.status === 200) {
+    //             fetchContentManagerPages();
+    //             if (!canPublish && response.data?.status === "Pending Approval") {
+    //                 toast.info("SEO changes moved this blog to Pending Approval for admin review.");
+    //             } else {
+    //                 toast.success("SEO Content saved successfully.");
+    //             }
+    //             document.getElementById('seoContentModalClose').click();
+    //         } else {
+    //             toast.error("Error submitting form. Please try again.");
+    //         }
+    //     } catch (error) {
+    //         toast.error(error.response?.data?.message ?? "Error submitting form.");
+    //         console.error("Error:", error);
+    //     }
+    // }
+
+        const handleSeoSubmit = async (formattedData) => {
+        const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
+        if (!slug) { toast.error("URL slug is required."); return; }
+        if ((formattedData.meta_title || "").length > 60) { toast.error("Meta title must be 60 characters or less."); return; }
+        if ((formattedData.meta_description || "").length > 160) { toast.error("Meta description must be 160 characters or less."); return; }
+        if ((formattedData.og_title || "").length > 60) { toast.error("OG title must be 60 characters or less."); return; }
+        if ((formattedData.og_description || "").length > 200) { toast.error("OG description must be 200 characters or less."); return; }
 
         try {
-            // const response = await api.patch(`/cms-blog/seo-content/${selectedId}`, formDataToSend, {
-            const response = await api.patch(`/cms-blog/seo-content/${seoId}`, formDataToSend, {
-                headers: { Authorization: `Bearer ${authToken}` },
-            });
+            const headers = { Authorization: `Bearer ${authToken}` };
 
-            if (response.status === 200) {
-                fetchContentManagerPages();
-                if (!canPublish && response.data?.status === "Pending Approval") {
-                    toast.info("SEO changes moved this blog to Pending Approval for admin review.");
-                } else {
-                    toast.success("SEO Content saved successfully.");
+            // 1) the slug defines the blog URL, so it stays on the blog record (only sent when it changed)
+            if (slug !== originalSlug) {
+                const res = await api.patch(
+                    `/cms-blog/seo-content/${seoId}`,
+                    {
+                        ...legacySeo,
+                        canonical_url: legacySeo.canonical_url || formattedData.canonical_url || `https://hcinterior.in/${slug}`,
+                        meta_title: legacySeo.meta_title || formattedData.meta_title,
+                        meta_description: legacySeo.meta_description || formattedData.meta_description,
+                        meta_keywords: legacySeo.meta_keywords || formattedData.keywords || "",
+                        slug,
+                    },
+                    { headers }
+                );
+                setOriginalSlug(slug);
+                if (!canPublish && res.data?.status === "Pending Approval") {
+                    toast.info("The slug change moved this blog to Pending Approval for admin review.");
                 }
-                document.getElementById('seoContentModalClose').click();
-            } else {
-                toast.error("Error submitting form. Please try again.");
             }
+
+            // 2) all SEO data goes to the global seo_tag table; its Route Path always follows the slug
+            const payload = { ...formattedData, page_name: `/${slug}` };
+            if (!canPublish && payload.status === "active") {
+                toast.info(getPublishWorkflowMessage("This SEO record"));
+            }
+            if (seoRow) {
+                await api.patch(`/seo-tag/${seoRow.id}`, payload, { headers });
+            } else {
+                const created = await api.post("/seo-tag", payload, { headers });
+                setSeoRow(created.data);
+            }
+
+            fetchContentManagerPages();
+            toast.success("SEO Content saved successfully.");
+            document.getElementById("seoContentModalClose").click();
         } catch (error) {
-            toast.error(error.response?.data?.message ?? "Error submitting form.");
+            const msg = error.response?.data?.message;
+            toast.error(Array.isArray(msg) ? msg.join(", ") : msg ?? "Error submitting form.");
             console.error("Error:", error);
         }
-    }
+    };
 
     return (
         <AuthMainLayout>
@@ -635,7 +772,7 @@ const CmsBlog = () => {
                             <h1 className="modal-title fs-5" id="seoContentModalLabel">Manage SEO Content</h1>
                             <button type="button" id="seoContentModalClose" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form onSubmit={handleSeoContentSubmit}>
+                        {/* <form onSubmit={handleSeoContentSubmit}>
                             <div className="modal-body row">
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Slug</label>
@@ -697,7 +834,23 @@ const CmsBlog = () => {
                                     <button className="px-5 read_morebtn" type="submit">Save</button>
                                 </div>
                             </div>
-                        </form>
+                        </form> */}
+
+                        <div className="modal-body">
+    <div className="mb-4">
+        <label className="form-label fw-bold">Slug *</label>
+        <div className="input-group">
+            <span className="input-group-text">/</span>
+            <input type="text" className="form-control" placeholder="my-blog-post" value={slugValue} onChange={(e) => setSlugValue(e.target.value)} />
+        </div>
+        <small className="text-muted">The SEO record below belongs to /{slugValue.trim() || "your-slug"}. Changing the slug moves the record to the new URL.</small>
+    </div>
+    {seoFormData ? (
+        <GlobalSeoForm initialData={seoFormData} onSubmit={handleSeoSubmit} canPublish={canPublish} lockPageName />
+    ) : (
+        <div className="text-center py-4">Loading...</div>
+    )}
+</div>
                     </div>
                 </div>
             </div>

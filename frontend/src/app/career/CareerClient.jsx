@@ -19,6 +19,7 @@ export default function CareerClient({ pageData, jobPostList }) {
         sectionBgDescription=""
         secBgDesClass={"text-center bg-transparent"}
         bgImageUrl={pageData.bgImage}
+                bgImageAlt={pageData.bgImageAlt}
       />
 
       <section className="my-5">
@@ -61,7 +62,7 @@ export default function CareerClient({ pageData, jobPostList }) {
                       >
                         <img
                           src={section.image || "/fallback-icon.png"}
-                          alt={section.heading || "Career Icon"}
+                                                    alt={section.imageAlt || section.heading || "Career Icon"}
                           className="d-block mx-auto img-fluid"
                           style={{
                             width: `${section.imageSize || 100}%`,

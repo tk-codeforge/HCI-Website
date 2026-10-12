@@ -80,6 +80,7 @@ async function getRemainingData() {
         spanColor: json.spanColor || "#ff914d",
         spanTag: json.spanTag || "span",
         bg_image: json.bg_image || json.image || record?.image || "",
+        bg_image_alt: json.bg_image_alt || "",
         bgSize: json.bgSize || "cover",
         cards: Array.isArray(json.cards) ? json.cards : [],
       };
@@ -89,6 +90,7 @@ let theWayWeWorkData = {
   heading: "The Way We Work",
   headingTag: "h2",
   bg_image: "",
+   bg_image_alt: "",
   cards: [],
 };
 
@@ -101,6 +103,7 @@ if (theWayWeWorkRaw) {
     headingColor: json.headingColor || "#ffffff", // Extract global heading color
     headingTag: json.headingTag || "h2",
     bg_image: json.bg_image || "",
+    bg_image_alt: json.bg_image_alt || "",
     bgSize: json.bgSize || "cover",               // Extract background size
     cards: Array.isArray(json.cards) ? json.cards : [],
   };
@@ -157,10 +160,13 @@ if (theWayWeWorkRaw) {
   video: "",
   topImage: "",              // 🆕 ADD
       topImageCaption: "",
+       topImageAlt: "",
   image1: "",
   image1Caption: "",
+   image1Alt: "",
   image2: "",
   image2Caption: "",
+  image2Alt: "",
   descriptionFontSize: 16,
 };
 
@@ -178,10 +184,13 @@ if (furnitureFactoryRaw) {
     video: json.video || "",
     topImage: json.topImage || "",              // 🆕 ADD
         topImageCaption: json.topImageCaption || "", // 🆕 ADD
+        topImageAlt: json.topImageAlt || "",
     image1: json.image1 || "",
     image1Caption: json.image1Caption || "",
+    image1Alt: json.image1Alt || "",
     image2: json.image2 || "",
     image2Caption: json.image2Caption || "",
+    image2Alt: json.image2Alt || "",
     descriptionFontSize: json.descriptionFontSize || 16,
   };
 }
@@ -515,6 +524,17 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
           backgroundRepeat: "no-repeat",
         }}
       >
+        {offerBgUrl && (
+  <img
+    src={offerBgUrl}
+    alt={
+      whatWeOfferData?.bg_image_alt ||
+      whatWeOfferData?.heading ||
+      "What We Offer banner"
+    }
+    className="visually-hidden"
+  />
+)}
         <style>{`
           .what-we-offer-main-heading {
             color: ${whatWeOfferData?.headingColor || "#23236b"} !important;
@@ -541,7 +561,11 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
                   <Card 
                     cardNameALl="cardoffer h-100 w-100" 
                     imgSrc={card.image || card.icon} 
-                    imgAlt={card.title || "Offer"} 
+                    imgAlt={
+  card.image_alt ||
+  card.title ||
+  "Offer"
+}
                     imgClass={"offerimg"} 
                     titleCard={card.title} 
                     descriptionCard={card.description} 
@@ -587,6 +611,17 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
           backgroundRepeat: "no-repeat",
         }}
       >
+        {dynamicBgUrl && (
+  <img
+    src={dynamicBgUrl}
+    alt={
+      theWayWeWorkData.bg_image_alt ||
+      theWayWeWorkData.heading ||
+      "The Way We Work banner"
+    }
+    className="visually-hidden"
+  />
+)}
         {/* FORCE HEADING COLOR TO OVERRIDE CSS !important */}
         <style>{`
           .way-work-main-heading {
@@ -646,7 +681,7 @@ const targetId = `step-${index + 1}`;
                         <div className="mb-3">
                           <img
                             src={card.icon}
-                            alt={card.title}
+                            alt={card.iconAltText || card.title || "Process icon"}
                             style={{
                               width: iconSize,
                               height: iconSize,
@@ -744,7 +779,7 @@ const targetId = `step-${index + 1}`;
                       <div className="mb-3">
                         <img
                           src={card.icon}
-                          alt={card.title}
+                          alt={card.iconAltText || card.title || "Process icon"}
                           style={{ width: iconSize, height: iconSize, objectFit: "contain" }}
                         />
                       </div>
@@ -889,7 +924,7 @@ const targetId = `step-${index + 1}`;
               <CarouselRow className="mt-4 row g-4 mx-0 mobile-scroll-row">
                 {staticRecords.map((record, i) => (
                   <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
-                    <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} descriptionBg={record?.child_content?.description} />
+                    <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} imageAlt={record?.child_content?.image_alt} descriptionBg={record?.child_content?.description} />
                   </div>
                 ))}
               </CarouselRow>
@@ -903,6 +938,7 @@ const targetId = `step-${index + 1}`;
                   cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
                   designerCardBgDiv={"designercard designercardimg1"}
                   titleBgImage={record?.child_content?.title}
+                                    imageAlt={record?.child_content?.image_alt}
                   descriptionBg={record?.child_content?.description}
                 />
               ))}
@@ -1057,7 +1093,7 @@ const targetId = `step-${index + 1}`;
               ) : (
                 <div className="col-lg-7 d-flex">
                    <div className="w-100">
-                  <FactoryImageSlider
+                  {/* <FactoryImageSlider
                     topImage={
                       furnitureFactoryData.topImage
                         ? { src: furnitureFactoryData.topImage, caption: furnitureFactoryData.topImageCaption }
@@ -1071,7 +1107,45 @@ const targetId = `step-${index + 1}`;
                         ? { src: furnitureFactoryData.image2, caption: furnitureFactoryData.image2Caption }
                         : null,
                     ]}
-                  />
+                  /> */}
+
+                  <FactoryImageSlider
+  topImage={
+    furnitureFactoryData.topImage
+      ? {
+          src: furnitureFactoryData.topImage,
+          caption: furnitureFactoryData.topImageCaption,
+          alt:
+            furnitureFactoryData.topImageAlt ||
+            furnitureFactoryData.heading ||
+            "Furniture factory banner",
+        }
+      : null
+  }
+  images={[
+    furnitureFactoryData.image1
+      ? {
+          src: furnitureFactoryData.image1,
+          caption: furnitureFactoryData.image1Caption,
+          alt:
+            furnitureFactoryData.image1Alt ||
+            furnitureFactoryData.image1Caption ||
+            "Furniture factory image 1",
+        }
+      : null,
+
+    furnitureFactoryData.image2
+      ? {
+          src: furnitureFactoryData.image2,
+          caption: furnitureFactoryData.image2Caption,
+          alt:
+            furnitureFactoryData.image2Alt ||
+            furnitureFactoryData.image2Caption ||
+            "Furniture factory image 2",
+        }
+      : null,
+  ]}
+/>
                 </div>
                  </div>
               )}

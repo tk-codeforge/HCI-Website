@@ -66,7 +66,8 @@ const galleryDescription = galleryData?.child_content?.description;
               <div className="col-lg-6">
                 <GalleryDetail
                   imgGalUrl={staticImages[0]?.image ?? "/images/detail-img/1.webp"}
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={staticImages[0]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images} // Pass all images here
                 />
@@ -74,7 +75,8 @@ const galleryDescription = galleryData?.child_content?.description;
               <div className="col-lg-6">
                 <GalleryDetail
                   imgGalUrl={staticImages[1]?.image ?? "/images/detail-img/6.webp"}
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={staticImages[1]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images} // Pass all images here
                 />
@@ -82,7 +84,8 @@ const galleryDescription = galleryData?.child_content?.description;
               <div className="col-lg-12">
                 <GalleryDetail
                   imgGalUrl={staticImages[2]?.image ?? "/images/detail-img/3.webp"}
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={staticImages[2]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img2"
                   images={images} // Pass all images here
                 />
@@ -90,7 +93,8 @@ const galleryDescription = galleryData?.child_content?.description;
               <div className="col-lg-6">
                 <GalleryDetail
                   imgGalUrl={staticImages[3]?.image ?? "/images/detail-img/4.webp"}
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={staticImages[3]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images} // Pass all images here
                 />
@@ -98,7 +102,8 @@ const galleryDescription = galleryData?.child_content?.description;
               <div className="col-lg-6">
                 <GalleryDetail
                   imgGalUrl={staticImages[4]?.image ?? "/images/detail-img/5.webp"}
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={staticImages[4]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img"
                   images={images} // Pass all images here
                 />
@@ -106,7 +111,8 @@ const galleryDescription = galleryData?.child_content?.description;
               <div className="col-lg-12">
                 <GalleryDetail
                   imgGalUrl={staticImages[5]?.image ?? "/images/detail-img/6.webp"}
-                  imgGalAlt={defaultAltText}
+                                    imgGalAlt={galleryTitle || defaultAltText}
+                  imgGalCmsAlt={staticImages[5]?.image_alt}
                   imgGalImgClass="w-100 detail_gal_img2"
                   images={images} // Pass all images here
                 />
@@ -118,7 +124,8 @@ const galleryDescription = galleryData?.child_content?.description;
                   <div key={index} className="col-lg-6">
                     <GalleryDetail
                       imgGalUrl={image.image}
-                      imgGalAlt={defaultAltText}
+                                            imgGalAlt={galleryTitle || defaultAltText}
+                      imgGalCmsAlt={image.image_alt}
                       imgGalImgClass="w-100 detail_gal_img"
                       images={images} // Pass all images here
                     />

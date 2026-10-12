@@ -1921,9 +1921,16 @@ const DynamicRootPage = async ({ params }) => {
   const localBizSchema = generateLocalBusinessSchema(siteSettings);
   const breadcrumbSchema = generateBreadcrumbSchema(slug, pageData.title);
   
-  const hasInnerCustomFaqSchema =
-    typeof pageData?.seo_content?.custom_code === "string" &&
-    /FAQPage/i.test(pageData.seo_content.custom_code);
+  // const hasInnerCustomFaqSchema =
+  //   typeof pageData?.seo_content?.custom_code === "string" &&
+  //   /FAQPage/i.test(pageData.seo_content.custom_code);
+
+    // legacy custom_code is only rendered when the seo_tag row has no schema, so only count it then
+  const customSchemaText =
+    typeof customSchema === "string" ? customSchema : customSchema ? JSON.stringify(customSchema) : "";
+  const legacySchemaText =
+    !customSchema && typeof pageData?.seo_content?.custom_code === "string" ? pageData.seo_content.custom_code : "";
+  const hasInnerCustomFaqSchema = /FAQPage/i.test(customSchemaText) || /FAQPage/i.test(legacySchemaText);
     
   const faqSchema = faqs.length > 0 && !hasInnerCustomFaqSchema ? generateFAQSchema(faqs) : null;
 
@@ -1963,7 +1970,8 @@ const DynamicRootPage = async ({ params }) => {
         />
       )}
 
-      {pageData?.seo_content?.custom_code && (
+      {/* {pageData?.seo_content?.custom_code && ( */}
+        {!customSchema && pageData?.seo_content?.custom_code && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: pageData.seo_content.custom_code.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') }}
@@ -2208,7 +2216,12 @@ const DynamicRootPage = async ({ params }) => {
             <div className="city-hero w-100">
               <Image 
                 src={heroImageSrc}
-                alt={`${displayCity} Interior Design`}
+                // alt={`${displayCity} Interior Design`}
+                alt={
+  pageData?.banner_image && pageData?.banner_image_alt?.trim()
+    ? pageData.banner_image_alt.trim()
+    : `${displayCity} Interior Design`
+}
                 fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
               />
               

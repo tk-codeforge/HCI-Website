@@ -38,7 +38,8 @@ const [banner, setBanner] = useState({
         title: "", link: "/estimator-for-home", image: null, item_index: null, action: "add", is_active: true,
         description: "", // NEW
         icon_bg_color: "#ffffff", // NEW
-        font_color: "#000000" // NEW
+        font_color: "#000000",
+        image_alt: ""
     });
     
     const fetchContent = useCallback(async () => {
@@ -210,6 +211,7 @@ const handleBannerSave = async () => {
         setFormData({ ...item, item_index: index, action: "update", image: null, is_active: item.is_active !== false,
         description: item.description || "", // NEW
         icon_bg_color: item.icon_bg_color || "#ffffff", // NEW
+        font_color: item.font_color || "#000000",
         font_color: item.font_color || "#000000" // NEW
 
          });
@@ -219,7 +221,8 @@ const handleBannerSave = async () => {
         setFormData({ title: "", link: "/estimator-for-home", image: null, item_index: pagesList.length || 0, action: "add", is_active: true,
         description: "", // NEW
         icon_bg_color: "#ffffff", // NEW
-        font_color: "#000000" // NEW
+        font_color: "#000000" ,
+        image_alt: ""
 
          });
     };
@@ -326,7 +329,7 @@ const handleBannerSave = async () => {
                                                 <small className="text-primary">{item.link}</small>
                                             </td>
                                             <td>
-                                                {item?.image ? <img src={item?.image} alt={item.title} height="60" style={{ borderRadius: '8px', objectFit: 'cover', width: '80px' }} /> : <span className="text-muted small">No Image</span>}
+                                                {item?.image ? <img src={item?.image} alt={item.image_alt || item.title} height="60" style={{ borderRadius: '8px', objectFit: 'cover', width: '80px' }} /> : <span className="text-muted small">No Image</span>}
                                             </td>
                                             <td>
                                                 <button onClick={() => handleEditClick(item, index)} className="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#addNewpageModal">Edit</button>
@@ -364,7 +367,7 @@ const handleBannerSave = async () => {
                                     <label className="form-label fw-bold">Redirect Link</label>
                                     <input type="text" className="form-control" name="link" value={formData.link} onChange={handleInputChange} placeholder="/estimator-for-home" required />
                                 </div>
-                                <div className="col-12">
+                                {/* <div className="col-12">
                                     <label className="form-label fw-bold">
                                         Card Icon (SVG)
                                     </label>
@@ -376,6 +379,32 @@ const handleBannerSave = async () => {
                                         accept=".svg,image/svg+xml"
                                         onChange={handleInputChange}
                                         required={formData.action === 'add'}
+                                    />
+                                </div> */}
+
+                                                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">
+                                        Card Icon (SVG)
+                                    </label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        name="image"
+                                        accept=".svg,image/svg+xml"
+                                        onChange={handleInputChange}
+                                        required={formData.action === 'add'}
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label fw-bold">Icon Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the icon (for accessibility)"
+                                        maxLength={125}
                                     />
                                 </div>
                                 <div className="col-md-6">

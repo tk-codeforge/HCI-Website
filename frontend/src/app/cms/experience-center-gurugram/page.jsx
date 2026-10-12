@@ -16,6 +16,7 @@ const CmsExperienceCenter = () => {
         image: null,
     });
     const [selectedId, setSelectedId] = useState(null);
+        const [childAlts, setChildAlts] = useState({}); // { index: alt text draft }
     const selectedPage = pagesList?.find(page => page.id === selectedId);
 
     const fetchContentManagerPages = useCallback(async () => {
@@ -126,6 +127,7 @@ const CmsExperienceCenter = () => {
         const formDataToSend = new FormData();
         formDataToSend.append("title", formData.title);
         formDataToSend.append("description", formData.description);
+                formDataToSend.append("image_alt", formData.image_alt || "");
         if (formData.image) {
             formDataToSend.append("image", formData.image);
         }
@@ -168,6 +170,7 @@ const CmsExperienceCenter = () => {
         formDataToSend.append("page_type", "experience_center_gurugram");
         formDataToSend.append("title", formData.title);
         formDataToSend.append("description", formData.description);
+                formDataToSend.append("image_alt", formData.image_alt || "");
         if (formData.image) {
             formDataToSend.append("image", formData.image);
         }
@@ -246,6 +249,7 @@ const CmsExperienceCenter = () => {
         setFormData({
             title: item.child_content?.title,
             description: item.child_content?.description,
+                        image_alt: item.child_content?.image_alt || "",
             image: null, // Reset image field
         });
     };
@@ -260,6 +264,7 @@ const CmsExperienceCenter = () => {
         const childDataToSend = new FormData();
         childDataToSend.append('childImageIndex', index);
         childDataToSend.append('image', e.target.files[0]);
+                childDataToSend.append('image_alt', childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "");
 
         try {
             const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
@@ -281,9 +286,37 @@ const CmsExperienceCenter = () => {
         }
     }
 
+        const handleChildAltSave = async (index) => {
+        const alt = (childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "").trim();
+
+        const childDataToSend = new FormData();
+        childDataToSend.append('childImageIndex', index);
+        childDataToSend.append('image_alt', alt);
+
+        try {
+            const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.status === 200) {
+                fetchContentManagerPages();
+                toast.success("Alt text updated.");
+            } else {
+                toast.error("Error updating alt text. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message ?? "Error updating alt text. Please try again.");
+            console.error("Error:", error);
+        }
+    };
+
 
     const handleManageChild = (id) => {
-        setSelectedId(id);
+               setSelectedId(id);
+        setChildAlts({});;
     }
 
 const handleDeleteParent = async (id) => {
@@ -372,7 +405,7 @@ const handleDeleteVideo = async (id) => {
                                     <tr key={item.id}>
                                         <td>{index + 1}</td>
                                         <td>
-                                            <img src={item?.child_content?.image} alt={item?.child_content.title} height="80" decoding="async"  loading="lazy" />
+                                            <img src={item?.child_content?.image} alt={item?.child_content?.image_alt || item?.child_content?.title} height="80" decoding="async"  loading="lazy" />
                                         </td>
                                         <td>{item?.child_content.title}</td>
                                         <td>{item?.child_content?.description}</td>
@@ -442,6 +475,19 @@ const handleDeleteVideo = async (id) => {
                                     />
                                 </div>
 
+                                                                <div className="mb-3 col-md-12">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
+                                    />
+                                </div>
+
                                 <div className="m-auto mt-2 col-12 d-flex justify-content-center">
                                     <button className="px-5 read_morebtn" type="submit">
                                         Save Changes
@@ -500,6 +546,19 @@ const handleDeleteVideo = async (id) => {
                                     />
                                 </div>
 
+                                                                <div className="mb-3 col-md-12">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO & accessibility)"
+                                        maxLength={125}
+                                    />
+                                </div>
+
                                 <div className="m-auto mt-2 col-12 d-flex justify-content-center">
                                     <button className="px-5 read_morebtn" type="submit">
                                         Save Changes
@@ -529,9 +588,24 @@ const handleDeleteVideo = async (id) => {
                                             accept="image/*"
                                             onChange={(e) => handleChildImageChange(index, e)}
                                         />
+                                                                                <input
+                                            type="text"
+                                            className="form-control mt-2"
+                                            value={childAlts[index] ?? imageItem?.image_alt ?? ""}
+                                            onChange={(e) => setChildAlts((prev) => ({ ...prev, [index]: e.target.value }))}
+                                            placeholder="Alt text for this image"
+                                            maxLength={125}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-success mt-2"
+                                            onClick={() => handleChildAltSave(index)}
+                                        >
+                                            Save Alt Text
+                                        </button>
                                     </div>
                                     <div className="col-md-6">
-                                        {imageItem && <img src={imageItem.image} alt={`Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
+                                        {imageItem && <img src={imageItem.image} alt={imageItem.image_alt || `Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
                                     </div>
                                 </div>
                             ))}

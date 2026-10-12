@@ -23,10 +23,22 @@ const PAGE_DEFS = [
 const HEADING_TAG_OPTIONS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const DEFAULT_TEXT_SHADOW = "2px 2px 4px rgba(0,0,0,0.8)";
-
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
 // Default text based on your current design-idea/page.jsx
 const defaultEntry = (key) => ({
   bannerImage: "", 
+    bannerAlt: "",
   headingText: key === "design_idea" ? "Design Gallery" : "",
   headingTag: "h1",
   descriptionText: key === "design_idea" ? "Designs That Speak Before Words Do—Explore Our Most Inspiring Creations, spaces that blend beauty, functionality, and timeless design." : "",
@@ -70,6 +82,7 @@ for (const def of PAGE_DEFS) {
   const record = res?.data || null;
   hydrated[def.key] = {
     bannerImage: record?.banner_image ?? defaultEntry(def.key).bannerImage,
+        bannerAlt: record?.banner_alt ?? "",
     headingText: record?.banner_heading ?? defaultEntry(def.key).headingText,
     headingTag: HEADING_TAG_OPTIONS.includes(record?.banner_heading_tag) ? record.banner_heading_tag : "h1",
     descriptionText: record?.banner_description ?? defaultEntry(def.key).descriptionText,
@@ -98,7 +111,11 @@ setEntries(hydrated);
 
   const handleImageUpload = (key, e) => {
   const file = e.target.files[0];
-  if (file) {
+    if (file) {
+    if (!validateImage(file)) {
+      e.target.value = "";
+      return;
+    }
     handleEntryChange(key, "bannerImageFile", file); // raw file for upload
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -124,6 +141,7 @@ setEntries(hydrated);
   formData.append("banner_heading_tag", entry.headingTag);
   formData.append("banner_description_font_size", entry.descriptionFontSize);
   formData.append("banner_key", key);
+    formData.append("banner_alt", entry.bannerAlt || "");
 
   // Only attach the file if the user picked a new one (not the existing URL string)
   if (entry.bannerImageFile) {
@@ -210,18 +228,33 @@ setEntries(hydrated);
                 <div className="row g-3">
                   {/* ---------- Media Picker controls ---------- */}
                   <div className="col-md-12">
-                    <label className="form-label fw-bold">Banner Image</label>
+                                        <label className="form-label fw-bold">
+                      Banner Image <small className="text-muted fw-normal">(.webp only, max 200 KB)</small>
+                    </label>
                     <div className="input-group">
                       <span className="input-group-text"><FaUpload /></span>
                       <input
                         type="file"
-                        accept="image/*"
+                                                accept="image/webp"
                         className="form-control"
                         onChange={(e) => handleImageUpload(def.key, e)}
                       />
                     </div>
                     {entry.bannerImage && (
                       <small className="text-success mt-1 d-block">Image uploaded and ready for preview.</small>
+                    )}
+
+                                        {entry.bannerImage && (
+                      <div className="mt-2" style={{ maxWidth: 560 }}>
+                        <label className="form-label fw-bold mb-1">Banner Alt Text</label>
+                        <input
+                          className="form-control"
+                          value={entry.bannerAlt}
+                          onChange={(e) => handleEntryChange(def.key, "bannerAlt", e.target.value)}
+                          placeholder="Describe the banner image (for SEO & accessibility)"
+                          maxLength={125}
+                        />
+                      </div>
                     )}
                   </div>
 

@@ -22,6 +22,20 @@ const Counter = ({ value = "", limit }) => (
         {value.length}/{limit} characters
     </small>
 );
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+    if (file.type !== "image/webp") {
+        toast.error("Only .webp images are allowed.");
+        return false;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+        toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+        return false;
+    }
+    return true;
+};
 
 const CmsCity = () => {
 
@@ -41,6 +55,12 @@ const CmsCity = () => {
         banner_title: "",
         banner_subtitle: "",
         banner_image: null,
+        main_title_tag: "h2",
+banner_title_tag: "h1",
+side_title_tag: "h2",
+        banner_image_alt: "",
+location_image_alt: "",
+side_image_alt: "",
     });
     // const [formSeoContentData, setFormSeoContentData] = useState({
     //     meta_title: "",
@@ -88,6 +108,10 @@ const CmsCity = () => {
     const handleInputChange = (e) => {
         const { name, value, files } = e.target;
         if ((name === "location_image" || name === "side_image" || name === "banner_image") && files?.length > 0) {
+            if (!validateImage(files[0])) {
+    e.target.value = "";
+    return;
+}
             setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -107,6 +131,12 @@ const CmsCity = () => {
         formDataToSend.append("side_description", formData.side_description);
         formDataToSend.append("banner_title", formData.banner_title);
         formDataToSend.append("banner_subtitle", formData.banner_subtitle);
+        formDataToSend.append("main_title_tag", formData.main_title_tag);
+formDataToSend.append("banner_title_tag", formData.banner_title_tag);
+formDataToSend.append("side_title_tag", formData.side_title_tag);
+        formDataToSend.append("banner_image_alt", (formData.banner_image_alt || "").trim());
+formDataToSend.append("location_image_alt", (formData.location_image_alt || "").trim());
+formDataToSend.append("side_image_alt", (formData.side_image_alt || "").trim());
 
         if (formData.location_image) {
             formDataToSend.append("location_image", formData.location_image);
@@ -143,7 +173,13 @@ const CmsCity = () => {
                     side_image: null,
                     banner_title: "",
                     banner_subtitle: "",
+                    main_title_tag: "h2",
+banner_title_tag: "h1",
+side_title_tag: "h2",
                     banner_image: null,
+                    banner_image_alt: "",
+location_image_alt: "",
+side_image_alt: "",
                 });
 
                 // Close modal and clear form data
@@ -176,7 +212,13 @@ const CmsCity = () => {
             side_image: null,
             banner_title: item.banner_title ?? "",
             banner_subtitle: item.banner_subtitle ?? "",
-            banner_image: null
+            banner_image: null,
+            main_title_tag: item.main_title_tag || "h2",
+banner_title_tag: item.banner_title_tag || "h1",
+side_title_tag: item.side_title_tag || "h2",
+banner_image_alt: item.banner_image_alt ?? "",
+location_image_alt: item.location_image_alt ?? "",
+side_image_alt: item.side_image_alt ?? ""
         });
     };
 
@@ -407,17 +449,17 @@ const CmsCity = () => {
                                             <span className="d-inline-block text-truncate" style={{ width: "250px" }} dangerouslySetInnerHTML={{ __html: item.main_description }}></span>
                                         </td>
                                         <td>
-                                            {item.location_image && <img src={item.location_image} alt="Location Image" height="80" decoding="async"  loading="lazy" />}
+                                            {item.location_image && <img src={item.location_image} alt={item.location_image_alt || "Location Image"}height="80" decoding="async"  loading="lazy" />}
                                         </td>
                                         <td>{item.side_title}</td>
                                         <td>
                                             <span className="d-inline-block text-truncate" style={{ width: "250px" }} dangerouslySetInnerHTML={{ __html: item.side_description }}></span>
                                         </td>
                                         <td>
-                                            {item.side_image && <img src={item.side_image} alt="Side Image" height="80" decoding="async"  loading="lazy" />}
+                                            {item.side_image && <img src={item.side_image} alt={item.side_image_alt || "Side Image"} height="80" decoding="async"  loading="lazy" />}
                                         </td>
                                         <td>
-                                            {item.banner_image && <img src={item.banner_image} alt="Banner Image" height="80" decoding="async" loading="lazy" />}
+                                            {item.banner_image && <img src={item.banner_image} alt={item.banner_image_alt || "Banner Image"} height="80" decoding="async" loading="lazy" />}
                                         </td>
                                         <td width={150}>
                                             <button onClick={() => handleManageSeoContentClick(item)} className="btn btn-info text-nowrap" type="button" data-bs-toggle="modal" data-bs-target="#seoContentModal">SEO Content</button>
@@ -459,7 +501,7 @@ const CmsCity = () => {
                                     <small className="text-muted">This acts as the URL slug (e.g. noida, new-delhi)</small>
                                 </div>
 
-                                <div className="mb-3 col-md-12">
+                                <div className="mb-3 col-md-9">
                                     <label className="form-label">Main Title</label>
                                     <input
                                         type="text"
@@ -471,6 +513,19 @@ const CmsCity = () => {
                                         required
                                     />
                                 </div>
+                                <div className="mb-3 col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select
+        className="form-select"
+        name="main_title_tag"
+        value={formData.main_title_tag}
+        onChange={handleInputChange}
+    >
+        {HEADING_TAGS.map((t) => (
+            <option key={t} value={t}>{t.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Main Description</label>
                                     <CKEditorComponent pageData={formData.main_description} setPageData={setMainDescriptionData} />
@@ -481,7 +536,7 @@ const CmsCity = () => {
                                     <h5 className="mb-3">Hero Banner</h5>
                                 </div>
 
-                                <div className="mb-3 col-md-12">
+                                <div className="mb-3 col-md-9">
                                     <label className="form-label">Banner Title</label>
                                     <input
                                         type="text"
@@ -492,6 +547,20 @@ const CmsCity = () => {
                                         onChange={handleInputChange}
                                     />
                                 </div>
+
+                                <div className="mb-3 col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select
+        className="form-select"
+        name="banner_title_tag"
+        value={formData.banner_title_tag}
+        onChange={handleInputChange}
+    >
+        {HEADING_TAGS.map((t) => (
+            <option key={t} value={t}>{t.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
 
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Banner Subtitle</label>
@@ -511,9 +580,19 @@ const CmsCity = () => {
                                         type="file"
                                         className="form-control"
                                         name="banner_image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
                                     />
+                                    <small className="text-muted d-block">Only .webp, max 200 KB.</small>
+<input
+    type="text"
+    className="form-control mt-2"
+    name="banner_image_alt"
+    maxLength={125}
+    placeholder="Banner image alt text (for SEO)"
+    value={formData.banner_image_alt || ""}
+    onChange={handleInputChange}
+/>
                                     {currentEditItem?.banner_image && (
                                         <div className="mt-2">
                                             <small className="text-muted d-block">Current Banner Image:</small>
@@ -528,9 +607,19 @@ const CmsCity = () => {
                                         type="file"
                                         className="form-control"
                                         name="location_image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
                                     />
+                                    <small className="text-muted d-block">Only .webp, max 200 KB.</small>
+<input
+    type="text"
+    className="form-control mt-2"
+    name="location_image_alt"
+    maxLength={125}
+    placeholder="Location image alt text (for SEO)"
+    value={formData.location_image_alt || ""}
+    onChange={handleInputChange}
+/>
                                     {currentEditItem?.location_image && (
                                         <div className="mt-2">
                                             <small className="text-muted d-block">Current Location Image:</small>
@@ -539,7 +628,7 @@ const CmsCity = () => {
                                     )}
                                 </div>
 
-                                <div className="mb-3 col-md-12">
+                                <div className="mb-3 col-md-9">
                                     <label className="form-label">Side Title</label>
                                     <input
                                         type="text"
@@ -552,6 +641,20 @@ const CmsCity = () => {
                                     />
                                 </div>
 
+                                <div className="mb-3 col-md-3">
+    <label className="form-label">Heading Tag</label>
+    <select
+        className="form-select"
+        name="side_title_tag"
+        value={formData.side_title_tag}
+        onChange={handleInputChange}
+    >
+        {HEADING_TAGS.map((t) => (
+            <option key={t} value={t}>{t.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+
                                 <div className="mb-3 col-md-12">
                                     <label className="form-label">Side Description</label>
                                     <CKEditorComponent pageData={formData.side_description} setPageData={setSideDescriptionData} />
@@ -563,9 +666,19 @@ const CmsCity = () => {
                                         type="file"
                                         className="form-control"
                                         name="side_image"
-                                        accept="image/*"
+                                        accept="image/webp"
                                         onChange={handleInputChange}
                                     />
+                                    <small className="text-muted d-block">Only .webp, max 200 KB.</small>
+<input
+    type="text"
+    className="form-control mt-2"
+    name="side_image_alt"
+    maxLength={125}
+    placeholder="Side image alt text (for SEO)"
+    value={formData.side_image_alt || ""}
+    onChange={handleInputChange}
+/>
                                     {currentEditItem?.side_image && (
                                         <div className="mt-2">
                                             <small className="text-muted d-block">Current Side Image:</small>

@@ -704,6 +704,7 @@ export default async function Career() {
     bgHeading: cmsContent?.bgHeading || "Career",
     bgHeadingTag: cmsContent?.bgHeadingTag || fallbackData.bgHeadingTag || "h1",
     bgImage: cmsContent?.main_image || cmsContent?.bg_image || "/fallback-bg.jpg",
+        bgImageAlt: cmsContent?.bgImageAlt || "",
   };
 
   return (
