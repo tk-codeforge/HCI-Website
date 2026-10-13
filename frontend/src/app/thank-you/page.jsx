@@ -1970,7 +1970,7 @@
 
 // export default ThankYou;
 
-
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import ThankYouClient from "./ThankYouClient";
 
 // Regenerated in the background at most once a minute.
@@ -1981,10 +1981,62 @@ const getBaseUrl = () =>
     ? process.env.NEXT_PUBLIC_API_DEV_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// --- HELPER: Fetch SEO Data ---
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/thank-you")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
+// --- DYNAMIC METADATA GENERATION ---
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title = seo?.meta_title || "Thank You - High Creation Interior";
+  const description = seo?.meta_description || "Thank you for contacting High Creation Interior.";
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/thank-you",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    openGraph: {
+      title: ogTitle,
+      description: ogDescription,
+      url: canonical,
+      type: "website",
+      images: seo?.og_image
+        ? [{ url: seo.og_image, width: 1200, height: 630 }]
+        : [{ url: "/images/new_hc_logo.png" }],
+    },
+  };
+}
+
 // Same endpoint and parsing ThankYouClient used to do in the browser.
 // Returns { cms } (cms may be null if there is no record yet), or null if the
 // request failed, in which case the client component fetches by itself.
 async function getThankYouCms() {
+   const seo = await getSeoData();
   try {
     const res = await fetch(`${getBaseUrl()}/cms-content/redirect_thank_you`, {
       next: { revalidate: 60 },
