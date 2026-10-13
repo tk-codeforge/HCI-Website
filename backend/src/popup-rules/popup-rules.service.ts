@@ -52,6 +52,7 @@ export class PopupRulesService {
             lead_form_name: dto.lead_form_name?.trim() || `Lead Form ${targetUrl}`,
             redirect_url: dto.redirect_url?.trim() || '/thank-you',
             success_message: dto.success_message?.trim() || 'Details submitted successfully!',
+            locations: dto.locations?.trim() || 'Noida, Delhi, Gurgaon, Faridabad, Ghaziabad',
         };
 
         if (desktopPath) sanitizedDto.desktop_image = desktopPath;

@@ -15,4 +15,5 @@ export class CreatePopupRuleDto {
     lead_form_name?: string;
     redirect_url?: string;
     success_message?: string;
+    locations?: string;
 }

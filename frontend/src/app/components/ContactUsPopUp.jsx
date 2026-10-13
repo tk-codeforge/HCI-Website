@@ -26,6 +26,12 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+
+        if (name === "contact") {
+        const numericValue = value.replace(/\D/g, "").slice(0, 10);
+        setFormData((prevData) => ({ ...prevData, [name]: numericValue }));
+        return;
+    }
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
@@ -43,6 +49,26 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmissionError("");
+
+        // 1. Validate Full Name (letters and spaces only, 2 to 50 characters)
+    const nameRegex = /^[A-Za-z\s]{2,50}$/;
+    if (!nameRegex.test(formData.fullName.trim())) {
+        setSubmissionError("Please enter a valid Full Name (letters and spaces only).");
+        return;
+    }
+
+    // 2. Validate Phone Number (10 digits starting with 6, 7, 8, or 9)
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(formData.contact.trim())) {
+        setSubmissionError("Please enter a valid 10-digit mobile number.");
+        return;
+    }
+
+    // 3. Validate Mandatory Location Dropdown Selection
+    if (!formData.place.trim()) {
+        setSubmissionError("Please select your location.");
+        return;
+    }
 
         if (!formData.termsAndConditions) {
             setSubmissionError("You must agree to the Terms & Conditions.");
@@ -325,7 +351,7 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
                                 <form onSubmit={handleSubmit}>
                                     {submissionError && <div className="alert alert-danger p-2 small mb-3 text-center rounded-3">{submissionError}</div>}
 
-                                    <div className="hc-input-wrap">
+                                    {/* <div className="hc-input-wrap">
                                         <FaUser className="hc-input-icon" />
                                         <input
                                             type="text"
@@ -364,7 +390,70 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
                                             onChange={handleInputChange}
                                             required
                                         />
-                                    </div>
+                                    </div> */}
+
+                                    {/* Full Name - Mandatory */}
+<div className="hc-input-wrap">
+    <FaUser className="hc-input-icon" />
+    <input
+        type="text"
+        name="fullName"
+        className="hc-input"
+        placeholder="Full Name *"
+        value={formData.fullName}
+        onChange={handleInputChange}
+        required
+    />
+</div>
+
+{/* Phone Number - Mandatory (10 digits) */}
+<div className="hc-input-wrap">
+    <FaPhoneAlt className="hc-input-icon" />
+    <input
+        type="tel"
+        name="contact"
+        className="hc-input"
+        placeholder="Phone Number (10 Digits) *"
+        maxLength="10"
+        value={formData.contact}
+        onChange={handleInputChange}
+        required
+    />
+</div>
+
+{/* Location - CMS Managed Dynamic Dropdown (Mandatory) */}
+<div className="hc-input-wrap">
+    <FaMapMarkerAlt className="hc-input-icon" />
+    <select
+        name="place"
+        className="hc-input"
+        value={formData.place}
+        onChange={handleInputChange}
+        style={{ appearance: 'none', cursor: 'pointer' }}
+        required
+    >
+        <option value="">Select Location *</option>
+        {activeRule?.locations
+            ? activeRule.locations.split(",").map((loc, idx) => {
+                const trimmedLoc = loc.trim();
+                return (
+                    <option key={idx} value={trimmedLoc}>
+                        {trimmedLoc}
+                    </option>
+                );
+            })
+            : (
+                <>
+                    <option value="Noida">Noida</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Gurgaon">Gurgaon</option>
+                    <option value="Faridabad">Faridabad</option>
+                    <option value="Ghaziabad">Ghaziabad</option>
+                </>
+            )
+        }
+    </select>
+</div>
 
                                     <div className="hc-checkbox-wrap">
                                         <input 

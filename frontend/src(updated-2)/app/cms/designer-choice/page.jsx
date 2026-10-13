@@ -1,0 +1,594 @@
+"use client";
+import React, { useState, useEffect, useCallback } from "react";
+import { useSelector } from "react-redux";
+import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
+import api from "@/utils/api";
+import { toast } from "react-toastify";
+import { getCmsAccess, getDeletePermissionMessage } from "@/utils/cmsAccess";
+
+import dynamic from "next/dynamic";
+const CKEditorComponent = dynamic(() => import("../../components/CKEditorComponent"), { ssr: false });
+
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const EMPTY_FORM = { title: "", title_tag: "h2", description: "", image: null, image_alt: "" };
+
+const MAX_IMAGE_BYTES = 200 * 1024;
+const validateImage = (file) => {
+  if (file.type !== "image/webp") {
+    toast.error("Only .webp images are allowed.");
+    return false;
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    toast.error(`Image must be 200 KB or smaller (selected: ${Math.round(file.size / 1024)} KB).`);
+    return false;
+  }
+  return true;
+};
+
+const CmsDesignGallery = () => {
+    const user = useSelector((state) => state.auth.user);
+    const authToken = useSelector((state) => state.auth.authToken);
+    const { canDelete } = getCmsAccess(user);
+    const [pagesList, setPagesList] = useState();
+    const [loading, setLoading] = useState(false);
+    // const [formData, setFormData] = useState({
+    //     title: "",
+    //     description: "",
+    //     image: null,
+    // });
+    const [formData, setFormData] = useState(EMPTY_FORM);
+const [editorKey, setEditorKey] = useState(0);
+    const [selectedId, setSelectedId] = useState(null);
+        const [childAlts, setChildAlts] = useState({}); // { index: alt text draft }
+    const selectedPage = pagesList?.find(page => page.id === selectedId);
+
+    const fetchContentManagerPages = useCallback(async () => {
+        try {
+            const response = await api.get(`/cms-parent-child/designer_choice`, {
+                headers: {
+                    Authorization: `Bearer ${authToken}`, // Send auth token
+                },
+            });
+
+            if (response.data && response.data) {
+                setPagesList(response.data);
+                setLoading(false);
+            }
+
+
+        } catch (err) {
+            toast.error(err.message ?? "Failed to fetch data. Please try again.");
+            setLoading(false);
+        }
+    }, [authToken]);
+
+    useEffect(() => {
+        fetchContentManagerPages();
+    }, [fetchContentManagerPages]);
+
+    // Handle input change for text fields and image
+    const handleInputChange = (e) => {
+        const { name, value, files } = e.target;
+        // if (name === "image" && files.length > 0) {
+        //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+                if (name === "image" && files.length > 0) {
+            if (!validateImage(files[0])) {
+                e.target.value = "";
+                return;
+            }
+            setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+        } else {
+            setFormData((prevData) => ({ ...prevData, [name]: value }));
+        }
+    };
+
+    const handleDescriptionChange = (data) => {
+    setFormData((prev) => ({ ...prev, description: data }));
+};
+
+const isDescriptionEmpty = (html) =>
+    !html || html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, "").trim() === "";
+
+    const handleAddSubmit = async (e) => {
+        e.preventDefault();
+
+        const formDataToSend = new FormData();
+        formDataToSend.append("page_type", "designer_choice");
+        formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "h2");
+                formDataToSend.append("image_alt", formData.image_alt || "");
+        formDataToSend.append("description", formData.description);
+        if (formData.image) {
+            formDataToSend.append("image", formData.image);
+        }
+
+        try {
+            // Send POST request to save form data
+            const response = await api.post(`/cms-parent-child`, formDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`, // Send auth token
+                },
+            });
+
+            // Handle success response
+            if (response.status === 201) {
+                fetchContentManagerPages();
+                toast.success("Gallery Added successfully.");
+                // setFormData({
+                //     title: "",
+                //     description: "",
+                //     image: null,
+                // });
+
+                setFormData(EMPTY_FORM);
+setEditorKey((k) => k + 1);
+
+                // Close modal and clear form data
+                document.getElementById('addGalleryModalClose').click();
+            } else {
+                toast.error("Error submitting form. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response.data.message ?? "Error fetching data. Please try again.");
+            console.error("Error:", error);
+        }
+    };
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const formDataToSend = new FormData();
+        formDataToSend.append("title", formData.title);
+        formDataToSend.append("title_tag", formData.title_tag || "h2");
+                formDataToSend.append("image_alt", formData.image_alt || "");
+        formDataToSend.append("description", formData.description);
+        if (formData.image) {
+            formDataToSend.append("image", formData.image);
+        }
+
+        try {
+            // Send POST request to save form data
+            const response = await api.patch(`/cms-parent-child/${selectedId}`, formDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`, // Send auth token
+                },
+            });
+
+            // Handle success response
+            if (response.status === 200) {
+                fetchContentManagerPages();
+                toast.success("Form submitted successfully.");
+                // setFormData({
+                //     title: "",
+                //     description: "",
+                //     image: null,
+                // });
+
+                setFormData(EMPTY_FORM);
+setEditorKey((k) => k + 1);
+
+                // Close modal and clear form data
+            document.getElementById('addNewpageModalClose').click();
+
+            } else {
+                toast.error("Error submitting form. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response.data.message ?? "Error fetching data. Please try again.");
+            console.error("Error:", error);
+        }
+    };
+
+    // Set form data when edit button is clicked
+    const handleEditClick = (item) => {
+        setEditorKey((k) => k + 1);
+setSelectedId(item.id);
+setFormData({
+    title: item.child_content?.title ?? "",
+    title_tag: item.child_content?.title_tag || "h2",
+        image_alt: item.child_content?.image_alt ?? "",
+    description: item.child_content?.description ?? "",
+    image: null,
+});
+    };
+
+    const handleChildImageChange = async (index, e) => {
+        e.preventDefault();
+
+        if (e.target.files.length === 0) {
+            return;
+        }
+                if (!validateImage(e.target.files[0])) {
+            e.target.value = "";
+            return;
+        }
+
+        const childDataToSend = new FormData();
+        childDataToSend.append('childImageIndex', index);
+        childDataToSend.append('image', e.target.files[0]);
+                childDataToSend.append('image_alt', childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "");
+
+        try {
+            const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`, // Send auth token
+                },
+            });
+
+            if (response.status === 200) {
+                fetchContentManagerPages();
+                toast.success("Child image updated successfully.");
+            } else {
+                toast.error("Error updating child image. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message ?? "Error updating child image. Please try again.");
+            console.error("Error:", error);
+        }
+    }
+    const handleChildAltSave = async (index) => {
+        const alt = (childAlts[index] ?? selectedPage?.child_images?.[index]?.image_alt ?? "").trim();
+
+        const childDataToSend = new FormData();
+        childDataToSend.append('childImageIndex', index);
+        childDataToSend.append('image_alt', alt);
+
+        try {
+            const response = await api.patch(`/cms-parent-child/update-child-image/${selectedId}`, childDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.status === 200) {
+                fetchContentManagerPages();
+                toast.success("Alt text updated.");
+            } else {
+                toast.error("Error updating alt text. Please try again.");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message ?? "Error updating alt text. Please try again.");
+            console.error("Error:", error);
+        }
+    };
+
+    const handleManageChild = (id) => {
+                setSelectedId(id);
+        setChildAlts({});
+    }
+
+    const deleteHandler = async (id) => {
+        if (!canDelete) {
+            toast.error(getDeletePermissionMessage("this design item"));
+            return;
+        }
+
+        if (!pagesList || pagesList.length <= 8) {
+            toast.error("Cannot delete records. Need more than 8 records.");
+            return;
+        }
+    
+        // Prevent deletion of the last 8 inserted records
+        const protectedRecords = pagesList.slice(-8); // Get the last 8 records
+        const isProtected = protectedRecords.some((record) => record.id === id);
+    
+        if (isProtected) {
+            toast.error("You cannot delete the latest 8 records.");
+            return;
+        }
+    
+        if (window.confirm("Are you sure you want to delete this item?")) {
+            try {
+                const response = await api.delete(`/cms-parent-child/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`, // Send auth token
+                    },
+                });
+    
+                if (response.status === 200) {
+                    fetchContentManagerPages();
+                    toast.success("Item deleted successfully.");
+                } else {
+                    toast.error("Failed to delete item. Please try again.");
+                }
+            } catch (error) {
+                toast.error("Failed to delete item. Please try again.");
+                console.error("Error:", error);
+            }
+        }
+    };
+    
+
+
+    return (
+        <AuthMainLayout>
+            <div className="container my-5">
+                <h1 className="mb-4 text-center">CMS - Designer Choice</h1>
+                <div className="d-flex justify-content-end mb-3">
+                    <button onClick={() => { setFormData(EMPTY_FORM); setEditorKey((k) => k + 1); }} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGalleryModal">
+                        Add Gallery
+                    </button>
+                </div>
+                {loading ? (
+                    <div className="text-center">Loading...</div>
+                ) : (
+                    <div className="table-responsive">
+                        <table
+                            id="usersTable"
+                            className="table display table-striped table-bordered"
+                            style={{ width: "100%" }}
+                        >
+                            <thead>
+                                <tr>
+                                    <th>SN</th>
+                                    <th width="80">Image</th>
+                                    <th>Title</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {pagesList && pagesList.map((item, index) => {
+    const isRecent = index >= pagesList.length - 8; // Check if it's in the last 8 records
+    return (
+        <tr key={item.id}>
+            <td>{index + 1}</td>
+            <td>
+                <img src={item?.child_content?.image} aalt={item?.child_content?.image_alt || item?.child_content?.title} height="80" decoding="async"  loading="lazy" />
+            </td>
+            <td>{item?.child_content.title}</td>
+            {/* <td>{item?.child_content?.description}</td> */}
+            <td dangerouslySetInnerHTML={{ __html: item?.child_content?.description ?? "" }} />
+            <td>
+                <button onClick={() => handleManageChild(item.id)} type="button" className="btn btn-info me-1" data-bs-toggle="modal" data-bs-target="#manageChildModal">
+                    Manage Child
+                </button>
+                <button onClick={() => handleEditClick(item)} type="button" className="read_morebtn" data-bs-toggle="modal" data-bs-target="#addNewpageModal">
+                    Edit
+                </button>
+                {canDelete && (
+                    <button 
+                        className="ms-2 btn btn-danger" 
+                        onClick={() => deleteHandler(item.id)} 
+                        disabled={isRecent} // Disable only the latest 8 records
+                    >
+                        Delete
+                    </button>
+                )}
+            </td>
+        </tr>
+    );
+})}
+
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+
+              {/* Add Gallery Modal */}
+              <div className="modal fade" id="addGalleryModal" tabIndex="-1" aria-hidden="true">
+                {/* <div className="modal-dialog"> */}
+                <div className="modal-dialog modal-xl">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5">Add Gallery</h1>
+                            <button type="button" className="btn-close" id="addGalleryModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form onSubmit={handleAddSubmit}>
+                            <div className="modal-body">
+                                {/* <div className="mb-3">
+                                    <label className="form-label">Title</label>
+                                    <input type="text" className="form-control" name="title" value={formData.title} onChange={handleInputChange} required />
+                                </div> */}
+
+                                <div className="row">
+    <div className="mb-3 col-md-3">
+        <label className="form-label">Heading Tag</label>
+        <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+            {HEADING_TAGS.map((tag) => (
+                <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+            ))}
+        </select>
+    </div>
+    <div className="mb-3 col-md-9">
+        <label className="form-label">Title</label>
+        <input type="text" className="form-control" name="title" value={formData.title} onChange={handleInputChange} required />
+    </div>
+</div>
+                                <div className="mb-3">
+                                    <label className="form-label">Description</label>
+                                    {/* <input type="text" className="form-control" name="description" value={formData.description} onChange={handleInputChange} required /> */}
+
+                                    <CKEditorComponent key={editorKey} pageData={formData.description} setPageData={handleDescriptionChange} />
+                                </div>
+                                {/* <div className="mb-3">
+                                    <label className="form-label">Image</label>
+                                    <input type="file" className="form-control" name="image" accept="image/*" onChange={handleInputChange} required />
+                                </div> */}
+
+                                                                <div className="row">
+                                    <div className="mb-3 col-md-6">
+                                        <label className="form-label">Image <small className="text-muted">(.webp, max 200 KB)</small></label>
+                                        <input type="file" className="form-control" name="image" accept="image/webp" onChange={handleInputChange} required />
+                                    </div>
+                                    <div className="mb-3 col-md-6">
+                                        <label className="form-label">Image Alt Text</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="image_alt"
+                                            value={formData.image_alt || ""}
+                                            onChange={handleInputChange}
+                                            placeholder="Describe the image (for SEO)"
+                                            maxLength={125}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <button className="btn btn-success" type="submit">Add Gallery</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div className="modal fade" id="addNewpageModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                {/* <div className="modal-dialog"> */}
+               <div className="modal-dialog modal-xl">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Edit</h1>
+                            <button type="button" className="btn-close" id="addNewpageModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form onSubmit={handleSubmit}>
+                            <div className="modal-body row">
+
+                                {/* <div className="mb-3 col-md-12">
+                                    <label htmlFor="title" className="form-label">Title</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="title"
+                                        placeholder="Title"
+                                        value={formData.title}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div> */}
+
+                                <div className="mb-3 col-md-3">
+    <label htmlFor="title_tag" className="form-label">Heading Tag</label>
+    <select className="form-select" name="title_tag" value={formData.title_tag} onChange={handleInputChange}>
+        {HEADING_TAGS.map((tag) => (
+            <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+        ))}
+    </select>
+</div>
+<div className="mb-3 col-md-9">
+    <label htmlFor="title" className="form-label">Title</label>
+    <input type="text" className="form-control" name="title" placeholder="Title"
+        value={formData.title} onChange={handleInputChange} required />
+</div>
+                                <div className="mb-3 col-md-12">
+                                    <label htmlFor="description" className="form-label">Description</label>
+                                    {/* <input
+                                        type="text"
+                                        className="form-control"
+                                        name="description"
+                                        placeholder="Description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        required
+                                    /> */}
+
+                                    <CKEditorComponent key={editorKey} pageData={formData.description} setPageData={handleDescriptionChange} />
+                                </div>
+
+
+                                {/* <div className="mb-3 col-md-12">
+                                    <label className="form-label">Image</label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        name="image"
+                                        accept="image/*"
+                                        onChange={handleInputChange}
+                                    />
+                                </div> */}
+
+                                                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image <small className="text-muted">(.webp, max 200 KB)</small></label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        name="image"
+                                        accept="image/webp"
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="mb-3 col-md-6">
+                                    <label className="form-label">Image Alt Text</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="image_alt"
+                                        value={formData.image_alt || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="Describe the image (for SEO)"
+                                        maxLength={125}
+                                    />
+                                </div>
+
+                                <div className="m-auto mt-2 col-12 d-flex justify-content-center">
+                                    <button className="px-5 read_morebtn" type="submit">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div className="modal fade" id="manageChildModal" tabIndex="-1" aria-labelledby="manageChildModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="manageChildModalLabel">Manage Child Images</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            {selectedPage?.child_images?.map((imageItem, index) => (
+                                <div className={`row border-bottom ${index !== 0 ? 'py-2' : ''}`} key={index}>
+                                    <div className="mb-2 col-md-6">
+                                        <label className="form-label">Image {index + 1}</label>
+                                        <input
+                                            type="file"
+                                            className="form-control"
+                                            accept="image/webp"
+                                            onChange={(e) => handleChildImageChange(index, e)}
+                                        />
+                                                                                <input
+                                            type="text"
+                                            className="form-control mt-2"
+                                            value={childAlts[index] ?? imageItem?.image_alt ?? ""}
+                                            onChange={(e) => setChildAlts((prev) => ({ ...prev, [index]: e.target.value }))}
+                                            placeholder="Alt text for this image"
+                                            maxLength={125}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-outline-success mt-2"
+                                            onClick={() => handleChildAltSave(index)}
+                                        >
+                                            Save Alt Text
+                                        </button>
+                                    </div>
+                                    <div className="col-md-6">
+                                        {imageItem && <img src={imageItem.image} alt={`imageItem.image_alt || Image ${index + 1}`} style={{ height: '100px', marginTop: '10px' }} decoding="async"  loading="lazy" />}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="m-auto mt-2 col-12 d-flex justify-content-center mb-4">
+                            <button className="px-5 read_morebtn" type="button" data-bs-dismiss="modal">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </AuthMainLayout>
+    );
+};
+
+export default CmsDesignGallery;

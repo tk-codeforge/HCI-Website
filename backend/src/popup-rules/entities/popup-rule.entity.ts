@@ -54,6 +54,9 @@ export class PopupRule {
     @Column({ type: 'varchar', length: 255, default: 'Form submitted successfully!' })
     success_message: string;
 
+    @Column({ type: 'varchar', length: 500, nullable: true, default: 'Noida, Delhi, Gurgaon, Faridabad, Ghaziabad' })
+    locations: string;
+
     @CreateDateColumn()
     created_at: Date;
 

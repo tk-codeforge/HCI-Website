@@ -18,7 +18,8 @@ const PopupManager = () => {
         trigger_type: "time", delay_seconds: 6, scroll_percentage: 50, 
         heading: "Let's build your dream space.", sub_heading: "Enter your details to get a free estimate.", 
         cta_text: "GET FREE QUOTE", lead_form_name: "Modern Popup Form",
-        redirect_url: "/thank-you", success_message: "Details submitted successfully!"
+        redirect_url: "/thank-you", success_message: "Details submitted successfully!",
+        locations: "Noida, Delhi, Gurgaon, Faridabad, Ghaziabad"
     };
     
     const [formData, setFormData] = useState(initialFormState);
@@ -228,6 +229,19 @@ const PopupManager = () => {
                                     <label className="fw-bold">Popup Sub-heading</label>
                                     <textarea className="form-control" name="sub_heading" value={formData.sub_heading} onChange={handleChange} rows="2"></textarea>
                                 </div>
+                                <div className="col-md-12 mt-3">
+    <label className="fw-bold">Location Dropdown Options (Comma separated) <span className="text-danger">*</span></label>
+    <input 
+        type="text" 
+        className="form-control" 
+        name="locations" 
+        value={formData.locations || ""} 
+        onChange={handleChange} 
+        placeholder="e.g. Noida, Delhi NCR, Gurgaon, Bangalore" 
+        required 
+    />
+    <small className="text-muted">Separate multiple locations with commas. Users will select from these options in the popup.</small>
+</div>
                                 <div className="col-md-6 mt-3">
                                     <label className="fw-bold">Lead Form Name</label>
                                     <input type="text" className="form-control" name="lead_form_name" value={formData.lead_form_name} onChange={handleChange} required />

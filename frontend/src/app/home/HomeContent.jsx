@@ -38,6 +38,20 @@ const SliderCard = dynamic(() => import("../components/SliderCard"), { ssr: fals
 const VideoTestimonialSlider = dynamic(() => import("../components/VideoTestimonialSlider"), { ssr: false, loading: () => <div style={{ height: "400px", background: "#f8f9fa", width: "100%" }} /> });
 const CounterRow = dynamic(() => import("../components/CounterRow"), { ssr: false, loading: () => <div style={{ height: "300px", background: "#f8f9fa", width: "100%" }} /> });
 
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
 // --- DATA FETCHING WITH FETCH ---
 async function getRemainingData() {
   const baseURL = process.env.NODE_ENV === "development" ? process.env.NEXT_PUBLIC_API_DEV_URL : process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -270,6 +284,12 @@ const FactoryHeadingTag = safeHeadingTag(furnitureFactoryData.headingTag);
         
 const dynamicBgUrl = theWayWeWorkData.bg_image || "";
 const offerBgUrl = whatWeOfferData?.bg_image || "";
+// Prefer a related CMS image as a lightweight video poster/backdrop.
+const factoryVideoPoster =
+  furnitureFactoryData.topImage ||
+  furnitureFactoryData.image1 ||
+  furnitureFactoryData.image2 ||
+  "";
 
   
   const WAY_WE_WORK_PALETTE = [
@@ -287,7 +307,6 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
           overflow-x: hidden;
         }
         .text-orange-force { color: #ff914d !important; }
-        .banner-overlay { padding-bottom: 7rem !important; }
         .force-white-title { color: #ffffff !important; }
         
         /* 🌟 FIX 1: Restored Old Styling for "The Way We Work" Numbers */
@@ -452,10 +471,6 @@ const offerBgUrl = whatWeOfferData?.bg_image || "";
         }
         .yt-fix-wrapper .card { border-radius: 12px; overflow: hidden; border: none; }
         
-        @media (min-width: 768px) {
-            .banner-overlay { padding-bottom: 9rem !important; }
-        }
-
         @media (max-width: 768px) {
 
   .designidea .btn_knowmoreblack {
@@ -924,7 +939,10 @@ const targetId = `step-${index + 1}`;
               <CarouselRow className="mt-4 row g-4 mx-0 mobile-scroll-row">
                 {staticRecords.map((record, i) => (
                   <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
-                    <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} imageAlt={record?.child_content?.image_alt} descriptionBg={record?.child_content?.description} />
+                    <BgImageCard style={{ backgroundImage: `url(${record?.child_content?.image})` }} cardLinkTag={`/designer-choice/gallery?id=${record?.id}`} designerCardBgDiv={"designercard designercardimg1"} titleBgImage={record?.child_content?.title} imageAlt={record?.child_content?.image_alt}
+                    //  descriptionBg={record?.child_content?.description}
+                    descriptionBg={stripHtml(record?.child_content?.description)}
+                     />
                   </div>
                 ))}
               </CarouselRow>
@@ -939,7 +957,8 @@ const targetId = `step-${index + 1}`;
                   designerCardBgDiv={"designercard designercardimg1"}
                   titleBgImage={record?.child_content?.title}
                                     imageAlt={record?.child_content?.image_alt}
-                  descriptionBg={record?.child_content?.description}
+                  // descriptionBg={record?.child_content?.description}
+                  descriptionBg={stripHtml(record.child_content?.description)}
                 />
               ))}
             </PopCarousel>
@@ -1002,9 +1021,11 @@ const targetId = `step-${index + 1}`;
    border-radius: 16px;
 }
 
-.factory-video-wrap .fv-bg { display: none; }
+.factory-video-wrap .fv-bg {
+  display: none;
+}
 .factory-video-wrap .fv-main {
-  object-fit: contain;           
+  object-fit: contain;
   z-index: 1;
 }
 
@@ -1016,8 +1037,12 @@ const targetId = `step-${index + 1}`;
     height: 100%;
     min-height: 260px;
   }
-    .factory-video-wrap .fv-bg {
+  .factory-video-wrap .fv-bg {
     display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     filter: blur(22px) brightness(0.85);
     transform: scale(1.15);
@@ -1053,41 +1078,31 @@ const targetId = `step-${index + 1}`;
               {furnitureFactoryData.video ? (
                 <div className="col-lg-7 d-flex">
                   <div className="factory-video-wrap">
+                    {factoryVideoPoster ? (
+                      <img
+                        className="fv-bg d-none d-lg-block"
+                        src={factoryVideoPoster}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : null}
                     <video
-  className="fv-bg d-none d-lg-block"
-  preload="metadata"
-  src={furnitureFactoryData.video}
-  autoPlay
-  muted
-  loop
-  playsInline
-  aria-hidden="true"
-  tabIndex={-1}
-/>
-{/* <video
-  className="fv-main"
-  src={furnitureFactoryData.video}
-  autoPlay
-  muted
-  loop
-  playsInline
-  controls
-/> */}
-
-<video
-  className="fv-main"
-  src={furnitureFactoryData.video}
-  autoPlay
-  muted
-  loop
-  playsInline
-  preload="auto"
-  disablePictureInPicture
-  disableRemotePlayback
-  controlsList="nodownload nofullscreen noremoteplayback"
-  tabIndex={-1}
-  aria-hidden="true"
-/>
+                      className="fv-main"
+                      src={furnitureFactoryData.video}
+                      poster={factoryVideoPoster || undefined}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="none"
+                      disablePictureInPicture
+                      disableRemotePlayback
+                      controlsList="nodownload nofullscreen noremoteplayback"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    />
                   </div>
                 </div>
               ) : (

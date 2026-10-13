@@ -107,59 +107,156 @@ export default function ExperienceFormClient({ initialConfig }) {
 
   const [submissionError, setSubmissionError] = useState("");
   const [submissionMessage, setSubmissionMessage] = useState("");
-  const [fieldErrors, setFieldErrors] = useState({
-    fullName: false,
-    email: false,
-    contactNo: false,
-    place: false,
-    query: false,
-    termsAccepted: false,
-  });
+  // const [fieldErrors, setFieldErrors] = useState({
+  //   fullName: false,
+  //   email: false,
+  //   contactNo: false,
+  //   place: false,
+  //   query: false,
+  //   termsAccepted: false,
+  // });
+
+    const [fieldErrors, setFieldErrors] = useState({});
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  // };
+
+  // const handleCheckboxChange = (e) => {
+  //   const { name, checked } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: checked }));
+  // };
+
+  // const validateForm = () => {
+  //   const errors = {};
+  //   FIELD_ORDER.forEach((key) => {
+  //     const fieldCfg = config.fields[key];
+  //     if (!fieldCfg?.enabled) {
+  //       errors[key] = false;
+  //       return;
+  //     }
+  //     if (key === "email") {
+  //       errors[key] =
+  //         fieldCfg.required && !/^\S+@\S+\.\S+$/.test(formData.email);
+  //     } else {
+  //       errors[key] = fieldCfg.required && formData[key].trim() === "";
+  //     }
+  //   });
+
+  //   errors.termsAccepted = !formData.termsAccepted;
+  //   setFieldErrors(errors);
+  //   return !Object.values(errors).some((error) => error === true);
+  // };
+
+    const sanitizePhone = (value) => {
+    let digits = value.replace(/\D/g, "");
+    if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+    return digits.slice(0, 10);
+  };
+
+  // Required-ness comes from the CMS (fieldCfg.required); format is always checked when filled
+  const validateField = (name, rawValue, fieldCfg) => {
+    const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+    const label = fieldCfg?.label || "This field";
+
+    if (!value) return fieldCfg?.required ? `${label} is required.` : "";
+
+    switch (name) {
+      case "fullName":
+        if (value.length < 2) return `${label} must be at least 2 characters.`;
+        if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+          return `${label} can only contain letters and spaces.`;
+        return "";
+      case "contactNo":
+        if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
+        if (!/^[6-9]/.test(value))
+          return "Mobile number must start with 6, 7, 8 or 9.";
+        return "";
+      case "email":
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+          return "Enter a valid email address.";
+        return "";
+      case "place":
+        if (value.length < 2) return "Enter a valid place.";
+        return "";
+      case "query":
+        if (value.length < 10) return "Query must be at least 10 characters.";
+        return "";
+      default:
+        return "";
+    }
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value =
+      name === "contactNo" ? sanitizePhone(e.target.value) : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // keep the error live once the field has been validated
+    if (fieldErrors[name] !== undefined) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [name]: validateField(name, value, config.fields[name]),
+      }));
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    const trimmed = value.trim();
+    setFormData((prev) => ({ ...prev, [name]: trimmed }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, trimmed, config.fields[name]),
+    }));
   };
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: checked }));
+    setFieldErrors((prev) => ({
+      ...prev,
+      [name]: checked ? "" : "Please accept the terms and conditions.",
+    }));
   };
 
   const validateForm = () => {
     const errors = {};
     FIELD_ORDER.forEach((key) => {
       const fieldCfg = config.fields[key];
-      if (!fieldCfg?.enabled) {
-        errors[key] = false;
-        return;
-      }
-      if (key === "email") {
-        errors[key] =
-          fieldCfg.required && !/^\S+@\S+\.\S+$/.test(formData.email);
-      } else {
-        errors[key] = fieldCfg.required && formData[key].trim() === "";
-      }
+      errors[key] = fieldCfg?.enabled
+        ? validateField(key, formData[key], fieldCfg)
+        : "";
     });
-
-    errors.termsAccepted = !formData.termsAccepted;
+    errors.termsAccepted = formData.termsAccepted
+      ? ""
+      : "Please accept the terms and conditions.";
     setFieldErrors(errors);
-    return !Object.values(errors).some((error) => error === true);
+    return !Object.values(errors).some(Boolean);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+        setSubmissionError("");
     if (!validateForm()) {
-      setSubmissionError("Please fill in all required fields and accept the terms.");
+      setSubmissionError("Please correct the highlighted fields.");
       return;
     }
 
     const formRequestedData = {
-      name: formData.fullName,
-      email: formData.email,
-      mobile: formData.contactNo,
-      place: formData.place,
-      query: formData.query,
+      // name: formData.fullName,
+      // email: formData.email,
+      // mobile: formData.contactNo,
+      // place: formData.place,
+      // query: formData.query,
+
+            name: formData.fullName.trim(),
+      email: formData.email.trim(),
+      mobile: formData.contactNo.trim(),
+      place: formData.place.trim(),
+      query: formData.query.trim(),
       ...buildLeadMetadata({
         pathname,
         leadFormType: "inline",
@@ -180,6 +277,7 @@ export default function ExperienceFormClient({ initialConfig }) {
           query: "",
           termsAccepted: false,
         });
+                setFieldErrors({});
         setTimeout(() => {
           window.location.href = "/thank-you";
         }, 300);
@@ -222,10 +320,16 @@ export default function ExperienceFormClient({ initialConfig }) {
               border-color: var(--experience-submit-bg) !important;
               color: var(--experience-submit-color) !important;
             }
+
+                        .form_experience_center .exp-field-error {
+              color: #ff6b6b;
+              font-size: 13px;
+              margin-top: 4px;
+            }
           `,
         }}
       />
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <h5 className="text-center exp-heading" style={{ color: "var(--experience-font-color)" }}>
           {config.heading}
         </h5>
@@ -243,21 +347,30 @@ export default function ExperienceFormClient({ initialConfig }) {
               value={formData.fullName}
               onChange={handleInputChange}
               required={config.fields.fullName.required}
+                            onBlur={handleInputBlur}
+              maxLength={60}
+              autoComplete="name"
             />
+                        {fieldErrors.fullName && <div className="exp-field-error">{fieldErrors.fullName}</div>}
           </div>
         )}
 
         {config.fields.contactNo?.enabled && (
           <div className="mb-3 col-md-12">
             <input
-              type="text"
+              type="tel"
               className={`form-control ${fieldErrors.contactNo ? "is-invalid" : ""}`}
               name="contactNo"
               placeholder={config.fields.contactNo.placeholder}
               value={formData.contactNo}
               onChange={handleInputChange}
               required={config.fields.contactNo.required}
+                            onBlur={handleInputBlur}
+              inputMode="numeric"
+              maxLength={10}
+              autoComplete="tel-national"
             />
+                        {fieldErrors.contactNo && <div className="exp-field-error">{fieldErrors.contactNo}</div>}
           </div>
         )}
 
@@ -271,7 +384,11 @@ export default function ExperienceFormClient({ initialConfig }) {
               value={formData.email}
               onChange={handleInputChange}
               required={config.fields.email.required}
+                            onBlur={handleInputBlur}
+              maxLength={100}
+              autoComplete="email"
             />
+                        {fieldErrors.email && <div className="exp-field-error">{fieldErrors.email}</div>}
           </div>
         )}
 
@@ -285,7 +402,11 @@ export default function ExperienceFormClient({ initialConfig }) {
               onChange={handleInputChange}
               placeholder={config.fields.place.placeholder}
               required={config.fields.place.required}
+                            onBlur={handleInputBlur}
+              maxLength={60}
+              autoComplete="address-level2"
             />
+                        {fieldErrors.place && <div className="exp-field-error">{fieldErrors.place}</div>}
           </div>
         )}
 
@@ -299,7 +420,10 @@ export default function ExperienceFormClient({ initialConfig }) {
               value={formData.query}
               onChange={handleInputChange}
               required={config.fields.query.required}
+                            onBlur={handleInputBlur}
+              maxLength={500}
             ></textarea>
+                        {fieldErrors.query && <div className="exp-field-error">{fieldErrors.query}</div>}
           </div>
         )}
 
@@ -321,6 +445,7 @@ export default function ExperienceFormClient({ initialConfig }) {
           <label className="form-check-label exp-checkbox-label">
             {renderCheckboxText(config.checkboxText, config.checkboxLinks)}
           </label>
+                    {fieldErrors.termsAccepted && <div className="exp-field-error">{fieldErrors.termsAccepted}</div>}
         </div>
 
         {submissionError && <div className="text-center alert alert-danger">{submissionError}</div>}

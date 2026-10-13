@@ -1,6 +1,1027 @@
+// "use client";
+
+// import { useState, useRef, useEffect, useCallback } from "react";
+// import { CiCirclePlus, CiCircleMinus } from "react-icons/ci";
+// import { useSearchParams } from "next/navigation";
+// import TooltipComponent from "../components/TooltipComponent";
+// import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
+// import api from "@/utils/api";
+// import "./estimator_step.css";
+
+// const RoomCounter = ({ title, count, onAdd, onRemove }) => (
+//   <>
+//     <div className="bg-white shadow w-75 rounded-3">
+//       <div className="d-flex justify-content-between align-items-center">
+//         <button onClick={onRemove} className="border-0 plusminus">
+//           <CiCircleMinus color={"#a9a9a9"} />
+//         </button>
+//         <h4>{count}</h4>
+//         <button onClick={onAdd} className="border-0 plusminus">
+//           <CiCirclePlus color={"#a9a9a9"} />
+//         </button>
+//       </div>
+//     </div>
+//     <h4 className="bedroomtext">{title}</h4>
+//   </>
+// );
+
+// const SIZE_TYPE_DATA = [
+//     { id: 1, name: "1BHK Apartment" },
+//     { id: 2, name: "2BHK Apartment" },
+//     { id: 3, name: "3BHK Apartment" },
+//     { id: 4, name: "4BHK Apartment" },
+//     { id: 5, name: "1BHK Villa" },
+//     { id: 6, name: "2BHK Villa" },
+//     { id: 7, name: "3BHK Villa" },
+//     { id: 8, name: "4BHK Villa" },
+//     { id: 9, name: "1BHK Flat" },
+//     { id: 10, name: "2BHK Flat" },
+//     { id: 11, name: "3BHK Flat" },
+//     { id: 12, name: "4BHK Flat" },
+//   ];
+
+// const EstimatorClient = () => {
+//   const searchParams = useSearchParams();
+//   const [otpSent, setOtpSent] = useState(false);
+//   const [bedrooms, setBedrooms] = useState(0);
+//   const [bathrooms, setBathrooms] = useState(0);
+//   const [living, setLiving] = useState(0);
+//   const [kitchen, setKitchen] = useState(0);
+//   const [home, setHome] = useState(""); // apartment, villa, flat
+//   const [movableFurniture, setMovableFurniture] = useState(false);
+//   const [selectedBHK, setSelectedBHK] = useState("");
+//   const [formData, setFormData] = useState({
+//     home: "",
+//     firstName: "",
+//     lastName: "",
+//     mobile: "",
+//     email: "",
+//     query: "",
+//   });
+//   const [step, setStep] = useState(1);
+//   const [otp, setOtp] = useState(["", "", "", ""]); // Store 4 OTP inputs
+//   const otpRefs = useRef([]);
+//   const [otpToken, setOtpToken] = useState("");
+//   const [verificationId, setVerificationId] = useState("");
+//   const [showWarning, setShowWarning] = useState(false);
+//   const [warningMessage, setWarningMessage] = useState("");
+//   const [submissionMessage, setSubmissionMessage] = useState("");
+//   const [submissionError, setSubmissionError] = useState("");
+//   const [timer, setTimer] = useState(60);
+//   const [isResendDisabled, setIsResendDisabled] = useState(true);
+//   const timerRef = useRef(null);
+//   const [estimaterCalculationData, setEstimaterCalculationData] = useState({});
+//   const [packageName, setPackageName] = useState("");
+
+//   // const sizeTypeData = [
+//   //   { id: 1, name: "1BHK Apartment" },
+//   //   { id: 2, name: "2BHK Apartment" },
+//   //   { id: 3, name: "3BHK Apartment" },
+//   //   { id: 4, name: "4BHK Apartment" },
+//   //   { id: 5, name: "1BHK Villa" },
+//   //   { id: 6, name: "2BHK Villa" },
+//   //   { id: 7, name: "3BHK Villa" },
+//   //   { id: 8, name: "4BHK Villa" },
+//   //   { id: 9, name: "1BHK Flat" },
+//   //   { id: 10, name: "2BHK Flat" },
+//   //   { id: 11, name: "3BHK Flat" },
+//   //   { id: 12, name: "4BHK Flat" },
+//   // ];
+
+//   useEffect(() => {
+//     const urlHome = searchParams?.get('home');
+//     const urlBhk = searchParams?.get('bhk');
+
+//     if (urlHome && urlBhk) {
+//       setHome(urlHome);
+//       setSelectedBHK(urlBhk);
+
+//       // Auto-fill sensible default rooms based on BHK selection
+//       const count = parseInt(urlBhk.charAt(0)) || 1;
+//       setBedrooms(count);
+//       setBathrooms(count === 1 ? 1 : count - 1); // e.g., 3BHK gets 3 beds, 2 baths
+//       setLiving(1);
+//       setKitchen(1);
+      
+//       // Sensible defaults so they aren't stuck
+//       setMovableFurniture(false); 
+//       setPackageName("Standard");
+
+//       // Auto-advance to Step 2 (Package Selection)
+//       setStep(2);
+//     }
+//   }, [searchParams]);
+
+//   useEffect(() => {
+//     if (otpSent) {
+//       // Reset and start the timer
+//       setTimer(60);
+//       setIsResendDisabled(true);
+
+//       timerRef.current = setInterval(() => {
+//         setTimer((prevTimer) => {
+//           if (prevTimer <= 1) {
+//             clearInterval(timerRef.current);
+//             setIsResendDisabled(false); // Enable resend button after timer ends
+//             return 0;
+//           }
+//           return prevTimer - 1;
+//         });
+//       }, 1000);
+//     }
+
+//     // Cleanup the timer on component unmount
+//     return () => clearInterval(timerRef.current);
+//   }, [otpSent]);
+
+//   const handleNext = async () => {
+//     let message = "";
+
+//     if (step === 1 && !(home && selectedBHK)) {
+//       message = "Please select a home type and home size before proceeding.";
+//     } else if (step === 2) {
+//       const selectedPackage = document.querySelector(
+//         'input[name="package"]:checked'
+//       );
+//       const movable = document.querySelector('input[name="movable"]:checked');
+
+//       if (!movable) {
+//         message = "Please select whether you have movable furniture.";
+//       } else if (!selectedPackage) {
+//         message = "Please select a package before proceeding.";
+//       }
+//     } else if (step === 3) {
+//       const { firstName, lastName, mobile, email, query } = formData;
+//       if (!firstName || !lastName || !mobile || !email || !query) {
+//         message = "Please fill in all required fields.";
+//       } else if (!/^\d{10}$/.test(mobile)) {
+//         message = "Please enter a valid 10-digit mobile number.";
+//       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+//         message = "Please enter a valid email address.";
+//       } else {
+//         // Send OTP if validation passes
+//         const response = await sendOtp(formData.mobile);
+//         console.log("OTP Data", response);
+//         return response;
+//       }
+//     }
+
+//     if (message) {
+//       setWarningMessage(message);
+//       setShowWarning(true);
+//     } else {
+//       setStep((prevStep) => prevStep + 1);
+//       setWarningMessage("");
+//     }
+//   };
+
+//   const sendOtp = async (phoneNumber) => {
+//     try {
+//       console.log(`Sending OTP to: ${phoneNumber}`);
+//       const response = await api.post("/otp/send", { phoneNumber });
+
+//       if (response.status === 200 || response.status === 201) {
+//         console.log("OTP sent successfully:", response.data);
+
+//         setVerificationId(response.data.verificationId);
+//         setOtpSent(true);
+//         setStep(4);
+
+//         if (response.data?.otpToken) {
+//           setOtpToken(response.data.otpToken);
+//         } else {
+//           console.warn("No OTP token returned. Proceeding without otpToken.");
+//         }
+
+//         setOtp(["", "", "", ""]);
+//       } else {
+//         console.error("Unexpected response status:", response);
+//         setSubmissionError("Error sending OTP. Please try again.");
+//       }
+//     } catch (error) {
+//       console.error(
+//         "Error sending OTP:",
+//         error.response?.data || error.message
+//       );
+//       setSubmissionError("Error sending OTP. Please try again.");
+//     }
+//   };
+
+//   const handleOtpChange = (index, value) => {
+//     if (!isNaN(value) && value.length <= 1) {
+//       const newOtp = [...otp];
+//       newOtp[index] = value;
+//       setOtp(newOtp);
+
+//       if (value) {
+//         if (index < otpRefs.current.length - 1) {
+//           otpRefs.current[index + 1].focus();
+//         }
+//       } else {
+//         if (index > 0) {
+//           otpRefs.current[index - 1].focus();
+//         }
+//       }
+//     }
+//   };
+
+//   const validateOtp = async () => {
+//     const otpCode = otp.join("");
+
+//     try {
+//       const response = await api.post("/otp/verify", {
+//         phoneNumber: formData.mobile,
+//         otpVerificationID: verificationId,
+//         otp: otpCode,
+//         otpToken: otpToken,
+//       });
+
+//       console.log("OTP verification response: ", response);
+
+//       if (response.status === 200 || response.status === 201) {
+//         submitForm();
+//       } else {
+//         setSubmissionError("Invalid OTP. Please try again.");
+//       }
+//     } catch (error) {
+//       setSubmissionError("Error validating OTP. Please try again.");
+//     }
+//   };
+
+//   const handleResendOtp = async () => {
+//     setOtpSent(false);
+//     setOtpSent(true);
+//     setIsResendDisabled(true);
+//     setTimer(60);
+//     await sendOtp(formData.mobile);
+//   };
+
+//   const handlePrevious = () => setStep((prevStep) => prevStep - 1);
+
+//   const handleHomeSelect = (type) => {
+//     setHome(type);
+//     setSelectedBHK("");
+//   };
+
+//   const handleBHKSelect = (bhk) => {
+//     setSelectedBHK(bhk);
+//   };
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prevData) => ({ ...prevData, [name]: value }));
+//   };
+
+//   const handleAddBedroom = () => setBedrooms(bedrooms + 1);
+//   const handleRemoveBedroom = () =>
+//     setBedrooms(bedrooms > 0 ? bedrooms - 1 : 0);
+
+//   const handleAddBathroom = () => setBathrooms(bathrooms + 1);
+//   const handleRemoveBathroom = () =>
+//     setBathrooms(bathrooms > 0 ? bathrooms - 1 : 0);
+
+//   const handleAddLiving = () => setLiving(living + 1);
+//   const handleRemoveLiving = () => setLiving(living > 0 ? living - 1 : 0);
+
+//   const handleAddKitchen = () => setKitchen(kitchen + 1);
+//   const handleRemoveKitchen = () => setKitchen(kitchen > 0 ? kitchen - 1 : 0);
+
+//   const submitForm = async () => {
+//     // const { firstName, lastName, mobile, email, query } = formData;
+
+//     const json_content = {
+//       package_name: packageName,
+//       bedrooms: bedrooms,
+//       bathrooms: bathrooms,
+//       living: living,
+//       kitchen: kitchen,
+//       home: getSizeTypeId(selectedBHK, home),
+//       selectedBHK: selectedBHK,
+//       movableFurniture: movableFurniture,
+//     };
+
+//     const payload = {
+//       bedrooms,
+//       bathrooms,
+//       living,
+//       kitchen,
+//       home,
+//       selectedBHK,
+//       ...formData,
+//       json_content,
+//       total_price: estimaterCalculationData?.totalAmount ?? 0,
+//     };
+
+//     try {
+//       const response = await api.post("/estimater", payload);
+//       console.log(response);
+//       if (response.status === 201) {
+//         setSubmissionMessage("Form submitted successfully!");
+//         setOtpSent(false);
+//         setStep(5);
+//       }
+//     } catch (error) {
+//       setSubmissionError("Error submitting the form. Please try again.");
+//     } finally {
+//       clearMessages();
+//     }
+//   };
+
+//   const resetForm = () => {
+//     setBedrooms(0);
+//     setBathrooms(0);
+//     setLiving(0);
+//     setKitchen(0);
+//     setHome("");
+//     setSelectedBHK("");
+//     setFormData({
+//       home: "",
+//       firstName: "",
+//       lastName: "",
+//       mobile: "",
+//       email: "",
+//       query: "",
+//     });
+//     setOtp(["", "", "", ""]);
+//     setStep(1);
+//     setOtpSent(false);
+//   };
+
+//   const clearMessages = () => {
+//     setTimeout(() => {
+//       setSubmissionMessage("");
+//       setSubmissionError("");
+//     }, 5000);
+//   };
+
+//   const getSizeTypeId = useCallback((selectedBHK, home) => {
+//     const name = `${selectedBHK} ${home}`.toLowerCase();
+//     const sizeType = SIZE_TYPE_DATA.find(
+//       (item) => item.name.toLowerCase() === name
+//     );
+//     return sizeType ? sizeType.id : null;
+//   }, []);
+
+//   const handleSubmitGetEstimate = useCallback(async () => {
+//     const payload = {
+//       size_type: getSizeTypeId(selectedBHK, home),
+//       bedroom: bedrooms,
+//       toilet: bathrooms,
+//       living: living,
+//       kitchen: kitchen,
+//       isfuniture_movable: movableFurniture,
+//       package_id:
+//         packageName === "Standard" ? 1 : packageName === "Premium" ? 2 : 3,
+//     };
+
+//     try {
+//       const response = await api.post(
+//         "/estimatercalculation/getEstimationQuatation",
+//         payload
+//       );
+//       if (response.status === 201) {
+//         setEstimaterCalculationData(response.data);
+//       } else {
+//         setSubmissionError("Error fetching estimation. Please try again.");
+//       }
+//     } catch (error) {
+//       setSubmissionError("Error fetching estimation. Please try again.");
+//       console.error("Error during estimation fetch: ", error.message);
+//     }
+//   }, [getSizeTypeId, selectedBHK, home, bedrooms, bathrooms, living, kitchen, movableFurniture, packageName]);
+
+//   useEffect(() => {
+//     if (step === 3) {
+//       handleSubmitGetEstimate();
+//     }
+//   }, [step, handleSubmitGetEstimate]);
+
+//   return (
+//     <main>
+//       {warningMessage && (
+//         <div
+//           className="text-center alert alert-warning alert-dismissible fade show"
+//           role="alert"
+//         >
+//           {warningMessage}
+//           <button
+//             type="button"
+//             className="btn-close"
+//             aria-label="Close"
+//             onClick={() => setWarningMessage(null)}
+//           ></button>
+//         </div>
+//       )}
+//       {submissionMessage && (
+//         <div
+//           className="text-center alert alert-success alert-dismissible fade show"
+//           role="alert"
+//         >
+//           {submissionMessage}
+//           <button
+//             type="button"
+//             className="btn-close"
+//             aria-label="Close"
+//             onClick={() => setSubmissionMessage(null)}
+//           ></button>
+//         </div>
+//       )}
+//       {submissionError && (
+//         <div
+//           className="text-center alert alert-danger alert-dismissible fade show"
+//           role="alert"
+//         >
+//           {submissionError}
+//           <button
+//             type="button"
+//             className="btn-close"
+//             aria-label="Close"
+//             onClick={() => setSubmissionError(null)}
+//           ></button>
+//         </div>
+//       )}
+
+//       <div className="progress-container">
+//         <div
+//           className={`step-container step_one ${
+//             step === 1 || step === 2 ? "active_step" : ""
+//           } ${step > 2 ? "completed" : ""}`}
+//         >
+//           <div className="step-progress">
+//             <div className="step-progress-wrap">
+//               <div className="step-icon">✔</div>
+//               <div className="step-number">1</div>
+//               <div className="step-label">House Details</div>
+//             </div>
+//           </div>
+//           <div className="triangle-wrapper">
+//             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+//               <path
+//                 d="M0,0 L50,50 L0,100"
+//                 stroke="var(--step_border_color)"
+//                 fill="none"
+//                 strokeWidth="1"
+//               />
+//             </svg>
+//           </div>
+//         </div>
+//         <div
+//           className={`step-container step_two ${
+//             step === 3 || step === 4 ? "active_step" : ""
+//           } ${step > 4 ? "completed" : ""}`}
+//         >
+//           <div className="step-progress">
+//             <div className="step-progress-wrap">
+//               <div className="step-icon">✔</div>
+//               <div className="step-number">2</div>
+//               <div className="step-label">User Details & Verification</div>
+//             </div>
+//           </div>
+//           <div className="triangle-wrapper">
+//             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+//               <path
+//                 d="M0,0 L50,50 L0,100"
+//                 stroke="var(--step_border_color)"
+//                 fill="none"
+//                 strokeWidth="1"
+//               />
+//             </svg>
+//           </div>
+//         </div>
+//         <div
+//           className={`step-container step_three need_to_complete ${
+//             step === 5 ? "active_step" : ""
+//           }`}
+//         >
+//           <div className="step-progress">
+//             <div className="step-progress-wrap">
+//               <div className="step-icon">✔</div>
+//               <div className="step-number">3</div>
+//               <div className="step-label">Quotation</div>
+//             </div>
+//           </div>
+//           <div className="triangle-wrapper">
+//             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+//               <path
+//                 d="M0,0 L50,50 L0,100"
+//                 stroke="var(--step_border_color)"
+//                 fill="none"
+//                 strokeWidth="1"
+//               />
+//             </svg>
+//           </div>
+//         </div>
+//       </div>
+
+//       {step === 1 && (
+//         <>
+//           <div className="step-content">
+//             <section className="container ">
+//               <div className="row mx-0 g-3">
+//                 <h3 className="   text-center">
+//                   Choose Your <span className="font_stylish">Home</span>
+//                 </h3>
+
+//                 <div className="col-lg-4 col-md-4 col-12">
+//                   <div
+//                     className={`card card_check_bhk ${
+//                       home === "apartment" ? "selected" : ""
+//                     }`}
+//                     onClick={() => handleHomeSelect("apartment")}
+//                   >
+//                     <div>
+//                       <input
+//                         className="form-check-input big_check"
+//                         type="radio"
+//                         name="home"
+//                         id="apartments"
+//                         value="apartment"
+//                         checked={home === "apartment"}
+//                         onChange={() => handleHomeSelect("apartment")}
+//                         onClick={(e) => e.stopPropagation()}
+//                       />
+//                     </div>
+//                     <img
+//                       src="/images/apartmen.jpeg"
+//                       className="w-100 object-fit-contain"
+//                       height={160}
+//                       alt="Apartment"
+//                     decoding="async"  loading="lazy" />
+//                     <h5 className="pt-3 text-center">Apartments</h5>
+//                     <div className="m-auto my-3 text-center">
+//                       {["1bhk", "2bhk", "3bhk", "4bhk"].map((bhk) => (
+//                         <div className="form-check form-check-inline" key={bhk}>
+//                           <input
+//                             className="form-check-input"
+//                             type="radio"
+//                             name="apartment-bhk"
+//                             value={"apartment" + bhk}
+//                             id={"apartment" + bhk}
+//                             checked={
+//                               selectedBHK === bhk && home === "apartment"
+//                             }
+//                             onChange={() => handleBHKSelect(bhk)}
+//                           />
+//                           <label
+//                             className="form-check-label"
+//                             htmlFor={"apartment" + bhk}
+//                           >
+//                             {bhk.toUpperCase()}
+//                           </label>
+//                         </div>
+//                       ))}
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-lg-4 col-md-4 col-12">
+//                   <div
+//                     className={`card card_check_bhk ${
+//                       home === "villa" ? "selected" : ""
+//                     }`}
+//                     onClick={() => handleHomeSelect("villa")}
+//                   >
+//                     <div>
+//                       <input
+//                         className="form-check-input big_check"
+//                         type="radio"
+//                         name="home"
+//                         id="villas"
+//                         value="villa"
+//                         checked={home === "villa"}
+//                         onChange={() => handleHomeSelect("villa")}
+//                         onClick={(e) => e.stopPropagation()}
+//                       />
+//                     </div>
+//                     <img
+//                       src="/images/vill.jpeg"
+//                       className="w-100 object-fit-contain"
+//                       height={160}
+//                       alt="Villa"
+//                     decoding="async"  loading="lazy" />
+//                     <h5 className="pt-3 text-center">Villa</h5>
+//                     <div className="m-auto my-3 text-center">
+//                       {["1bhk", "2bhk", "3bhk", "4bhk"].map((bhk) => (
+//                         <div className="form-check form-check-inline" key={bhk}>
+//                           <input
+//                             className="form-check-input"
+//                             type="radio"
+//                             name="villa-bhk"
+//                             value={"villa" + bhk}
+//                             id={"villa" + bhk}
+//                             checked={selectedBHK === bhk && home === "villa"}
+//                             onChange={() => handleBHKSelect(bhk)}
+//                           />
+//                           <label
+//                             className="form-check-label"
+//                             htmlFor={"villa" + bhk}
+//                           >
+//                             {bhk.toUpperCase()}
+//                           </label>
+//                         </div>
+//                       ))}
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-lg-4 col-md-4 col-12">
+//                   <div
+//                     className={`card card_check_bhk ${
+//                       home === "flat" ? "selected" : ""
+//                     }`}
+//                     onClick={() => handleHomeSelect("flat")}
+//                   >
+//                     <div>
+//                       <input
+//                         className="form-check-input big_check"
+//                         type="radio"
+//                         name="home"
+//                         id="flats"
+//                         value="flat"
+//                         checked={home === "flat"}
+//                         onChange={() => handleHomeSelect("flat")}
+//                         onClick={(e) => e.stopPropagation()}
+//                       />
+//                     </div>
+//                     <img
+//                       src="/images/vill.jpeg"
+//                       className="w-100 object-fit-contain"
+//                       height={160}
+//                       alt="flat"
+//                     decoding="async"  loading="lazy" />
+//                     <h5 className="pt-3 text-center">Flat</h5>
+//                     <div className="m-auto my-3 text-center">
+//                       {["1bhk", "2bhk", "3bhk", "4bhk"].map((bhk) => (
+//                         <div className="form-check form-check-inline" key={bhk}>
+//                           <input
+//                             className="form-check-input"
+//                             type="radio"
+//                             name="flat-bhk"
+//                             value={"flat" + bhk}
+//                             id={"flat" + bhk}
+//                             checked={selectedBHK === bhk && home === "flat"}
+//                             onChange={() => handleBHKSelect(bhk)}
+//                           />
+//                           <label
+//                             className="form-check-label"
+//                             htmlFor={"flat" + bhk}
+//                           >
+//                             {bhk.toUpperCase()}
+//                           </label>
+//                         </div>
+//                       ))}
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </section>
+//           </div>
+//         </>
+//       )}
+
+//       {step === 2 && (
+//         <div className="step-content">
+//           <section className="package">
+//             <div className="container">
+//               <div className="row justify-content-center mx-0 g-4">
+//                 <h3 className="my-0 mb-0 g-4 mb-lg-4 text-center">
+//                   Number of <span className="font_stylish">Rooms?</span>
+//                 </h3>
+//                 <div className="col-lg-2 col-6 col-md-4 mt-0">
+//                   <RoomCounter
+//                     title="Bedroom"
+//                     count={bedrooms}
+//                     onAdd={handleAddBedroom}
+//                     onRemove={handleRemoveBedroom}
+//                   />
+//                 </div>
+//                 <div className="col-lg-2 col-6 col-md-4  mt-0 ">
+//                   <RoomCounter
+//                     title="Bathroom"
+//                     count={bathrooms}
+//                     onAdd={handleAddBathroom}
+//                     onRemove={handleRemoveBathroom}
+//                   />
+//                 </div>
+//                 <div className="col-lg-2 col-6 col-md-4 mt-0">
+//                   <RoomCounter
+//                     title="Living"
+//                     count={living}
+//                     onAdd={handleAddLiving}
+//                     onRemove={handleRemoveLiving}
+//                   />
+//                 </div>
+//                 <div className="col-lg-2 col-6 col-md-4 mt-0">
+//                   <RoomCounter
+//                     title="Kitchen"
+//                     count={kitchen}
+//                     onAdd={handleAddKitchen}
+//                     onRemove={handleRemoveKitchen}
+//                   />
+//                 </div>
+
+//                 <div className="col-lg-2 col-md-4 col-12 mt-0">
+//                   <div className="box_yesno">
+//                     <div>
+//                       <h6 className="text-center">Movable Furniture</h6>
+//                     </div>
+//                     <div className="m-auto mt-2 text-center">
+//                       <div className="form-check form-check-inline ">
+//                         <input
+//                           className="mt-2 form-check-input"
+//                           type="radio"
+//                           id="yes"
+//                           name="movable"
+//                           value="yes"
+//                           checked={movableFurniture === true}
+//                           onChange={() => setMovableFurniture(true)}
+//                         />
+//                         <label
+//                           className="form-check-label fw-bolder fs-5"
+//                           htmlFor="yes"
+//                         >
+//                           Yes
+//                         </label>
+//                       </div>
+//                       <div className="form-check form-check-inline">
+//                         <input
+//                           className="mt-2 form-check-input"
+//                           type="radio"
+//                           id="no"
+//                           name="movable"
+//                           value="no"
+//                           checked={movableFurniture === false}
+//                           onChange={() => setMovableFurniture(false)}
+//                         />
+//                         <label
+//                           className="form-check-label fw-bolder fs-5"
+//                           htmlFor="no"
+//                         >
+//                           No
+//                         </label>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//             <div className="select_packege">
+//               <div className="container">
+//                 <div className="pb-lg-5 row mx-0">
+//                   <h3 className="pb-lg-2 my-2 mb-lg-2 mb-2 text-center">
+//                     Select <span className="font_stylish">Packages</span>
+//                   </h3>
+//                   <div className="col-lg-4">
+//                     <div className="form-check d-flex align-items-center">
+//                       <input
+//                         className="form-check-input big_check"
+//                         type="radio"
+//                         name="package"
+//                         id="Standard"
+//                         onClick={() => setPackageName("Standard")}
+//                       />
+//                       <div className="d-flex align-items-center ps-2">
+//                         <label
+//                           className="form-check-label label_toooltiip"
+//                           htmlFor="Standard"
+//                         >
+//                           Standard
+//                         </label>
+//                         <TooltipComponent info="Discover a comprehensive range of essential home interior solutions tailored to meet all your needs seamlessly." />
+//                       </div>
+//                     </div>
+//                   </div>
+//                   <div className="col-lg-4">
+//                     <div className="form-check d-flex align-items-center">
+//                       <input
+//                         className="form-check-input big_check"
+//                         type="radio"
+//                         name="package"
+//                         id="Premium"
+//                         onClick={() => setPackageName("Premium")}
+//                       />
+//                       <div className="d-flex align-items-center ps-2">
+//                         <label
+//                           className="form-check-label label_toooltiip"
+//                           htmlFor="Premium"
+//                         >
+//                           Premium
+//                         </label>
+//                         <TooltipComponent info="Elevate your interiors with superior home solutions that redefine excellence and take your living spaces to new heights" />
+//                       </div>
+//                     </div>
+//                   </div>
+//                   <div className="col-lg-4">
+//                     <div className="form-check d-flex align-items-center">
+//                       <input
+//                         className="form-check-input big_check"
+//                         type="radio"
+//                         name="package"
+//                         id="Luxury"
+//                         onClick={() => setPackageName("Luxury")}
+//                       />
+//                       <div className="d-flex align-items-center ps-2">
+//                         <label
+//                           className="form-check-label label_toooltiip"
+//                           htmlFor="Luxury"
+//                         >
+//                           Luxury
+//                         </label>
+
+//                         <TooltipComponent info="Experience the epitome of home interiors with our high-end solutions designed to deliver the ultimate sophistication you deserve." />
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+//         </div>
+//       )}
+
+//       {step === 3 && (
+//         <div className="step-content">
+//           <section className="container p-3 p-lg-5 my-5 card fill_your_deatil">
+//             <h3 className="pb-3 text-center">Fill Your Details</h3>
+//             <form className="row mx-0">
+//               {["firstName", "lastName", "mobile", "email", "query"].map(
+//                 (field) => (
+//                   <div className="mb-3 col-md-6" key={field}>
+//                     <input
+//                       type={
+//                         field === "email"
+//                           ? "email"
+//                           : field === "mobile"
+//                           ? "tel"
+//                           : "text"
+//                       }
+//                       className="form-control"
+//                       name={field}
+//                       placeholder={
+//                         field === "query"
+//                           ? "Location"
+//                           : field.charAt(0).toUpperCase() + field.slice(1)
+//                       }
+//                       value={formData[field]}
+//                       onChange={handleInputChange}
+//                       pattern={field === "mobile" ? "[0-9]{10}" : undefined}
+//                       maxLength={field === "mobile" ? 10 : undefined}
+//                       required
+//                     />
+//                   </div>
+//                 )
+//               )}
+//             </form>
+//             <div className="my-4 text-center">
+//               <button className="know_more" onClick={handleNext}>
+//                 Send OTP
+//               </button>
+//             </div>
+//           </section>
+//         </div>
+//       )}
+
+//       {step === 4 && (
+//         <>
+//           <section className="container p-5 my-5 card fill_your_deatil">
+//             <div className="text-center row">
+//               <p>Enter OTP sent to your mobile number:</p>
+//               <div className="container col-lg-6 d-flex justify-content-center">
+//                 {otp.map((_, index) => (
+//                   <input
+//                     key={index}
+//                     type="text"
+//                     className="mx-1 text-center form-control otp-input text-black"
+//                     maxLength={1}
+//                     value={otp[index]}
+//                     onChange={(e) => handleOtpChange(index, e.target.value)}
+//                     ref={(el) => (otpRefs.current[index] = el)}
+//                   />
+//                 ))}
+//               </div>
+//               <div className="my-4 text-center">
+//                 <button className="know_more" onClick={() => validateOtp()}>
+//                   Submit OTP
+//                 </button>
+//                 {isResendDisabled ? (
+//                   <span className="timer ms-3">Resend OTP in {timer}s</span>
+//                 ) : (
+//                   <button className="know_more ms-3" onClick={handleResendOtp}>
+//                     Resend OTP
+//                   </button>
+//                 )}
+//               </div>
+//             </div>
+//           </section>
+//         </>
+//       )}
+
+//       {step === 5 && (
+//         <div className="container">
+//           <div className="row justify-content-center mx-0">
+//             <div className="col-md-12 col-lg-8 col-xl-8">
+//               <div className="pricing-box">
+//                 <div className="row align-items-center row_bill">
+//                   <div className="col-lg-2 col-4">
+//                     <img
+//                       src="/images/standard_ico.jpeg"
+//                       width={80}
+//                       alt="bill"
+//                     decoding="async"  loading="lazy" />
+//                   </div>
+//                   <div className="col-lg-7 col-8">
+//                     <h5 className="header text-capitalize">
+//                       {packageName ?? "Standard"}
+//                     </h5>
+//                     <p className="pb-0 mb-0 description">
+//                       Experience the epitome of home interiors with our high-end
+//                       solutions designed to deliver the ultimate sophistication
+//                       you deserve.
+//                     </p>
+//                   </div>
+//                   <div className="col-12 col-lg-3 pe-lg-0">
+//                     <div className="text-end price">
+//                       INR {estimaterCalculationData?.totalAmount ?? 0}
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="pt-3 row justify-content-center">
+//                   <div className="col-12 col-lg-10">
+//                     <div className="row justify-content-center">
+//                       <table>
+//                         <tbody>
+//                           <tr>
+//                             <th></th>
+//                             <th></th>
+//                           </tr>
+//                           <tr>
+//                             <td>Type</td>
+//                             <td>{estimaterCalculationData.type}</td>
+//                           </tr>
+//                           <tr>
+//                             <td>Room</td>
+//                             <td>
+//                               {estimaterCalculationData?.room?.join(", ")}
+//                             </td>
+//                           </tr>
+//                           <tr>
+//                             <td>Modular</td>
+//                             <td>
+//                               {estimaterCalculationData?.modular?.join(", ")}
+//                             </td>
+//                           </tr>
+//                           <tr>
+//                             <td>Furniture</td>
+//                             <td>
+//                               {estimaterCalculationData?.furniture?.join(", ")}
+//                             </td>
+//                           </tr>
+//                           <tr>
+//                             <td>Services</td>
+//                             <td>
+//                               {estimaterCalculationData?.services?.join(", ")}
+//                             </td>
+//                           </tr>
+//                         </tbody>
+//                       </table>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="text-center mt-4">
+//                   <a href="/thank-you" className="know_more px-3">
+//                     Next
+//                   </a>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       <div className="p-lg-0 mx-lg-5 mt-lg-0 d-flex justify-content-between">
+//         {step > 1 && (
+//           <button
+//             className="know_more ms-5   me-auto"
+//             onClick={handlePrevious}
+//           >
+//             <IoIosArrowBack /> Previous
+//           </button>
+//         )}
+//         {step < 3 && (
+//           <button className="know_more ms-auto me-5   " onClick={handleNext}>
+//             Next <IoIosArrowForward />
+//           </button>
+//         )}
+//       </div>
+//     </main>
+//   );
+// };
+
+// export default EstimatorClient;
+
+
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
+import Image from "next/image";
 import { CiCirclePlus, CiCircleMinus } from "react-icons/ci";
 import { useSearchParams } from "next/navigation";
 import TooltipComponent from "../components/TooltipComponent";
@@ -25,6 +1046,37 @@ const RoomCounter = ({ title, count, onAdd, onRemove }) => (
   </>
 );
 
+// Reads ?home=&bhk= from the URL. It lives in its own <Suspense> so that
+// useSearchParams() only defers THIS tiny component (renders nothing) instead of
+// forcing the whole calculator to client-render behind a "Loading..." fallback.
+const UrlPrefill = ({ onPrefill }) => {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const urlHome = searchParams?.get("home");
+    const urlBhk = searchParams?.get("bhk");
+    if (urlHome && urlBhk) onPrefill(urlHome, urlBhk);
+  }, [searchParams, onPrefill]);
+
+  return null;
+};
+
+// Same look as the old <img className="w-100 object-fit-contain" height={160}>,
+// but resized / converted by next/image. The first card is the LCP image.
+const HomeTypeImage = ({ src, alt, priority = false }) => (
+  <div style={{ position: "relative", width: "100%", height: 160 }}>
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      priority={priority}
+      sizes="(max-width: 767px) 100vw, 33vw"
+      quality={75}
+      style={{ objectFit: "contain" }}
+    />
+  </div>
+);
+
 const SIZE_TYPE_DATA = [
     { id: 1, name: "1BHK Apartment" },
     { id: 2, name: "2BHK Apartment" },
@@ -41,7 +1093,6 @@ const SIZE_TYPE_DATA = [
   ];
 
 const EstimatorClient = () => {
-  const searchParams = useSearchParams();
   const [otpSent, setOtpSent] = useState(false);
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
@@ -58,6 +1109,7 @@ const EstimatorClient = () => {
     email: "",
     query: "",
   });
+    const [formErrors, setFormErrors] = useState({});
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState(["", "", "", ""]); // Store 4 OTP inputs
   const otpRefs = useRef([]);
@@ -88,29 +1140,26 @@ const EstimatorClient = () => {
   //   { id: 12, name: "4BHK Flat" },
   // ];
 
-  useEffect(() => {
-    const urlHome = searchParams?.get('home');
-    const urlBhk = searchParams?.get('bhk');
+  // Same prefill logic as before, now triggered by <UrlPrefill/> below.
+  // All setters are stable, so this callback never changes.
+  const handleUrlPrefill = useCallback((urlHome, urlBhk) => {
+    setHome(urlHome);
+    setSelectedBHK(urlBhk);
 
-    if (urlHome && urlBhk) {
-      setHome(urlHome);
-      setSelectedBHK(urlBhk);
+    // Auto-fill sensible default rooms based on BHK selection
+    const count = parseInt(urlBhk.charAt(0)) || 1;
+    setBedrooms(count);
+    setBathrooms(count === 1 ? 1 : count - 1); // e.g., 3BHK gets 3 beds, 2 baths
+    setLiving(1);
+    setKitchen(1);
 
-      // Auto-fill sensible default rooms based on BHK selection
-      const count = parseInt(urlBhk.charAt(0)) || 1;
-      setBedrooms(count);
-      setBathrooms(count === 1 ? 1 : count - 1); // e.g., 3BHK gets 3 beds, 2 baths
-      setLiving(1);
-      setKitchen(1);
-      
-      // Sensible defaults so they aren't stuck
-      setMovableFurniture(false); 
-      setPackageName("Standard");
+    // Sensible defaults so they aren't stuck
+    setMovableFurniture(false);
+    setPackageName("Standard");
 
-      // Auto-advance to Step 2 (Package Selection)
-      setStep(2);
-    }
-  }, [searchParams]);
+    // Auto-advance to Step 2 (Package Selection)
+    setStep(2);
+  }, []);
 
   useEffect(() => {
     if (otpSent) {
@@ -151,16 +1200,25 @@ const EstimatorClient = () => {
         message = "Please select a package before proceeding.";
       }
     } else if (step === 3) {
-      const { firstName, lastName, mobile, email, query } = formData;
-      if (!firstName || !lastName || !mobile || !email || !query) {
-        message = "Please fill in all required fields.";
-      } else if (!/^\d{10}$/.test(mobile)) {
-        message = "Please enter a valid 10-digit mobile number.";
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        message = "Please enter a valid email address.";
+      // const { firstName, lastName, mobile, email, query } = formData;
+      // if (!firstName || !lastName || !mobile || !email || !query) {
+      //   message = "Please fill in all required fields.";
+      // } else if (!/^\d{10}$/.test(mobile)) {
+      //   message = "Please enter a valid 10-digit mobile number.";
+      // } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      //   message = "Please enter a valid email address.";
+      // } else {
+      //   // Send OTP if validation passes
+      //   const response = await sendOtp(formData.mobile);
+      //   console.log("OTP Data", response);
+      //   return response;
+      // }
+
+            if (!validateForm()) {
+        message = "Please correct the highlighted fields.";
       } else {
         // Send OTP if validation passes
-        const response = await sendOtp(formData.mobile);
+        const response = await sendOtp(formData.mobile.trim());
         console.log("OTP Data", response);
         return response;
       }
@@ -267,9 +1325,75 @@ const EstimatorClient = () => {
     setSelectedBHK(bhk);
   };
 
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prevData) => ({ ...prevData, [name]: value }));
+  // };
+
+    const validateField = (name, rawValue) => {
+    const value = (rawValue || "").trim();
+    switch (name) {
+      case "firstName":
+      case "lastName": {
+        const label = name === "firstName" ? "First name" : "Last name";
+        if (!value) return `${label} is required.`;
+        if (value.length < 2) return `${label} must be at least 2 characters.`;
+        if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+          return `${label} can only contain letters and spaces.`;
+        return "";
+      }
+      case "mobile":
+        if (!value) return "Mobile number is required.";
+        if (!/^\d{10}$/.test(value))
+          return "Enter a valid 10-digit mobile number.";
+        if (!/^[6-9]/.test(value))
+          return "Mobile number must start with 6, 7, 8 or 9.";
+        return "";
+      case "email":
+        if (!value) return "Email is required.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+          return "Enter a valid email address.";
+        return "";
+      case "query":
+        if (!value) return "Location is required.";
+        if (value.length < 2) return "Enter a valid location.";
+        return "";
+      default:
+        return "";
+    }
+  };
+
+  const validateForm = () => {
+    const fields = ["firstName", "lastName", "mobile", "email", "query"];
+    const errors = {};
+    fields.forEach((f) => {
+      const err = validateField(f, formData[f]);
+      if (err) errors[f] = err;
+    });
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    let { value } = e.target;
+
+    // mobile: digits only, max 10
+    if (name === "mobile") value = value.replace(/\D/g, "").slice(0, 10);
+
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+    // live-clear/refresh the error once the field was touched
+    if (formErrors[name] !== undefined) {
+      setFormErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    const trimmed = value.trim();
+    setFormData((prev) => ({ ...prev, [name]: trimmed }));
+    setFormErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
 
   const handleAddBedroom = () => setBedrooms(bedrooms + 1);
@@ -398,6 +1522,9 @@ const EstimatorClient = () => {
 
   return (
     <main>
+      <Suspense fallback={null}>
+        <UrlPrefill onPrefill={handleUrlPrefill} />
+      </Suspense>
       {warningMessage && (
         <div
           className="text-center alert alert-warning alert-dismissible fade show"
@@ -541,12 +1668,7 @@ const EstimatorClient = () => {
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
-                    <img
-                      src="/images/apartmen.jpeg"
-                      className="w-100 object-fit-contain"
-                      height={160}
-                      alt="Apartment"
-                    decoding="async"  loading="lazy" />
+                    <HomeTypeImage src="/images/apartmen.jpeg" alt="Apartment" priority />
                     <h5 className="pt-3 text-center">Apartments</h5>
                     <div className="m-auto my-3 text-center">
                       {["1bhk", "2bhk", "3bhk", "4bhk"].map((bhk) => (
@@ -592,12 +1714,7 @@ const EstimatorClient = () => {
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
-                    <img
-                      src="/images/vill.jpeg"
-                      className="w-100 object-fit-contain"
-                      height={160}
-                      alt="Villa"
-                    decoding="async"  loading="lazy" />
+                    <HomeTypeImage src="/images/vill.jpeg" alt="Villa" />
                     <h5 className="pt-3 text-center">Villa</h5>
                     <div className="m-auto my-3 text-center">
                       {["1bhk", "2bhk", "3bhk", "4bhk"].map((bhk) => (
@@ -641,12 +1758,7 @@ const EstimatorClient = () => {
                         onClick={(e) => e.stopPropagation()}
                       />
                     </div>
-                    <img
-                      src="/images/vill.jpeg"
-                      className="w-100 object-fit-contain"
-                      height={160}
-                      alt="flat"
-                    decoding="async"  loading="lazy" />
+                    <HomeTypeImage src="/images/vill.jpeg" alt="flat" />
                     <h5 className="pt-3 text-center">Flat</h5>
                     <div className="m-auto my-3 text-center">
                       {["1bhk", "2bhk", "3bhk", "4bhk"].map((bhk) => (
@@ -839,7 +1951,7 @@ const EstimatorClient = () => {
 
       {step === 3 && (
         <div className="step-content">
-          <section className="container p-3 p-lg-5 my-5 card fill_your_deatil">
+          {/* <section className="container p-3 p-lg-5 my-5 card fill_your_deatil">
             <h3 className="pb-3 text-center">Fill Your Details</h3>
             <form className="row mx-0">
               {["firstName", "lastName", "mobile", "email", "query"].map(
@@ -875,6 +1987,71 @@ const EstimatorClient = () => {
                 Send OTP
               </button>
             </div>
+          </section> */}
+
+                    <section
+  className="p-3 p-lg-4 my-5 card mx-auto estimator_details_card"
+  style={{ maxWidth: "640px", width: "calc(100% - 24px)" }}
+>
+            <h3 className="pb-3 text-center">Fill Your Details</h3>
+            <form
+              className="row g-3 mx-0"
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleNext();
+              }}
+            >
+              {[
+                { name: "firstName", label: "First Name", type: "text", col: "col-md-6", auto: "given-name" },
+                { name: "lastName", label: "Last Name", type: "text", col: "col-md-6", auto: "family-name" },
+                { name: "mobile", label: "Mobile Number", type: "tel", col: "col-md-6", auto: "tel-national" },
+                { name: "email", label: "Email Address", type: "email", col: "col-md-6", auto: "email" },
+                { name: "query", label: "Location", type: "text", col: "col-12", auto: "address-level2" },
+              ].map(({ name, label, type, col, auto }) => (
+                <div className={col} key={name}>
+                  <label htmlFor={`est_${name}`} className="form-label">
+                    {label} <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id={`est_${name}`}
+                    type={type}
+                    className={`form-control ${formErrors[name] ? "is-invalid" : ""}`}
+                    name={name}
+                    placeholder={
+                      name === "mobile"
+                        ? "10-digit mobile number"
+                        : name === "email"
+                        ? "you@example.com"
+                        : name === "query"
+                        ? "City / Area"
+                        : `Enter ${label.toLowerCase()}`
+                    }
+                    value={formData[name]}
+                    onChange={handleInputChange}
+                    onBlur={handleInputBlur}
+                    maxLength={name === "mobile" ? 10 : 60}
+                    inputMode={name === "mobile" ? "numeric" : undefined}
+                    autoComplete={auto}
+                                        required
+                    style={{
+                      height: "42px",
+                      padding: "8px 14px",
+                      fontSize: "15px",
+                      borderRadius: "6px",
+                    }}
+                  />
+                  {formErrors[name] && (
+                    <div className="invalid-feedback">{formErrors[name]}</div>
+                  )}
+                </div>
+              ))}
+              <div className="col-12 text-center mt-4">
+                <button type="submit" className="know_more">
+                  Send OTP
+                </button>
+              </div>
+            </form>
           </section>
         </div>
       )}

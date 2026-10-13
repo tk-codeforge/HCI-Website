@@ -5,6 +5,47 @@ import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
 import { FaUser, FaPhoneAlt, FaCheckCircle, FaMapMarkerAlt } from "react-icons/fa"; // Added FaMapMarkerAlt
 
+const sanitizePhone = (value) => {
+  let digits = value.replace(/\D/g, "");
+  if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+  return digits.slice(0, 10);
+};
+
+const validateField = (name, rawValue) => {
+  const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+  switch (name) {
+    case "fullName":
+      if (!value) return "Full name is required.";
+      if (value.length < 2) return "Full name must be at least 2 characters.";
+      if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+        return "Full name can only contain letters and spaces.";
+      return "";
+    case "contactNo":
+      if (!value) return "Phone number is required.";
+      if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit phone number.";
+      if (!/^[6-9]/.test(value))
+        return "Phone number must start with 6, 7, 8 or 9.";
+      return "";
+    case "email":
+      if (!value) return "Email is required.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+        return "Enter a valid email address.";
+      return "";
+    case "place":
+      if (!value) return "Location is required.";
+      if (value.length < 2) return "Enter a valid location.";
+      return "";
+    case "query":
+      if (!value) return "Please tell us your requirements.";
+      if (value.length < 10) return "Please enter at least 10 characters.";
+      return "";
+    case "termsAccepted":
+      return value ? "" : "You must accept the Terms & Conditions.";
+    default:
+      return "";
+  }
+};
+
 // 🌟 1. THE SMART SIDEBAR FORM
 export function SidebarForm({ city }) {
   const pathname = usePathname();
@@ -12,21 +53,50 @@ export function SidebarForm({ city }) {
   const [formData, setFormData] = useState({ fullName: "", contactNo: "", place: "" });
   const [status, setStatus] = useState({ error: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+    const [errors, setErrors] = useState({});
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  // };
+
+    const validateForm = () => {
+    const newErrors = {};
+    ["fullName", "contactNo", "place"].forEach((f) => {
+      const err = validateField(f, formData[f]);
+      if (err) newErrors[f] = err;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value =
+      name === "contactNo" ? sanitizePhone(e.target.value) : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name] !== undefined) {
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    const trimmed = value.trim();
+    setFormData((prev) => ({ ...prev, [name]: trimmed }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+        setStatus({ error: "", message: "" });
+    if (!validateForm()) return;
     try {
       const response = await api.post("/user-queries", {
-        name: formData.fullName,
-        mobile: formData.contactNo,
-        email: "", // Maintain consistency with working forms
-        // Capture user input location, fallback to page city, or default
-        place: formData.place || city || "Not Specified", 
+               name: formData.fullName.trim(),
+        mobile: formData.contactNo.trim(),
+        email: "",
+                place: formData.place.trim(), 
         query: "Quick Quote Request from Sidebar",
         ...buildLeadMetadata({
           pathname,
@@ -39,6 +109,7 @@ export function SidebarForm({ city }) {
       if (response.status === 201) {
         setSubmitted(true);
         setFormData({ fullName: "", contactNo: "", place: "" }); // Reset place
+                setErrors({});
       } else {
         setStatus({ error: "Failed to submit. Try again.", message: "" });
       }
@@ -64,7 +135,7 @@ export function SidebarForm({ city }) {
   return (
     <div className="sidebar-widget mb-4 bg-white p-4 rounded-4 shadow-sm border">
       <h4 className="fw-bold font-outfit mb-4 text-center">Get Free Consultation</h4>
-      <form onSubmit={handleSubmit}>
+      {/* <form onSubmit={handleSubmit}>
         {status.error && <div className="alert alert-danger small py-2">{status.error}</div>}
         
         <div className="mb-3 position-relative">
@@ -77,7 +148,7 @@ export function SidebarForm({ city }) {
           <input type="tel" className="form-control border-0 bg-light p-3 ps-5 rounded-3" name="contactNo" value={formData.contactNo} onChange={handleInputChange} placeholder="Phone Number" required />
         </div>
 
-        {/* 🌟 NEW LOCATION FIELD */}
+      
         <div className="mb-3 position-relative">
           <FaMapMarkerAlt className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
           <input type="text" className="form-control border-0 bg-light p-3 ps-5 rounded-3" name="place" value={formData.place} onChange={handleInputChange} placeholder="Location / City" required />
@@ -85,6 +156,69 @@ export function SidebarForm({ city }) {
 
         <button type="submit" className="btn btn-warning w-100 fw-bold text-white py-3 rounded-3 shadow-sm" style={{ background: 'linear-gradient(to right, #ff914d, #ff5722)' }}>
         Submit
+        </button>
+      </form> */}
+
+            <form onSubmit={handleSubmit} noValidate>
+        {status.error && <div className="alert alert-danger small py-2">{status.error}</div>}
+
+        <div className="mb-3 position-relative">
+          <FaUser className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
+          <input
+            type="text"
+            className={`form-control bg-light p-3 ps-5 rounded-3 ${errors.fullName ? "border border-danger" : "border-0"}`}
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            placeholder="Full Name *"
+            aria-label="Full Name"
+            autoComplete="name"
+            maxLength={60}
+            required
+          />
+          {errors.fullName && <div className="text-danger small mt-1 ps-1">{errors.fullName}</div>}
+        </div>
+
+        <div className="mb-3 position-relative">
+          <FaPhoneAlt className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
+          <input
+            type="tel"
+            inputMode="numeric"
+            className={`form-control bg-light p-3 ps-5 rounded-3 ${errors.contactNo ? "border border-danger" : "border-0"}`}
+            name="contactNo"
+            value={formData.contactNo}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            placeholder="Phone Number *"
+            aria-label="Phone Number"
+            autoComplete="tel-national"
+            maxLength={10}
+            required
+          />
+          {errors.contactNo && <div className="text-danger small mt-1 ps-1">{errors.contactNo}</div>}
+        </div>
+
+        <div className="mb-3 position-relative">
+          <FaMapMarkerAlt className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
+          <input
+            type="text"
+            className={`form-control bg-light p-3 ps-5 rounded-3 ${errors.place ? "border border-danger" : "border-0"}`}
+            name="place"
+            value={formData.place}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            placeholder="Location / City *"
+            aria-label="Location / City"
+            autoComplete="address-level2"
+            maxLength={60}
+            required
+          />
+          {errors.place && <div className="text-danger small mt-1 ps-1">{errors.place}</div>}
+        </div>
+
+        <button type="submit" className="btn btn-warning w-100 fw-bold text-white py-3 rounded-3 shadow-sm" style={{ background: 'linear-gradient(to right, #ff914d, #ff5722)' }}>
+          Submit
         </button>
       </form>
     </div>
@@ -99,29 +233,73 @@ export function BottomContactForm({ mapSrc }) {
   });
   const [status, setStatus] = useState({ error: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+    const [errors, setErrors] = useState({});
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  // };
+
+  // const handleCheckboxChange = (e) => {
+  //   setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }));
+  // };
+
+    const validateForm = () => {
+    const newErrors = {};
+    ["fullName", "contactNo", "email", "place", "query", "termsAccepted"].forEach((f) => {
+      const err = validateField(f, formData[f]);
+      if (err) newErrors[f] = err;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value =
+      name === "contactNo" ? sanitizePhone(e.target.value) : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name] !== undefined) {
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    const trimmed = value.trim();
+    setFormData((prev) => ({ ...prev, [name]: trimmed }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
 
   const handleCheckboxChange = (e) => {
-    setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }));
+    const checked = e.target.checked;
+    setFormData((prev) => ({ ...prev, termsAccepted: checked }));
+    setErrors((prev) => ({ ...prev, termsAccepted: validateField("termsAccepted", checked) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.termsAccepted) {
-      setStatus({ error: "You must agree to the Terms & Conditions.", message: "" });
-      return;
-    }
+    // if (!formData.termsAccepted) {
+    //   setStatus({ error: "You must agree to the Terms & Conditions.", message: "" });
+    //   return;
+    // }
+
+        setStatus({ error: "", message: "" });
+    if (!validateForm()) return;
+
     try {
       const response = await api.post("/user-queries", {
-        name: formData.fullName, 
-        mobile: formData.contactNo, 
-        email: formData.email, 
-        place: formData.place, 
-        query: formData.query,
+        // name: formData.fullName, 
+        // mobile: formData.contactNo, 
+        // email: formData.email, 
+        // place: formData.place, 
+        // query: formData.query,
+
+                name: formData.fullName.trim(),
+        mobile: formData.contactNo.trim(),
+        email: formData.email.trim(),
+        place: formData.place.trim(),
+        query: formData.query.trim(),
         ...buildLeadMetadata({ 
           pathname, 
           leadFormType: "inline", 
@@ -133,6 +311,7 @@ export function BottomContactForm({ mapSrc }) {
       if (response.status === 201) {
         setSubmitted(true);
         setFormData({ fullName: "", contactNo: "", email: "", place: "", query: "", termsAccepted: false });
+                setErrors({});
       } else {
         setStatus({ error: "Failed to submit. Please try again.", message: "" });
       }
@@ -172,10 +351,10 @@ export function BottomContactForm({ mapSrc }) {
             <>
               <h2 className="font-outfit fw-bold h3 mb-2 text-dark">Reach Out With Confidence</h2>
               <p className="text-muted font-poppins mb-4">Fill out the form below and our design experts will contact you shortly.</p>
-              <form className="row g-3 font-poppins" onSubmit={handleSubmit}>
+              <form className="row g-3 font-poppins" onSubmit={handleSubmit} noValidate >
                 {status.error && <div className="col-12"><div className="alert alert-danger">{status.error}</div></div>}
                 
-                <div className="col-md-6"><input type="text" className="form-control p-3 bg-light border-0" value={formData.fullName} name="fullName" placeholder="Full Name" required onChange={handleInputChange} /></div>
+                {/* <div className="col-md-6"><input type="text" className="form-control p-3 bg-light border-0" value={formData.fullName} name="fullName" placeholder="Full Name" required onChange={handleInputChange} /></div>
                 <div className="col-md-6"><input type="text" className="form-control p-3 bg-light border-0" name="contactNo" value={formData.contactNo} placeholder="Contact No." required onChange={handleInputChange} /></div>
                 <div className="col-md-12"><input type="email" className="form-control p-3 bg-light border-0" name="email" value={formData.email} placeholder="Email" required onChange={handleInputChange} /></div>
                 <div className="col-md-12"><input type="text" className="form-control p-3 bg-light border-0" name="place" value={formData.place} onChange={handleInputChange} placeholder="City / Location" required /></div>
@@ -185,6 +364,35 @@ export function BottomContactForm({ mapSrc }) {
                   <div className="form-check mt-2">
                     <input className="form-check-input" type="checkbox" checked={formData.termsAccepted} id="termsAcceptedBottom" name="termsAccepted" required onChange={handleCheckboxChange} />
                     <label className="form-check-label text-muted small" htmlFor="termsAcceptedBottom">I agree to the Terms & Conditions</label>
+                  </div>
+                </div> */}
+
+                                <div className="col-md-6">
+                  <input type="text" className={`form-control p-3 bg-light ${errors.fullName ? "border border-danger" : "border-0"}`} name="fullName" value={formData.fullName} placeholder="Full Name *" aria-label="Full Name" autoComplete="name" maxLength={60} required onChange={handleInputChange} onBlur={handleInputBlur} />
+                  {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
+                </div>
+                <div className="col-md-6">
+                  <input type="tel" inputMode="numeric" className={`form-control p-3 bg-light ${errors.contactNo ? "border border-danger" : "border-0"}`} name="contactNo" value={formData.contactNo} placeholder="Contact No. *" aria-label="Contact Number" autoComplete="tel-national" maxLength={10} required onChange={handleInputChange} onBlur={handleInputBlur} />
+                  {errors.contactNo && <div className="text-danger small mt-1">{errors.contactNo}</div>}
+                </div>
+                <div className="col-md-12">
+                  <input type="email" className={`form-control p-3 bg-light ${errors.email ? "border border-danger" : "border-0"}`} name="email" value={formData.email} placeholder="Email *" aria-label="Email Address" autoComplete="email" maxLength={100} required onChange={handleInputChange} onBlur={handleInputBlur} />
+                  {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
+                </div>
+                <div className="col-md-12">
+                  <input type="text" className={`form-control p-3 bg-light ${errors.place ? "border border-danger" : "border-0"}`} name="place" value={formData.place} placeholder="City / Location *" aria-label="City / Location" autoComplete="address-level2" maxLength={60} required onChange={handleInputChange} onBlur={handleInputBlur} />
+                  {errors.place && <div className="text-danger small mt-1">{errors.place}</div>}
+                </div>
+                <div className="col-md-12">
+                  <textarea className={`form-control p-3 bg-light ${errors.query ? "border border-danger" : "border-0"}`} name="query" value={formData.query} placeholder="Tell us about your requirements... *" aria-label="Your Requirements" rows="4" maxLength={500} required onChange={handleInputChange} onBlur={handleInputBlur}></textarea>
+                  {errors.query && <div className="text-danger small mt-1">{errors.query}</div>}
+                </div>
+
+                <div className="col-12">
+                  <div className="form-check mt-2">
+                    <input className={`form-check-input ${errors.termsAccepted ? "is-invalid" : ""}`} type="checkbox" checked={formData.termsAccepted} id="termsAcceptedBottom" name="termsAccepted" required onChange={handleCheckboxChange} />
+                    <label className="form-check-label text-muted small" htmlFor="termsAcceptedBottom">I agree to the Terms & Conditions</label>
+                    {errors.termsAccepted && <div className="text-danger small mt-1">{errors.termsAccepted}</div>}
                   </div>
                 </div>
                 <div className="col-12 mt-4">

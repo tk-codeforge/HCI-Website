@@ -1,0 +1,37 @@
+import React from "react";
+
+const RoomOfice = (props) => {
+  const safeArrowAlt = props.altArrow?.trim() ? props.altArrow : "View design details";
+  const safeMainAlt = props.altImage?.trim() ? props.altImage : (props.cardTitle || "Interior Room Design");
+
+  return (
+    <div>
+      <div className={props.cardRoomOffice}>
+        <span className={props.badge_circle}>
+          <img src={props.arrowIcon} alt={safeArrowAlt} width={props.width}  fetchpriority="high"
+  loading="eager"
+  data-no-lazy="1" decoding="async" />
+        </span>
+        <img
+          src={props.imageRoom_Office}
+          className={`responsive-media ${props.roomImg || ""}`}
+          alt={safeMainAlt}
+          fetchPriority="high"
+          loading="eager"
+          data-no-lazy="1"
+        decoding="async" />
+        <div className={props.cardBody}>
+          <h5 className="">{props.cardTitle}</h5>
+          <p className="text-white me-5 pe-5">{props.cardText}</p>
+          <div className="text-end mt-3 mt-lg-5 mb-2">
+            <a className={props.btnClass} href={props.btnLink} aria-label={`${props.btnText} - ${props.cardTitle || 'Room Design'}`}>
+              {props.btnText}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RoomOfice;

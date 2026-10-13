@@ -1,203 +1,1665 @@
+// "use client";
+// import MainLayout from "../layouts/MainLayout";
+// import BgImageCard from "../components/BgImageCard";
+// import RowImage from "../components/RowImage";
+// import { IoIosShareAlt } from "react-icons/io";
+// import { IoIosCall } from "react-icons/io";
+// import { FaComments } from "react-icons/fa";
+// import ContactUsPopUp from "../components/ContactUsPopUp";
+// import { useCallback, useEffect, useState } from "react";
+// import { usePathname } from "next/navigation";
+// import VideoBox from "../components/VideoBox";
+// import { toast } from "react-toastify";
+// import api from "@/utils/api";
+// import { image } from "@nextui-org/theme";
+// import { buildLeadMetadata } from "@/utils/leadForms";
+// import { MediaImg } from "../components/MediaImage";
+// import DOMPurify from "isomorphic-dompurify";
+
+// const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+// const pickTag = (t, fallback) => (HEADING_TAGS.includes(t) ? t : fallback);
+// const dynSize = (t) => (HEADING_TAGS.includes(t) ? `dyn-size dyn-${t}` : "");
+// const Html = ({ html, className, style }) => (
+//   <div className={className} style={style} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html || "") }} />
+// );
+
+// const HCLandingPage = () => {
+//   const pathname = usePathname();
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [formData, setFormData] = useState({
+//     fullName: "",
+//     contact: "",
+//     email: "",
+//     place: "",
+//     query: "",
+//     termsAndConditions: false,
+//   });
+
+//   const [submissionError, setSubmissionError] = useState("");
+//   const [submissionMessage, setSubmissionMessage] = useState("");
+//   const [designIdea, setDesignIdea] = useState([]);
+
+//   const [faqData, setFaqData] = useState([]);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     const fetchFAQs = async () => {
+//       try {
+//         const response = await api.get("/cms-content/faqs");
+//         setFaqData(response.data || []);
+//       }
+//       catch (err) {
+//         setError("Failed to fetch FAQ data. Please try again.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchFAQs();
+//   }, []);
+
+//   useEffect(() => {
+//     setLoading(true);
+//     const fetchDesignIdea = async () => {
+//       try {
+//         const response = await api.get("/cms-parent-child/designer_choice");
+//         setDesignIdea(response.data);
+//       } catch (err) {
+//         console.error("Error fetching design idea:", err);
+//         setError("Failed to load design ideas. Please try again.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchDesignIdea();
+//   }, []);
+
+//     // Sort records by ID in descending order (newest first)
+//     const sortedDesignIdea = [...designIdea].sort((a, b) => b.id - a.id);
+
+//     // Get the 8 oldest records
+//     const staticRecords = sortedDesignIdea.slice(-5); // Last 8 records (oldest)
+
+//     // Get the latest records (excluding the last 8)
+//     const latestRecords = sortedDesignIdea.slice(0, -5); // Everything except last 8
+
+//   // section one
+//   const [data1, setdata1] = useState();
+//    const fetchContentManagerPages = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams", {});
+//       if (response.data && response.data.json_content) {
+//         setdata1(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section two
+//   const [data2, setdata2] = useState();
+//    const fetchContentManagerPages_2 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_2", {});
+//       if (response.data && response.data.json_content) {
+//         setdata2(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section three
+//   const [data3, setdata3] = useState();
+//    const fetchContentManagerPages_3 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_3", {});
+//       if (response.data && response.data.json_content) {
+//         setdata3(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section four
+//   const [data4, setdata4] = useState();
+//    const fetchContentManagerPages_4 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_4", {});
+//       if (response.data && response.data.json_content) {
+//         setdata4(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section five
+//   const [data5, setdata5] = useState();
+//    const fetchContentManagerPages_5 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_5", {});
+//       if (response.data && response.data.json_content) {
+//         setdata5(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section six
+//   const [data6, setdata6] = useState();
+//    const fetchContentManagerPages_6 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_6", {});
+//       if (response.data && response.data.json_content) {
+//         setdata6(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetchContentManagerPages();
+//     fetchContentManagerPages_2();
+//     fetchContentManagerPages_3();
+//     fetchContentManagerPages_4();
+//     fetchContentManagerPages_5();
+//     fetchContentManagerPages_6();
+//   }, [fetchContentManagerPages, fetchContentManagerPages_2, fetchContentManagerPages_3, fetchContentManagerPages_4, fetchContentManagerPages_5, fetchContentManagerPages_6]);
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     console.log(formData);
+//     setFormData((prevData) => ({ ...prevData, [name]: value }));
+//   };
+
+//   const handleCheckboxChange = (e) => {
+//     const { checked } = e.target;
+//     setFormData((prevData) => ({ ...prevData, termsAndConditions: checked }));
+//     console.log("Checkbox state:", checked);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!formData.termsAndConditions) {
+//       toast.error("You must agree to the Terms & Conditions before submitting.")
+//       setSubmissionError(
+//         "You must agree to the Terms & Conditions before submitting."
+//       );
+//       return;
+//     }
+
+//     const formRequestData = {
+//       name: formData.fullName,
+//       mobile: formData.contact,
+//       email: formData.email,
+//       place: formData.place,
+//       query: formData.query,
+//       ...buildLeadMetadata({
+//         pathname,
+//         leadFormType: "inline",
+//         leadFormName: "Creating The Home Of Your Dreams Lead Form",
+//         ctaText: "SEND",
+//       }),
+//     };
+
+//     try {
+//       const response = await api.post("/user-queries", formRequestData);
+//       console.log(response);
+//       if (response.status === 201) {
+//         setSubmissionMessage("Form submitted successfully!");
+//         setFormData({
+//           fullName: "",
+//           contact: "",
+//           email: "",
+//           place: "",
+//           query: "",
+//           termsAndConditions: false,
+//         });
+//         setTimeout(() => {
+//           window.location.href = "/thank-you";
+//       }, 300);
+//         toast.success("Form submitted successfully!");
+//       } else {
+//         toast.error("Failed to submit form. Please try again.");
+//         setSubmissionError("Failed to submit form. Please try again.");
+//       }
+//     } catch (error) {
+//       toast.error(error.message)
+//       setSubmissionError("Error submitting form. Please try again.", error);
+//       console.error("Error:", error);
+//     } finally {
+//       // Clear error message after some time
+//       setTimeout(() => {
+//         setSubmissionError("");
+//         setSubmissionMessage("");
+//       }, 5000);
+//     }
+//   };
+
+//   const handleModalStateChange = useCallback((isOpen) => {
+//     setIsModalOpen(isOpen);
+//   }, []);
+
+//   const S1TopTag = pickTag(data1?.top_title_tag, "h3");
+// const S1MidTag = pickTag(data1?.mid_sub_title_tag, "h3");
+// const S2SubTag = HEADING_TAGS.includes(data2?.top_description_tag) ? data2.top_description_tag : undefined;
+// const S3Tag = pickTag(data3?.top_title_tag, "h3");
+// const S4Tag = pickTag(data4?.top_title_tag, "h3");
+// const S6Tag = pickTag(data6?.top_title_tag, "h2");
+
+//   return (
+//     <MainLayout>
+//     <div>
+//       <style dangerouslySetInnerHTML={{__html: `
+//         .text-orange-force { color: #ff914d !important; }
+
+//         /* Fix text visibility on designer image cards — mirrors HomeContent.jsx */
+//         .bgsectionroom .designercard * {
+//           color: #ffffff !important;
+//           text-shadow: 0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8) !important;
+//         }
+//         .bgsectionroom .designercard * { font-weight: 800 !important; }
+
+//         /* Modern & Clean Typography Overrides (Scaled down headings) */
+//         .font_about, .about_wrapper .rowimage-title, .about_wrapper h1, .about_wrapper h2, .about_wrapper h3, .about_wrapper h4, .about_wrapper h5, .about_wrapper h6 {
+//           font-family: var(--font-poppins), sans-serif !important;
+//           font-size: clamp(1.5rem, 2vw, 2.1rem) !important; /* Scaled down for a cleaner look */
+//           font-weight: 500 !important;
+//           line-height: 1.3 !important;
+//           color: #1f1f1f !important;
+//           letter-spacing: -0.5px !important;
+//           text-align: center !important;
+//           margin-bottom: 1rem !important;
+//         }
+        
+//         .hc_landing_desc, .about_wrapper p {
+//           font-family: var(--font-poppins), sans-serif !important;
+//           font-size: 1.05rem !important;
+//           line-height: 1.65 !important;
+//           color: #555 !important;
+//           font-weight: 400 !important;
+//         }
+//           .dream6-sub p { margin: 0; }
+
+//           /* Tag-driven sizes for sections 1 & 2, applied only when a tag is chosen in the CMS */
+// .dyn-size.dyn-h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem) !important; }
+// .dyn-size.dyn-h2 { font-size: clamp(2rem, 3.8vw, 3rem) !important; }
+// .dyn-size.dyn-h3 { font-size: clamp(1.75rem, 3vw, 2.4rem) !important; }
+// .dyn-size.dyn-h4 { font-size: clamp(1.5rem, 2.4vw, 1.9rem) !important; }
+// .dyn-size.dyn-h5 { font-size: 1.35rem !important; }
+// .dyn-size.dyn-h6 { font-size: 1.1rem !important; }
+
+//         .about_wrapper .our_experts_text_land {
+//           text-align: left !important;
+//           display: block;
+//         }
+//       `}} />
+//       {/* <head>
+//         <title>
+//         Creating the home of your dreams. - High Creation Interior
+//         </title>
+//       </head> */}
+//       <div className={isModalOpen ? "blur-bg" : ""}>
+//         {/* <header className="container-fluid px-lg-5 px-3">
+//           <nav className="navbar navbar-expand-lg p-0">
+//             <div className="container-fluid">
+//               <a className="navbar-brand ms-lg-5" href="/" aria-label="Home">
+//                 <img
+//                   src="/images/new_hc_logo.png"
+//                   width={90}
+//                   height={90}
+//                   alt="hc-logo"
+//                   className="p-2"
+//                 decoding="async"  loading="lazy" />
+//               </a>
+//               <button
+//                 className="navbar-toggler d-block d-lg-none"
+//                 type="button"
+//                 data-bs-toggle="collapse"
+//                 data-bs-target="#navbarSupportedContent"
+//                 aria-controls="navbarSupportedContent"
+//                 aria-expanded="false"
+//                 aria-label="Toggle navigation"
+//               >
+//                 <span className="navbar-toggler-icon"></span>
+//               </button>
+//               <div
+//                 className="collapse navbar-collapse"
+//                 id="navbarSupportedContent"
+//               >
+//                 <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+//                   <li className="mb-3 mb-lg-0">
+//                     <a href="tel:18001200532" className="btn read_morebtn">
+//                       <IoIosCall className="callicon me-2" />
+//                       1800 1200 532
+//                     </a>
+//                   </li>
+//                   <li className="mb-4 mb-lg-0">
+//                     <a href="/contact" className="read_morebtn py-2">
+//                       Let’s Connect
+//                     </a>
+//                   </li>
+//                   <li className="mb-3 mb-lg-0">
+//                     <a href="/estimator-for-home" className="read_morebtn py-2">
+//                       Estimator for Your Home
+//                     </a>
+//                   </li>
+//                 </ul>
+//               </div>
+//             </div>
+//           </nav>
+//         </header> */}
+//         <main className="mt-0 pt-0">
+//         <section
+//           className="contact_wrapper hc_landing_ban1 position-relative"
+//           style={{
+//             backgroundImage: `url(${data1?.mid_image})`,
+//             backgroundSize: "cover",
+//             backgroundPosition: "center"
+//           }}
+//         >
+//                     {data1?.mid_image && (
+//             <MediaImg
+//               src={data1.mid_image}
+//                             alt={data1?.mid_image_alt}
+//               fallbackAlt={data1?.mid_sub_title || data1?.top_title || ""}
+//               loading="eager"
+//               fetchPriority="high"
+//               style={{
+//                 position: "absolute",
+//                 inset: 0,
+//                 width: "100%",
+//                 height: "100%",
+//                 objectFit: "cover",
+//                 objectPosition: "center",
+//                 pointerEvents: "none",
+//                 zIndex: 0,
+//               }}
+//             />
+//           )}
+//              <div className="container position-relative" style={{ zIndex: 1 }}>
+//               <div className="row">
+//                 <div className="col-lg-7 d-flex align-items-center">
+//                   <div className="pe-lg-5 text-white">
+//                     {/* <h3 className="fw-lighter fs-3 pb-0 mb-0 home_subhead" style={{ color: "#ffffff" }}>
+//                     {data1?.top_title}
+//                     </h3>
+//                     <h3 className="letheading home_banner_heading mt-2" style={{ color: "#ffffff" }}>
+//                       {data1?.mid_sub_title}
+//                     </h3>
+//                     <p className="text-dark fw-medium fs-6 mt-3">
+//                     {data1?.top_description}
+//                     </p> */}
+
+//                     <S1TopTag className={`fw-lighter fs-3 pb-0 mb-0 home_subhead ${dynSize(data1?.top_title_tag)}`} style={{ color: "#ffffff" }}>
+//   {data1?.top_title}
+// </S1TopTag>
+// <S1MidTag className={`letheading home_banner_heading mt-2 ${dynSize(data1?.mid_sub_title_tag)}`} style={{ color: "#ffffff" }}>
+//   {data1?.mid_sub_title}
+// </S1MidTag>
+// <Html className="text-dark fw-medium fs-6 mt-3" html={data1?.top_description} />
+//                   </div>
+//                 </div>
+//                 <div className="col-lg-5">
+//                   <div className="contact_form contact" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: "12px", padding: "1.5rem", border: "1px solid rgba(255,255,255,0.25)" }}>
+//                     <h4 className="form_heading mb-3" style={{ color: "#ffffff" }}>
+//                       Styles to Suit Every Budget
+//                     </h4>
+//                     <p className="text-white">Get Your Dream house today. Let Our experts help you</p>
+//                     <form className="row" onSubmit={handleSubmit}>
+//                       <div className="col-md-12 mb-3">
+//                         <input
+//                           type="text"
+//                           className="form-control"
+//                           id="validationCustom01"
+//                           placeholder="Name"
+//                           name="fullName"
+//                           onChange={handleInputChange}
+//                           value={formData.fullName}
+//                           required
+//                         />
+//                       </div>
+//                       <div className="col-md-6 mb-3">
+//                         <input
+//                           type="text"
+//                           className="form-control"
+//                           id="validationCustom05"
+//                           placeholder="Contact No."
+//                           name="contact"
+//                           onChange={handleInputChange}
+//                           value={formData.contact}
+//                           required
+//                         />
+//                       </div>
+
+//                       <div className="col-md-6 mb-3">
+//                         <input
+//                           type="email"
+//                           className="form-control"
+//                           id="validationCustom03"
+//                           placeholder="Email ID"
+//                           name="email"
+//                           onChange={handleInputChange}
+//                           value={formData.email}
+//                           required
+//                         />
+//                       </div>
+
+//                       <div className="col-md-12 mb-3">
+//                         <textarea
+//                           className="form-control"
+//                           id="exampleFormControlTextarea1"
+//                           placeholder="Design Name / Message"
+//                           name="query"
+//                           onChange={handleInputChange}
+//                           value={formData.query}
+//                           rows="1"
+//                         ></textarea>
+//                       </div>
+//                       <div className="col-12">
+//                         <div className="form-check">
+//                           <input
+//                             className="form-check-input"
+//                             type="checkbox"
+//                             value={formData.termsAndConditions}
+//                             id="invalidCheck"
+//                             required
+//                             onChange={handleCheckboxChange}
+//                           />
+//                           <label
+//                             className="form-check-label"
+//                             htmlFor="invalidCheck"
+//                             style={{ color: "#1a1a1a", fontSize: "0.8rem" }}
+//                           >
+//                             By submitting this form, you agree to the privacy
+//                             policy & terms and conditions
+//                           </label>
+//                           <div className="invalid-feedback" style={{ color: "#c0392b" }}>
+//                             You must agree before submitting.
+//                           </div>
+//                         </div>
+//                       </div>
+//                       <div className="col-12 mt-3 d-flex m-auto justify-content-center">
+//                         <button
+//                           className="btn know_more px-5 w-100"
+//                           type="submit"
+//                         >
+//                           SEND
+//                         </button>
+//                       </div>
+//                     </form>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+//           <section className="my-5 about_wrapper">
+//             <RowImage
+//               imageColLg="6"
+//               imageColXl="6"
+//               imageColMd="6"
+//               imageCol="12"
+//               ImgAbout={data2?.mid_image}
+//               ImgAboutClass={"aboout_img object-fit-contain w-100"}
+//                             imgAlt={data2?.mid_image_alt || data2?.top_title || "About"}
+//               titleHeading=  {data2?.top_title}
+//              subHeadingTag={S2SubTag}
+//               subHeading= {data2?.top_description}
+//               subHeadingClass={`our_experts_text_land pt-3 ${dynSize(data2?.top_description_tag)}`}
+//               desClass="team_description hc_landing_desc"
+//               // description= {data2?.mid_sub_title}
+//               descriptionHtml={data2?.mid_sub_title}
+//               textAboutBtn="READ MORE"
+//               btnLink={data2?.mid_sub_description}
+//               textAboutBtnCLass="read_morebtn"
+//             />
+//           </section>
+//           <hr />
+//           <section>
+//             <div className="container">
+//               <div className="row py-5 mx-0 g-4">
+//                 <center>
+//                   {/* <h3 className="font_about text-left pb-2">
+//                   {data3?.top_title}
+//                   </h3>
+//                   <p className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start">
+//                   {data3?.top_description}
+//                   </p> */}
+
+//                   <S3Tag className="text-left pb-2">{data3?.top_title}</S3Tag>
+// <Html className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start" html={data3?.top_description} />
+//                 </center>
+//                 <div className="col-lg-6 col-md-6 col-12">
+//                   <VideoBox
+//                     videoUrl={data3?.mid_sub_title}    // Replace with your video URL
+//                     imageUrl="/images/Designer_Choice/Vintage_blue.webp"
+//                   />
+//                 </div>
+//                 <div className="col-lg-6 col-md-6 col-12">
+//                   <VideoBox
+//                     videoUrl={data3?.mid_sub_description}
+//                     imageUrl="/images/Designer_Choice/Natural.jpg"
+//                   />
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+
+//           <div className="my-5 home_interior_wrapper">
+//             <div className="container ">
+//               <div className="row position-relative mx-0">
+//                 <center>
+//                   {/* <h3 className="pb-3 font_about">{data4?.top_title}   </h3> */}
+//                   <S4Tag className="pb-3">{data4?.top_title}</S4Tag>
+//                   {/* <p className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start">
+//                   {data4?.top_description}
+//                   </p> */}
+
+//                   <Html className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start" html={data4?.top_description} />
+//                   <div className="my-2">
+//                     <a href={data4?.mid_sub_title} className="read_morebtn py-2">
+//                       Let’s Connect
+//                     </a>
+//                   </div>
+//                 </center>
+//               </div>
+
+
+//               <div className="my-5 bgsectionroom">
+//           <div className="container">
+//             {/* ── Header: exact same pattern as HomeContent.jsx line 294-296 ── */}
+//             <div className="row mx-0 mb-4 text-center">
+//               <div className="col-12 px-0">
+//                 <span className="font_stylish text-orange-force d-block mb-1">{`Designer's Choice:`}</span>
+//                 <h2 className="h2 fw-bold mb-0 text-center">Exclusive Design Specials</h2>
+//               </div>
+//             </div>
+//             {/* ── Cards Grid ── */}
+//             <div className="mt-4 row g-4 mx-0">
+//               {staticRecords.map((record, i) => (
+//                 <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
+//                   <BgImageCard
+//                     style={{ backgroundImage: `url(${record?.child_content?.image})` }}
+//                     cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
+//                     designerCardBgDiv={"designercard designercardimg1"}
+//                     titleBgImage={record?.child_content?.title}
+//                                         imageAlt={record?.child_content?.image_alt}
+//                     descriptionBg={record?.child_content?.description}
+//                   />
+//                 </div>
+//               ))}
+//             </div>
+//             <div className="mt-4 col-lg-12 text-end pe-3">
+//               <a href="/designer-choice" className="know_more">Know More</a>
+//             </div>
+//           </div>
+//         </div>
+//             </div>
+//           </div>
+//           <section className="faq_wrapper savedesign">
+//             <div className="container">
+//               <div className="text-start">
+//                 <h3 className="font_about">High Creation Interior</h3>
+//                 <h3>
+//                   <span className="font_stylish our_experts_text_land">
+//                     Common Questions
+//                   </span>
+//                 </h3>
+
+//                 {loading ? (
+//                   <p>Loading FAQs...</p>
+//                 ) : error ? (
+//                   <p className="text-danger">{error}</p>
+//                 ) : (
+//                   <div className="row justify-content-center mx-0">
+//                     <div className="col-lg-12">
+//                       <div className="accordion " id="faqAccordion">
+//                         {faqData.map((faq, index) => (
+//                           <div className="accordion-item" key={index}>
+//                             <h2 className="accordion-header">
+//                               <button
+//                                 className={`accordion-button bg-transparent faq_landing ${
+//                                   index === 0 ? "" : "collapsed"
+//                                 }`}
+//                                 type="button"
+//                                 data-bs-toggle="collapse"
+//                                 data-bs-target={`#collapse${index}`}
+//                                 aria-expanded={index === 0 ? "true" : "false"}
+//                                 aria-controls={`collapse${index}`}
+//                               >
+//                                 {faq.json_content.title}
+//                               </button>
+//                             </h2>
+//                             <div
+//                               id={`collapse${index}`}
+//                               className={`accordion-collapse collapse ${
+//                                 index === 0 ? "show" : ""
+//                               }`}
+//                               data-bs-parent="#faqAccordion"
+//                             >
+//                               <div className="accordion-body ps-0">
+//                                 {faq.json_content.description}
+//                               </div>
+//                             </div>
+//                           </div>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 )}
+
+//               </div>
+//             </div>
+//           </section>
+//           <div className="footer_top py-5">
+//               <div className="container">
+//                 <div className="text-center py-3">
+//                   <p style={{
+//                     fontFamily: "var(--font-poppins), sans-serif",
+//                     fontSize: "0.75rem",
+//                     fontWeight: 700,
+//                     letterSpacing: "3px",
+//                     textTransform: "uppercase",
+//                     color: "#ff914d",
+//                     marginBottom: "0.5rem",
+//                   }}>
+//                     ✦   Your Dream Awaits
+//                   </p>
+
+//                   <S6Tag style={{
+//                     fontFamily: "var(--font-poppins), sans-serif",
+//                     fontWeight: 800,
+//                     fontSize: "clamp(1.8rem, 4vw, 3rem)",
+//                     lineHeight: 1.15,
+//                     color: "#171717",
+//                     marginBottom: "0.2rem",
+//                   }}>
+//                     {data6?.top_title || "Bring Your Dream Home to Life"}
+//                   </S6Tag>
+//                   {/* <h2 style={{
+//                     fontFamily: "var(--font-poppins), sans-serif",
+//                     fontWeight: 700,
+//                     fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
+//                     lineHeight: 1.15,
+//                     color: "#ff914d",
+//                     marginBottom: "2rem",
+//                   }}>
+//                     {data6?.top_description || "with Our Experts"}
+//                   </h2> */}
+
+//                   <Html
+//   className="dream6-sub"
+//   html={data6?.top_description || "with Our Experts"}
+//   style={{
+//     fontFamily: "var(--font-poppins), sans-serif",
+//     fontWeight: 700,
+//     fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
+//     lineHeight: 1.15,
+//     color: "#ff914d",
+//     marginBottom: "2rem",
+//   }}
+// />
+
+//                   <a href={data6?.mid_sub_title} className="read_morebtn py-2 px-4">
+//                     {`Let's Connect`}
+//                   </a>
+//                 </div>
+//               </div>
+//             </div>
+//             <hr />
+          
+//           {/* Refactored Sticky Sidebar using writing-mode for clean vertical layout */}
+//           <div className="position-fixed d-flex flex-column align-items-end" style={{ top: '50%', right: '0', zIndex: 9999, transform: 'translateY(-50%)', gap: '12px' }}>
+//             <a href="/contact" style={{
+//               writingMode: 'vertical-rl',
+//               backgroundColor: '#ff914d',
+//               color: 'white',
+//               padding: '16px 8px',
+//               textDecoration: 'none',
+//               fontWeight: '600',
+//               fontSize: '14px',
+//               borderTopLeftRadius: '6px',
+//               borderBottomLeftRadius: '6px',
+//               boxShadow: '-2px 2px 8px rgba(0,0,0,0.15)',
+//               transform: 'rotate(180deg)', /* Flips the text so it reads bottom-to-top */
+//               letterSpacing: '1px',
+//               transition: 'background-color 0.3s'
+//             }}>
+//               Enquiry Now
+//             </a>
+//             {/* <a href="https://wa.me/919560277787" className="shadow rounded-circle d-flex align-items-center justify-content-center bg-white" style={{ width: '44px', height: '44px', marginRight: '4px', transition: 'transform 0.3s' }}>
+//               <img src="/images/whatsapp.svg" width={28} alt="WhatsApp" decoding="async" loading="lazy" />
+//             </a> */}
+//           </div>
+//         </main>
+//         <ContactUsPopUp onModalStateChange={handleModalStateChange} />
+//       </div>
+//     </div>
+//     </MainLayout>
+//   );
+// };
+
+// export default HCLandingPage;
+
+
+// "use client";
+// import MainLayout from "../layouts/MainLayout";
+// import BgImageCard from "../components/BgImageCard";
+// import RowImage from "../components/RowImage";
+// import { IoIosShareAlt } from "react-icons/io";
+// import { IoIosCall } from "react-icons/io";
+// import { FaComments } from "react-icons/fa";
+// import ContactUsPopUp from "../components/ContactUsPopUp";
+// import { useCallback, useEffect, useState } from "react";
+// import { usePathname } from "next/navigation";
+// import VideoBox from "../components/VideoBox";
+// import { toast } from "react-toastify";
+// import api from "@/utils/api";
+// import { image } from "@nextui-org/theme";
+// import { buildLeadMetadata } from "@/utils/leadForms";
+// import { MediaImg } from "../components/MediaImage";
+// import DOMPurify from "isomorphic-dompurify";
+
+// const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+// const pickTag = (t, fallback) => (HEADING_TAGS.includes(t) ? t : fallback);
+// const dynSize = (t) => (HEADING_TAGS.includes(t) ? `dyn-size dyn-${t}` : "");
+// const Html = ({ html, className, style }) => (
+//   <div className={className} style={style} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html || "") }} />
+// );
+
+// const HCLandingPage = () => {
+//   const pathname = usePathname();
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [formData, setFormData] = useState({
+//     fullName: "",
+//     contact: "",
+//     email: "",
+//     place: "",
+//     query: "",
+//     termsAndConditions: false,
+//   });
+
+//   const [submissionError, setSubmissionError] = useState("");
+//   const [submissionMessage, setSubmissionMessage] = useState("");
+//   const [designIdea, setDesignIdea] = useState([]);
+
+//   const [faqData, setFaqData] = useState([]);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     const fetchFAQs = async () => {
+//       try {
+//         const response = await api.get("/cms-content/faqs");
+//         setFaqData(response.data || []);
+//       }
+//       catch (err) {
+//         setError("Failed to fetch FAQ data. Please try again.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchFAQs();
+//   }, []);
+
+//   useEffect(() => {
+//     setLoading(true);
+//     const fetchDesignIdea = async () => {
+//       try {
+//         const response = await api.get("/cms-parent-child/designer_choice");
+//         setDesignIdea(response.data);
+//       } catch (err) {
+//         console.error("Error fetching design idea:", err);
+//         setError("Failed to load design ideas. Please try again.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchDesignIdea();
+//   }, []);
+
+//     // Sort records by ID in descending order (newest first)
+//     const sortedDesignIdea = [...designIdea].sort((a, b) => b.id - a.id);
+
+//     // Get the 8 oldest records
+//     const staticRecords = sortedDesignIdea.slice(-5); // Last 8 records (oldest)
+
+//     // Get the latest records (excluding the last 8)
+//     const latestRecords = sortedDesignIdea.slice(0, -5); // Everything except last 8
+
+//   // section one
+//   const [data1, setdata1] = useState();
+//    const fetchContentManagerPages = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams", {});
+//       if (response.data && response.data.json_content) {
+//         setdata1(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section two
+//   const [data2, setdata2] = useState();
+//    const fetchContentManagerPages_2 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_2", {});
+//       if (response.data && response.data.json_content) {
+//         setdata2(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section three
+//   const [data3, setdata3] = useState();
+//    const fetchContentManagerPages_3 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_3", {});
+//       if (response.data && response.data.json_content) {
+//         setdata3(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section four
+//   const [data4, setdata4] = useState();
+//    const fetchContentManagerPages_4 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_4", {});
+//       if (response.data && response.data.json_content) {
+//         setdata4(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section five
+//   const [data5, setdata5] = useState();
+//    const fetchContentManagerPages_5 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_5", {});
+//       if (response.data && response.data.json_content) {
+//         setdata5(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   // section six
+//   const [data6, setdata6] = useState();
+//    const fetchContentManagerPages_6 = useCallback(async () => {
+//     try {
+//       const response = await api.get("/cms-content/creating_the_home_of_your_dreams_6", {});
+//       if (response.data && response.data.json_content) {
+//         setdata6(response.data?.json_content);
+
+//       }
+//     } catch (err) {
+//       toast.error(err.message ?? "Failed to fetch data. Please try again.");
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetchContentManagerPages();
+//     fetchContentManagerPages_2();
+//     fetchContentManagerPages_3();
+//     fetchContentManagerPages_4();
+//     fetchContentManagerPages_5();
+//     fetchContentManagerPages_6();
+//   }, [fetchContentManagerPages, fetchContentManagerPages_2, fetchContentManagerPages_3, fetchContentManagerPages_4, fetchContentManagerPages_5, fetchContentManagerPages_6]);
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     console.log(formData);
+//     setFormData((prevData) => ({ ...prevData, [name]: value }));
+//   };
+
+//   const handleCheckboxChange = (e) => {
+//     const { checked } = e.target;
+//     setFormData((prevData) => ({ ...prevData, termsAndConditions: checked }));
+//     console.log("Checkbox state:", checked);
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!formData.termsAndConditions) {
+//       toast.error("You must agree to the Terms & Conditions before submitting.")
+//       setSubmissionError(
+//         "You must agree to the Terms & Conditions before submitting."
+//       );
+//       return;
+//     }
+
+//     const formRequestData = {
+//       name: formData.fullName,
+//       mobile: formData.contact,
+//       email: formData.email,
+//       place: formData.place,
+//       query: formData.query,
+//       ...buildLeadMetadata({
+//         pathname,
+//         leadFormType: "inline",
+//         leadFormName: "Creating The Home Of Your Dreams Lead Form",
+//         ctaText: "SEND",
+//       }),
+//     };
+
+//     try {
+//       const response = await api.post("/user-queries", formRequestData);
+//       console.log(response);
+//       if (response.status === 201) {
+//         setSubmissionMessage("Form submitted successfully!");
+//         setFormData({
+//           fullName: "",
+//           contact: "",
+//           email: "",
+//           place: "",
+//           query: "",
+//           termsAndConditions: false,
+//         });
+//         setTimeout(() => {
+//           window.location.href = "/thank-you";
+//       }, 300);
+//         toast.success("Form submitted successfully!");
+//       } else {
+//         toast.error("Failed to submit form. Please try again.");
+//         setSubmissionError("Failed to submit form. Please try again.");
+//       }
+//     } catch (error) {
+//       toast.error(error.message)
+//       setSubmissionError("Error submitting form. Please try again.", error);
+//       console.error("Error:", error);
+//     } finally {
+//       // Clear error message after some time
+//       setTimeout(() => {
+//         setSubmissionError("");
+//         setSubmissionMessage("");
+//       }, 5000);
+//     }
+//   };
+
+//   const handleModalStateChange = useCallback((isOpen) => {
+//     setIsModalOpen(isOpen);
+//   }, []);
+
+//   const S1TopTag = pickTag(data1?.top_title_tag, "h3");
+// const S1MidTag = pickTag(data1?.mid_sub_title_tag, "h3");
+// const S2SubTag = HEADING_TAGS.includes(data2?.top_description_tag) ? data2.top_description_tag : undefined;
+// const S3Tag = pickTag(data3?.top_title_tag, "h3");
+// const S4Tag = pickTag(data4?.top_title_tag, "h3");
+// const S6Tag = pickTag(data6?.top_title_tag, "h2");
+
+//   return (
+//     <MainLayout>
+//     <div>
+//       <style dangerouslySetInnerHTML={{__html: `
+//         .text-orange-force { color: #ff914d !important; }
+
+//         /* Fix text visibility on designer image cards — mirrors HomeContent.jsx */
+//         .bgsectionroom .designercard * {
+//           color: #ffffff !important;
+//           text-shadow: 0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8) !important;
+//         }
+//         .bgsectionroom .designercard * { font-weight: 800 !important; }
+
+//         /* Modern & Clean Typography Overrides (Scaled down headings) */
+//         .font_about, .about_wrapper .rowimage-title, .about_wrapper h1, .about_wrapper h2, .about_wrapper h3, .about_wrapper h4, .about_wrapper h5, .about_wrapper h6 {
+//           font-family: var(--font-poppins), sans-serif !important;
+//           font-size: clamp(1.5rem, 2vw, 2.1rem) !important; /* Scaled down for a cleaner look */
+//           font-weight: 500 !important;
+//           line-height: 1.3 !important;
+//           color: #1f1f1f !important;
+//           letter-spacing: -0.5px !important;
+//           text-align: center !important;
+//           margin-bottom: 1rem !important;
+//         }
+        
+//         .hc_landing_desc, .about_wrapper p {
+//           font-family: var(--font-poppins), sans-serif !important;
+//           font-size: 1.05rem !important;
+//           line-height: 1.65 !important;
+//           color: #555 !important;
+//           font-weight: 400 !important;
+//         }
+//           .dream6-sub p { margin: 0; }
+
+//           /* Tag-driven sizes for sections 1 & 2, applied only when a tag is chosen in the CMS */
+// .dyn-size.dyn-h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem) !important; }
+// .dyn-size.dyn-h2 { font-size: clamp(2rem, 3.8vw, 3rem) !important; }
+// .dyn-size.dyn-h3 { font-size: clamp(1.75rem, 3vw, 2.4rem) !important; }
+// .dyn-size.dyn-h4 { font-size: clamp(1.5rem, 2.4vw, 1.9rem) !important; }
+// .dyn-size.dyn-h5 { font-size: 1.35rem !important; }
+// .dyn-size.dyn-h6 { font-size: 1.1rem !important; }
+
+//         .about_wrapper .our_experts_text_land {
+//           text-align: left !important;
+//           display: block;
+//         }
+//       `}} />
+//       {/* <head>
+//         <title>
+//         Creating the home of your dreams. - High Creation Interior
+//         </title>
+//       </head> */}
+//       <div className={isModalOpen ? "blur-bg" : ""}>
+//         {/* <header className="container-fluid px-lg-5 px-3">
+//           <nav className="navbar navbar-expand-lg p-0">
+//             <div className="container-fluid">
+//               <a className="navbar-brand ms-lg-5" href="/" aria-label="Home">
+//                 <img
+//                   src="/images/new_hc_logo.png"
+//                   width={90}
+//                   height={90}
+//                   alt="hc-logo"
+//                   className="p-2"
+//                 decoding="async"  loading="lazy" />
+//               </a>
+//               <button
+//                 className="navbar-toggler d-block d-lg-none"
+//                 type="button"
+//                 data-bs-toggle="collapse"
+//                 data-bs-target="#navbarSupportedContent"
+//                 aria-controls="navbarSupportedContent"
+//                 aria-expanded="false"
+//                 aria-label="Toggle navigation"
+//               >
+//                 <span className="navbar-toggler-icon"></span>
+//               </button>
+//               <div
+//                 className="collapse navbar-collapse"
+//                 id="navbarSupportedContent"
+//               >
+//                 <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+//                   <li className="mb-3 mb-lg-0">
+//                     <a href="tel:18001200532" className="btn read_morebtn">
+//                       <IoIosCall className="callicon me-2" />
+//                       1800 1200 532
+//                     </a>
+//                   </li>
+//                   <li className="mb-4 mb-lg-0">
+//                     <a href="/contact" className="read_morebtn py-2">
+//                       Let’s Connect
+//                     </a>
+//                   </li>
+//                   <li className="mb-3 mb-lg-0">
+//                     <a href="/estimator-for-home" className="read_morebtn py-2">
+//                       Estimator for Your Home
+//                     </a>
+//                   </li>
+//                 </ul>
+//               </div>
+//             </div>
+//           </nav>
+//         </header> */}
+//         <main className="mt-0 pt-0">
+//         <section
+//           className="contact_wrapper hc_landing_ban1 position-relative"
+//           style={{
+//             backgroundImage: `url(${data1?.mid_image})`,
+//             backgroundSize: "cover",
+//             backgroundPosition: "center"
+//           }}
+//         >
+//                     {data1?.mid_image && (
+//             <MediaImg
+//               src={data1.mid_image}
+//                             alt={data1?.mid_image_alt}
+//               fallbackAlt={data1?.mid_sub_title || data1?.top_title || ""}
+//               loading="eager"
+//               fetchPriority="high"
+//               style={{
+//                 position: "absolute",
+//                 inset: 0,
+//                 width: "100%",
+//                 height: "100%",
+//                 objectFit: "cover",
+//                 objectPosition: "center",
+//                 pointerEvents: "none",
+//                 zIndex: 0,
+//               }}
+//             />
+//           )}
+//              <div className="container position-relative" style={{ zIndex: 1 }}>
+//               <div className="row">
+//                 <div className="col-lg-7 d-flex align-items-center">
+//                   <div className="pe-lg-5 text-white">
+//                     {/* <h3 className="fw-lighter fs-3 pb-0 mb-0 home_subhead" style={{ color: "#ffffff" }}>
+//                     {data1?.top_title}
+//                     </h3>
+//                     <h3 className="letheading home_banner_heading mt-2" style={{ color: "#ffffff" }}>
+//                       {data1?.mid_sub_title}
+//                     </h3>
+//                     <p className="text-dark fw-medium fs-6 mt-3">
+//                     {data1?.top_description}
+//                     </p> */}
+
+//                     <S1TopTag className={`fw-lighter fs-3 pb-0 mb-0 home_subhead ${dynSize(data1?.top_title_tag)}`} style={{ color: "#ffffff" }}>
+//   {data1?.top_title}
+// </S1TopTag>
+// <S1MidTag className={`letheading home_banner_heading mt-2 ${dynSize(data1?.mid_sub_title_tag)}`} style={{ color: "#ffffff" }}>
+//   {data1?.mid_sub_title}
+// </S1MidTag>
+// <Html className="text-dark fw-medium fs-6 mt-3" html={data1?.top_description} />
+//                   </div>
+//                 </div>
+//                 <div className="col-lg-5">
+//                   <div className="contact_form contact" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: "12px", padding: "1.5rem", border: "1px solid rgba(255,255,255,0.25)" }}>
+//                     <h4 className="form_heading mb-3" style={{ color: "#ffffff" }}>
+//                       Styles to Suit Every Budget
+//                     </h4>
+//                     <p className="text-white">Get Your Dream house today. Let Our experts help you</p>
+//                     <form className="row" onSubmit={handleSubmit}>
+//                       <div className="col-md-12 mb-3">
+//                         <input
+//                           type="text"
+//                           className="form-control"
+//                           id="validationCustom01"
+//                           placeholder="Name"
+//                           name="fullName"
+//                           onChange={handleInputChange}
+//                           value={formData.fullName}
+//                           required
+//                         />
+//                       </div>
+//                       <div className="col-md-6 mb-3">
+//                         <input
+//                           type="text"
+//                           className="form-control"
+//                           id="validationCustom05"
+//                           placeholder="Contact No."
+//                           name="contact"
+//                           onChange={handleInputChange}
+//                           value={formData.contact}
+//                           required
+//                         />
+//                       </div>
+
+//                       <div className="col-md-6 mb-3">
+//                         <input
+//                           type="email"
+//                           className="form-control"
+//                           id="validationCustom03"
+//                           placeholder="Email ID"
+//                           name="email"
+//                           onChange={handleInputChange}
+//                           value={formData.email}
+//                           required
+//                         />
+//                       </div>
+
+//                       <div className="col-md-12 mb-3">
+//                         <textarea
+//                           className="form-control"
+//                           id="exampleFormControlTextarea1"
+//                           placeholder="Design Name / Message"
+//                           name="query"
+//                           onChange={handleInputChange}
+//                           value={formData.query}
+//                           rows="1"
+//                         ></textarea>
+//                       </div>
+//                       <div className="col-12">
+//                         <div className="form-check">
+//                           <input
+//                             className="form-check-input"
+//                             type="checkbox"
+//                             value={formData.termsAndConditions}
+//                             id="invalidCheck"
+//                             required
+//                             onChange={handleCheckboxChange}
+//                           />
+//                           <label
+//                             className="form-check-label"
+//                             htmlFor="invalidCheck"
+//                             style={{ color: "#1a1a1a", fontSize: "0.8rem" }}
+//                           >
+//                             By submitting this form, you agree to the privacy
+//                             policy & terms and conditions
+//                           </label>
+//                           <div className="invalid-feedback" style={{ color: "#c0392b" }}>
+//                             You must agree before submitting.
+//                           </div>
+//                         </div>
+//                       </div>
+//                       <div className="col-12 mt-3 d-flex m-auto justify-content-center">
+//                         <button
+//                           className="btn know_more px-5 w-100"
+//                           type="submit"
+//                         >
+//                           SEND
+//                         </button>
+//                       </div>
+//                     </form>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+//           <section className="my-5 about_wrapper">
+//             <RowImage
+//               imageColLg="6"
+//               imageColXl="6"
+//               imageColMd="6"
+//               imageCol="12"
+//               ImgAbout={data2?.mid_image}
+//               ImgAboutClass={"aboout_img object-fit-contain w-100"}
+//                             imgAlt={data2?.mid_image_alt || data2?.top_title || "About"}
+//               titleHeading=  {data2?.top_title}
+//              subHeadingTag={S2SubTag}
+//               subHeading= {data2?.top_description}
+//               subHeadingClass={`our_experts_text_land pt-3 ${dynSize(data2?.top_description_tag)}`}
+//               desClass="team_description hc_landing_desc"
+//               // description= {data2?.mid_sub_title}
+//               descriptionHtml={data2?.mid_sub_title}
+//               textAboutBtn="READ MORE"
+//               btnLink={data2?.mid_sub_description}
+//               textAboutBtnCLass="read_morebtn"
+//             />
+//           </section>
+//           <hr />
+//           <section>
+//             <div className="container">
+//               <div className="row py-5 mx-0 g-4">
+//                 <center>
+//                   {/* <h3 className="font_about text-left pb-2">
+//                   {data3?.top_title}
+//                   </h3>
+//                   <p className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start">
+//                   {data3?.top_description}
+//                   </p> */}
+
+//                   <S3Tag className="text-left pb-2">{data3?.top_title}</S3Tag>
+// <Html className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start" html={data3?.top_description} />
+//                 </center>
+//                 <div className="col-lg-6 col-md-6 col-12">
+//                   <VideoBox
+//                     videoUrl={data3?.mid_sub_title}    // Replace with your video URL
+//                     imageUrl="/images/Designer_Choice/Vintage_blue.webp"
+//                   />
+//                 </div>
+//                 <div className="col-lg-6 col-md-6 col-12">
+//                   <VideoBox
+//                     videoUrl={data3?.mid_sub_description}
+//                     imageUrl="/images/Designer_Choice/Natural.jpg"
+//                   />
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+
+//           <div className="my-5 home_interior_wrapper">
+//             <div className="container ">
+//               <div className="row position-relative mx-0">
+//                 <center>
+//                   {/* <h3 className="pb-3 font_about">{data4?.top_title}   </h3> */}
+//                   <S4Tag className="pb-3">{data4?.top_title}</S4Tag>
+//                   {/* <p className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start">
+//                   {data4?.top_description}
+//                   </p> */}
+
+//                   <Html className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start" html={data4?.top_description} />
+//                   <div className="my-2">
+//                     <a href={data4?.mid_sub_title} className="read_morebtn py-2">
+//                       Let’s Connect
+//                     </a>
+//                   </div>
+//                 </center>
+//               </div>
+
+
+//               <div className="my-5 bgsectionroom">
+//           <div className="container">
+//             {/* ── Header: exact same pattern as HomeContent.jsx line 294-296 ── */}
+//             <div className="row mx-0 mb-4 text-center">
+//               <div className="col-12 px-0">
+//                 <span className="font_stylish text-orange-force d-block mb-1">{`Designer's Choice:`}</span>
+//                 <h2 className="h2 fw-bold mb-0 text-center">Exclusive Design Specials</h2>
+//               </div>
+//             </div>
+//             {/* ── Cards Grid ── */}
+//             <div className="mt-4 row g-4 mx-0">
+//               {staticRecords.map((record, i) => (
+//                 <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
+//                   <BgImageCard
+//                     style={{ backgroundImage: `url(${record?.child_content?.image})` }}
+//                     cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
+//                     designerCardBgDiv={"designercard designercardimg1"}
+//                     titleBgImage={record?.child_content?.title}
+//                                         imageAlt={record?.child_content?.image_alt}
+//                     descriptionBg={record?.child_content?.description}
+//                   />
+//                 </div>
+//               ))}
+//             </div>
+//             <div className="mt-4 col-lg-12 text-end pe-3">
+//               <a href="/designer-choice" className="know_more">Know More</a>
+//             </div>
+//           </div>
+//         </div>
+//             </div>
+//           </div>
+//           <section className="faq_wrapper savedesign">
+//             <div className="container">
+//               <div className="text-start">
+//                 <h3 className="font_about">High Creation Interior</h3>
+//                 <h3>
+//                   <span className="font_stylish our_experts_text_land">
+//                     Common Questions
+//                   </span>
+//                 </h3>
+
+//                 {loading ? (
+//                   <p>Loading FAQs...</p>
+//                 ) : error ? (
+//                   <p className="text-danger">{error}</p>
+//                 ) : (
+//                   <div className="row justify-content-center mx-0">
+//                     <div className="col-lg-12">
+//                       <div className="accordion " id="faqAccordion">
+//                         {faqData.map((faq, index) => (
+//                           <div className="accordion-item" key={index}>
+//                             <h2 className="accordion-header">
+//                               <button
+//                                 className={`accordion-button bg-transparent faq_landing ${
+//                                   index === 0 ? "" : "collapsed"
+//                                 }`}
+//                                 type="button"
+//                                 data-bs-toggle="collapse"
+//                                 data-bs-target={`#collapse${index}`}
+//                                 aria-expanded={index === 0 ? "true" : "false"}
+//                                 aria-controls={`collapse${index}`}
+//                               >
+//                                 {faq.json_content.title}
+//                               </button>
+//                             </h2>
+//                             <div
+//                               id={`collapse${index}`}
+//                               className={`accordion-collapse collapse ${
+//                                 index === 0 ? "show" : ""
+//                               }`}
+//                               data-bs-parent="#faqAccordion"
+//                             >
+//                               <div className="accordion-body ps-0">
+//                                 {faq.json_content.description}
+//                               </div>
+//                             </div>
+//                           </div>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 )}
+
+//               </div>
+//             </div>
+//           </section>
+//           <div className="footer_top py-5">
+//               <div className="container">
+//                 <div className="text-center py-3">
+//                   <p style={{
+//                     fontFamily: "var(--font-poppins), sans-serif",
+//                     fontSize: "0.75rem",
+//                     fontWeight: 700,
+//                     letterSpacing: "3px",
+//                     textTransform: "uppercase",
+//                     color: "#ff914d",
+//                     marginBottom: "0.5rem",
+//                   }}>
+//                     ✦   Your Dream Awaits
+//                   </p>
+
+//                   <S6Tag style={{
+//                     fontFamily: "var(--font-poppins), sans-serif",
+//                     fontWeight: 800,
+//                     fontSize: "clamp(1.8rem, 4vw, 3rem)",
+//                     lineHeight: 1.15,
+//                     color: "#171717",
+//                     marginBottom: "0.2rem",
+//                   }}>
+//                     {data6?.top_title || "Bring Your Dream Home to Life"}
+//                   </S6Tag>
+//                   {/* <h2 style={{
+//                     fontFamily: "var(--font-poppins), sans-serif",
+//                     fontWeight: 700,
+//                     fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
+//                     lineHeight: 1.15,
+//                     color: "#ff914d",
+//                     marginBottom: "2rem",
+//                   }}>
+//                     {data6?.top_description || "with Our Experts"}
+//                   </h2> */}
+
+//                   <Html
+//   className="dream6-sub"
+//   html={data6?.top_description || "with Our Experts"}
+//   style={{
+//     fontFamily: "var(--font-poppins), sans-serif",
+//     fontWeight: 700,
+//     fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
+//     lineHeight: 1.15,
+//     color: "#ff914d",
+//     marginBottom: "2rem",
+//   }}
+// />
+
+//                   <a href={data6?.mid_sub_title} className="read_morebtn py-2 px-4">
+//                     {`Let's Connect`}
+//                   </a>
+//                 </div>
+//               </div>
+//             </div>
+//             <hr />
+          
+//           {/* Refactored Sticky Sidebar using writing-mode for clean vertical layout */}
+//           <div className="position-fixed d-flex flex-column align-items-end" style={{ top: '50%', right: '0', zIndex: 9999, transform: 'translateY(-50%)', gap: '12px' }}>
+//             <a href="/contact" style={{
+//               writingMode: 'vertical-rl',
+//               backgroundColor: '#ff914d',
+//               color: 'white',
+//               padding: '16px 8px',
+//               textDecoration: 'none',
+//               fontWeight: '600',
+//               fontSize: '14px',
+//               borderTopLeftRadius: '6px',
+//               borderBottomLeftRadius: '6px',
+//               boxShadow: '-2px 2px 8px rgba(0,0,0,0.15)',
+//               transform: 'rotate(180deg)', /* Flips the text so it reads bottom-to-top */
+//               letterSpacing: '1px',
+//               transition: 'background-color 0.3s'
+//             }}>
+//               Enquiry Now
+//             </a>
+//             {/* <a href="https://wa.me/919560277787" className="shadow rounded-circle d-flex align-items-center justify-content-center bg-white" style={{ width: '44px', height: '44px', marginRight: '4px', transition: 'transform 0.3s' }}>
+//               <img src="/images/whatsapp.svg" width={28} alt="WhatsApp" decoding="async" loading="lazy" />
+//             </a> */}
+//           </div>
+//         </main>
+//         <ContactUsPopUp onModalStateChange={handleModalStateChange} />
+//       </div>
+//     </div>
+//     </MainLayout>
+//   );
+// };
+
+// export default HCLandingPage;
+
+
 "use client";
-import MainLayout from "../layouts/MainLayout";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { toast } from "react-toastify";
+import DOMPurify from "isomorphic-dompurify";
 import BgImageCard from "../components/BgImageCard";
 import RowImage from "../components/RowImage";
-import { IoIosShareAlt } from "react-icons/io";
-import { IoIosCall } from "react-icons/io";
-import { FaComments } from "react-icons/fa";
-import ContactUsPopUp from "../components/ContactUsPopUp";
-import { useCallback, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import VideoBox from "../components/VideoBox";
-import { toast } from "react-toastify";
+import { useMediaAlt } from "../components/MediaImage";
 import api from "@/utils/api";
-import { image } from "@nextui-org/theme";
 import { buildLeadMetadata } from "@/utils/leadForms";
-import { MediaImg } from "../components/MediaImage";
-import DOMPurify from "isomorphic-dompurify";
+
+// The popup only appears after a delay / scroll / exit-intent, so there is no
+// reason to ship its code in the initial bundle or render it on the server.
+const ContactUsPopUp = dynamic(() => import("../components/ContactUsPopUp"), {
+  ssr: false,
+});
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 const pickTag = (t, fallback) => (HEADING_TAGS.includes(t) ? t : fallback);
 const dynSize = (t) => (HEADING_TAGS.includes(t) ? `dyn-size dyn-${t}` : "");
-const Html = ({ html, className, style }) => (
-  <div className={className} style={style} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html || "") }} />
-);
 
-const HCLandingPage = () => {
+// Sanitise once per html change (not on every keystroke / state change).
+const Html = memo(function Html({ html, className, style }) {
+  const clean = useMemo(() => DOMPurify.sanitize(html || ""), [html]);
+  return (
+    <div
+      className={className}
+      style={style}
+      dangerouslySetInnerHTML={{ __html: clean }}
+    />
+  );
+});
+
+// Accessible orange for TEXT on light backgrounds (#ff914d is only 2.2:1 on white).
+const ACCESSIBLE_ORANGE = "#b84c00";
+
+const DREAM6_STYLE = {
+  fontFamily: "var(--font-poppins), sans-serif",
+  fontWeight: 700,
+  fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
+  lineHeight: 1.15,
+  color: ACCESSIBLE_ORANGE,
+  marginBottom: "2rem",
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Hero image                                                                */
+/* -------------------------------------------------------------------------- */
+
+// Keep in sync with images.domains in next.config.mjs. Hosts that are not
+// listed there can't go through next/image, so they use a plain <img>.
+const OPTIMIZED_HOSTS = [
+  "hcinterior.in",
+  "www.hcinterior.in",
+  "apidev.hcinterior.in",
+  "localhost",
+];
+
+const canOptimize = (src) => {
+  if (!src) return false;
+  if (src.startsWith("//")) return false;
+  if (src.startsWith("/")) return true;
+  try {
+    return OPTIMIZED_HOSTS.includes(new URL(src).hostname);
+  } catch {
+    return false;
+  }
+};
+
+const HERO_IMG_STYLE = {
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  objectPosition: "center",
+  pointerEvents: "none",
+  zIndex: 0,
+};
+
+// This is the LCP element. It is rendered in the server HTML, preloaded
+// (priority), resized/AVIF-converted by next/image, and never lazy-loaded.
+const HeroImage = ({ src, alt, fallbackAlt }) => {
+  const mapAlt = useMediaAlt(src, fallbackAlt);
+  const finalAlt = alt || mapAlt;
+
+  if (canOptimize(src)) {
+    return (
+      <Image
+        src={src}
+        alt={finalAlt}
+        fill
+        priority
+        sizes="100vw"
+        quality={70}
+        style={HERO_IMG_STYLE}
+      />
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={finalAlt}
+      loading="eager"
+      fetchPriority="high"
+      decoding="async"
+      style={HERO_IMG_STYLE}
+    />
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Lead form (own state => typing no longer re-renders the whole page)       */
+/* -------------------------------------------------------------------------- */
+
+const EMPTY_FORM = {
+  fullName: "",
+  contact: "",
+  email: "",
+  place: "",
+  query: "",
+  termsAndConditions: false,
+};
+
+const LeadForm = () => {
   const pathname = usePathname();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    contact: "",
-    email: "",
-    place: "",
-    query: "",
-    termsAndConditions: false,
-  });
-
-  const [submissionError, setSubmissionError] = useState("");
-  const [submissionMessage, setSubmissionMessage] = useState("");
-  const [designIdea, setDesignIdea] = useState([]);
-
-  const [faqData, setFaqData] = useState([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchFAQs = async () => {
-      try {
-        const response = await api.get("/cms-content/faqs");
-        setFaqData(response.data || []);
-      }
-      catch (err) {
-        setError("Failed to fetch FAQ data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFAQs();
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const fetchDesignIdea = async () => {
-      try {
-        const response = await api.get("/cms-parent-child/designer_choice");
-        setDesignIdea(response.data);
-      } catch (err) {
-        console.error("Error fetching design idea:", err);
-        setError("Failed to load design ideas. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDesignIdea();
-  }, []);
-
-    // Sort records by ID in descending order (newest first)
-    const sortedDesignIdea = [...designIdea].sort((a, b) => b.id - a.id);
-
-    // Get the 8 oldest records
-    const staticRecords = sortedDesignIdea.slice(-5); // Last 8 records (oldest)
-
-    // Get the latest records (excluding the last 8)
-    const latestRecords = sortedDesignIdea.slice(0, -5); // Everything except last 8
-
-  // section one
-  const [data1, setdata1] = useState();
-   const fetchContentManagerPages = useCallback(async () => {
-    try {
-      const response = await api.get("/cms-content/creating_the_home_of_your_dreams", {});
-      if (response.data && response.data.json_content) {
-        setdata1(response.data?.json_content);
-
-      }
-    } catch (err) {
-      toast.error(err.message ?? "Failed to fetch data. Please try again.");
-    }
-  }, []);
-
-  // section two
-  const [data2, setdata2] = useState();
-   const fetchContentManagerPages_2 = useCallback(async () => {
-    try {
-      const response = await api.get("/cms-content/creating_the_home_of_your_dreams_2", {});
-      if (response.data && response.data.json_content) {
-        setdata2(response.data?.json_content);
-
-      }
-    } catch (err) {
-      toast.error(err.message ?? "Failed to fetch data. Please try again.");
-    }
-  }, []);
-
-  // section three
-  const [data3, setdata3] = useState();
-   const fetchContentManagerPages_3 = useCallback(async () => {
-    try {
-      const response = await api.get("/cms-content/creating_the_home_of_your_dreams_3", {});
-      if (response.data && response.data.json_content) {
-        setdata3(response.data?.json_content);
-
-      }
-    } catch (err) {
-      toast.error(err.message ?? "Failed to fetch data. Please try again.");
-    }
-  }, []);
-
-  // section four
-  const [data4, setdata4] = useState();
-   const fetchContentManagerPages_4 = useCallback(async () => {
-    try {
-      const response = await api.get("/cms-content/creating_the_home_of_your_dreams_4", {});
-      if (response.data && response.data.json_content) {
-        setdata4(response.data?.json_content);
-
-      }
-    } catch (err) {
-      toast.error(err.message ?? "Failed to fetch data. Please try again.");
-    }
-  }, []);
-
-  // section five
-  const [data5, setdata5] = useState();
-   const fetchContentManagerPages_5 = useCallback(async () => {
-    try {
-      const response = await api.get("/cms-content/creating_the_home_of_your_dreams_5", {});
-      if (response.data && response.data.json_content) {
-        setdata5(response.data?.json_content);
-
-      }
-    } catch (err) {
-      toast.error(err.message ?? "Failed to fetch data. Please try again.");
-    }
-  }, []);
-
-  // section six
-  const [data6, setdata6] = useState();
-   const fetchContentManagerPages_6 = useCallback(async () => {
-    try {
-      const response = await api.get("/cms-content/creating_the_home_of_your_dreams_6", {});
-      if (response.data && response.data.json_content) {
-        setdata6(response.data?.json_content);
-
-      }
-    } catch (err) {
-      toast.error(err.message ?? "Failed to fetch data. Please try again.");
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchContentManagerPages();
-    fetchContentManagerPages_2();
-    fetchContentManagerPages_3();
-    fetchContentManagerPages_4();
-    fetchContentManagerPages_5();
-    fetchContentManagerPages_6();
-  }, [fetchContentManagerPages, fetchContentManagerPages_2, fetchContentManagerPages_3, fetchContentManagerPages_4, fetchContentManagerPages_5, fetchContentManagerPages_6]);
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(formData);
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCheckboxChange = (e) => {
     const { checked } = e.target;
-    setFormData((prevData) => ({ ...prevData, termsAndConditions: checked }));
-    console.log("Checkbox state:", checked);
+    setFormData((prev) => ({ ...prev, termsAndConditions: checked }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.termsAndConditions) {
-      toast.error("You must agree to the Terms & Conditions before submitting.")
-      setSubmissionError(
-        "You must agree to the Terms & Conditions before submitting."
-      );
+      toast.error("You must agree to the Terms & Conditions before submitting.");
       return;
     }
 
@@ -217,54 +1679,203 @@ const HCLandingPage = () => {
 
     try {
       const response = await api.post("/user-queries", formRequestData);
-      console.log(response);
       if (response.status === 201) {
-        setSubmissionMessage("Form submitted successfully!");
-        setFormData({
-          fullName: "",
-          contact: "",
-          email: "",
-          place: "",
-          query: "",
-          termsAndConditions: false,
-        });
+        setFormData(EMPTY_FORM);
         setTimeout(() => {
           window.location.href = "/thank-you";
-      }, 300);
+        }, 300);
         toast.success("Form submitted successfully!");
       } else {
         toast.error("Failed to submit form. Please try again.");
-        setSubmissionError("Failed to submit form. Please try again.");
       }
     } catch (error) {
-      toast.error(error.message)
-      setSubmissionError("Error submitting form. Please try again.", error);
+      toast.error(error.message);
       console.error("Error:", error);
-    } finally {
-      // Clear error message after some time
-      setTimeout(() => {
-        setSubmissionError("");
-        setSubmissionMessage("");
-      }, 5000);
     }
   };
+
+  return (
+    <div
+      className="contact_form contact"
+      style={{
+        background: "rgba(255,255,255,0.12)",
+        backdropFilter: "blur(8px)",
+        borderRadius: "12px",
+        padding: "1.5rem",
+        border: "1px solid rgba(255,255,255,0.25)",
+      }}
+    >
+      <h4 className="form_heading mb-3" style={{ color: "#ffffff" }}>
+        Styles to Suit Every Budget
+      </h4>
+      <p className="text-white">Get Your Dream house today. Let Our experts help you</p>
+      <form className="row" onSubmit={handleSubmit}>
+        <div className="col-md-12 mb-3">
+          <input
+            type="text"
+            className="form-control"
+            id="validationCustom01"
+            placeholder="Name"
+            name="fullName"
+            onChange={handleInputChange}
+            value={formData.fullName}
+            required
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <input
+            type="text"
+            className="form-control"
+            id="validationCustom05"
+            placeholder="Contact No."
+            name="contact"
+            onChange={handleInputChange}
+            value={formData.contact}
+            required
+          />
+        </div>
+
+        <div className="col-md-6 mb-3">
+          <input
+            type="email"
+            className="form-control"
+            id="validationCustom03"
+            placeholder="Email ID"
+            name="email"
+            onChange={handleInputChange}
+            value={formData.email}
+            required
+          />
+        </div>
+
+        <div className="col-md-12 mb-3">
+          <textarea
+            className="form-control"
+            id="exampleFormControlTextarea1"
+            placeholder="Design Name / Message"
+            name="query"
+            onChange={handleInputChange}
+            value={formData.query}
+            rows="1"
+          ></textarea>
+        </div>
+        <div className="col-12">
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              checked={formData.termsAndConditions}
+              id="invalidCheck"
+              required
+              onChange={handleCheckboxChange}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="invalidCheck"
+              style={{ color: "#1a1a1a", fontSize: "0.8rem" }}
+            >
+              By submitting this form, you agree to the privacy
+              policy & terms and conditions
+            </label>
+            <div className="invalid-feedback" style={{ color: "#c0392b" }}>
+              You must agree before submitting.
+            </div>
+          </div>
+        </div>
+        <div className="col-12 mt-3 d-flex m-auto justify-content-center">
+          <button className="btn know_more px-5 w-100" type="submit">
+            SEND
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Page                                                                      */
+/* -------------------------------------------------------------------------- */
+
+// Fallback loader: only used when the server could not provide a section.
+const fetchSection = async (endpoint, setter) => {
+  try {
+    const response = await api.get(endpoint, {});
+    if (response.data && response.data.json_content) {
+      setter(response.data.json_content);
+    }
+  } catch (err) {
+    toast.error(err.message ?? "Failed to fetch data. Please try again.");
+  }
+};
+
+const HCLandingPage = ({ initialData }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // CMS content. Seeded from the server render so the first paint already has
+  // the real text/images (no empty sections that pop in later => no CLS).
+  const [data1, setData1] = useState(initialData?.data1 ?? null);
+  const [data2, setData2] = useState(initialData?.data2 ?? null);
+  const [data3, setData3] = useState(initialData?.data3 ?? null);
+  const [data4, setData4] = useState(initialData?.data4 ?? null);
+  const [data6, setData6] = useState(initialData?.data6 ?? null);
+
+  const [faqData, setFaqData] = useState(initialData?.faqs ?? []);
+  const [faqLoading, setFaqLoading] = useState(initialData?.faqs == null);
+  const [faqError, setFaqError] = useState("");
+
+  const [designIdea, setDesignIdea] = useState(initialData?.designIdea ?? []);
+  const [designLoading, setDesignLoading] = useState(initialData?.designIdea == null);
+
+  // Client-side fallbacks (same endpoints as before) for anything the server
+  // could not load, e.g. the API was briefly unreachable during regeneration.
+  useEffect(() => {
+    const init = initialData || {};
+
+    if (!init.data1) fetchSection("/cms-content/creating_the_home_of_your_dreams", setData1);
+    if (!init.data2) fetchSection("/cms-content/creating_the_home_of_your_dreams_2", setData2);
+    if (!init.data3) fetchSection("/cms-content/creating_the_home_of_your_dreams_3", setData3);
+    if (!init.data4) fetchSection("/cms-content/creating_the_home_of_your_dreams_4", setData4);
+    if (!init.data6) fetchSection("/cms-content/creating_the_home_of_your_dreams_6", setData6);
+
+    if (init.faqs == null) {
+      api
+        .get("/cms-content/faqs")
+        .then((response) => setFaqData(response.data || []))
+        .catch(() => setFaqError("Failed to fetch FAQ data. Please try again."))
+        .finally(() => setFaqLoading(false));
+    }
+
+    if (init.designIdea == null) {
+      api
+        .get("/cms-parent-child/designer_choice")
+        .then((response) => setDesignIdea(Array.isArray(response.data) ? response.data : []))
+        .catch((err) => console.error("Error fetching design idea:", err))
+        .finally(() => setDesignLoading(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Newest first, then the 5 oldest records (unchanged logic).
+  const staticRecords = useMemo(
+    () => [...designIdea].sort((a, b) => b.id - a.id).slice(-5),
+    [designIdea]
+  );
 
   const handleModalStateChange = useCallback((isOpen) => {
     setIsModalOpen(isOpen);
   }, []);
 
   const S1TopTag = pickTag(data1?.top_title_tag, "h3");
-const S1MidTag = pickTag(data1?.mid_sub_title_tag, "h3");
-const S2SubTag = HEADING_TAGS.includes(data2?.top_description_tag) ? data2.top_description_tag : undefined;
-const S3Tag = pickTag(data3?.top_title_tag, "h3");
-const S4Tag = pickTag(data4?.top_title_tag, "h3");
-const S6Tag = pickTag(data6?.top_title_tag, "h2");
+  const S1MidTag = pickTag(data1?.mid_sub_title_tag, "h3");
+  const S2SubTag = HEADING_TAGS.includes(data2?.top_description_tag) ? data2.top_description_tag : undefined;
+  const S3Tag = pickTag(data3?.top_title_tag, "h3");
+  const S4Tag = pickTag(data4?.top_title_tag, "h3");
+  const S6Tag = pickTag(data6?.top_title_tag, "h2");
 
   return (
-    <MainLayout>
     <div>
       <style dangerouslySetInnerHTML={{__html: `
-        .text-orange-force { color: #ff914d !important; }
+        .text-orange-force { color: ${ACCESSIBLE_ORANGE} !important; }
 
         /* Fix text visibility on designer image cards — mirrors HomeContent.jsx */
         .bgsectionroom .designercard * {
@@ -284,7 +1895,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
           text-align: center !important;
           margin-bottom: 1rem !important;
         }
-        
+
         .hc_landing_desc, .about_wrapper p {
           font-family: var(--font-poppins), sans-serif !important;
           font-size: 1.05rem !important;
@@ -292,216 +1903,61 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
           color: #555 !important;
           font-weight: 400 !important;
         }
-          .dream6-sub p { margin: 0; }
+        .dream6-sub p { margin: 0; }
 
-          /* Tag-driven sizes for sections 1 & 2, applied only when a tag is chosen in the CMS */
-.dyn-size.dyn-h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem) !important; }
-.dyn-size.dyn-h2 { font-size: clamp(2rem, 3.8vw, 3rem) !important; }
-.dyn-size.dyn-h3 { font-size: clamp(1.75rem, 3vw, 2.4rem) !important; }
-.dyn-size.dyn-h4 { font-size: clamp(1.5rem, 2.4vw, 1.9rem) !important; }
-.dyn-size.dyn-h5 { font-size: 1.35rem !important; }
-.dyn-size.dyn-h6 { font-size: 1.1rem !important; }
+        /* Reserve the hero text space on stacked (mobile/tablet) layouts so the
+           form does not jump down when CMS text arrives late. */
+        @media (max-width: 991.98px) {
+          .hc_landing_ban1 .hero-copy { min-height: 240px; }
+        }
+
+        /* Tag-driven sizes for sections 1 & 2, applied only when a tag is chosen in the CMS */
+        .dyn-size.dyn-h1 { font-size: clamp(2.25rem, 4.5vw, 3.5rem) !important; }
+        .dyn-size.dyn-h2 { font-size: clamp(2rem, 3.8vw, 3rem) !important; }
+        .dyn-size.dyn-h3 { font-size: clamp(1.75rem, 3vw, 2.4rem) !important; }
+        .dyn-size.dyn-h4 { font-size: clamp(1.5rem, 2.4vw, 1.9rem) !important; }
+        .dyn-size.dyn-h5 { font-size: 1.35rem !important; }
+        .dyn-size.dyn-h6 { font-size: 1.1rem !important; }
 
         .about_wrapper .our_experts_text_land {
           text-align: left !important;
           display: block;
         }
       `}} />
-      {/* <head>
-        <title>
-        Creating the home of your dreams. - High Creation Interior
-        </title>
-      </head> */}
       <div className={isModalOpen ? "blur-bg" : ""}>
-        {/* <header className="container-fluid px-lg-5 px-3">
-          <nav className="navbar navbar-expand-lg p-0">
-            <div className="container-fluid">
-              <a className="navbar-brand ms-lg-5" href="/" aria-label="Home">
-                <img
-                  src="/images/new_hc_logo.png"
-                  width={90}
-                  height={90}
-                  alt="hc-logo"
-                  className="p-2"
-                decoding="async"  loading="lazy" />
-              </a>
-              <button
-                className="navbar-toggler d-block d-lg-none"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-              >
-                <span className="navbar-toggler-icon"></span>
-              </button>
-              <div
-                className="collapse navbar-collapse"
-                id="navbarSupportedContent"
-              >
-                <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
-                  <li className="mb-3 mb-lg-0">
-                    <a href="tel:18001200532" className="btn read_morebtn">
-                      <IoIosCall className="callicon me-2" />
-                      1800 1200 532
-                    </a>
-                  </li>
-                  <li className="mb-4 mb-lg-0">
-                    <a href="/contact" className="read_morebtn py-2">
-                      Let’s Connect
-                    </a>
-                  </li>
-                  <li className="mb-3 mb-lg-0">
-                    <a href="/estimator-for-home" className="read_morebtn py-2">
-                      Estimator for Your Home
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </nav>
-        </header> */}
         <main className="mt-0 pt-0">
-        <section
-          className="contact_wrapper hc_landing_ban1 position-relative"
-          style={{
-            backgroundImage: `url(${data1?.mid_image})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center"
-          }}
-        >
-                    {data1?.mid_image && (
-            <MediaImg
-              src={data1.mid_image}
-                            alt={data1?.mid_image_alt}
-              fallbackAlt={data1?.mid_sub_title || data1?.top_title || ""}
-              loading="eager"
-              fetchPriority="high"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center",
-                pointerEvents: "none",
-                zIndex: 0,
-              }}
-            />
-          )}
-             <div className="container position-relative" style={{ zIndex: 1 }}>
+          <section
+            className="contact_wrapper hc_landing_ban1 position-relative"
+            style={{
+              // The image is drawn by <HeroImage/> (optimised + preloaded). The old
+              // CSS background duplicated the download at full size, and rendered
+              // `url(undefined)` (a 404) until the CMS data arrived.
+              backgroundImage: "none",
+              ...(data1?.mid_image ? { backgroundColor: "#2f2a26" } : null),
+            }}
+          >
+            {data1?.mid_image && (
+              <HeroImage
+                src={data1.mid_image}
+                alt={data1?.mid_image_alt}
+                fallbackAlt={data1?.mid_sub_title || data1?.top_title || ""}
+              />
+            )}
+            <div className="container position-relative" style={{ zIndex: 1 }}>
               <div className="row">
                 <div className="col-lg-7 d-flex align-items-center">
-                  <div className="pe-lg-5 text-white">
-                    {/* <h3 className="fw-lighter fs-3 pb-0 mb-0 home_subhead" style={{ color: "#ffffff" }}>
-                    {data1?.top_title}
-                    </h3>
-                    <h3 className="letheading home_banner_heading mt-2" style={{ color: "#ffffff" }}>
-                      {data1?.mid_sub_title}
-                    </h3>
-                    <p className="text-dark fw-medium fs-6 mt-3">
-                    {data1?.top_description}
-                    </p> */}
-
+                  <div className="pe-lg-5 text-white hero-copy">
                     <S1TopTag className={`fw-lighter fs-3 pb-0 mb-0 home_subhead ${dynSize(data1?.top_title_tag)}`} style={{ color: "#ffffff" }}>
-  {data1?.top_title}
-</S1TopTag>
-<S1MidTag className={`letheading home_banner_heading mt-2 ${dynSize(data1?.mid_sub_title_tag)}`} style={{ color: "#ffffff" }}>
-  {data1?.mid_sub_title}
-</S1MidTag>
-<Html className="text-dark fw-medium fs-6 mt-3" html={data1?.top_description} />
+                      {data1?.top_title}
+                    </S1TopTag>
+                    <S1MidTag className={`letheading home_banner_heading mt-2 ${dynSize(data1?.mid_sub_title_tag)}`} style={{ color: "#ffffff" }}>
+                      {data1?.mid_sub_title}
+                    </S1MidTag>
+                    <Html className="text-dark fw-medium fs-6 mt-3" html={data1?.top_description} />
                   </div>
                 </div>
                 <div className="col-lg-5">
-                  <div className="contact_form contact" style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", borderRadius: "12px", padding: "1.5rem", border: "1px solid rgba(255,255,255,0.25)" }}>
-                    <h4 className="form_heading mb-3" style={{ color: "#ffffff" }}>
-                      Styles to Suit Every Budget
-                    </h4>
-                    <p className="text-white">Get Your Dream house today. Let Our experts help you</p>
-                    <form className="row" onSubmit={handleSubmit}>
-                      <div className="col-md-12 mb-3">
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="validationCustom01"
-                          placeholder="Name"
-                          name="fullName"
-                          onChange={handleInputChange}
-                          value={formData.fullName}
-                          required
-                        />
-                      </div>
-                      <div className="col-md-6 mb-3">
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="validationCustom05"
-                          placeholder="Contact No."
-                          name="contact"
-                          onChange={handleInputChange}
-                          value={formData.contact}
-                          required
-                        />
-                      </div>
-
-                      <div className="col-md-6 mb-3">
-                        <input
-                          type="email"
-                          className="form-control"
-                          id="validationCustom03"
-                          placeholder="Email ID"
-                          name="email"
-                          onChange={handleInputChange}
-                          value={formData.email}
-                          required
-                        />
-                      </div>
-
-                      <div className="col-md-12 mb-3">
-                        <textarea
-                          className="form-control"
-                          id="exampleFormControlTextarea1"
-                          placeholder="Design Name / Message"
-                          name="query"
-                          onChange={handleInputChange}
-                          value={formData.query}
-                          rows="1"
-                        ></textarea>
-                      </div>
-                      <div className="col-12">
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            value={formData.termsAndConditions}
-                            id="invalidCheck"
-                            required
-                            onChange={handleCheckboxChange}
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="invalidCheck"
-                            style={{ color: "#1a1a1a", fontSize: "0.8rem" }}
-                          >
-                            By submitting this form, you agree to the privacy
-                            policy & terms and conditions
-                          </label>
-                          <div className="invalid-feedback" style={{ color: "#c0392b" }}>
-                            You must agree before submitting.
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-12 mt-3 d-flex m-auto justify-content-center">
-                        <button
-                          className="btn know_more px-5 w-100"
-                          type="submit"
-                        >
-                          SEND
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+                  <LeadForm />
                 </div>
               </div>
             </div>
@@ -514,13 +1970,12 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
               imageCol="12"
               ImgAbout={data2?.mid_image}
               ImgAboutClass={"aboout_img object-fit-contain w-100"}
-                            imgAlt={data2?.mid_image_alt || data2?.top_title || "About"}
-              titleHeading=  {data2?.top_title}
-             subHeadingTag={S2SubTag}
-              subHeading= {data2?.top_description}
+              imgAlt={data2?.mid_image_alt || data2?.top_title || "About"}
+              titleHeading={data2?.top_title}
+              subHeadingTag={S2SubTag}
+              subHeading={data2?.top_description}
               subHeadingClass={`our_experts_text_land pt-3 ${dynSize(data2?.top_description_tag)}`}
               desClass="team_description hc_landing_desc"
-              // description= {data2?.mid_sub_title}
               descriptionHtml={data2?.mid_sub_title}
               textAboutBtn="READ MORE"
               btnLink={data2?.mid_sub_description}
@@ -532,19 +1987,12 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
             <div className="container">
               <div className="row py-5 mx-0 g-4">
                 <center>
-                  {/* <h3 className="font_about text-left pb-2">
-                  {data3?.top_title}
-                  </h3>
-                  <p className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start">
-                  {data3?.top_description}
-                  </p> */}
-
                   <S3Tag className="text-left pb-2">{data3?.top_title}</S3Tag>
-<Html className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start" html={data3?.top_description} />
+                  <Html className="team_description hc_landing_desc pb-4 px-3 px-lg-5 text-start" html={data3?.top_description} />
                 </center>
                 <div className="col-lg-6 col-md-6 col-12">
                   <VideoBox
-                    videoUrl={data3?.mid_sub_title}    // Replace with your video URL
+                    videoUrl={data3?.mid_sub_title}
                     imageUrl="/images/Designer_Choice/Vintage_blue.webp"
                   />
                 </div>
@@ -562,12 +2010,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
             <div className="container ">
               <div className="row position-relative mx-0">
                 <center>
-                  {/* <h3 className="pb-3 font_about">{data4?.top_title}   </h3> */}
                   <S4Tag className="pb-3">{data4?.top_title}</S4Tag>
-                  {/* <p className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start">
-                  {data4?.top_description}
-                  </p> */}
-
                   <Html className="team_description hc_landing_desc px-3 px-lg-5 pb-2 text-start" html={data4?.top_description} />
                   <div className="my-2">
                     <a href={data4?.mid_sub_title} className="read_morebtn py-2">
@@ -577,36 +2020,37 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
                 </center>
               </div>
 
-
               <div className="my-5 bgsectionroom">
-          <div className="container">
-            {/* ── Header: exact same pattern as HomeContent.jsx line 294-296 ── */}
-            <div className="row mx-0 mb-4 text-center">
-              <div className="col-12 px-0">
-                <span className="font_stylish text-orange-force d-block mb-1">{`Designer's Choice:`}</span>
-                <h2 className="h2 fw-bold mb-0 text-center">Exclusive Design Specials</h2>
-              </div>
-            </div>
-            {/* ── Cards Grid ── */}
-            <div className="mt-4 row g-4 mx-0">
-              {staticRecords.map((record, i) => (
-                <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
-                  <BgImageCard
-                    style={{ backgroundImage: `url(${record?.child_content?.image})` }}
-                    cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
-                    designerCardBgDiv={"designercard designercardimg1"}
-                    titleBgImage={record?.child_content?.title}
-                                        imageAlt={record?.child_content?.image_alt}
-                    descriptionBg={record?.child_content?.description}
-                  />
+                <div className="container">
+                  <div className="row mx-0 mb-4 text-center">
+                    <div className="col-12 px-0">
+                      <span className="font_stylish text-orange-force d-block mb-1">{`Designer's Choice:`}</span>
+                      <h2 className="h2 fw-bold mb-0 text-center">Exclusive Design Specials</h2>
+                    </div>
+                  </div>
+                  {/* Cards Grid (min-height only matters if the client fallback fetch is needed) */}
+                  <div
+                    className="mt-4 row g-4 mx-0"
+                    style={designLoading ? { minHeight: "400px" } : undefined}
+                  >
+                    {staticRecords.map((record, i) => (
+                      <div className={`col-lg-${i === 0 || i === 3 ? '5' : i === 4 ? '12' : '7'} col-md-6 col-12`} key={record.id}>
+                        <BgImageCard
+                          style={{ backgroundImage: `url(${record?.child_content?.image})` }}
+                          cardLinkTag={`/designer-choice/gallery?id=${record?.id}`}
+                          designerCardBgDiv={"designercard designercardimg1"}
+                          titleBgImage={record?.child_content?.title}
+                          imageAlt={record?.child_content?.image_alt}
+                          descriptionBg={record?.child_content?.description}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 col-lg-12 text-end pe-3">
+                    <a href="/designer-choice" className="know_more">Know More</a>
+                  </div>
                 </div>
-              ))}
-            </div>
-            <div className="mt-4 col-lg-12 text-end pe-3">
-              <a href="/designer-choice" className="know_more">Know More</a>
-            </div>
-          </div>
-        </div>
+              </div>
             </div>
           </div>
           <section className="faq_wrapper savedesign">
@@ -619,10 +2063,10 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
                   </span>
                 </h3>
 
-                {loading ? (
-                  <p>Loading FAQs...</p>
-                ) : error ? (
-                  <p className="text-danger">{error}</p>
+                {faqLoading ? (
+                  <p style={{ minHeight: "280px" }}>Loading FAQs...</p>
+                ) : faqError ? (
+                  <p className="text-danger">{faqError}</p>
                 ) : (
                   <div className="row justify-content-center mx-0">
                     <div className="col-lg-12">
@@ -640,7 +2084,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
                                 aria-expanded={index === 0 ? "true" : "false"}
                                 aria-controls={`collapse${index}`}
                               >
-                                {faq.json_content.title}
+                                {faq?.json_content?.title}
                               </button>
                             </h2>
                             <div
@@ -651,7 +2095,7 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
                               data-bs-parent="#faqAccordion"
                             >
                               <div className="accordion-body ps-0">
-                                {faq.json_content.description}
+                                {faq?.json_content?.description}
                               </div>
                             </div>
                           </div>
@@ -665,69 +2109,54 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
             </div>
           </section>
           <div className="footer_top py-5">
-              <div className="container">
-                <div className="text-center py-3">
-                  <p style={{
-                    fontFamily: "var(--font-poppins), sans-serif",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    letterSpacing: "3px",
-                    textTransform: "uppercase",
-                    color: "#ff914d",
-                    marginBottom: "0.5rem",
-                  }}>
-                    ✦   Your Dream Awaits
-                  </p>
+            <div className="container">
+              <div className="text-center py-3">
+                <p style={{
+                  fontFamily: "var(--font-poppins), sans-serif",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  letterSpacing: "3px",
+                  textTransform: "uppercase",
+                  color: ACCESSIBLE_ORANGE,
+                  marginBottom: "0.5rem",
+                }}>
+                  ✦   Your Dream Awaits
+                </p>
 
-                  <S6Tag style={{
-                    fontFamily: "var(--font-poppins), sans-serif",
-                    fontWeight: 800,
-                    fontSize: "clamp(1.8rem, 4vw, 3rem)",
-                    lineHeight: 1.15,
-                    color: "#171717",
-                    marginBottom: "0.2rem",
-                  }}>
-                    {data6?.top_title || "Bring Your Dream Home to Life"}
-                  </S6Tag>
-                  {/* <h2 style={{
-                    fontFamily: "var(--font-poppins), sans-serif",
-                    fontWeight: 700,
-                    fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
-                    lineHeight: 1.15,
-                    color: "#ff914d",
-                    marginBottom: "2rem",
-                  }}>
-                    {data6?.top_description || "with Our Experts"}
-                  </h2> */}
+                <S6Tag style={{
+                  fontFamily: "var(--font-poppins), sans-serif",
+                  fontWeight: 800,
+                  fontSize: "clamp(1.8rem, 4vw, 3rem)",
+                  lineHeight: 1.15,
+                  color: "#171717",
+                  marginBottom: "0.2rem",
+                }}>
+                  {data6?.top_title || "Bring Your Dream Home to Life"}
+                </S6Tag>
 
-                  <Html
-  className="dream6-sub"
-  html={data6?.top_description || "with Our Experts"}
-  style={{
-    fontFamily: "var(--font-poppins), sans-serif",
-    fontWeight: 700,
-    fontSize: "clamp(1.5rem, 3.2vw, 2.4rem)",
-    lineHeight: 1.15,
-    color: "#ff914d",
-    marginBottom: "2rem",
-  }}
-/>
+                <Html
+                  className="dream6-sub"
+                  html={data6?.top_description || "with Our Experts"}
+                  style={DREAM6_STYLE}
+                />
 
-                  <a href={data6?.mid_sub_title} className="read_morebtn py-2 px-4">
-                    {`Let's Connect`}
-                  </a>
-                </div>
+                <a href={data6?.mid_sub_title} className="read_morebtn py-2 px-4">
+                  {`Let's Connect`}
+                </a>
               </div>
             </div>
-            <hr />
-          
-          {/* Refactored Sticky Sidebar using writing-mode for clean vertical layout */}
+          </div>
+          <hr />
+
+          {/* Sticky sidebar link (vertical text). Min 44px wide tap target, 5:1 contrast. */}
           <div className="position-fixed d-flex flex-column align-items-end" style={{ top: '50%', right: '0', zIndex: 9999, transform: 'translateY(-50%)', gap: '12px' }}>
             <a href="/contact" style={{
               writingMode: 'vertical-rl',
-              backgroundColor: '#ff914d',
+              backgroundColor: ACCESSIBLE_ORANGE,
               color: 'white',
-              padding: '16px 8px',
+              padding: '16px 12px',
+              minWidth: '44px',
+              textAlign: 'center',
               textDecoration: 'none',
               fontWeight: '600',
               fontSize: '14px',
@@ -740,15 +2169,11 @@ const S6Tag = pickTag(data6?.top_title_tag, "h2");
             }}>
               Enquiry Now
             </a>
-            {/* <a href="https://wa.me/919560277787" className="shadow rounded-circle d-flex align-items-center justify-content-center bg-white" style={{ width: '44px', height: '44px', marginRight: '4px', transition: 'transform 0.3s' }}>
-              <img src="/images/whatsapp.svg" width={28} alt="WhatsApp" decoding="async" loading="lazy" />
-            </a> */}
           </div>
         </main>
         <ContactUsPopUp onModalStateChange={handleModalStateChange} />
       </div>
     </div>
-    </MainLayout>
   );
 };
 

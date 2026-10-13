@@ -1,0 +1,578 @@
+// import MainLayout from "../layouts/MainLayout";
+// import PortfolioCard from "../components/PortfolioCard";
+// import BgImageCard from "../components/BgImageCard";
+// import BackgroundImageRow from "../components/BackgroundImageRow";
+// import { useEffect, useState } from "react";
+// import api from "@/utils/api";
+
+// const Designidea = () => {
+//   const [designIdea, setDesignIdea] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+//   const [seoData, setSeoData] = useState({});
+
+//   useEffect(() => {
+//     setLoading(true);
+//     const fetchDesignIdea = async () => {
+//       try {
+//         const response = await api.get("/cms-parent-child/designer_choice");
+//         setDesignIdea(response.data);
+//       } catch (err) {
+//         console.error("Error fetching design idea:", err);
+//         setError("Failed to load design ideas. Please try again.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchDesignIdea();
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchSeoData = async () => {
+//       try {
+//         const response = await api.get("/content-manager/slug/design-idea");
+//         setSeoData(response.data);
+//       } catch (err) {
+//         console.error("Error fetching SEO data:", err);
+//       }
+//     };
+
+//     fetchSeoData();
+//   }, []);
+
+//   // Sort records by ID in descending order (newest first)
+//   const sortedDesignIdea = [...designIdea].sort((a, b) => b.id - a.id);
+
+//   // Get the 8 oldest records
+//   const staticRecords = sortedDesignIdea.slice(-5); // Last 8 records (oldest)
+
+//   // Get the latest records (excluding the last 8)
+//   const latestRecords = sortedDesignIdea.slice(0, -5); // Everything except last 8
+//  console.log('latestRecords',latestRecords);
+//   return (
+//     <div>
+//       <head>
+//         <title>{seoData?.title ?? "High Creation Interior - Interior Design Gallery"}</title>
+//         <meta name="title" content={seoData?.metaTitle ?? "High Creation Interior - Interior Design Gallery"} />
+//         <meta
+//           name="description"
+//           content={seoData?.metaDescription ?? "Explore Interior Design gallery designed by Top interior designers at High Creation Interior."}
+//         />
+//         <meta
+//           name="keywords"
+//           content={seoData?.metaKeywords ?? "design idea, living room interior, living room design, living room decor"}
+//         />
+//       </head>
+//       <MainLayout>
+//         <main>
+//         <div className="container">
+//         <div className="text-center mt-3 mx-0 row">
+//               <h1 className="wallpaperHeading">Designer Choice</h1>
+//               <p className="px-lg-5 team_description">
+//            Explore our curated selection of stunning interior designs, blending luxury, functionality, and innovation. From modern minimalism to timeless elegance, each space is crafted to inspire. Discover bespoke designs, premium materials, and expert craftsmanship that transform homes into masterpieces. Elevate your interiors with our exclusive designer choices.
+//               </p>
+//             </div>
+//             </div> 
+//           {loading ? (
+//             <div className="text-center">Loading...</div>
+//           ) : error ? (
+//             <div className="text-center alert alert-danger">{error}</div>
+//           ) : (
+//             <section className="container my-0">
+              
+//                 {/* Check if static records exist */}
+//                 {staticRecords.length > 0 ? (
+//               <div className="mt-0 row g-4 mx-0">
+//               <div className="col-lg-5 col-md-6 col-12">
+//                 <BgImageCard
+//                  style={{
+//                   backgroundImage: `url(${staticRecords[0]?.child_content?.image})`,
+//                 }}
+//                   cardLinkTag={`/designer-choice/gallery?id=${staticRecords[0]?.id}`}
+//                   designerCardBgDiv={"designercard designercardimg1"}
+//                   titleBgImage={staticRecords[0]?.child_content?.title}
+//                   descriptionBg={staticRecords[0]?.child_content?.description}
+//                 />
+//               </div>
+//               <div className="col-lg-7 col-md-6 col-12">
+//               <BgImageCard
+//                  style={{
+//                   backgroundImage: `url(${staticRecords[1]?.child_content?.image})`,
+//                 }}
+//                   cardLinkTag={`/designer-choice/gallery?id=${staticRecords[1]?.id}`}
+//                   designerCardBgDiv={"designercard designercardimg1"}
+//                   titleBgImage={staticRecords[1]?.child_content?.title}
+//                   descriptionBg={staticRecords[1]?.child_content?.description}
+//                 />
+//               </div>
+//               <div className="col-lg-7 col-md-6 col-12">
+//               <BgImageCard
+//                  style={{
+//                   backgroundImage: `url(${staticRecords[2]?.child_content?.image})`,
+//                 }}
+//                   cardLinkTag={`/designer-choice/gallery?id=${staticRecords[2]?.id}`}
+//                   designerCardBgDiv={"designercard designercardimg1"}
+//                   titleBgImage={staticRecords[2]?.child_content?.title}
+//                   descriptionBg={staticRecords[2]?.child_content?.description}
+//                 />
+//               </div>
+//               <div className="col-lg-5 col-md-6 col-12">
+//               <BgImageCard
+//                  style={{
+//                   backgroundImage: `url(${staticRecords[3]?.child_content?.image})`,
+//                 }}
+//                   cardLinkTag={`/designer-choice/gallery?id=${staticRecords[3]?.id}`}
+//                   designerCardBgDiv={"designercard designercardimg1"}
+//                   titleBgImage={staticRecords[3]?.child_content?.title}
+//                   descriptionBg={staticRecords[3]?.child_content?.description}
+//                 />
+//               </div>
+//               <div className="col-lg-12 ">
+//               <BgImageCard
+//                  style={{
+//                   backgroundImage: `url(${staticRecords[4]?.child_content?.image})`,
+//                 }}
+//                   cardLinkTag={`/designer-choice/gallery?id=${staticRecords[4]?.id}`}
+//                   designerCardBgDiv={"designercard designercardimg1"}
+//                   titleBgImage={staticRecords[4]?.child_content?.title}
+//                   descriptionBg={staticRecords[4]?.child_content?.description}
+//                 />
+//               </div>
+//             </div>
+//                 ) : (
+//                   <></>
+//                 )}
+             
+//              <div className="mt-4 row g-4 mx-0">
+//                   {latestRecords.map((item) => (
+//                     <div key={item.id} className="col-lg-6">
+
+// <BgImageCard
+//                  style={{
+//                   backgroundImage: `url(${item.child_content?.image})`,
+//                 }}
+//                   cardLinkTag={`/designer-choice/gallery?id=${item.id}`}
+//                   designerCardBgDiv={"designercard designercardimg1"}
+//                   titleBgImage={item.child_content?.title}
+//                   descriptionBg={item.child_content?.description}
+//                 />
+
+                     
+//                     </div>
+//                   ))}
+//                 </div>
+//             </section>
+//           )}
+//           <hr className="mt-5" />
+//         </main>
+//       </MainLayout>
+//     </div>
+//   );
+// };
+
+// export default Designidea;
+import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
+import MainLayout from "../layouts/MainLayout";
+import BgImageCard from "../components/BgImageCard";
+import { buildTextShadow } from "@/utils/textShadow";
+import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { MediaBg } from "../components/MediaImage";
+import JsonLd from "../components/JsonLd";
+
+// --- CONFIGURATION ---
+export const revalidate = 60; // Regenerate page every 60 seconds
+
+// --- HELPER: Base URL Logic ---
+const getBaseUrl = () => {
+  return process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_API_DEV_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
+};
+
+// CMS descriptions are saved as HTML (CKEditor). Cards expect plain text.
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// --- HELPER: Fetch Designer Choice Data ---
+async function getDesignerChoices() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(`${baseURL}/cms-parent-child/designer_choice`, {
+      // cache handled by page revalidate
+    });
+
+    if (!res.ok) {
+      console.error(`Failed to fetch designer choices: ${res.status}`);
+      return [];
+    }
+
+    return await res.json();
+  } catch (err) {
+    console.error("Designer Choice Fetch Error:", err);
+    return [];
+  }
+}
+
+// --- HELPER: Fetch SEO Data ---
+// async function getSeoData() {
+//   try {
+//     const baseURL = getBaseUrl();
+//     const res = await fetch(`${baseURL}/seo-tag`, {
+//       next: { revalidate: 60 },
+//     });
+
+//     if (!res.ok) return null;
+
+//     const allTags = await res.json();
+
+//     // Match the specific page URL for Designer Choice
+//     if (Array.isArray(allTags)) {
+//       return allTags.find(
+//         (tag) =>
+//           tag.page_name === "https://hcinterior.in/designer-choice" ||
+//           tag.page_name?.endsWith("/designer-choice")
+//       );
+//     }
+//     return null;
+//   } catch (err) {
+//     console.error("SEO Fetch Error:", err);
+//     return null;
+//   }
+// }
+
+async function getSeoData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(
+      `${baseURL}/seo-tag/route?path=${encodeURIComponent("/designer-choice")}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("SEO Fetch Error:", err);
+    return null;
+  }
+}
+
+async function getHeadingDescriptionData() {
+  try {
+    const baseURL = getBaseUrl();
+    const res = await fetch(`${baseURL}/cms-content/manage_heading_description`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) return null;
+
+    const record = await res.json();
+    const data = Array.isArray(record) ? record[0] : record;
+    return data?.json_content?.sections?.designer_choice || null;
+  } catch (err) {
+    console.error("Heading/Description Fetch Error:", err);
+    return null;
+  }
+}
+
+// --- DYNAMIC METADATA GENERATION ---
+// export async function generateMetadata() {
+//   const seoData = await getSeoData();
+
+//   const defaultTitle = "High Creation Interior - Interior Design Gallery";
+//   const defaultDesc = "Explore Interior Design gallery designed by Top interior designers at High Creation Interior.";
+//   const defaultCanonical = "https://hcinterior.in/designer-choice";
+
+//   return {
+//     title: seoData?.title || defaultTitle,
+//     description: seoData?.meta_description || defaultDesc,
+//     alternates: {
+//       canonical: seoData?.page_name || defaultCanonical,
+//     },
+//     openGraph: {
+//       title: seoData?.title || defaultTitle,
+//       description: seoData?.meta_description || defaultDesc,
+//       url: seoData?.page_name || defaultCanonical,
+//       type: "website",
+//     },
+//   };
+// }
+
+export async function generateMetadata() {
+  const seo = await getSeoData();
+
+  const title =
+    seo?.meta_title || "High Creation Interior - Interior Design Gallery";
+  const description =
+    seo?.meta_description ||
+    "Explore Interior Design gallery designed by Top interior designers at High Creation Interior.";
+
+    const ogTitle = seo?.og_title || title;
+const ogDescription = seo?.og_description || description;
+
+  const canonical = getCanonicalUrl({
+    canonicalUrl: seo?.canonical_url,
+    fallbackPath: "/designer-choice",
+  });
+  const { index, follow } = seo
+    ? getRobotsDirectives(seo)
+    : { index: true, follow: true };
+
+  return {
+    title,
+    description,
+    ...(seo?.keywords && { keywords: seo.keywords }),
+    alternates: { canonical },
+    robots: { index, follow },
+    // openGraph: {
+    //   title,
+    //   description,
+    //   url: canonical,
+    //   type: "website",
+    //   ...(seo?.og_image && {
+    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
+    //   }),
+    // },
+
+        openGraph: {
+      title: ogTitle,
+      description: ogDescription,
+      url: canonical,
+      type: "website",
+      images: seo?.og_image
+        ? [{ url: seo.og_image, width: 1200, height: 630 }]
+        : [{ url: "/images/new_hc_logo.png" }],
+    },
+  };
+}
+
+// --- MAIN SERVER COMPONENT ---
+export default async function DesignerChoice() {
+  const seo = await getSeoData();
+  const slugMap = await getGallerySlugMap("designer-choice");
+  const designIdea = await getDesignerChoices();
+
+  // --- LOGIC: Sort and Split Records ---
+  // 1. Sort records by ID in descending order (newest first)
+  const sortedDesignIdea = [...designIdea].sort((a, b) => b.id - a.id);
+
+  // 2. Get the 5 oldest records (The last 5 items of the descending list)
+  // These are displayed in the specific featured grid at the top
+  const staticRecords = sortedDesignIdea.slice(-5);
+
+  // 3. Get the latest records (Everything except the last 5)
+  // These are displayed in the list below the grid
+  const latestRecords = sortedDesignIdea.slice(0, -5);
+
+  const headingData = await getHeadingDescriptionData();
+
+const HeadingTag = headingData?.headingTag || "h1";
+const headingText = headingData?.headingText || "Designer Choice";
+const headingStyle = {
+  textShadow: buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  ),
+  fontFamily: "inherit",
+  ...(headingData?.headingColor && { color: headingData.headingColor }),
+};
+
+const descriptionText =
+  headingData?.descriptionText ||
+  "Explore our curated selection of stunning interior designs, blending luxury, functionality, and innovation. From modern minimalism to timeless elegance, each space is crafted to inspire. Discover bespoke designs, premium materials, and expert craftsmanship that transform homes into masterpieces. Elevate your interiors with our exclusive designer choices."
+const descriptionStyle = {
+  ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+  textShadow: buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  ),
+};
+
+const bannerImage = headingData?.bannerImage || "";
+const bannerStyle = bannerImage
+  ? {
+      backgroundImage: `url("${bannerImage}")`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      aspectRatio: "1900 / 441",
+    }
+  : {};
+
+const headingBlock = (
+  <>
+    <HeadingTag id="designer-choice-heading" className="wallpaperHeading" style={headingStyle}>
+      {headingText}
+    </HeadingTag>
+    <p id="designer-choice-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+      {descriptionText}
+    </p>
+    <style>{`
+  ${headingData?.headingColor ? `#designer-choice-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#designer-choice-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#designer-choice-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #designer-choice-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #designer-choice-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+  </>
+);
+
+  return (
+    <MainLayout>
+      <JsonLd data={seo?.custom_schema} />
+      <main>
+        {/* <div className="container">
+          <div className="text-center mt-3 mx-0 row"> */}
+          {/* <div
+  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container"}
+  style={bannerStyle}
+>
+  <div className={bannerImage ? "container text-center py-5" : "text-center mt-3 mx-0 row"}>
+            <HeadingTag id="designer-choice-heading" className="wallpaperHeading" style={headingStyle}>
+  {headingText}
+</HeadingTag>
+            <p id="designer-choice-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+  {descriptionText}
+</p>
+<style>{`
+  ${headingData?.headingColor ? `#designer-choice-heading { color: ${headingData.headingColor} !important; }` : ""}
+  ${headingData?.descriptionColor ? `#designer-choice-description { color: ${headingData.descriptionColor} !important; }` : ""}
+  ${headingData?.descriptionFontSize ? `#designer-choice-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
+  #designer-choice-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
+  #designer-choice-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+`}</style>
+          </div>
+        </div> */}
+
+                {bannerImage ? (
+            <MediaBg 
+            src={bannerImage} 
+            alt={headingData?.bannerAlt} 
+            fallbackAlt={headingText}
+            className="w-100 d-flex align-items-center justify-content-center"
+            style={{ aspectRatio: "1900 / 441" }}
+          >
+            <div className="container text-center py-5">{headingBlock}</div>
+          </MediaBg>
+        ) : (
+          <div className="container">
+            <div className="text-center mt-3 mx-0 row">{headingBlock}</div>
+          </div>
+        )}
+
+        <section className="container my-0">
+          {/* Static Records Grid (Oldest 5) */}
+          {staticRecords.length > 0 && (
+            <div className="mt-0 row g-4 mx-0">
+              <div className="col-lg-5 col-md-6 col-12 .text-light-force">
+                {staticRecords[0] && (
+                  <BgImageCard
+                    style={{
+                      backgroundImage: `url(${staticRecords[0]?.child_content?.image})`,
+                    }}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[0]?.id)}
+                    designerCardBgDiv={"designercard designercardimg1"}
+                    titleBgImage={staticRecords[0]?.child_content?.title}
+                                        imageAlt={staticRecords[0]?.child_content?.image_alt}
+                    // descriptionBg={staticRecords[0]?.child_content?.description}
+                    descriptionBg={stripHtml(staticRecords[0]?.child_content?.description)}
+                  />
+                )}
+              </div>
+              <div className="col-lg-7 col-md-6 col-12">
+                {staticRecords[1] && (
+                  <BgImageCard
+                    style={{
+                      backgroundImage: `url(${staticRecords[1]?.child_content?.image})`,
+                    }}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[1]?.id)}
+                    designerCardBgDiv={"designercard designercardimg1"}
+                    titleBgImage={staticRecords[1]?.child_content?.title}
+                                        imageAlt={staticRecords[1]?.child_content?.image_alt}
+                    // descriptionBg={staticRecords[1]?.child_content?.description}
+                    descriptionBg={stripHtml(staticRecords[1]?.child_content?.description)}
+                  />
+                )}
+              </div>
+              <div className="col-lg-7 col-md-6 col-12">
+                {staticRecords[2] && (
+                  <BgImageCard
+                    style={{
+                      backgroundImage: `url(${staticRecords[2]?.child_content?.image})`,
+                    }}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[2]?.id)}
+                    designerCardBgDiv={"designercard designercardimg1"}
+                    titleBgImage={staticRecords[2]?.child_content?.title}
+                                        imageAlt={staticRecords[2]?.child_content?.image_alt}
+                    // descriptionBg={staticRecords[2]?.child_content?.description}
+                    descriptionBg={stripHtml(staticRecords[2]?.child_content?.description)}
+                  />
+                )}
+              </div>
+              <div className="col-lg-5 col-md-6 col-12">
+                {staticRecords[3] && (
+                  <BgImageCard
+                    style={{
+                      backgroundImage: `url(${staticRecords[3]?.child_content?.image})`,
+                    }}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[3]?.id)}
+                    designerCardBgDiv={"designercard designercardimg1"}
+                    titleBgImage={staticRecords[3]?.child_content?.title}
+                                        imageAlt={staticRecords[3]?.child_content?.image_alt}
+                    // descriptionBg={staticRecords[3]?.child_content?.description}
+                    descriptionBg={stripHtml(staticRecords[3]?.child_content?.description)}
+                  />
+                )}
+              </div>
+              <div className="col-lg-12">
+                {staticRecords[4] && (
+                  <BgImageCard
+                    style={{
+                      backgroundImage: `url(${staticRecords[4]?.child_content?.image})`,
+                    }}
+                    cardLinkTag={pageGalleryHref("designer-choice", slugMap, staticRecords[4]?.id)}
+                    designerCardBgDiv={"designercard designercardimg1"}
+                    titleBgImage={staticRecords[4]?.child_content?.title}
+                                        imageAlt={staticRecords[4]?.child_content?.image_alt}
+                    // descriptionBg={staticRecords[4]?.child_content?.description}
+                    descriptionBg={stripHtml(staticRecords[4]?.child_content?.description)}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Latest Records (Remainder) */}
+          <div className="mt-4 row g-4 mx-0">
+            {latestRecords.map((item) => (
+              <div key={item.id} className="col-lg-6">
+                <BgImageCard
+                  style={{
+                    backgroundImage: `url(${item.child_content?.image})`,
+                  }}
+                  cardLinkTag={pageGalleryHref("designer-choice", slugMap, item.id)}
+                  designerCardBgDiv={"designercard designercardimg1"}
+                  titleBgImage={item.child_content?.title}
+                  imageAlt={item.child_content?.image_alt}
+                  // descriptionBg={item.child_content?.description}
+                  descriptionBg={stripHtml(item.child_content?.description)}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <hr className="mt-5" />
+      </main>
+    </MainLayout>
+  );
+}

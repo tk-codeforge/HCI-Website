@@ -64,9 +64,9 @@ export default function HeroCarousel({ bannerData }) {
   if (!bannerData || bannerData.length === 0) return null;
 
   return (
-    <section className="position-relative w-100" style={{ backgroundColor: '#f0f0f0' }}>
+    <section className="home-hero position-relative w-100" style={{ backgroundColor: '#f0f0f0' }}>
       <style dangerouslySetInnerHTML={{ __html: `
-        .embla { 
+        .home-hero .embla { 
             overflow: hidden; 
             width: 100%; 
             aspect-ratio: 3/4; 
@@ -74,18 +74,18 @@ export default function HeroCarousel({ bannerData }) {
         }
         
         @media (min-width: 768px) { 
-            .embla { aspect-ratio: 192/85; min-height: unset; } 
+            .home-hero .embla { aspect-ratio: 192/85; min-height: unset; } 
         }
         
-        .embla__container { display: flex; height: 100%; }
-        .embla__slide { flex: 0 0 100%; min-width: 0; position: relative; }
-        .banner-media { object-fit: cover; object-position: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .home-hero .embla__container { display: flex; height: 100%; }
+        .home-hero .embla__slide { flex: 0 0 100%; min-width: 0; position: relative; }
+        .home-hero .banner-media { object-fit: cover; object-position: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
         
         /* Mobile vs Desktop image toggle classes */
-        .desktop-banner { display: none !important; }
-        .mobile-banner { display: block !important; }
+        .home-hero .desktop-banner { display: none !important; }
+        .home-hero .mobile-banner { display: block !important; }
 
-        .banner-overlay { 
+        .home-hero .banner-overlay { 
             position: absolute; 
             z-index: 10; 
             inset: 0; 
@@ -93,16 +93,16 @@ export default function HeroCarousel({ bannerData }) {
             flex-direction: column; 
             justify-content: flex-end; 
             align-items: center;      
-            padding-bottom: 4rem;      
+            padding-bottom: 7rem;      
             pointer-events: none;
             background: transparent;
             text-align: center;
         }
         
-        .banner-overlay * { pointer-events: auto; }
-        .banner-content-wrapper { width: 100%; padding: 0 1.25rem; }
+        .home-hero .banner-overlay * { pointer-events: auto; }
+        .home-hero .banner-content-wrapper { width: 100%; padding: 0 1.25rem; }
 
-        .embla__dots {
+        .home-hero .embla__dots {
             position: absolute;
             bottom: 45px;
             left: 0;
@@ -113,19 +113,19 @@ export default function HeroCarousel({ bannerData }) {
             gap: 12px;
             z-index: 20;
         }
-        .embla__dot {
+        .home-hero .embla__dot {
             width: 10px; height: 10px; border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.4);
             border: none; cursor: pointer; padding: 0;
             transition: all 0.3s ease;
         }
-        .embla__dot:hover { background-color: rgba(255, 255, 255, 0.8); }
-        .embla__dot--selected {
+        .home-hero .embla__dot:hover { background-color: rgba(255, 255, 255, 0.8); }
+        .home-hero .embla__dot--selected {
             background-color: #ff914d; transform: scale(1.4);
             box-shadow: 0 0 8px rgba(255, 145, 77, 0.8);
         }
 
-        .banner-top-slogan { 
+        .home-hero .banner-top-slogan { 
             font-family: var(--dynamic-paragraph-font) !important;
             font-size: 0.8rem; 
             font-weight: 300 !important;
@@ -136,7 +136,7 @@ export default function HeroCarousel({ bannerData }) {
         }
         
         /* THICK Main Heading - Reduced font-size for mobile from 2rem to 1.5rem */
-        .home_banner_heading { 
+        .home-hero .home_banner_heading { 
             font-family: var(--dynamic-heading-font) !important; 
             font-size: 1.5rem; 
             font-weight: 800 !important;
@@ -145,7 +145,7 @@ export default function HeroCarousel({ bannerData }) {
             color: #ffffff !important; 
         }
         
-        .font_stylish_home { 
+        .home-hero .font_stylish_home { 
             font-family: var(--dynamic-heading-font) !important; 
             font-size: 1.1rem; 
             font-weight: 300 !important;
@@ -156,7 +156,7 @@ export default function HeroCarousel({ bannerData }) {
             line-height: 1.2;
         }
         
-        .banner-desc { 
+        .home-hero .banner-desc { 
             font-family: var(--dynamic-paragraph-font) !important;
             font-size: 0.9rem; 
             font-weight: 300 !important;
@@ -169,7 +169,7 @@ export default function HeroCarousel({ bannerData }) {
             overflow: hidden;
         }
 
-        .banner-btn {
+        .home-hero .banner-btn {
             background-color: #ff914d; border: none;
             font-family: var(--dynamic-heading-font) !important;
             font-weight: 700 !important;
@@ -184,42 +184,42 @@ export default function HeroCarousel({ bannerData }) {
             max-width: 100%; /* Prevents overflow if text is very long */
             margin: 0 auto; /* Centers the button naturally */
         }
-        .banner-btn:hover { background-color: #e67d3c; transform: translateY(-2px); }
+        .home-hero .banner-btn:hover { background-color: #e67d3c; transform: translateY(-2px); }
 
-        .embla__nav-btn { display: none; }
+        .home-hero .embla__nav-btn { display: none; }
 
         @media (min-width: 768px) {
-            .desktop-banner { display: block !important; }
-            .mobile-banner { display: none !important; }
+            .home-hero .desktop-banner { display: block !important; }
+            .home-hero .mobile-banner { display: none !important; }
 
-            .banner-overlay { padding-bottom: 6rem; background: transparent; }
-            .banner-content-wrapper { width: 90%; max-width: 1200px; padding: 0 20px; }
-            .banner-top-slogan { font-size: 1.1rem; margin-bottom: 1rem !important; }
+            .home-hero .banner-overlay { padding-bottom: 9rem; background: transparent; }
+            .home-hero .banner-content-wrapper { width: 90%; max-width: 1200px; padding: 0 20px; }
+            .home-hero .banner-top-slogan { font-size: 1.1rem; margin-bottom: 1rem !important; }
             
             /* Desktop font size restored */
-            .home_banner_heading { font-size: 4.5rem; margin-bottom: 1rem !important; line-height: 1.1; }
+            .home-hero .home_banner_heading { font-size: 4.5rem; margin-bottom: 1rem !important; line-height: 1.1; }
             
-            .font_stylish_home { font-size: 1.5rem; margin-bottom: 1rem !important; }
-            .banner-desc { font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem !important; max-width: 800px; margin-left: auto; margin-right: auto; }
-            .banner-btn { display: inline-block; width: fit-content; padding: 16px 50px !important; font-size: 1.1rem !important; border-radius: 50px; }
+            .home-hero .font_stylish_home { font-size: 1.5rem; margin-bottom: 1rem !important; }
+            .home-hero .banner-desc { font-size: 1.2rem; line-height: 1.6; margin-bottom: 2rem !important; max-width: 800px; margin-left: auto; margin-right: auto; }
+            .home-hero .banner-btn { display: inline-block; width: fit-content; padding: 16px 50px !important; font-size: 1.1rem !important; border-radius: 50px; }
             
-            .embla__dots {
+            .home-hero .embla__dots {
                 bottom: 55px; 
             }
 
-            .embla__nav-btn {
+            .home-hero .embla__nav-btn {
                 display: flex; position: absolute; top: 50%; transform: translateY(-50%); z-index: 20;
                 width: 44px; height: 44px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(4px);
                 border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%;
                 align-items: center; justify-content: center; color: white; cursor: pointer;
             }
-            .embla__nav-btn:hover { background: rgba(255, 145, 77, 0.9); border-color: #ff914d; }
-            .embla__nav-btn.prev { left: 20px; }
-            .embla__nav-btn.next { right: 20px; }
+            .home-hero .embla__nav-btn:hover { background: rgba(255, 145, 77, 0.9); border-color: #ff914d; }
+            .home-hero .embla__nav-btn.prev { left: 20px; }
+            .home-hero .embla__nav-btn.next { right: 20px; }
         }
 
-        @media (min-width: 1200px) { .home_banner_heading { font-size: 5.5rem; } }
-        .embla__nav-icon { width: 20px; height: 20px; fill: currentColor; }
+        @media (min-width: 1200px) { .home-hero .home_banner_heading { font-size: 5.5rem; } }
+        .home-hero .embla__nav-icon { width: 20px; height: 20px; fill: currentColor; }
       `}} />
 
       <div className="embla" ref={emblaRef}>
@@ -227,13 +227,26 @@ export default function HeroCarousel({ bannerData }) {
           {activeBanners.map((banner, index) => {
             const isVideo = banner?.banner_image?.match(/\.(mp4|webm|ogg)$/i);
             const isFirstSlide = index === 0;
+            const isActiveSlide = index === selectedIndex;
+            const hasVideoPoster = Boolean(banner?.banner_image_poster);
+            // If a poster is available, keep off-screen video slides poster-only.
+            // For older CMS entries without a poster, retain metadata loading so
+            // their visual behavior does not regress while the carousel advances.
+            const shouldAttachVideoSource = isActiveSlide || !hasVideoPoster;
 
             return (
               <div className="embla__slide" key={banner.id || index}>
                 {isVideo ? (
-                  <video className="banner-media" autoPlay loop muted playsInline preload={isFirstSlide ? "auto" : "metadata"} poster={banner?.banner_image_poster || ""}>
-                    <source src={banner?.banner_image} type="video/mp4" />
-                  </video>
+                  <video
+                    className="banner-media"
+                    autoPlay={Boolean(isActiveSlide)}
+                    loop
+                    muted
+                    playsInline
+                    preload={isActiveSlide || !hasVideoPoster ? "metadata" : "none"}
+                    poster={banner?.banner_image_poster || undefined}
+                    src={shouldAttachVideoSource ? banner?.banner_image : undefined}
+                  />
                 ) : (
                   <>
                     {/* Render Mobile Specific Image if available */}
