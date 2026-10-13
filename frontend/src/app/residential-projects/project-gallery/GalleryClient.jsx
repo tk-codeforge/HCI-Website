@@ -131,6 +131,7 @@ export default function GalleryClient({ portfolioData }) {
   const galleryTitle = portfolioData.title || "Residential Projects Gallery";
 
   return (
+     <main>
     <section className="container my-5 residential-gallery-page">
       <div className="row g-4 mx-0">
         <div className="col-12 text-center mt-3">
@@ -144,5 +145,6 @@ export default function GalleryClient({ portfolioData }) {
         />
       </div>
     </section>
+    </main>
   );
 }

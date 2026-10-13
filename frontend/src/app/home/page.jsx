@@ -105,7 +105,10 @@ async function getBannerData() {
     }
 
     const data = await res.json();
-    return data?.json_content || [];
+    // return data?.json_content || [];
+        return (data?.json_content || []).filter(
+      (b) => b && b.is_active !== false && b.is_active !== "false"
+    );
   } catch (err) {
     console.error("Banner Fetch Error:", err);
     return [];

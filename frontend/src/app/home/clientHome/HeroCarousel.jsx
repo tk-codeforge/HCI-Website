@@ -11,6 +11,7 @@ export default function HeroCarousel({ bannerData }) {
   const [isMounted, setIsMounted] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [speed, setSpeed] = useState(7000);
+    const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     api.get("/site-settings")
@@ -40,6 +41,7 @@ export default function HeroCarousel({ bannerData }) {
 
   useEffect(() => {
     setIsMounted(true);
+    setIsMobile(window.innerWidth < 768);
     if (window.innerWidth >= 768) {
       const timer = setTimeout(() => setShowRest(true), 2500);
       return () => clearTimeout(timer);
@@ -66,11 +68,17 @@ export default function HeroCarousel({ bannerData }) {
   return (
     <section className="home-hero position-relative w-100" style={{ backgroundColor: '#f0f0f0' }}>
       <style dangerouslySetInnerHTML={{ __html: `
-        .home-hero .embla { 
+        // .home-hero .embla { 
+        //     overflow: hidden; 
+        //     width: 100%; 
+        //     aspect-ratio: 3/4; 
+        //     min-height: 500px; 
+        // }
+
+                .home-hero .embla { 
             overflow: hidden; 
             width: 100%; 
-            aspect-ratio: 3/4; 
-            min-height: 500px; 
+            aspect-ratio: 774/1016; 
         }
         
         @media (min-width: 768px) { 
@@ -225,7 +233,9 @@ export default function HeroCarousel({ bannerData }) {
       <div className="embla" ref={emblaRef}>
         <div className="embla__container">
           {activeBanners.map((banner, index) => {
-            const isVideo = banner?.banner_image?.match(/\.(mp4|webm|ogg)$/i);
+            // const isVideo = banner?.banner_image?.match(/\.(mp4|webm|ogg)$/i);
+            const mediaSrc = isMobile && banner?.mobile_banner_image ? banner.mobile_banner_image : banner?.banner_image;
+const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaSrc || "");
             const isFirstSlide = index === 0;
             const isActiveSlide = index === selectedIndex;
             const hasVideoPoster = Boolean(banner?.banner_image_poster);
@@ -245,7 +255,8 @@ export default function HeroCarousel({ bannerData }) {
                     playsInline
                     preload={isActiveSlide || !hasVideoPoster ? "metadata" : "none"}
                     poster={banner?.banner_image_poster || undefined}
-                    src={shouldAttachVideoSource ? banner?.banner_image : undefined}
+                    // src={shouldAttachVideoSource ? banner?.banner_image : undefined}
+                    src={shouldAttachVideoSource ? mediaSrc : undefined}
                   />
                 ) : (
                   <>
