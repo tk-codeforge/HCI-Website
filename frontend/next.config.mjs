@@ -5,6 +5,7 @@ const nextConfig = {
     domains: [
       'localhost',
       'hcinterior.in',
+      'www.hcinterior.in',
       'apidev.hcinterior.in',
     ],
     formats: ['image/avif', 'image/webp'],

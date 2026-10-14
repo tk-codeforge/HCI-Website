@@ -1521,6 +1521,8 @@ import { toast } from "react-toastify";
 import DOMPurify from "isomorphic-dompurify";
 import BgImageCard from "../components/BgImageCard";
 import RowImage from "../components/RowImage";
+import { IoIosShareAlt } from "react-icons/io";
+import { IoIosCall } from "react-icons/io";
 import VideoBox from "../components/VideoBox";
 import { useMediaAlt } from "../components/MediaImage";
 import api from "@/utils/api";
@@ -1583,6 +1585,20 @@ const canOptimize = (src) => {
     return false;
   }
 };
+
+const stripHtml = (html = "") =>
+  String(html ?? "")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/(p|div|li|h[1-6])>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const HERO_IMG_STYLE = {
   position: "absolute",
@@ -1708,7 +1724,7 @@ const LeadForm = () => {
       <h4 className="form_heading mb-3" style={{ color: "#ffffff" }}>
         Styles to Suit Every Budget
       </h4>
-      <p className="text-white">Get Your Dream house today. Let Our experts help you</p>
+      <p className="text-dark">Get Your Dream house today. Let Our experts help you</p>
       <form className="row" onSubmit={handleSubmit}>
         <div className="col-md-12 mb-3">
           <input
@@ -1925,6 +1941,54 @@ const HCLandingPage = ({ initialData }) => {
         }
       `}} />
       <div className={isModalOpen ? "blur-bg" : ""}>
+        <header className="container-fluid px-lg-5 px-3">
+          <nav className="navbar navbar-expand-lg p-0">
+             <div className="container-fluid">
+               <a className="navbar-brand ms-lg-5" href="/" aria-label="Home">
+               <img
+                 src="/images/new_hc_logo.png"
+                  width={90}
+                  height={90}
+                  alt="hc-logo"
+                  className="p-2"
+                decoding="async"  loading="lazy" />
+              </a>
+              <button
+                className="navbar-toggler d-block d-lg-none"
+                 type="button"
+                 data-bs-toggle="collapse"
+                 data-bs-target="#navbarSupportedContent"
+                 aria-controls="navbarSupportedContent"
+                 aria-expanded="false"
+                 aria-label="Toggle navigation"               >
+                 <span className="navbar-toggler-icon"></span>
+               </button>
+               <div
+                 className="collapse navbar-collapse"
+                 id="navbarSupportedContent"
+              >
+                 <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                   <li className="mb-3 mb-lg-0">
+                     <a href="tel:18001200532" className="btn read_morebtn">
+                       <IoIosCall className="callicon me-2" />
+                       1800 1200 532
+                     </a>
+                   </li>
+                   <li className="mb-4 mb-lg-0">
+                     <a href="/contact" className="read_morebtn py-2">
+                       Let’s Connect
+                     </a>
+                   </li>
+                   <li className="mb-3 mb-lg-0">
+                     <a href="/estimator-for-home" className="read_morebtn py-2">
+                       Estimator for Your Home
+                     </a>
+                   </li>
+               </ul>
+               </div>
+             </div>
+           </nav>
+         </header> 
         <main className="mt-0 pt-0">
           <section
             className="contact_wrapper hc_landing_ban1 position-relative"
@@ -2041,7 +2105,8 @@ const HCLandingPage = ({ initialData }) => {
                           designerCardBgDiv={"designercard designercardimg1"}
                           titleBgImage={record?.child_content?.title}
                           imageAlt={record?.child_content?.image_alt}
-                          descriptionBg={record?.child_content?.description}
+                          // descriptionBg={record?.child_content?.description}
+                          descriptionBg={stripHtml(record?.child_content?.description)}
                         />
                       </div>
                     ))}
@@ -2168,6 +2233,9 @@ const HCLandingPage = ({ initialData }) => {
               transition: 'background-color 0.3s'
             }}>
               Enquiry Now
+            </a>
+            <a href="https://wa.me/919560277787" className="shadow rounded-circle d-flex align-items-center justify-content-center bg-white" style={{ width: '44px', height: '44px', marginRight: '4px', transition: 'transform 0.3s' }}>
+              <img src="/images/whatsapp.svg" width={28} alt="WhatsApp" decoding="async" loading="lazy" />
             </a>
           </div>
         </main>

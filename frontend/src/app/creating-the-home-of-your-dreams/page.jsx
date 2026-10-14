@@ -162,7 +162,7 @@
 
 
 import HCLandingClient from "./HCLandingClient";
-import MainLayout from "../layouts/MainLayout";
+import Footer from "../layouts/footer";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
 
@@ -312,9 +312,8 @@ export default async function Page() {
   return (
     <>
       <JsonLd data={seo?.custom_schema} />
-      <MainLayout>
-        <HCLandingClient initialData={landingData} />
-      </MainLayout>
+      <HCLandingClient initialData={landingData} />
+      <Footer />
     </>
   );
 }
