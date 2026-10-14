@@ -41,13 +41,20 @@ export default function HeroCarousel({ bannerData }) {
 
   useEffect(() => {
     setIsMounted(true);
-    setIsMobile(window.innerWidth < 768);
     if (window.innerWidth >= 768) {
       const timer = setTimeout(() => setShowRest(true), 2500);
       return () => clearTimeout(timer);
     } else {
       setShowRest(true);
     }
+  }, []);
+
+    useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
@@ -248,6 +255,7 @@ const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaSrc || "");
               <div className="embla__slide" key={banner.id || index}>
                 {isVideo ? (
                   <video
+                  key={mediaSrc}
                     className="banner-media"
                     autoPlay={Boolean(isActiveSlide)}
                     loop
