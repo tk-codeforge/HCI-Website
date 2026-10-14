@@ -1657,34 +1657,125 @@ const EMPTY_FORM = {
   termsAndConditions: false,
 };
 
+const sanitizePhone = (value) => {
+  let digits = value.replace(/\D/g, "");
+  if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+  return digits.slice(0, 10);
+};
+
+const validateField = (name, rawValue) => {
+  const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+  switch (name) {
+    case "fullName":
+      if (!value) return "Name is required.";
+      if (value.length < 2) return "Name must be at least 2 characters.";
+      if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+        return "Name can only contain letters and spaces.";
+      return "";
+    case "contact":
+      if (!value) return "Contact number is required.";
+      if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
+      if (!/^[6-9]/.test(value))
+        return "Mobile number must start with 6, 7, 8 or 9.";
+      return "";
+    case "email":
+      if (!value) return "Email is required.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+        return "Enter a valid email address.";
+      return "";
+    case "query":
+      if (!value) return "Design name / message is required.";
+      if (value.length < 3) return "Please enter at least 3 characters.";
+      return "";
+    case "termsAndConditions":
+      return value ? "" : "You must agree before submitting.";
+    default:
+      return "";
+  }
+};
+
+const FieldError = ({ msg }) =>
+  msg ? (
+    <div className="mt-1 text-start" style={{ color: "#c0392b", fontSize: "0.8rem" }}>
+      {msg}
+    </div>
+  ) : null;
+
 const LeadForm = () => {
   const pathname = usePathname();
   const [formData, setFormData] = useState(EMPTY_FORM);
+    const [errors, setErrors] = useState({});
+
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData((prev) => ({ ...prev, [name]: value }));
+  // };
+
+  // const handleCheckboxChange = (e) => {
+  //   const { checked } = e.target;
+  //   setFormData((prev) => ({ ...prev, termsAndConditions: checked }));
+  // };
+
+    const validateForm = () => {
+    const newErrors = {};
+    ["fullName", "contact", "email", "query", "termsAndConditions"].forEach((f) => {
+      const err = validateField(f, formData[f]);
+      if (err) newErrors[f] = err;
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value =
+      name === "contact" ? sanitizePhone(e.target.value) : e.target.value;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name] !== undefined) {
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    const trimmed = value.trim();
+    setFormData((prev) => ({ ...prev, [name]: trimmed }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
 
   const handleCheckboxChange = (e) => {
     const { checked } = e.target;
     setFormData((prev) => ({ ...prev, termsAndConditions: checked }));
+    setErrors((prev) => ({
+      ...prev,
+      termsAndConditions: validateField("termsAndConditions", checked),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.termsAndConditions) {
+    // if (!formData.termsAndConditions) {
+    //   toast.error("You must agree to the Terms & Conditions before submitting.");
+    //   return;
+    // }
+
+        if (!formData.termsAndConditions) {
       toast.error("You must agree to the Terms & Conditions before submitting.");
       return;
     }
 
     const formRequestData = {
-      name: formData.fullName,
-      mobile: formData.contact,
-      email: formData.email,
+      // name: formData.fullName,
+      // mobile: formData.contact,
+      // email: formData.email,
+
+      name: formData.fullName.trim(),
+      mobile: formData.contact.trim(),
+      email: formData.email.trim(),
       place: formData.place,
-      query: formData.query,
+      // query: formData.query,
+            query: formData.query.trim(),
       ...buildLeadMetadata({
         pathname,
         leadFormType: "inline",
@@ -1697,6 +1788,7 @@ const LeadForm = () => {
       const response = await api.post("/user-queries", formRequestData);
       if (response.status === 201) {
         setFormData(EMPTY_FORM);
+                setErrors({});
         setTimeout(() => {
           window.location.href = "/thank-you";
         }, 300);
@@ -1725,60 +1817,88 @@ const LeadForm = () => {
         Styles to Suit Every Budget
       </h4>
       <p className="text-dark">Get Your Dream house today. Let Our experts help you</p>
-      <form className="row" onSubmit={handleSubmit}>
+      {/* <form className="row" onSubmit={handleSubmit}> */}
+      <form className="row" onSubmit={handleSubmit} noValidate>
         <div className="col-md-12 mb-3">
           <input
             type="text"
-            className="form-control"
+            // className="form-control"
+                        className={`form-control ${errors.fullName ? "is-invalid" : ""}`}
             id="validationCustom01"
-            placeholder="Name"
+            placeholder="Name *"
             name="fullName"
             onChange={handleInputChange}
             value={formData.fullName}
             required
+                        onBlur={handleInputBlur}
+            maxLength={60}
+            autoComplete="name"
+            aria-label="Name"
           />
+                    <FieldError msg={errors.fullName} />
         </div>
         <div className="col-md-6 mb-3">
           <input
-            type="text"
-            className="form-control"
+           type="tel"
+            // className="form-control"
+                        className={`form-control ${errors.contact ? "is-invalid" : ""}`}
             id="validationCustom05"
-            placeholder="Contact No."
+            placeholder="Contact No. *"
             name="contact"
             onChange={handleInputChange}
             value={formData.contact}
             required
+                        onBlur={handleInputBlur}
+            inputMode="numeric"
+            maxLength={10}
+            autoComplete="tel-national"
+            aria-label="Contact Number"
           />
+                    <FieldError msg={errors.contact} />
         </div>
 
         <div className="col-md-6 mb-3">
           <input
             type="email"
-            className="form-control"
+            // className="form-control"
+                        className={`form-control ${errors.email ? "is-invalid" : ""}`}
             id="validationCustom03"
-            placeholder="Email ID"
+            placeholder="Email ID *"
             name="email"
             onChange={handleInputChange}
             value={formData.email}
             required
+                        onBlur={handleInputBlur}
+            maxLength={100}
+            autoComplete="email"
+            aria-label="Email ID"
           />
+                    <FieldError msg={errors.email} />
         </div>
 
         <div className="col-md-12 mb-3">
           <textarea
-            className="form-control"
+            // className="form-control"
+                        className={`form-control ${errors.query ? "is-invalid" : ""}`}
             id="exampleFormControlTextarea1"
-            placeholder="Design Name / Message"
+            // placeholder="Design Name / Message"
+            placeholder="Design Name / Message *"
             name="query"
             onChange={handleInputChange}
             value={formData.query}
             rows="1"
+                        required
+            onBlur={handleInputBlur}
+            maxLength={500}
+            aria-label="Design Name / Message"
           ></textarea>
+                    <FieldError msg={errors.query} />
         </div>
         <div className="col-12">
           <div className="form-check">
             <input
-              className="form-check-input"
+              // className="form-check-input"
+                            className={`form-check-input ${errors.termsAndConditions ? "is-invalid" : ""}`}
               type="checkbox"
               checked={formData.termsAndConditions}
               id="invalidCheck"
