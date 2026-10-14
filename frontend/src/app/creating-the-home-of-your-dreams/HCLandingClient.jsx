@@ -1551,7 +1551,7 @@ const Html = memo(function Html({ html, className, style }) {
 });
 
 // Accessible orange for TEXT on light backgrounds (#ff914d is only 2.2:1 on white).
-const ACCESSIBLE_ORANGE = "#b84c00";
+const ACCESSIBLE_ORANGE = "#ff914d";
 
 const DREAM6_STYLE = {
   fontFamily: "var(--font-poppins), sans-serif",
