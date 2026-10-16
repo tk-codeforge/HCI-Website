@@ -1028,6 +1028,7 @@ import TooltipComponent from "../components/TooltipComponent";
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import api from "@/utils/api";
 import "./estimator_step.css";
+import { validateLeadField } from "@/utils/leadValidation";
 
 const RoomCounter = ({ title, count, onAdd, onRemove }) => (
   <>
@@ -1330,38 +1331,42 @@ const EstimatorClient = () => {
   //   setFormData((prevData) => ({ ...prevData, [name]: value }));
   // };
 
-    const validateField = (name, rawValue) => {
-    const value = (rawValue || "").trim();
-    switch (name) {
-      case "firstName":
-      case "lastName": {
-        const label = name === "firstName" ? "First name" : "Last name";
-        if (!value) return `${label} is required.`;
-        if (value.length < 2) return `${label} must be at least 2 characters.`;
-        if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-          return `${label} can only contain letters and spaces.`;
-        return "";
-      }
-      case "mobile":
-        if (!value) return "Mobile number is required.";
-        if (!/^\d{10}$/.test(value))
-          return "Enter a valid 10-digit mobile number.";
-        if (!/^[6-9]/.test(value))
-          return "Mobile number must start with 6, 7, 8 or 9.";
-        return "";
-      case "email":
-        if (!value) return "Email is required.";
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-          return "Enter a valid email address.";
-        return "";
-      case "query":
-        if (!value) return "Location is required.";
-        if (value.length < 2) return "Enter a valid location.";
-        return "";
-      default:
-        return "";
-    }
-  };
+  //   const validateField = (name, rawValue) => {
+  //   const value = (rawValue || "").trim();
+  //   switch (name) {
+  //     case "firstName":
+  //     case "lastName": {
+  //       const label = name === "firstName" ? "First name" : "Last name";
+  //       if (!value) return `${label} is required.`;
+  //       if (value.length < 2) return `${label} must be at least 2 characters.`;
+  //       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+  //         return `${label} can only contain letters and spaces.`;
+  //       return "";
+  //     }
+  //     case "mobile":
+  //       if (!value) return "Mobile number is required.";
+  //       if (!/^\d{10}$/.test(value))
+  //         return "Enter a valid 10-digit mobile number.";
+  //       if (!/^[6-9]/.test(value))
+  //         return "Mobile number must start with 6, 7, 8 or 9.";
+  //       return "";
+  //     case "email":
+  //       if (!value) return "Email is required.";
+  //       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+  //         return "Enter a valid email address.";
+  //       return "";
+  //     case "query":
+  //       if (!value) return "Location is required.";
+  //       if (value.length < 2) return "Enter a valid location.";
+  //       return "";
+  //     default:
+  //       return "";
+  //   }
+  // };
+
+    const FIELD_MAP = { mobile: "contact", query: "location" };
+  const validateField = (name, value) =>
+    validateLeadField(FIELD_MAP[name] || name, value);
 
   const validateForm = () => {
     const fields = ["firstName", "lastName", "mobile", "email", "query"];

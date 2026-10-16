@@ -457,7 +457,7 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
   if (!bannerData || bannerData.length === 0) return null;
 
   return (
-    <section className="home-hero position-relative w-100" style={{ backgroundColor: '#f0f0f0' }}>
+    <section className="home-hero position-relative w-100" style={{ backgroundColor: '#f0f0f0', marginTop: '35px' }}>
       <style dangerouslySetInnerHTML={{ __html: `
         // .home-hero .embla { 
         //     overflow: hidden; 

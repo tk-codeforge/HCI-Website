@@ -6,6 +6,7 @@ import Image from "next/image";
 import { FaTimes, FaCheckCircle, FaUser, FaPhoneAlt, FaMapMarkerAlt } from "react-icons/fa";
 import api from "@/utils/api";
 import { buildLeadMetadata, getLeadDeviceType, resolveLeadRule } from "@/utils/leadForms";
+import { validateLeadField } from "@/utils/leadValidation";
 
 const ContactUsPopUp = ({ onModalStateChange }) => {
     const router = useRouter();
@@ -24,20 +25,74 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
         fullName: "", contact: "", place: "", termsAndConditions: false,
     });
 
+        const [errors, setErrors] = useState({});
+
+    // Same list drives the dropdown and the validation (stops tampered values)
+    const locationOptions = activeRule?.locations
+        ? activeRule.locations.split(",").map((l) => l.trim()).filter(Boolean)
+        : ["Noida", "Delhi", "Gurgaon", "Faridabad", "Ghaziabad"];
+
+    // const handleInputChange = (e) => {
+    //     const { name, value } = e.target;
+
+    //     if (name === "contact") {
+    //     const numericValue = value.replace(/\D/g, "").slice(0, 10);
+    //     setFormData((prevData) => ({ ...prevData, [name]: numericValue }));
+    //     return;
+    // }
+    //     setFormData((prevData) => ({ ...prevData, [name]: value }));
+    // };
+
+    // const handleCheckboxChange = (e) => {
+    //     const { checked } = e.target;
+    //     setFormData((prevData) => ({ ...prevData, termsAndConditions: checked }));
+    // };
+
+        const validateField = (name, value) => {
+        if (name === "place") {
+            if (!value) return "Please select your location.";
+            return locationOptions.includes(value) ? "" : "Please select a valid location.";
+        }
+        return validateLeadField(name, value); // fullName, contact, termsAndConditions
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        ["fullName", "contact", "place", "termsAndConditions"].forEach((f) => {
+            const err = validateField(f, formData[f]);
+            if (err) newErrors[f] = err;
+        });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name } = e.target;
+        let { value } = e.target;
 
         if (name === "contact") {
-        const numericValue = value.replace(/\D/g, "").slice(0, 10);
-        setFormData((prevData) => ({ ...prevData, [name]: numericValue }));
-        return;
-    }
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
+            let digits = value.replace(/\D/g, "");
+            if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+            value = digits.slice(0, 10);
+        }
+
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        if (errors[name] !== undefined) {
+            setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+        }
+    };
+
+    const handleInputBlur = (e) => {
+        const { name, value } = e.target;
+        const trimmed = value.trim();
+        setFormData((prev) => ({ ...prev, [name]: trimmed }));
+        setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
     };
 
     const handleCheckboxChange = (e) => {
         const { checked } = e.target;
-        setFormData((prevData) => ({ ...prevData, termsAndConditions: checked }));
+        setFormData((prev) => ({ ...prev, termsAndConditions: checked }));
+        setErrors((prev) => ({ ...prev, termsAndConditions: validateField("termsAndConditions", checked) }));
     };
 
     const handleClose = () => {
@@ -50,39 +105,41 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
         e.preventDefault();
         setSubmissionError("");
 
-        // 1. Validate Full Name (letters and spaces only, 2 to 50 characters)
-    const nameRegex = /^[A-Za-z\s]{2,50}$/;
-    if (!nameRegex.test(formData.fullName.trim())) {
-        setSubmissionError("Please enter a valid Full Name (letters and spaces only).");
-        return;
-    }
+    //     // 1. Validate Full Name (letters and spaces only, 2 to 50 characters)
+    // const nameRegex = /^[A-Za-z\s]{2,50}$/;
+    // if (!nameRegex.test(formData.fullName.trim())) {
+    //     setSubmissionError("Please enter a valid Full Name (letters and spaces only).");
+    //     return;
+    // }
 
-    // 2. Validate Phone Number (10 digits starting with 6, 7, 8, or 9)
-    const phoneRegex = /^[6-9]\d{9}$/;
-    if (!phoneRegex.test(formData.contact.trim())) {
-        setSubmissionError("Please enter a valid 10-digit mobile number.");
-        return;
-    }
+    // // 2. Validate Phone Number (10 digits starting with 6, 7, 8, or 9)
+    // const phoneRegex = /^[6-9]\d{9}$/;
+    // if (!phoneRegex.test(formData.contact.trim())) {
+    //     setSubmissionError("Please enter a valid 10-digit mobile number.");
+    //     return;
+    // }
 
-    // 3. Validate Mandatory Location Dropdown Selection
-    if (!formData.place.trim()) {
-        setSubmissionError("Please select your location.");
-        return;
-    }
+    // // 3. Validate Mandatory Location Dropdown Selection
+    // if (!formData.place.trim()) {
+    //     setSubmissionError("Please select your location.");
+    //     return;
+    // }
 
-        if (!formData.termsAndConditions) {
-            setSubmissionError("You must agree to the Terms & Conditions.");
-            return;
-        }
+    //     if (!formData.termsAndConditions) {
+    //         setSubmissionError("You must agree to the Terms & Conditions.");
+    //         return;
+    //     }
 
+        if (!validateForm()) return;
         setLoading(true);
 
         const formRequestData = {
-            name: formData.fullName,
-            mobile: formData.contact,
-            place: formData.place, 
-            email: "info@hcinterior.in", 
-            query: `Offer Claimed. Pincode/Location: ${formData.place}`, 
+            name: formData.fullName.trim(),
+            mobile: formData.contact.trim(),
+            place: formData.place.trim(),
+            email: "", 
+            // query: `Offer Claimed. Pincode/Location: ${formData.place}`, 
+            query: "", 
             ...buildLeadMetadata({
                 pathname,
                 leadFormType: "popup",
@@ -99,6 +156,7 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
             if (response.status === 201) {
                 setSubmissionMessage(activeRule?.success_message || "Details submitted successfully!");
                 setFormData({ fullName: "", contact: "", place: "", termsAndConditions: false });
+                                setErrors({});
 
                 setTimeout(() => {
                     handleClose();
@@ -291,6 +349,12 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
                     box-shadow: 0 0 0 4px rgba(255,145,77,0.1);
                 }
 
+                                .hc-input-invalid { border-color: #dc3545 !important; background: #fff5f5; }
+                .hc-error {
+                    color: #dc3545; font-size: 12px; margin: -10px 0 14px 4px;
+                    font-family: var(--font-poppins), sans-serif;
+                }
+
                 .hc-checkbox-wrap { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 25px; }
                 .hc-checkbox-text { font-size: 12px; color: #64748b; line-height: 1.5; margin: 0; font-family: var(--font-poppins), sans-serif; }
                 .hc-checkbox-text a { color: #ff914d; text-decoration: none; font-weight: 600; }
@@ -348,7 +412,7 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
                                     </p>
                                 )}
 
-                                <form onSubmit={handleSubmit}>
+                                <form onSubmit={handleSubmit} noValidate>
                                     {submissionError && <div className="alert alert-danger p-2 small mb-3 text-center rounded-3">{submissionError}</div>}
 
                                     {/* <div className="hc-input-wrap">
@@ -392,8 +456,8 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
                                         />
                                     </div> */}
 
-                                    {/* Full Name - Mandatory */}
-<div className="hc-input-wrap">
+                                    
+{/* <div className="hc-input-wrap">
     <FaUser className="hc-input-icon" />
     <input
         type="text"
@@ -406,7 +470,7 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
     />
 </div>
 
-{/* Phone Number - Mandatory (10 digits) */}
+
 <div className="hc-input-wrap">
     <FaPhoneAlt className="hc-input-icon" />
     <input
@@ -421,7 +485,7 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
     />
 </div>
 
-{/* Location - CMS Managed Dynamic Dropdown (Mandatory) */}
+
 <div className="hc-input-wrap">
     <FaMapMarkerAlt className="hc-input-icon" />
     <select
@@ -467,7 +531,87 @@ const ContactUsPopUp = ({ onModalStateChange }) => {
                                         <label htmlFor="termsCheck" className="hc-checkbox-text" style={{ cursor: 'pointer' }}>
                                             I agree to the <a href="/term-and-condition">Terms of Use</a> and <a href="/privacy-policy">Privacy Policy</a>.
                                         </label>
+                                    </div> */}
+
+                                                                        {/* Full Name */}
+                                    <div className="hc-input-wrap">
+                                        <FaUser className="hc-input-icon" />
+                                        <input
+                                            type="text"
+                                            name="fullName"
+                                            className={`hc-input ${errors.fullName ? "hc-input-invalid" : ""}`}
+                                            placeholder="Full Name *"
+                                            aria-label="Full Name"
+                                            autoComplete="name"
+                                            maxLength={60}
+                                            value={formData.fullName}
+                                            onChange={handleInputChange}
+                                            onBlur={handleInputBlur}
+                                            required
+                                        />
                                     </div>
+                                    {errors.fullName && <p className="hc-error">{errors.fullName}</p>}
+
+                                    {/* Phone */}
+                                    <div className="hc-input-wrap">
+                                        <FaPhoneAlt className="hc-input-icon" />
+                                        <input
+                                            type="tel"
+                                            inputMode="numeric"
+                                            name="contact"
+                                            className={`hc-input ${errors.contact ? "hc-input-invalid" : ""}`}
+                                            placeholder="Phone Number (10 Digits) *"
+                                            aria-label="Phone Number"
+                                            autoComplete="tel-national"
+                                            maxLength={10}
+                                            value={formData.contact}
+                                            onChange={handleInputChange}
+                                            onBlur={handleInputBlur}
+                                            required
+                                        />
+                                    </div>
+                                    {errors.contact && <p className="hc-error">{errors.contact}</p>}
+
+                                    {/* Location (CMS-managed dropdown) */}
+                                    <div className="hc-input-wrap">
+                                        <FaMapMarkerAlt className="hc-input-icon" />
+                                        <select
+                                            name="place"
+                                            className={`hc-input ${errors.place ? "hc-input-invalid" : ""}`}
+                                            aria-label="Location"
+                                            value={formData.place}
+                                            onChange={handleInputChange}
+                                            onBlur={handleInputBlur}
+                                            style={{ appearance: 'none', cursor: 'pointer' }}
+                                            required
+                                        >
+                                            <option value="">Select Location *</option>
+                                            {locationOptions.map((loc) => (
+                                                <option key={loc} value={loc}>{loc}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {errors.place && <p className="hc-error">{errors.place}</p>}
+
+                                    <div className="hc-checkbox-wrap">
+                                        <input 
+                                            type="checkbox" 
+                                            id="termsCheck" 
+                                            className="mt-1"
+                                            style={{ accentColor: '#ff914d', cursor: 'pointer' }}
+                                            checked={formData.termsAndConditions}
+                                            onChange={handleCheckboxChange}
+                                            required
+                                        />
+                                        <label htmlFor="termsCheck" className="hc-checkbox-text" style={{ cursor: 'pointer' }}>
+                                            I agree to the <a href="/term-and-condition">Terms of Use</a> and <a href="/privacy-policy">Privacy Policy</a>.
+                                        </label>
+                                    </div>
+                                    {errors.termsAndConditions && (
+                                        <p className="hc-error" style={{ marginTop: "-18px", marginBottom: "18px" }}>
+                                            {errors.termsAndConditions}
+                                        </p>
+                                    )}
 
                                     <button type="submit" className="hc-submit-btn" disabled={loading}>
                                         {loading ? "PROCESSING..." : activeRule?.cta_text || "GET FREE QUOTE"}

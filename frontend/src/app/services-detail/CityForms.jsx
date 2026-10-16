@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
 import { FaUser, FaPhoneAlt, FaCheckCircle, FaMapMarkerAlt } from "react-icons/fa"; // Added FaMapMarkerAlt
+import { validateLeadField as validateField } from "@/utils/leadValidation";
 
 const sanitizePhone = (value) => {
   let digits = value.replace(/\D/g, "");
@@ -11,40 +12,40 @@ const sanitizePhone = (value) => {
   return digits.slice(0, 10);
 };
 
-const validateField = (name, rawValue) => {
-  const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-  switch (name) {
-    case "fullName":
-      if (!value) return "Full name is required.";
-      if (value.length < 2) return "Full name must be at least 2 characters.";
-      if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-        return "Full name can only contain letters and spaces.";
-      return "";
-    case "contactNo":
-      if (!value) return "Phone number is required.";
-      if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit phone number.";
-      if (!/^[6-9]/.test(value))
-        return "Phone number must start with 6, 7, 8 or 9.";
-      return "";
-    case "email":
-      if (!value) return "Email is required.";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-        return "Enter a valid email address.";
-      return "";
-    case "place":
-      if (!value) return "Location is required.";
-      if (value.length < 2) return "Enter a valid location.";
-      return "";
-    case "query":
-      if (!value) return "Please tell us your requirements.";
-      if (value.length < 10) return "Please enter at least 10 characters.";
-      return "";
-    case "termsAccepted":
-      return value ? "" : "You must accept the Terms & Conditions.";
-    default:
-      return "";
-  }
-};
+// const validateField = (name, rawValue) => {
+//   const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+//   switch (name) {
+//     case "fullName":
+//       if (!value) return "Full name is required.";
+//       if (value.length < 2) return "Full name must be at least 2 characters.";
+//       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+//         return "Full name can only contain letters and spaces.";
+//       return "";
+//     case "contactNo":
+//       if (!value) return "Phone number is required.";
+//       if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit phone number.";
+//       if (!/^[6-9]/.test(value))
+//         return "Phone number must start with 6, 7, 8 or 9.";
+//       return "";
+//     case "email":
+//       if (!value) return "Email is required.";
+//       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+//         return "Enter a valid email address.";
+//       return "";
+//     case "place":
+//       if (!value) return "Location is required.";
+//       if (value.length < 2) return "Enter a valid location.";
+//       return "";
+//     case "query":
+//       if (!value) return "Please tell us your requirements.";
+//       if (value.length < 10) return "Please enter at least 10 characters.";
+//       return "";
+//     case "termsAccepted":
+//       return value ? "" : "You must accept the Terms & Conditions.";
+//     default:
+//       return "";
+//   }
+// };
 
 // 🌟 1. THE SMART SIDEBAR FORM
 export function SidebarForm({ city }) {

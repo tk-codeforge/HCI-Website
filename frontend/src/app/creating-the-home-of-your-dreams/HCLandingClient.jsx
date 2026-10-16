@@ -1527,6 +1527,7 @@ import VideoBox from "../components/VideoBox";
 import { useMediaAlt } from "../components/MediaImage";
 import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
+import { validateLeadField as validateField } from "@/utils/leadValidation";
 
 // The popup only appears after a delay / scroll / exit-intent, so there is no
 // reason to ship its code in the initial bundle or render it on the server.
@@ -1663,36 +1664,36 @@ const sanitizePhone = (value) => {
   return digits.slice(0, 10);
 };
 
-const validateField = (name, rawValue) => {
-  const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-  switch (name) {
-    case "fullName":
-      if (!value) return "Name is required.";
-      if (value.length < 2) return "Name must be at least 2 characters.";
-      if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-        return "Name can only contain letters and spaces.";
-      return "";
-    case "contact":
-      if (!value) return "Contact number is required.";
-      if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
-      if (!/^[6-9]/.test(value))
-        return "Mobile number must start with 6, 7, 8 or 9.";
-      return "";
-    case "email":
-      if (!value) return "Email is required.";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-        return "Enter a valid email address.";
-      return "";
-    case "query":
-      if (!value) return "Design name / message is required.";
-      if (value.length < 3) return "Please enter at least 3 characters.";
-      return "";
-    case "termsAndConditions":
-      return value ? "" : "You must agree before submitting.";
-    default:
-      return "";
-  }
-};
+// const validateField = (name, rawValue) => {
+//   const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+//   switch (name) {
+//     case "fullName":
+//       if (!value) return "Name is required.";
+//       if (value.length < 2) return "Name must be at least 2 characters.";
+//       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+//         return "Name can only contain letters and spaces.";
+//       return "";
+//     case "contact":
+//       if (!value) return "Contact number is required.";
+//       if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
+//       if (!/^[6-9]/.test(value))
+//         return "Mobile number must start with 6, 7, 8 or 9.";
+//       return "";
+//     case "email":
+//       if (!value) return "Email is required.";
+//       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+//         return "Enter a valid email address.";
+//       return "";
+//     case "query":
+//       if (!value) return "Design name / message is required.";
+//       if (value.length < 3) return "Please enter at least 3 characters.";
+//       return "";
+//     case "termsAndConditions":
+//       return value ? "" : "You must agree before submitting.";
+//     default:
+//       return "";
+//   }
+// };
 
 const FieldError = ({ msg }) =>
   msg ? (

@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import BoxIcon from "../components/BoxIcon";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
+import ReferFormClient from "./ReferFormClient";
 
 const getBaseUrl = () => {
   return process.env.NODE_ENV === "development"
@@ -366,7 +367,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
                           </button>
                         </div>
                       </form> */}
-         <form className="row">             
+         {/* <form className="row">             
 {formFields.friend_name.shown && (
   <div className="col-md-6 mb-3">
     <input
@@ -469,7 +470,14 @@ const formHeading = contentData.form_heading || "Refer and Earn";
         {submitButtonText}
       </button>
     </div>
-  </form>
+  </form> */}
+
+  <ReferFormClient
+  formFields={formFields}
+  submitButtonText={submitButtonText}
+  submitButtonBgColor={submitButtonBgColor}
+  submitButtonColor={submitButtonColor}
+/>
                     </div>
                   </div>
                 </div>

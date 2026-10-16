@@ -212,6 +212,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
+import { validateLeadField as validateField } from "@/utils/leadValidation";
 
 const ContactForm = ({ mapSrc }) => {
   const pathname = usePathname();
@@ -238,41 +239,41 @@ const ContactForm = ({ mapSrc }) => {
   //   setFormData((prevData) => ({ ...prevData, termsAccepted: checked }));
   // };
 
-    const validateField = (name, rawValue) => {
-    const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-    switch (name) {
-      case "fullName":
-        if (!value) return "Full name is required.";
-        if (value.length < 2) return "Full name must be at least 2 characters.";
-        if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-          return "Full name can only contain letters and spaces.";
-        return "";
-      case "contactNo":
-        if (!value) return "Contact number is required.";
-        if (!/^\d{10}$/.test(value))
-          return "Enter a valid 10-digit contact number.";
-        if (!/^[6-9]/.test(value))
-          return "Contact number must start with 6, 7, 8 or 9.";
-        return "";
-      case "email":
-        if (!value) return "Email is required.";
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-          return "Enter a valid email address.";
-        return "";
-      case "place":
-        if (!value) return "Place is required.";
-        if (value.length < 2) return "Enter a valid place.";
-        return "";
-      case "query":
-        if (!value) return "Query is required.";
-        if (value.length < 10) return "Query must be at least 10 characters.";
-        return "";
-      case "termsAccepted":
-        return value ? "" : "You must accept the Terms & Conditions.";
-      default:
-        return "";
-    }
-  };
+  //   const validateField = (name, rawValue) => {
+  //   const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+  //   switch (name) {
+  //     case "fullName":
+  //       if (!value) return "Full name is required.";
+  //       if (value.length < 2) return "Full name must be at least 2 characters.";
+  //       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+  //         return "Full name can only contain letters and spaces.";
+  //       return "";
+  //     case "contactNo":
+  //       if (!value) return "Contact number is required.";
+  //       if (!/^\d{10}$/.test(value))
+  //         return "Enter a valid 10-digit contact number.";
+  //       if (!/^[6-9]/.test(value))
+  //         return "Contact number must start with 6, 7, 8 or 9.";
+  //       return "";
+  //     case "email":
+  //       if (!value) return "Email is required.";
+  //       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+  //         return "Enter a valid email address.";
+  //       return "";
+  //     case "place":
+  //       if (!value) return "Place is required.";
+  //       if (value.length < 2) return "Enter a valid place.";
+  //       return "";
+  //     case "query":
+  //       if (!value) return "Query is required.";
+  //       if (value.length < 10) return "Query must be at least 10 characters.";
+  //       return "";
+  //     case "termsAccepted":
+  //       return value ? "" : "You must accept the Terms & Conditions.";
+  //     default:
+  //       return "";
+  //   }
+  // };
 
   const validateForm = () => {
     const fields = [

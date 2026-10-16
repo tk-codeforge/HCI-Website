@@ -1,37 +1,123 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import BackgroundImageWithHeading from "../../components/BackgroundImageWithHeading";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
+import { validateLeadField } from "@/utils/leadValidation";
+
+const FIELD_MAP = { name: "fullName", phone: "contact", your_job_title: "jobTitle" };
+const validateField = (name, value) => validateLeadField(FIELD_MAP[name] || name, value);
+
+const MAX_RESUME_MB = 5; // set this to your API's upload limit
+const validateResume = (file) => {
+  if (!file) return "Please upload your resume (PDF).";
+  if (file.size === 0) return "The selected file is empty.";
+  if (file.type !== "application/pdf" || !/\.pdf$/i.test(file.name))
+    return "Only PDF files are allowed.";
+  if (file.size > MAX_RESUME_MB * 1024 * 1024)
+    return `File must be smaller than ${MAX_RESUME_MB} MB.`;
+  return "";
+};
 
 export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText }) {
-  const [formData, setFormData] = useState({
+  // const [formData, setFormData] = useState({
+  //   name: "",
+  //   email: "",
+  //   phone: "",
+  //   your_job_title: "",
+  //   resume: null,
+  // });
+
+    const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     your_job_title: "",
     resume: null,
+    termsAccepted: false,
   });
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // const handleInputChange = (e) => {
+  //   const { name, value, files } = e.target;
+  //   if (name === "resume" && files?.length > 0) {
+  //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+  //   } else {
+  //     setFormData((prevData) => ({ ...prevData, [name]: value }));
+  //   }
+  // };
+
+    const validateForm = () => {
+    const newErrors = {};
+    ["name", "email", "phone", "your_job_title"].forEach((f) => {
+      const err = validateField(f, formData[f]);
+      if (err) newErrors[f] = err;
+    });
+    const resumeErr = validateResume(formData.resume);
+    if (resumeErr) newErrors.resume = resumeErr;
+    if (!formData.termsAccepted) newErrors.termsAccepted = "You must agree before submitting.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "resume" && files?.length > 0) {
-      setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
-    } else {
-      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    const { name } = e.target;
+    let { value } = e.target;
+
+    // phone: digits only, drop a pasted +91 / 91 prefix, max 10
+    if (name === "phone") {
+      let digits = value.replace(/\D/g, "");
+      if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+      value = digits.slice(0, 10);
     }
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name] !== undefined) {
+      setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    const { name, value } = e.target;
+    const trimmed = value.trim();
+    setFormData((prev) => ({ ...prev, [name]: trimmed }));
+    setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    const err = validateResume(file);
+    if (err) e.target.value = ""; // drop an invalid file so it can't be submitted
+    setFormData((prev) => ({ ...prev, resume: err ? null : file }));
+    setErrors((prev) => ({ ...prev, resume: err }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { checked } = e.target;
+    setFormData((prev) => ({ ...prev, termsAccepted: checked }));
+    setErrors((prev) => ({
+      ...prev,
+      termsAccepted: checked ? "" : "You must agree before submitting.",
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+        if (!validateForm()) {
+      toast.error("Please correct the highlighted fields.");
+      return;
+    }
+    setSubmitting(true);
 
     const formDataToSend = new FormData();
     if (jobId) formDataToSend.append("job_id", jobId);
-    formDataToSend.append("name", formData.name);
-    formDataToSend.append("email", formData.email);
-    formDataToSend.append("phone", formData.phone);
-    formDataToSend.append("your_job_title", formData.your_job_title);
+    formDataToSend.append("name", formData.name.trim());
+    formDataToSend.append("email", formData.email.trim());
+    formDataToSend.append("phone", formData.phone.trim());
+    formDataToSend.append("your_job_title", formData.your_job_title.trim());
     if (formData.resume) {
       formDataToSend.append("resume", formData.resume);
     }
@@ -45,19 +131,25 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
 
       if (response.status === 201) {
         toast.success("Form submitted successfully.");
-        setFormData({
+                setFormData({
           name: "",
           email: "",
           phone: "",
           your_job_title: "",
           resume: null,
+          termsAccepted: false,
         });
+        setErrors({});
+        if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
         toast.error("Error submitting form. Please try again.");
       }
     } catch (error) {
       toast.error(error.message ?? "Error submitting form. Please try again.");
       console.error("Error submitting application:", error);
+    }
+    finally {
+      setSubmitting(false);
     }
   };
 
@@ -163,6 +255,16 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
           color: #f2793a !important; /* Theme orange */
           text-decoration: none !important;
         }
+
+                .career-form-card .career-field-error {
+          display: inline-block;
+          margin-top: 4px;
+          padding: 2px 8px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.9);
+          color: #dc3545;
+          font-size: 13px;
+        }
       `}</style>
 
       {(cmsSettings?.bg_color || cmsSettings?.font_color) && (
@@ -226,61 +328,84 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
               >
                 {cmsSettings?.form_heading || "Apply Now"}
               </h4>
-              <form className="row" onSubmit={handleSubmit}>
+              <form className="row" onSubmit={handleSubmit} noValidate>
                 <div className="mb-3 col-md-6">
                   <input
                     type="text"
-                    className="form-control"
+                                        className={`form-control ${errors.name ? "is-invalid" : ""}`}
                     name="name"
                     placeholder={cmsSettings?.placeholder_name || "Full Name"}
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                                        onBlur={handleInputBlur}
+                    maxLength={60}
+                    autoComplete="name"
+                    aria-label="Full Name"
                   />
+                                    {errors.name && <div className="career-field-error">{errors.name}</div>}
                 </div>
                 <div className="mb-3 col-md-6">
                   <input
                     type="email"
-                    className="form-control"
+                                        className={`form-control ${errors.email ? "is-invalid" : ""}`}
                     name="email"
                     placeholder={cmsSettings?.placeholder_email || "Email"}
                     value={formData.email}
                     onChange={handleInputChange}
                     required
+                                        onBlur={handleInputBlur}
+                    maxLength={100}
+                    autoComplete="email"
+                    aria-label="Email"
                   />
+                                    {errors.email && <div className="career-field-error">{errors.email}</div>}
                 </div>
                 <div className="mb-3 col-md-6">
                   <input
-                    type="text"
-                    className="form-control"
+                    type="tel"
+                                        className={`form-control ${errors.phone ? "is-invalid" : ""}`}
                     name="phone"
                     placeholder={cmsSettings?.placeholder_phone || "Contact No."}
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
+                                        onBlur={handleInputBlur}
+                    inputMode="numeric"
+                    maxLength={10}
+                    autoComplete="tel-national"
+                    aria-label="Contact Number"
                   />
+                                    {errors.phone && <div className="career-field-error">{errors.phone}</div>}
                 </div>
 
                 <div className="mb-3 col-md-6">
                   <input
                     type="text"
-                    className="form-control"
+                                        className={`form-control ${errors.your_job_title ? "is-invalid" : ""}`}
                     name="your_job_title"
                     placeholder={cmsSettings?.placeholder_job_position || "Job Position"}
                     value={formData.your_job_title}
                     onChange={handleInputChange}
                     required
+                                        onBlur={handleInputBlur}
+                    maxLength={60}
+                    autoComplete="organization-title"
+                    aria-label="Job Position"
                   />
+                                    {errors.your_job_title && <div className="career-field-error">{errors.your_job_title}</div>}
                 </div>
                 <div className="mb-3 col-md-12">
                   <div className="input-group mb-3">
                     <input
                       type="file"
-                      className="form-control me-2 w-75"
+                                           className={`form-control me-2 w-75 ${errors.resume ? "is-invalid" : ""}`}
                       id="inputGroupFile02"
                       name="resume"
                       accept="application/pdf"
-                      onChange={handleInputChange}
+                      ref={fileInputRef}
+                      required
+                      onChange={handleFileChange}
                     />
                     <label
                       className="input-group-text rounded-5 mt-3 mt-lg-0"
@@ -289,15 +414,18 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
                       {cmsSettings?.resume_button_label || "Upload your resume"}
                     </label>
                   </div>
+                                    {errors.resume && <div className="career-field-error">{errors.resume}</div>}
                 </div>
 
                 <div className="col-12">
                   <div className="form-check">
                     <input
-                      className="form-check-input"
+                                            className={`form-check-input ${errors.termsAccepted ? "is-invalid" : ""}`}
                       type="checkbox"
                       id="invalidCheck"
                       required
+                                            checked={formData.termsAccepted}
+                      onChange={handleCheckboxChange}
                     />
                     <label
                       className="form-check-label ms-1"
@@ -320,7 +448,7 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
                     className="px-5 know_more career-form-submit-btn"
                     type="submit"
                   >
-                    {cmsSettings?.submit_button_text || "Submit"}
+                                        {submitting ? "Submitting..." : cmsSettings?.submit_button_text || "Submit"}
                   </button>
                 </div>
               </form>

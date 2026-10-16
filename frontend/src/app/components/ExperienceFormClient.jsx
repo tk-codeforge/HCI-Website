@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import api from "../../utils/api";
 import { buildLeadMetadata } from "../../utils/leadForms";
+import { validateLeadField } from "../../utils/leadValidation";
 
 const CENTER_NAMES_BY_PATH = {
   "/experience-center-noida-extension": "Noida Extension",
@@ -156,36 +157,44 @@ export default function ExperienceFormClient({ initialConfig }) {
   };
 
   // Required-ness comes from the CMS (fieldCfg.required); format is always checked when filled
-  const validateField = (name, rawValue, fieldCfg) => {
+  // const validateField = (name, rawValue, fieldCfg) => {
+  //   const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+  //   const label = fieldCfg?.label || "This field";
+
+  //   if (!value) return fieldCfg?.required ? `${label} is required.` : "";
+
+  //   switch (name) {
+  //     case "fullName":
+  //       if (value.length < 2) return `${label} must be at least 2 characters.`;
+  //       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
+  //         return `${label} can only contain letters and spaces.`;
+  //       return "";
+  //     case "contactNo":
+  //       if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
+  //       if (!/^[6-9]/.test(value))
+  //         return "Mobile number must start with 6, 7, 8 or 9.";
+  //       return "";
+  //     case "email":
+  //       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+  //         return "Enter a valid email address.";
+  //       return "";
+  //     case "place":
+  //       if (value.length < 2) return "Enter a valid place.";
+  //       return "";
+  //     case "query":
+  //       if (value.length < 10) return "Query must be at least 10 characters.";
+  //       return "";
+  //     default:
+  //       return "";
+  //   }
+  // };
+
+    const validateField = (name, rawValue, fieldCfg) => {
     const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-    const label = fieldCfg?.label || "This field";
-
-    if (!value) return fieldCfg?.required ? `${label} is required.` : "";
-
-    switch (name) {
-      case "fullName":
-        if (value.length < 2) return `${label} must be at least 2 characters.`;
-        if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-          return `${label} can only contain letters and spaces.`;
-        return "";
-      case "contactNo":
-        if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
-        if (!/^[6-9]/.test(value))
-          return "Mobile number must start with 6, 7, 8 or 9.";
-        return "";
-      case "email":
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-          return "Enter a valid email address.";
-        return "";
-      case "place":
-        if (value.length < 2) return "Enter a valid place.";
-        return "";
-      case "query":
-        if (value.length < 10) return "Query must be at least 10 characters.";
-        return "";
-      default:
-        return "";
+    if (!value) {
+      return fieldCfg?.required ? `${fieldCfg?.label || "This field"} is required.` : "";
     }
+    return validateLeadField(name, value);
   };
 
   const handleInputChange = (e) => {
