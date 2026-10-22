@@ -3,12 +3,12 @@ import { IsString, IsOptional, IsEnum, IsBoolean, MaxLength} from 'class-validat
 export class CreateSeoTagDto {
     @IsString()
     @IsOptional()
-    @MaxLength(60)
+    @MaxLength(65)
     title?: string;
 
     @IsString()
     @IsOptional()
-    @MaxLength(60)
+    @MaxLength(65)
     meta_title?: string;
 
     @IsString()
@@ -48,7 +48,7 @@ export class CreateSeoTagDto {
 
     @IsString()
     @IsOptional()
-    @MaxLength(60)
+    @MaxLength(65)
     og_title?: string;
 
     @IsString()

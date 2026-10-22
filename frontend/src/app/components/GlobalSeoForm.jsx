@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { DEFAULT_SITEMAP_CHANGE_FREQUENCY, DEFAULT_SITEMAP_PRIORITY, SITEMAP_CHANGE_FREQUENCY_OPTIONS } from "@/utils/seoHelpers";
 
-const TITLE_LIMIT = 60;
+const TITLE_LIMIT = 65;
 const DESC_LIMIT = 160;
 
 const Counter = ({ value = "", limit }) => (
@@ -82,6 +82,10 @@ export default function GlobalSeoForm({ initialData, onSubmit, canPublish, lockP
     alert(`Meta title must be ${TITLE_LIMIT} characters or less (currently ${formData.meta_title.length}).`);
     return;
 }
+if (formData.og_title.length > TITLE_LIMIT) {
+    alert(`OG title must be ${TITLE_LIMIT} characters or less (currently ${formData.og_title.length}).`);
+    return;
+}
 if (formData.meta_description.length > DESC_LIMIT) {
     alert(`Meta description must be ${DESC_LIMIT} characters or less (currently ${formData.meta_description.length}).`);
     return;
@@ -130,8 +134,8 @@ if (formData.meta_description.length > DESC_LIMIT) {
 
             <div className="mb-3 col-md-12">
     <label className="form-label">OG Title <small className="text-muted">(social share title; blank uses Meta Title)</small></label>
-    <input type="text" className="form-control" name="og_title" value={formData.og_title} onChange={handleInputChange} maxLength={60} placeholder={formData.meta_title} />
-    <small className="text-muted">{formData.og_title.length}/60 characters</small>
+    <input type="text" className="form-control" name="og_title" value={formData.og_title} onChange={handleInputChange} maxLength={TITLE_LIMIT} placeholder={formData.meta_title} />
+    <Counter value={formData.og_title} limit={TITLE_LIMIT} />
 </div>
 <div className="mb-3 col-md-12">
     <label className="form-label">OG Description <small className="text-muted">(blank uses Meta Description)</small></label>

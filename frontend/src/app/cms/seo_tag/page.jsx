@@ -39,8 +39,8 @@ const SeoTag = () => {
     }, [fetchQueries]);
 
 const validateSeoLengths = (data) => {
-    if ((data.meta_title || data.title || "").length > 60) {
-        toast.error("Meta title must be 60 characters or less.");
+    if ((data.meta_title || data.title || "").length > 65) {
+        toast.error("Meta title must be 65 characters or less.");
         return false;
     }
     if ((data.meta_description || "").length > 160) {
@@ -48,7 +48,7 @@ const validateSeoLengths = (data) => {
         return false;
     }
 
-    if ((data.og_title || "").length > 60) { toast.error("OG title must be 90 characters or less."); return false; }
+    if ((data.og_title || "").length > 65) { toast.error("OG title must be 65 characters or less."); return false; }
     if ((data.og_description || "").length > 200) { toast.error("OG description must be 200 characters or less."); return false; }
 
     return true;
