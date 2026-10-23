@@ -280,16 +280,16 @@ export default async function Home() {
 
   return (
     <>
-      <script
+      {/* <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      /> */}
       
       {/* 1. Hero Carousel */}
       <HeroCarousel bannerData={bannerData} carouselSpeed={carouselSpeed} />
 
       {/* 2. The Rest of the Page */}
-      <Suspense fallback={<div className="py-5 text-center">Loading Content...</div>}>
+      <Suspense fallback={<div className="py-5 text-center"></div>}>
         <HomeContent />
       </Suspense>
     </>

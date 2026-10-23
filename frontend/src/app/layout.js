@@ -73,6 +73,7 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
+            "@id": "https://hcinterior.in/#organization",
             "name": "High Creation Interior",
             "url": "https://hcinterior.in",
             "logo": "https://hcinterior.in/images/new_hc_logo.png",
