@@ -2,9 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'node:path';
+import {
+  webpNegotiationMiddleware,
+} from './common/middleware/webp-negotiation.middleware';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+
+    // Serve optimized WebP images through existing image URLs.
+const uploadsRoot = join(__dirname, '..', 'uploads');
+
+app.use(
+  '/uploads',
+  webpNegotiationMiddleware(uploadsRoot),
+);
 
     // Enable global validation using ValidationPipe
     app.useGlobalPipes(new ValidationPipe());

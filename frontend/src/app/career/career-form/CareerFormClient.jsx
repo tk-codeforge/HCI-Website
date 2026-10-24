@@ -73,6 +73,9 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
       if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
       value = digits.slice(0, 10);
     }
+    if (name === "email") {
+  value = value.toLowerCase().replace(/\s/g, "");
+}
 
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name] !== undefined) {
@@ -82,7 +85,7 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
-    const trimmed = value.trim();
+    const trimmed = name === "email" ? value.trim().toLowerCase() : value.trim();
     setFormData((prev) => ({ ...prev, [name]: trimmed }));
     setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
@@ -115,7 +118,7 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
     const formDataToSend = new FormData();
     if (jobId) formDataToSend.append("job_id", jobId);
     formDataToSend.append("name", formData.name.trim());
-    formDataToSend.append("email", formData.email.trim());
+    formDataToSend.append("email", formData.email.trim().toLowerCase());
     formDataToSend.append("phone", formData.phone.trim());
     formDataToSend.append("your_job_title", formData.your_job_title.trim());
     if (formData.resume) {

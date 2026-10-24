@@ -299,6 +299,10 @@ export default function ContactForm({ mapSrc }) {
       value = digits.slice(0, 10);
     }
 
+    if (name === "email") {
+    value = value.toLowerCase().replace(/\s/g, "");
+}
+
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name] !== undefined) {
       setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));

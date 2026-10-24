@@ -293,11 +293,11 @@ const editorConfig = {
         { name: 'resizeImage:30', value: '30', label: '30px' },
         { name: 'resizeImage:40', value: '40', label: '40px' },
         { name: 'resizeImage:50', value: '50', label: '50px' },
-        { name: 'resizeImage:50', value: '60', label: '50px' },
-        { name: 'resizeImage:50', value: '70', label: '50px' },
-        { name: 'resizeImage:50', value: '80', label: '50px' },
-        { name: 'resizeImage:50', value: '90', label: '50px' },
-        { name: 'resizeImage:50', value: '100', label: '50px' },
+        { name: 'resizeImage:60', value: '60', label: '60px' },
+        { name: 'resizeImage:70', value: '70', label: '70px' },
+        { name: 'resizeImage:80', value: '80', label: '80px' },
+        { name: 'resizeImage:90', value: '90', label: '90px' },
+        { name: 'resizeImage:100', value: '100', label: '100px' },
     ],
         toolbar: [
             'imageResize',
@@ -343,6 +343,11 @@ const editorConfig = {
     }
 };
 
+const forceHttpsHtml = (html) =>
+  typeof html === "string"
+    ? html.replace(/http:\/\/(apidev\.hcinterior\.in|www\.hcinterior\.in|hcinterior\.in)/gi, "https://$1")
+    : html;
+
 const CKEditorComponent = ({ pageData, setPageData , withTickIcon = false}) => {
 
     const config = useMemo(
@@ -358,7 +363,8 @@ const CKEditorComponent = ({ pageData, setPageData , withTickIcon = false}) => {
             data={pageData}
             onChange={(event, editor) => {
                 const data = editor.getData();
-                setPageData(data);
+                // setPageData(data);
+                setPageData(forceHttpsHtml(data));
             }}
             // config={editorConfig}
             config={config}

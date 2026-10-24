@@ -109,6 +109,12 @@ const emailField = z
   .max(100, "Email is too long")
   .refine((v) => EMAIL_RE.test(v) && !v.includes(".."), "Enter a valid email address")
   .refine((v) => !BAD_EMAIL_LOCAL.test(v.split("@")[0]), "Please enter your real email address")
+    .refine((v) => !/(.)\1{3,}/.test(v.split("@")[0]), "Please enter your real email address")
+  .refine((v) => {
+    const [local, domain] = v.toLowerCase().split("@");
+    if (!["gmail.com", "googlemail.com"].includes(domain)) return true;
+    return /^[a-z0-9.]{6,30}$/.test(local.split("+")[0]);
+  }, "Enter a valid Gmail address")
   .refine((v) => !TYPO_DOMAINS.has(v.split("@")[1]?.toLowerCase()), "Check the email domain for a typo")
   .refine((v) => !BLOCKED_EMAIL_DOMAINS.has(v.split("@")[1]?.toLowerCase()), "Please enter your personal email address");
 

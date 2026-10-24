@@ -81,7 +81,7 @@ const DEFAULT_MENU = [
   },
 ];
 
-const Header = () => {
+// const Header = () => {
   
   // useEffect(() => {
   //   const fetchServingAreas = async () => {
@@ -102,29 +102,47 @@ const Header = () => {
   //   fetchServingAreas();
   // }, []);
 
+  const Header = ({ initialMenu = null }) => {
+  const [menu, setMenu] = useState(initialMenu || DEFAULT_MENU);
+
   useEffect(() => {
+  if (initialMenu) return; // already server-rendered from CMS
   const fetchMenu = async () => {
     try {
       const res = await api.get("/cms-content/navbar_header_menu");
-      if (res.data) {
-        const record = Array.isArray(res.data) ? res.data[0] : res.data;
-        const items = record?.json_content?.menu;
-        if (items && items.length > 0) {
-          setMenu(items);
-        }
-      }
+      const record = Array.isArray(res.data) ? res.data[0] : res.data;
+      const items = record?.json_content?.menu;
+      if (items && items.length > 0) setMenu(items);
     } catch (err) {
       console.error("Failed to load CMS header menu:", err);
     }
   };
-
   fetchMenu();
-}, []);
+}, [initialMenu]);
+
+//   useEffect(() => {
+//   const fetchMenu = async () => {
+//     try {
+//       const res = await api.get("/cms-content/navbar_header_menu");
+//       if (res.data) {
+//         const record = Array.isArray(res.data) ? res.data[0] : res.data;
+//         const items = record?.json_content?.menu;
+//         if (items && items.length > 0) {
+//           setMenu(items);
+//         }
+//       }
+//     } catch (err) {
+//       console.error("Failed to load CMS header menu:", err);
+//     }
+//   };
+
+//   fetchMenu();
+// }, []);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   // const [servingAreas, setServingAreas] = useState(DEFAULT_SERVING_AREAS);
-  const [menu, setMenu] = useState(DEFAULT_MENU);
+  // const [menu, setMenu] = useState(DEFAULT_MENU);
   const navRef = useRef(null);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);

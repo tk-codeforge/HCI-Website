@@ -683,10 +683,10 @@ const removeHorizontalSection = (index) => {
                          <label className="form-label">Brand Logo Image URL</label>
                          <input className="form-control" placeholder="e.g., /images/logo.png" value={col.logoUrl} onChange={(e) => updateColumnConfig(index, 'logoUrl', e.target.value)} />
                       </div>
-                      <div className="col-md-6 mb-2">
+                      {/* <div className="col-md-6 mb-2">
                          <label className="form-label">Home Website URL</label>
                          <input className="form-control" placeholder="e.g., https://hcinterior.in" value={col.homeUrl} onChange={(e) => updateColumnConfig(index, 'homeUrl', e.target.value)} />
-                      </div>
+                      </div> */}
                     </div>
                   )}
 

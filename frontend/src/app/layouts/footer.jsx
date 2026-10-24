@@ -14,48 +14,96 @@ import { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 
-const Footer = () => {
-  const [footerlink, setData] = useState([]);
-  const [settings, setSettings] = useState({});
-  const currentYear = new Date().getFullYear();
+// const Footer = () => {
+//   const [footerlink, setData] = useState([]);
+//   const [settings, setSettings] = useState({});
+//   const currentYear = new Date().getFullYear();
   
-  const [allProfilesData, setAllProfilesData] = useState({});
-const [visibilityRules, setVisibilityRules] = useState([]);
-const pathname = usePathname();
+//   const [allProfilesData, setAllProfilesData] = useState({});
+// const [visibilityRules, setVisibilityRules] = useState([]);
+// const pathname = usePathname();
 
-useEffect(() => {
+// useEffect(() => {
 
+//   const fetchFooterProfiles = async () => {
+//   try {
+//     const res = await api.get("/cms-content/footer_profiles");
+//     const record = Array.isArray(res.data) ? res.data[0] : res.data;
+//     let parsed = record?.json_content;
+//     if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
+//       parsed = JSON.parse(parsed.json_content);
+//     } else if (typeof parsed === "string") {
+//       try { parsed = JSON.parse(parsed); } catch { parsed = {}; }
+//     }
+//     setAllProfilesData(parsed || {});
+//   } catch (err) { console.error("Error fetching footer profiles:", err); }
+// };
+
+// const fetchVisibilityRules = async () => {
+//   try {
+//     const res = await api.get("/cms-content/footer_page_rules");
+//     const record = Array.isArray(res.data) ? res.data[0] : res.data;
+//     let parsed = record?.json_content;
+//     if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
+//       parsed = JSON.parse(parsed.json_content);
+//     } else if (typeof parsed === "string") {
+//       try { parsed = JSON.parse(parsed); } catch { parsed = []; }
+//     }
+//     setVisibilityRules(Array.isArray(parsed) ? parsed : []);
+//   } catch (err) { console.error("Error fetching visibility rules:", err); }
+// };
+
+//   fetchFooterProfiles();
+//   fetchVisibilityRules();
+// }, []);
+
+const Footer = ({
+  initialProfiles = {},
+  initialRules = [],
+  initialLinks = [],
+  initialSettings = {},
+}) => {
+  const [footerlink, setData] = useState(initialLinks);
+  const [settings, setSettings] = useState(initialSettings);
+  const currentYear = new Date().getFullYear();
+
+  const [allProfilesData, setAllProfilesData] = useState(initialProfiles);
+  const [visibilityRules, setVisibilityRules] = useState(initialRules);
+  const pathname = usePathname();
+
+  useEffect(() => {
   const fetchFooterProfiles = async () => {
-  try {
-    const res = await api.get("/cms-content/footer_profiles");
-    const record = Array.isArray(res.data) ? res.data[0] : res.data;
-    let parsed = record?.json_content;
-    if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
-      parsed = JSON.parse(parsed.json_content);
-    } else if (typeof parsed === "string") {
-      try { parsed = JSON.parse(parsed); } catch { parsed = {}; }
-    }
-    setAllProfilesData(parsed || {});
-  } catch (err) { console.error("Error fetching footer profiles:", err); }
-};
+    try {
+      const res = await api.get("/cms-content/footer_profiles");
+      const record = Array.isArray(res.data) ? res.data[0] : res.data;
+      let parsed = record?.json_content;
+      if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
+        parsed = JSON.parse(parsed.json_content);
+      } else if (typeof parsed === "string") {
+        try { parsed = JSON.parse(parsed); } catch { parsed = {}; }
+      }
+      setAllProfilesData(parsed || {});
+    } catch (err) { console.error("Error fetching footer profiles:", err); }
+  };
 
-const fetchVisibilityRules = async () => {
-  try {
-    const res = await api.get("/cms-content/footer_page_rules");
-    const record = Array.isArray(res.data) ? res.data[0] : res.data;
-    let parsed = record?.json_content;
-    if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
-      parsed = JSON.parse(parsed.json_content);
-    } else if (typeof parsed === "string") {
-      try { parsed = JSON.parse(parsed); } catch { parsed = []; }
-    }
-    setVisibilityRules(Array.isArray(parsed) ? parsed : []);
-  } catch (err) { console.error("Error fetching visibility rules:", err); }
-};
+  const fetchVisibilityRules = async () => {
+    try {
+      const res = await api.get("/cms-content/footer_page_rules");
+      const record = Array.isArray(res.data) ? res.data[0] : res.data;
+      let parsed = record?.json_content;
+      if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
+        parsed = JSON.parse(parsed.json_content);
+      } else if (typeof parsed === "string") {
+        try { parsed = JSON.parse(parsed); } catch { parsed = []; }
+      }
+      setVisibilityRules(Array.isArray(parsed) ? parsed : []);
+    } catch (err) { console.error("Error fetching visibility rules:", err); }
+  };
 
-  fetchFooterProfiles();
-  fetchVisibilityRules();
+  if (Object.keys(initialProfiles).length === 0) fetchFooterProfiles();
+  if (initialRules.length === 0) fetchVisibilityRules();
 }, []);
+
 const matchesPattern = (pattern, path) =>
   pattern === "/" ? path === "/" :
   pattern.endsWith("/*") ? path.startsWith(pattern.slice(0, -2)) :
@@ -66,62 +114,92 @@ const shouldHide = matchedRule?.type === "hidden";
 const resolvedProfileKey = matchedRule?.profileKey || "default";
 const cmsFooter = allProfilesData[resolvedProfileKey] || allProfilesData["default"] || null;
 
+  // useEffect(() => {
+  //   // 1. Fetch Footer Links
+  //   const fetchfooterlink = async () => {
+  //     try {
+  //       const response = await api.get("/footer-link");
+        
+  //       const priorityOrder = [
+  //         "Noida", 
+  //         "Ghaziabad", 
+  //         "Greater Noida", 
+  //         "Delhi", 
+  //         "Dwarka", 
+  //         "Faridabad", 
+  //         "Gurugram", 
+  //         "Manesar"
+  //       ];
+
+  //       const sortedLinks = response.data.sort((a, b) => {
+  //         const indexA = priorityOrder.findIndex(city => 
+  //           a.title.toLowerCase().includes(city.toLowerCase())
+  //         );
+  //         const indexB = priorityOrder.findIndex(city => 
+  //           b.title.toLowerCase().includes(city.toLowerCase())
+  //         );
+          
+  //         const safeIndexA = indexA === -1 ? 999 : indexA;
+  //         const safeIndexB = indexB === -1 ? 999 : indexB;
+          
+  //         return safeIndexA - safeIndexB;
+  //       });
+
+  //       setData(sortedLinks);
+  //     } catch (err) {
+  //       console.error("Error fetching SEO data:", err);
+  //     }
+  //   };
+
+  //   // 2. Fetch Site Settings
+  //   const fetchSiteSettings = async () => {
+  //     try {
+  //       const response = await api.get("/site-settings");
+  //       let rawData = response.data?.data || response.data;
+  //       const settingsData = Array.isArray(rawData) ? rawData[0] : rawData;
+        
+  //       if(settingsData) {
+  //         setSettings(settingsData);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching Site Settings:", err);
+  //     }
+  //   };
+
+  //   fetchfooterlink();
+  //   fetchSiteSettings();
+  //   // fetchCmsFooter();
+  // }, [resolvedProfileKey]);
+
   useEffect(() => {
-    // 1. Fetch Footer Links
-    const fetchfooterlink = async () => {
-      try {
-        const response = await api.get("/footer-link");
-        
-        const priorityOrder = [
-          "Noida", 
-          "Ghaziabad", 
-          "Greater Noida", 
-          "Delhi", 
-          "Dwarka", 
-          "Faridabad", 
-          "Gurugram", 
-          "Manesar"
-        ];
+  const fetchfooterlink = async () => {
+    try {
+      const response = await api.get("/footer-link");
+      const priorityOrder = ["Noida","Ghaziabad","Greater Noida","Delhi","Dwarka","Faridabad","Gurugram","Manesar"];
+      const rank = (t) => {
+        const i = priorityOrder.findIndex((c) => t.toLowerCase().includes(c.toLowerCase()));
+        return i === -1 ? 999 : i;
+      };
+      setData([...response.data].sort((a, b) => rank(a.title) - rank(b.title)));
+    } catch (err) {
+      console.error("Error fetching footer links:", err);
+    }
+  };
 
-        const sortedLinks = response.data.sort((a, b) => {
-          const indexA = priorityOrder.findIndex(city => 
-            a.title.toLowerCase().includes(city.toLowerCase())
-          );
-          const indexB = priorityOrder.findIndex(city => 
-            b.title.toLowerCase().includes(city.toLowerCase())
-          );
-          
-          const safeIndexA = indexA === -1 ? 999 : indexA;
-          const safeIndexB = indexB === -1 ? 999 : indexB;
-          
-          return safeIndexA - safeIndexB;
-        });
+  const fetchSiteSettings = async () => {
+    try {
+      const response = await api.get("/site-settings");
+      const rawData = response.data?.data || response.data;
+      const settingsData = Array.isArray(rawData) ? rawData[0] : rawData;
+      if (settingsData) setSettings(settingsData);
+    } catch (err) {
+      console.error("Error fetching Site Settings:", err);
+    }
+  };
 
-        setData(sortedLinks);
-      } catch (err) {
-        console.error("Error fetching SEO data:", err);
-      }
-    };
-
-    // 2. Fetch Site Settings
-    const fetchSiteSettings = async () => {
-      try {
-        const response = await api.get("/site-settings");
-        let rawData = response.data?.data || response.data;
-        const settingsData = Array.isArray(rawData) ? rawData[0] : rawData;
-        
-        if(settingsData) {
-          setSettings(settingsData);
-        }
-      } catch (err) {
-        console.error("Error fetching Site Settings:", err);
-      }
-    };
-
-    fetchfooterlink();
-    fetchSiteSettings();
-    // fetchCmsFooter();
-  }, [resolvedProfileKey]);
+  if (initialLinks.length === 0) fetchfooterlink();
+  if (Object.keys(initialSettings).length === 0) fetchSiteSettings();
+}, []);
 
     const verticalColumns = cmsFooter?.verticalColumns || [];
   const horizontalSections = cmsFooter?.horizontalSections || [];
@@ -509,7 +587,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
                       {/* Column 1 Brand Logo */}
                       {index === 0 && col.logoUrl && (
                         <div style={{ marginBottom: "40px" }}>
-                          <a href={col.homeUrl || "/"} aria-label="Home">
                             <Image
                               src={col.logoUrl}
                               alt="High Creation Interior Logo"
@@ -520,7 +597,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
                               data-no-lazy="1"
                               style={{ maxWidth: "180px", mixBlendMode: "multiply" }}
                             />
-                          </a>
                         </div>
                       )}
 

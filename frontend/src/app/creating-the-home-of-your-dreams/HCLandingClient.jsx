@@ -1729,8 +1729,9 @@ const LeadForm = () => {
 
   const handleInputChange = (e) => {
     const { name } = e.target;
-    const value =
-      name === "contact" ? sanitizePhone(e.target.value) : e.target.value;
+    let value = e.target.value;
+if (name === "contactNo") value = sanitizePhone(value);
+if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name] !== undefined) {
       setErrors((prev) => ({ ...prev, [name]: validateField(name, value) }));
@@ -1739,7 +1740,7 @@ const LeadForm = () => {
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
-    const trimmed = value.trim();
+    const trimmed = name === "email" ? value.trim().toLowerCase() : value.trim();
     setFormData((prev) => ({ ...prev, [name]: trimmed }));
     setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
@@ -1773,7 +1774,7 @@ const LeadForm = () => {
 
       name: formData.fullName.trim(),
       mobile: formData.contact.trim(),
-      email: formData.email.trim(),
+     email: formData.email.trim().toLowerCase(),
       place: formData.place,
       // query: formData.query,
             query: formData.query.trim(),

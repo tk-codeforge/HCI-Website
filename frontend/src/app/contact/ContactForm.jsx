@@ -304,6 +304,10 @@ const ContactForm = ({ mapSrc }) => {
       value = digits.slice(0, 10);
     }
 
+    if (name === "email") {
+  value = value.toLowerCase().replace(/\s/g, "");
+}
+
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // once a field has been validated, keep its error live while typing
@@ -314,7 +318,7 @@ const ContactForm = ({ mapSrc }) => {
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
-    const trimmed = value.trim();
+    const trimmed = name === "email" ? value.trim().toLowerCase() : value.trim();
     setFormData((prev) => ({ ...prev, [name]: trimmed }));
     setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed) }));
   };
@@ -349,7 +353,7 @@ const ContactForm = ({ mapSrc }) => {
       // query: formData.query,
             name: formData.fullName.trim(),
       mobile: formData.contactNo.trim(),
-      email: formData.email.trim(),
+      email: formData.email.trim().toLowerCase(),
       place: formData.place.trim(),
       query: formData.query.trim(),
       ...buildLeadMetadata({

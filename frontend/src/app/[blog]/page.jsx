@@ -1828,8 +1828,10 @@ export async function generateMetadata({ params }) {
   const description = seoData?.description || data?.seo_content?.meta_description || "";
 
   // share image: SEO Manager OG image > this page's own image > site logo
+  // const fallbackImage =
+  //   data?.image || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
   const fallbackImage =
-    data?.image || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+  toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
   const og = seoData?.openGraph;
   const ogImages = og?.images?.length
     ? og.images
@@ -1866,6 +1868,18 @@ const parseJsonSafe = (data) => {
   if (Array.isArray(data)) return data;
   try { return JSON.parse(data); } catch (e) { return []; }
 };
+
+const OWN_HOSTS = "(?:apidev\\.hcinterior\\.in|www\\.hcinterior\\.in|hcinterior\\.in)";
+
+const forceHttpsHtml = (html) =>
+  typeof html === "string"
+    ? html.replace(new RegExp(`http://(${OWN_HOSTS})`, "gi"), "https://$1")
+    : html;
+
+const toHttps = (url) =>
+  typeof url === "string"
+    ? url.replace(new RegExp(`^http://(${OWN_HOSTS})`, "i"), "https://$1")
+    : url;
 
 const DynamicRootPage = async ({ params }) => {
   headers();
@@ -1935,7 +1949,10 @@ const DynamicRootPage = async ({ params }) => {
   const faqSchema = faqs.length > 0 && !hasInnerCustomFaqSchema ? generateFAQSchema(faqs) : null;
 
   const displayCity = slug.split(/-|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
+  // const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
+  const safeContent = pageData?.content
+  ? forceHttpsHtml(DOMPurify.sanitize(pageData.content))
+  : "";
 
   let heroImageSrc = getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg');
 
@@ -1956,8 +1973,8 @@ const DynamicRootPage = async ({ params }) => {
 
   return (
     <MainLayout>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      {/* <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} /> */}
 
       {customSchema && (
         <script
@@ -2142,7 +2159,8 @@ const DynamicRootPage = async ({ params }) => {
                   {pageData.image && (
                     <div className="w-100 mb-4 mb-lg-5 d-flex justify-content-center">
                       <Image
-                        src={pageData.image}
+                        // src={pageData.image}
+                        src={toHttps(pageData.image)}
                         alt={pageData.image_alt || pageData.title || defaultAltText}
                         width={1200}
                         height={675}
@@ -2154,7 +2172,9 @@ const DynamicRootPage = async ({ params }) => {
                   )}
 
                  <div className="details font-poppins rich-text-content ck-content">
-                    <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
+                   {/* <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
+                   */}
+                   <div dangerouslySetInnerHTML={{ __html: forceHttpsHtml(pageData.description) }} />
                   </div>
                 </div>
               </div>
@@ -2172,7 +2192,8 @@ const DynamicRootPage = async ({ params }) => {
                           <Link key={idx} href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                             <div className="sidebar-blog-card d-flex align-items-center gap-3">
                               <img 
-                                src={blog.image || "/images/default.jpg"} 
+                                // src={blog.image || "/images/default.jpg"} 
+                                src={toHttps(blog.image) || "/images/default.jpg"}
                                 alt={blog.title} 
                                 className="rounded shadow-sm flex-shrink-0" 
                                 style={{ width: "70px", height: "70px", objectFit: "contain" }} 
@@ -2282,7 +2303,10 @@ const DynamicRootPage = async ({ params }) => {
                               <div className="col-md-6" key={idx}>
                                 <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                                   <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
-                                    <img src={blog.image || "/images/default.jpg"} alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" />
+                                    <img 
+                                    // src={blog.image || "/images/default.jpg"}
+                                    src={toHttps(blog.image) || "/images/default.jpg"}
+                                    alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" />
                                     <div className="ms-3">
                                       <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
                                       <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
@@ -2411,7 +2435,8 @@ const DynamicRootPage = async ({ params }) => {
                                 <div className={block.data.reverse_layout ? 'col-md-6 order-md-1 text-center' : 'col-md-6 text-center'}>
                                   {block.data.image_url && (
                                     <img 
-                                      src={block.data.image_url} 
+                                      // src={block.data.image_url} 
+                                      src={toHttps(block.data.image_url)}
                                       alt={block.data.image_alt || block.data.heading || defaultAltText} 
                                       className="img-fluid rounded-4 shadow-sm" 
                                       style={{ maxHeight: '350px', objectFit: 'cover', width: '100%' }} 

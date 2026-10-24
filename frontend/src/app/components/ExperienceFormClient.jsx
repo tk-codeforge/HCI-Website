@@ -199,8 +199,9 @@ export default function ExperienceFormClient({ initialConfig }) {
 
   const handleInputChange = (e) => {
     const { name } = e.target;
-    const value =
-      name === "contactNo" ? sanitizePhone(e.target.value) : e.target.value;
+    let value = e.target.value;
+if (name === "contactNo") value = sanitizePhone(value);
+if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // keep the error live once the field has been validated
@@ -214,7 +215,7 @@ export default function ExperienceFormClient({ initialConfig }) {
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
-    const trimmed = value.trim();
+    const trimmed = name === "email" ? value.trim().toLowerCase() : value.trim();
     setFormData((prev) => ({ ...prev, [name]: trimmed }));
     setFieldErrors((prev) => ({
       ...prev,
@@ -262,7 +263,7 @@ export default function ExperienceFormClient({ initialConfig }) {
       // query: formData.query,
 
             name: formData.fullName.trim(),
-      email: formData.email.trim(),
+      email: formData.email.trim().toLowerCase(),
       mobile: formData.contactNo.trim(),
       place: formData.place.trim(),
       query: formData.query.trim(),

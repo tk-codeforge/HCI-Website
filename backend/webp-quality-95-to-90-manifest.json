@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-10-21T12:43:06.731Z",
+  "uploadsRoot": "R:\\hci_website\\backend\\uploads",
+  "targetMaxBytes": 200000,
+  "maxKbDefinition": "Decimal KB: 1 KB = 1000 bytes",
+  "originalsModified": false,
+  "databaseUpdated": false,
+  "dryRun": false,
+  "policy": "Quality-first lossy WebP; no resizing; try quality 95 down to 90; output only accepted if within limit and smaller than source.",
+  "backupRoot": "R:\\hci_website\\backend\\uploads-webp-backup-2026-10-21T12-43-06-369Z",
+  "note": "Original JPEG/PNG files and database paths are never modified. If overwrite is enabled and a source cannot produce an acceptable derivative, an older .webp derivative is backed up so the middleware falls back to the original.",
+  "records": [
+    {
+      "status": "SUCCESS",
+      "source": "about/image-1785905492190-325156234.png",
+      "webp": "about/image-1785905492190-325156234.webp",
+      "sourceBytes": 1058468,
+      "webpBytes": 191276,
+      "attemptedWebpBytes": 191276,
+      "width": 589,
+      "height": 908,
+      "quality": 94,
+      "reductionPercent": 81.93,
+      "backupWebp": "uploads-webp-backup-2026-10-21T12-43-06-369Z/about/image-1785905492190-325156234.webp",
+      "error": null
+    }
+  ]
+}

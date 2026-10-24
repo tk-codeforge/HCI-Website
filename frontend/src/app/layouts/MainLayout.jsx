@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
 import { FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
-import Footer from "./footer";
-import Header from "./Header";
+import HeaderServer from "./HeaderServer";
+import FooterServer from "./FooterServer";
 import MobileBottomBar from "../components/MobileBottomBar";
 
 const ContactUsPopUp = dynamic(() => import("../components/ContactUsPopUp"), { 
@@ -57,7 +57,7 @@ const MainLayout = ({ children }) => {
         }
       `}} />
 
-      <Header />
+      <HeaderServer />
       
       <main>{children}</main>
 
@@ -74,7 +74,7 @@ const MainLayout = ({ children }) => {
 
       <ContactUsPopUp />
       <MobileBottomBar />
-      <Footer />
+      <FooterServer />
     </>
   );
 };

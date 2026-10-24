@@ -455,9 +455,9 @@ banner_image_alt: item.banner_image_alt || ""
     const handleSeoSubmit = async (formattedData) => {
         const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
         if (!slug) { toast.error("URL slug is required."); return; }
-        if ((formattedData.meta_title || "").length > 60) { toast.error("Meta title must be 60 characters or less."); return; }
+        if ((formattedData.meta_title || "").length > 65) { toast.error("Meta title must be 65 characters or less."); return; }
         if ((formattedData.meta_description || "").length > 160) { toast.error("Meta description must be 160 characters or less."); return; }
-        if ((formattedData.og_title || "").length > 60) { toast.error("OG title must be 60 characters or less."); return; }
+        if ((formattedData.og_title || "").length > 65) { toast.error("OG title must be 65 characters or less."); return; }
         if ((formattedData.og_description || "").length > 200) { toast.error("OG description must be 200 characters or less."); return; }
 
         try {

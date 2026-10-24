@@ -77,7 +77,9 @@ export default function ReferFormClient({
 
   const handleInputChange = (e) => {
     const { name } = e.target;
-    const value = PHONE_FIELDS.includes(name) ? sanitizePhone(e.target.value) : e.target.value;
+    let value = e.target.value;
+if (PHONE_FIELDS.includes(name)) value = sanitizePhone(value);
+if (name === "friend_email") value = value.toLowerCase().replace(/\s/g, "");
     const next = { ...formData, [name]: value };
     setFormData(next);
     if (errors[name] !== undefined) {
@@ -87,7 +89,7 @@ export default function ReferFormClient({
 
   const handleInputBlur = (e) => {
     const { name, value } = e.target;
-    const trimmed = value.trim();
+    const trimmed = name === "friend_email" ? value.trim().toLowerCase() : value.trim();
     const next = { ...formData, [name]: trimmed };
     setFormData(next);
     setErrors((prev) => ({ ...prev, [name]: validateField(name, trimmed, next) }));
@@ -107,7 +109,7 @@ export default function ReferFormClient({
       const response = await api.post("/user-queries", {
         name: formData.friend_name.trim(),
         mobile: formData.friend_number.trim(),
-        email: formData.friend_email.trim(),
+        email: formData.friend_email.trim().toLowerCase(),
         place: formData.other_place.trim() || formData.place,
         query: formData.phone_no.trim()
           ? `Referral. Referred by: ${formData.phone_no.trim()}`
