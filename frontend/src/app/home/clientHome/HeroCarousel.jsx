@@ -351,6 +351,8 @@ import api from "@/utils/api";
 // Renders ONE banner image. When a separate mobile image exists we use a <picture>, so
 // the browser downloads only the version for its screen. Before, both versions were
 // rendered with `priority`, which preloaded and downloaded BOTH on every device.
+const FILL_STYLE = { position: "absolute", inset: 0, width: "100%", height: "100%", color: "transparent" };
+
 function HeroPicture({ desktopSrc, mobileSrc, alt, mobileAlt, isFirstSlide }) {
   const quality = isFirstSlide ? 90 : 75;
 
@@ -360,7 +362,9 @@ function HeroPicture({ desktopSrc, mobileSrc, alt, mobileAlt, isFirstSlide }) {
         src={desktopSrc}
         className="banner-media"
         alt={alt}
-        fill
+          width={1920}
+        height={800}
+        style={FILL_STYLE}
         priority={isFirstSlide}
         fetchPriority={isFirstSlide ? "high" : "auto"}
         quality={quality}
@@ -369,9 +373,13 @@ function HeroPicture({ desktopSrc, mobileSrc, alt, mobileAlt, isFirstSlide }) {
     );
   }
 
-  const common = { fill: true, sizes: "100vw", quality };
+  // const common = { fill: true, sizes: "100vw", quality };
+  // const desktop = getImageProps({ ...common, src: desktopSrc, alt }).props;
+  // const mobile = getImageProps({ ...common, src: mobileSrc, alt: mobileAlt }).props;
+
+    const common = { width: 1920, height: 800, sizes: "100vw", quality, style: FILL_STYLE };
   const desktop = getImageProps({ ...common, src: desktopSrc, alt }).props;
-  const mobile = getImageProps({ ...common, src: mobileSrc, alt: mobileAlt }).props;
+  const mobile = getImageProps({ ...common, width: 768, height: 960, src: mobileSrc, alt: mobileAlt }).props;
 
   return (
     <picture>

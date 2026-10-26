@@ -238,6 +238,8 @@ descriptionFontSize={bannerData.descriptionSize}
                         src={offer.img}
                         alt={offer.imgAlt || offer.title}
                         className="offer-img"
+                        width={1200}
+                        height={900}
                         style={{ "--img-scale": offer.imageSize / 100 }}
                         loading="lazy"
                       />

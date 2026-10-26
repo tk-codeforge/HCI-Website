@@ -136,7 +136,9 @@ const AboutImage = ({ src, alt }) => {
             sizes={optimizable ? "(min-width: 992px) 50vw, 100vw" : undefined}
             alt={alt}
             className="w-100 rounded-4 shadow-sm object-fit-cover"
-            style={{ aspectRatio: `auto ${ABOUT_IMAGE_RATIO}` }}
+            width={1200}
+            height={900}
+            style={{ height: "auto", aspectRatio: `auto ${ABOUT_IMAGE_RATIO}` }}
             loading="lazy"
             decoding="async"
         />

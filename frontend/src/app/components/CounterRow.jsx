@@ -289,7 +289,9 @@ const CounterRow = (props) => {
                     props.titleHeadingCounter ||
                     "Interior Design"
                   }
-                  fill
+                                    width={800}
+                  height={1000}
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", color: "transparent" }}
                   quality={100}
                   sizes="(max-width: 991px) 100vw, 50vw"
                   priority

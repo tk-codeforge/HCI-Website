@@ -32,6 +32,8 @@ export default function TeamMediaGallery({ items }) {
                 src={item.url}
                  alt={item.image_alt?.trim() || "Team media"}
                 className="team-media-image"
+                width={1280}
+                height={720}
                 loading="lazy"
                 decoding="async"
               />

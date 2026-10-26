@@ -296,6 +296,8 @@ function StepImage({ src, alt, size, priority }) {
       sizes={optimizable ? "(max-width: 767px) 280px, 450px" : undefined}
       alt={alt}
       className="step-img"
+      width={800}
+      height={800}
       style={{
         width: size ? size + "%" : "100%",
         aspectRatio: `auto ${STEP_IMAGE_RATIO}`,

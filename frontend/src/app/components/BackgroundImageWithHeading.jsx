@@ -69,6 +69,8 @@ const BackgroundImageWithHeading = (props) => {
             src={props.bgImageUrl}
                         alt={props.bgImageAlt}
             fallbackAlt={props.sectionBgHeading || ""}
+            width={1920}
+            height={600}
             loading="eager"
             fetchPriority="high"
             style={{

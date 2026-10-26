@@ -16,6 +16,8 @@ const RoomOfice = (props) => {
           src={props.imageRoom_Office}
           className={`responsive-media ${props.roomImg || ""}`}
           alt={safeMainAlt}
+           width={1200}
+          height={800}
           fetchPriority="high"
           loading="eager"
           data-no-lazy="1"

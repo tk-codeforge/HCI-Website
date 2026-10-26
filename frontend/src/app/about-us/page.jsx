@@ -225,6 +225,8 @@ export default async function AboutUs() {
                                             alt={formData?.mid_image_alt}
                       fallbackAlt={formData?.top_title || "About Us"}
                       className="d-block"
+                      width={1200}
+                      height={800}
                       style={{
                         width: formData?.mid_image_size ? `${formData.mid_image_size}%` : "100%",
                         maxWidth: "none",
@@ -268,6 +270,9 @@ export default async function AboutUs() {
                 <img
                   src="/images/about/Whatmakes.png"
                   className="w-100"
+                  width={800}
+                  height={800}
+                  style={{ height: "auto" }}
                   alt="What makes us best"
                 decoding="async"  loading="lazy" />
               </div>

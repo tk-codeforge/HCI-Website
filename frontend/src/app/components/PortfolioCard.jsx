@@ -53,6 +53,64 @@
 
 // export default PortfolioCard;
 
+// import { MediaImg } from "./MediaImage";
+
+// const PortfolioCard = (props) => {
+//   const TitleTag = props.portfolioTitleTag || "h4";
+//   return (
+//     <div>
+//       <section className="">
+//         <a href={props.cardDetailLink}>
+//           <div className={props.portCard}>
+//             <div
+//               className={props.portfolioImgBg}
+//               style={{
+//                 backgroundSize: "cover",
+//                 backgroundPosition: "center",
+//                 backgroundRepeat: "no-repeat",
+//                 position: "relative",
+//                 ...(props?.portfolioImg ? { backgroundImage: `url(${props?.portfolioImg})` } : {})
+//               }}
+//             >
+//               {props?.portfolioImg && (
+//                 <MediaImg
+//                   src={props.portfolioImg}
+//                   alt={props.portfolioImgAlt}
+//                   fallbackAlt={props.portfolioTitle || ""}
+//                   style={{
+//                     position: "absolute",
+//                     inset: 0,
+//                     width: "100%",
+//                     height: "100%",
+//                     objectFit: "cover",
+//                     objectPosition: "center",
+//                     pointerEvents: "none",
+//                     zIndex: 0,
+//                   }}
+//                 />
+//               )}
+
+//               <div style={{ position: "relative", zIndex: 1 }}>
+//                 {props.portfolioTitle ? (
+//                   <TitleTag className="text-white mb-0">{props.portfolioTitle}</TitleTag>
+//                 ) : null}
+//                 <p className={props.portfolioClassCss}>
+//                   {props.portfolioDescription}
+//                 </p>
+//               </div>
+//               <div className="text-end" style={{ position: "relative", zIndex: 1 }}></div>
+//             </div>
+//           </div>
+//         </a>
+//       </section>
+//     </div>
+//   );
+// };
+
+// export default PortfolioCard;
+
+
+
 import { MediaImg } from "./MediaImage";
 
 const PortfolioCard = (props) => {
@@ -77,6 +135,8 @@ const PortfolioCard = (props) => {
                   src={props.portfolioImg}
                   alt={props.portfolioImgAlt}
                   fallbackAlt={props.portfolioTitle || ""}
+                  width={1200}
+                  height={800}
                   style={{
                     position: "absolute",
                     inset: 0,

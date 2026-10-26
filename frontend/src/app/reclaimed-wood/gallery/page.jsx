@@ -1,5 +1,6 @@
 import GalleryClient from "./GalleryClient";
 import JsonLd from "../../components/JsonLd";
+import MainLayout from "../../layouts/MainLayout";
 import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
 export async function generateMetadata({ searchParams }) {
@@ -16,9 +17,9 @@ export default async function GalleryPage({ searchParams }) {
   const seo = await getGallerySeo({ basePath: "/reclaimed-wood/gallery", id });
 
   return (
-    <>
+     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
       <GalleryClient />
-    </>
+    </MainLayout>
   );
 }

@@ -173,6 +173,8 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
             <img
   src={topImage.src}
   alt={topImage.alt || topImage.caption || "Furniture factory banner"}
+  width={1280}
+  height={720}
 />
             {topImage.caption && <span className="ffs-caption">{topImage.caption}</span>}
           </div>
@@ -188,6 +190,8 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
                 <img
   src={img.src}
   alt={img.alt || img.caption || "Furniture factory image"}
+  width={1280}
+  height={720}
 />
                 {img.caption && <span className="ffs-caption">{img.caption}</span>}
               </div>

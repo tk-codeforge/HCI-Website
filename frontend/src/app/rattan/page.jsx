@@ -884,7 +884,7 @@ import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg, MediaImg } from "../components/MediaImage";
 import JsonLd from "../components/JsonLd";
-import { getImageSizes } from "@/utils/imageSize";
+import { getImageSizes } from "@/utils/Imagesize";
 
 
 // --- CONFIGURATION ---

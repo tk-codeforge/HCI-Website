@@ -913,14 +913,31 @@ export default async function Services() {
                     <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
                       <div className="service-img-wrapper">
                         {itemImage ? (
-                          <Image 
+                          // <Image 
+                          //   src={itemImage} 
+                          //   alt={item?.image_alt?.trim() || titleText || defaultAltText}
+                          //   fill
+                          //   sizes="(max-width: 768px) 100vw, 50vw"
+                          //   priority={isFirstItem}
+                          //   fetchPriority={isFirstItem ? "high" : "auto"}
+                          //   style={{ objectFit: 'cover' }}
+                          // />
+
+                                                    <Image 
                             src={itemImage} 
                             alt={item?.image_alt?.trim() || titleText || defaultAltText}
-                            fill
+                            width={1200}
+                            height={900}
                             sizes="(max-width: 768px) 100vw, 50vw"
                             priority={isFirstItem}
                             fetchPriority={isFirstItem ? "high" : "auto"}
-                            style={{ objectFit: 'cover' }}
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
                           />
                         ) : (
                           <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">

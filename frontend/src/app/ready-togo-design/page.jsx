@@ -382,6 +382,8 @@ const bannerStyle = bannerImage
   src={design?.child_content?.image ?? "/images/Bhk/1bhk.png"}
     alt={design?.child_content?.image_alt}
   fallbackAlt={design?.child_content?.title ?? defaultAltText}
+  width={1200}
+  height={800}
   className="rtd-img"
 />
                     </div>

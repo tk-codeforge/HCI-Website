@@ -2243,7 +2243,17 @@ const DynamicRootPage = async ({ params }) => {
     ? pageData.banner_image_alt.trim()
     : `${displayCity} Interior Design`
 }
-                fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+              //   fill 
+              //   priority 
+              //   sizes="100vw" 
+              //   style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+              // />
+
+              width={1920}
+                height={800}
+                priority
+                sizes="100vw"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
               />
               
               <div className="container hero-content font-poppins">

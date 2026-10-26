@@ -1057,7 +1057,12 @@ const SideTag = safeTag(pageData?.side_title_tag, "h3");
     ? pageData.banner_image_alt.trim()
     : pageData?.banner_title || pageData?.main_title || `${displayCity} Interior Design`
 }
-            fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+            // fill priority sizes="100vw" style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+                        width={1920}
+            height={800}
+            priority
+            sizes="100vw"
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
           />
           <div className="container hero-content font-poppins">
             <div className="hero-badge"><FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior in ${displayCity}`}</div>
@@ -1119,7 +1124,9 @@ const SideTag = safeTag(pageData?.side_title_tag, "h3");
                           <div className="col-md-6" key={idx}>
                             <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                               <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
-                                <img src={blog.image || "/images/default.jpg"} alt={blog.title} className="rounded" style={{ width: "80px", height: "80px",objectFit: "contain", flexShrink: 0 }} loading="lazy" />
+                                <img src={blog.image || "/images/default.jpg"} alt={blog.title} 
+                                width={80} height={80}
+                                className="rounded" style={{ width: "80px", height: "80px",objectFit: "contain", flexShrink: 0 }} loading="lazy" />
                                 <div className="ms-3">
                                   <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
                                   <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
@@ -1152,6 +1159,8 @@ const SideTag = safeTag(pageData?.side_title_tag, "h3");
                                 <img 
                                   src={getBackendImageUrl(stat.image)} 
                                   alt={stat.label || "Stat Icon"} 
+                                  width={stat.size || 40}
+                                  height={stat.size || 40}
                                   style={{ width: `${stat.size || 40}px`, height: `${stat.size || 40}px`, objectFit: "contain" }} 
                                   className="mb-3"
                                 />
@@ -1338,11 +1347,20 @@ const SideTag = safeTag(pageData?.side_title_tag, "h3");
                     <Link href={cityUrlMap[cityName]} className="text-decoration-none">
                       <div className="related-card bg-white position-relative shadow-sm h-100 rounded-4 overflow-hidden">
                         <div style={{ height: "200px", position: "relative" }}>
-                          <Image 
+                          {/* <Image 
                             src={cityImg} 
                             alt={cityName} 
                             fill 
                             style={{ objectFit: "cover" }} 
+                            loading="lazy" 
+                          /> */}
+
+                                                    <Image 
+                            src={cityImg} 
+                            alt={cityName} 
+                            width={800}
+                            height={400}
+                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} 
                             loading="lazy" 
                           />
                           <div className="position-absolute bottom-0 start-0 p-4 w-100 text-white fw-bold" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' }}>

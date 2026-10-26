@@ -48,7 +48,6 @@ const galleryDescription = galleryData?.child_content?.description;
           </div>
         </div>
       ) : (
-      <MainLayout>
         <main>
           <section className="container my-5">
             <div className="row g-4 mx-0">
@@ -141,7 +140,6 @@ const galleryDescription = galleryData?.child_content?.description;
           </section>
           <hr />
         </main>
-      </MainLayout>
       )}
     </div>
   );

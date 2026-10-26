@@ -325,6 +325,8 @@ const bannerStyle = bannerImage
       src={bannerImage}
             alt={headingData?.bannerAlt}
       fallbackAlt={headingText}
+       width={1900}
+      height={441}
       loading="eager"
       fetchPriority="high"
       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none", zIndex: 0 }}
@@ -381,12 +383,22 @@ const bannerStyle = bannerImage
                       <div className="featured-blog-card row g-0 align-items-center">
                         <div className="col-lg-7">
                           <div className="card-img-wrapper" style={{ aspectRatio: '10/6' }}>
-                            <Image 
+                            {/* <Image 
                               src={featuredBlog.image || "/images/Blog/blo_img1.webp"} 
                               alt={featuredBlog.image_alt || featuredBlog.title || defaultAltText}
                               fill
                               sizes="(max-width: 992px) 100vw, 60vw"
                               style={{ objectFit: 'cover' }}
+                              priority
+                            /> */}
+
+                                                        <Image 
+                              src={featuredBlog.image || "/images/Blog/blo_img1.webp"} 
+                              alt={featuredBlog.image_alt || featuredBlog.title || defaultAltText}
+                              width={1000}
+                              height={600}
+                              sizes="(max-width: 992px) 100vw, 60vw"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                               priority
                             />
                           </div>
@@ -433,12 +445,21 @@ const bannerStyle = bannerImage
                         <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                           <div className="modern-blog-card">
                             <div className="card-img-wrapper">
-                              <Image 
+                              {/* <Image 
                                 src={blog.image || "/images/Blog/blo_img1.webp"} 
                                 alt={blog.image_alt || blog.title || defaultAltText}
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 style={{ objectFit: 'cover' }}
+                              /> */}
+
+                                                            <Image 
+                                src={blog.image || "/images/Blog/blo_img1.webp"} 
+                                alt={blog.image_alt || blog.title || defaultAltText}
+                                width={1100}
+                                height={600}
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                               />
                             </div>
                             <div className="p-4 d-flex flex-column flex-grow-1">
