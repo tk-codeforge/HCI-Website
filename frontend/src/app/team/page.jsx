@@ -15,33 +15,6 @@ const getBaseUrl = () => {
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 };
 
-// --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 },
-//     });
-
-//     if (!res.ok) return null;
-
-//     const allTags = await res.json();
-
-//     // Match the specific page URL for the Team page
-//     if (Array.isArray(allTags)) {
-//       return allTags.find(
-//         (tag) =>
-//           tag.page_name === "https://hcinterior.in/team" ||
-//           tag.page_name?.endsWith("/team")
-//       );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
-
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -86,30 +59,6 @@ async function getTeamPageMedia() {
   }
 }
 
-// --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-
-//   const defaultTitle = "Step Into The Team's Gallery Of High Creation Interior";
-//   const defaultDesc =
-//     "Team of expert interior designers in Noida & Delhi NCR · High Creation Interior Team · Noida & Delhi NCR";
-//   const defaultCanonical = "https://hcinterior.in/team";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       canonical: seoData?.page_name || defaultCanonical,
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//   };
-// }
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
@@ -136,16 +85,6 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
         openGraph: {
       title: ogTitle,
       description: ogDescription,
@@ -173,15 +112,6 @@ const hasMedia = teamMediaItems.length > 0;
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
       <main>
-        {/* 1. RESTORED ORIGINAL IMAGE BANNER */}
-        {/* <BackgroundImageRow
-          sectionBgImages={"sectionbg teamsImage"}
-          sectionBgHeading="Teams"
-          secBgHeadingClass="sec_bgheading_lass"
-          sectionBgDescription="Great design starts with great people—meet our passionate designers, planners, and innovators who turn ideas into beautiful interiors and dreams into reality. "
-          secBgDesClass="secbgbesclass"
-        /> */}
-
         <BackgroundImageRow
           sectionBgImages={"contact_wrapper teamsImage"}
           sectionBgHeading={bgHeading}
@@ -195,20 +125,7 @@ descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
 sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
   sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
         />
-        {/* <style dangerouslySetInnerHTML={{__html: `
-  .team-media-image {
-    width: 100%;
-    height: 450px;
-    object-fit: cover;
-    display: block;
-  }
-  @media (max-width: 768px) {
-    .team-media-image {
-      height: auto;
-      aspect-ratio: 16 / 9;
-    }
-  }
-`}} /> */}
+
 
 <style dangerouslySetInnerHTML={{__html: `
   .team-media-grid {
@@ -216,15 +133,6 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  // .team-media-video,
-  // .team-media-image {
-  //   width: 100%;
-  //   height: 450px;
-  //   object-fit: contain;
-  //   display: block;
-  //   border-radius: 15px;
-  //   overflow: hidden;
-  // }
 
   .team-media-video,
   .team-media-image {
@@ -252,22 +160,6 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
     }
   }
 
-  // .team-media-cell {
-  //   position: relative;
-  // }
-  // .team-media-overlay {
-  //   position: absolute;
-  //   inset: 0;
-  //   background: rgba(0, 0, 0, 0.35);
-  //   display: flex;
-  //   align-items: center;
-  //   justify-content: center;
-  //   opacity: 0;
-  //   cursor: pointer;
-  //   border-radius: 15px;
-  //   transition: opacity 0.2s ease;
-  // }
-
   .team-media-box {
     position: relative;
     width: 100%;
@@ -287,9 +179,6 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
     border-radius: 15px;
     transition: opacity 0.2s ease;
   }
-  // .team-media-cell:hover .team-media-overlay {
-  //   opacity: 1;
-  // }
   .team-media-box:hover .team-media-overlay {
     opacity: 1;
   }
@@ -360,224 +249,9 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
     color: #fff;
     font-size: 14px;
   }
-  // @media (max-width: 768px) {
-  //   .team-media-overlay {
-  //     opacity: 1;
-  //     background: transparent;
-  //   }
-  //   .team-media-viewfull {
-  //     display: none;
-  //   }
-  // }
 `}} />
 
-        {/* 2. CLEAR VIDEO SECTION (No dark overlays, no blurry stretching) */}
-        {/* <section className="container my-5">
-          <div 
-            className="video-container shadow-lg" 
-            style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
-          >
-            <video
-              width="100%"
-              autoPlay
-              loop
-              muted
-              playsInline
-              controls // Adds play/pause buttons for the user
-              style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
-            >
-              <source src={teamVideoSrc} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </section> */}
-
-        {/* 2. CLEAR VIDEO/IMAGE SECTION (No dark overlays, no blurry stretching) */}
-{/* <section className="container my-5"> */}
-  {/* {hasMedia ? (
-    <div className="row g-4"> */}
-      {/* {teamMediaItems.map((item, idx) => (
-        <div className="col-md-6" key={idx}>
-          {item.video ? (
-            <div
-              className="video-container shadow-lg"
-              style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
-            >
-              <video
-                width="100%"
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls
-                style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
-              >
-                <source src={item.video} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          ) : item.image ? (
-            <img
-              src={item.image}
-              alt="Team media"
-              className="img-fluid rounded-3 shadow-lg"
-              style={{ width: "100%", maxHeight: "70vh", objectFit: "cover" }}
-            />
-          ) : null}
-        </div>
-      ))} */}
-
-      {/* {teamMediaItems.map((item, idx) => (
-  <div className="col-md-6" key={idx}>
-    {item.type === 'video' ? (
-      <div
-        className="video-container shadow-lg"
-        style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
-      >
-        <video
-          width="100%"
-          autoPlay
-          loop
-          muted
-          playsInline
-          controls
-          style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
-        >
-          <source src={item.url} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    ) : item.type === 'image' ? (
-      <img
-        src={item.url}
-        alt="Team media"
-        className="img-fluid rounded-3 shadow-lg"
-        style={{ width: "100%", maxHeight: "70vh", objectFit: "cover" }}
-      />
-    ) : null}
-  </div>
-))}
-    </div>
-  ) : (
-    <div
-      className="video-container shadow-lg"
-      style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
-    >
-      <video
-        width="100%"
-        autoPlay
-        loop
-        muted
-        playsInline
-        controls
-        style={{ display: "block", maxHeight: "70vh", objectFit: "contain" }}
-      >
-        <source src="/team.MP4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  )}
-</section> */}
-
-{/* <section className="container my-5">
-  {teamMediaItems
-    .filter((item) => item.type === 'video')
-    .map((item, idx) => (
-      <div
-        key={`video-${idx}`}
-        className="video-container shadow-lg mb-4 w-100"
-        style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
-      >
-        <video
-          width="100%"
-          autoPlay
-          loop
-          muted
-          playsInline
-          controls
-          style={{ display: "block", width: "100%", maxHeight: "70vh", objectFit: "contain" }}
-        >
-          <source src={item.url} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    ))}
-
-    {teamMediaItems
-  .filter((item) => item.type === 'image')
-  .map((item, idx) => (
-    <div key={`image-${idx}`} className="mb-4">
-      <img
-        src={item.url}
-        alt="Team media"
-        className="img-thumbnail team-media-image"
-        loading="lazy"
-        decoding="async"
-      />
-    </div>
-  ))}
-
-  {!hasMedia && (
-    <div
-      className="video-container shadow-lg w-100"
-      style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
-    >
-      <video
-        width="100%"
-        autoPlay
-        loop
-        muted
-        playsInline
-        controls
-        style={{ display: "block", width: "100%", maxHeight: "70vh", objectFit: "contain" }}
-      >
-        <source src="/team.MP4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  )}
-</section> */}
-
 <section className="container my-5">
-  {/* <div className="team-media-grid">
-    {teamMediaItems
-      .filter((item) => item.type === 'video')
-      .map((item, idx) => (
-        <div key={`video-${idx}`}>
-          <video
-            className="team-media-video"
-            autoPlay
-            loop
-            muted
-            playsInline
-            controls
-          >
-            <source src={item.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          {item.description && (
-            <p className="team-media-description">{item.description}</p>
-          )}
-        </div>
-      ))}
-
-    {teamMediaItems
-      .filter((item) => item.type === 'image')
-      .map((item, idx) => (
-        <div key={`image-${idx}`}>
-          <img
-            src={item.url}
-            alt="Team media"
-            className="img-thumbnail team-media-image"
-            loading="lazy"
-            decoding="async"
-          />
-          {item.description && (
-            <p className="team-media-description">{item.description}</p>
-          )}
-        </div>
-      ))}
-  </div> */}
   {hasMedia && (
   <TeamMediaGallery
     items={[

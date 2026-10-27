@@ -25,10 +25,7 @@ const FALLBACK_ORGANIZATION_SCHEMA = {
   ]
 };
 
-/**
- * Accept a JSON-LD object or a JSON string from the CMS.
- * Invalid or empty schema data returns null.
- */
+
 function parseCmsSchema(rawSchema) {
   if (!rawSchema) {
     return null;

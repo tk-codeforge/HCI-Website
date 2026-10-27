@@ -1,20 +1,15 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
+import { canOptimize, optimizedUrl, optimizedSrcSet } from "@/utils/optimizedImage";
 
-/**
- * Desktop (>=992px): a static "1 wide image on top, 2 images below" layout.
- *   - If only the two bottom images are present (no topImage), they render
- *     as a single edge-to-edge row (no gap, no border-radius).
- *   - No border-radius anywhere; hover-zoom is kept via CSS transform.
- * Mobile (<992px): a swipeable, one-card-at-a-time slider through whichever
- *   of the (up to 3) images are present, in order: topImage, image1, image2.
- *   A thin scrub bar appears on touch/scroll and auto-hides after 2s.
- *
- * Props:
- *   topImage: { src, caption } | null
- *   images:   [{ src, caption } | null, { src, caption } | null]  (bottom row, left/right)
- */
+const imgProps = (src, sizes) =>
+  canOptimize(src)
+    ? { src: optimizedUrl(src, 1080), srcSet: optimizedSrcSet(src), sizes }
+    : { src };
+
+
+
 export default function FactoryImageSlider({ topImage = null, images = [] }) {
   const trackRef = useRef(null);
   const hideTimerRef = useRef(null);
@@ -89,18 +84,6 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
   }
 }
 
-        /* ---------- Desktop / tablet static layout ---------- */
-        // .ffs-desktop {
-        //   display: flex;
-        //   flex-direction: column;
-        //   gap: 16px;
-        // }
-        // .ffs-top.ffs-box { height: 260px; }
-        // .ffs-bottom {
-        //   display: grid;
-        //   gap: 12px;
-        // }
-        // .ffs-bottom .ffs-box { height: 220px; }
 
         .ffs-desktop {
   display: flex;
@@ -171,11 +154,13 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
         {topImage && (
           <div className="ffs-top ffs-box">
             <img
-  src={topImage.src}
-  alt={topImage.alt || topImage.caption || "Furniture factory banner"}
-  width={1280}
-  height={720}
-/>
+              {...imgProps(topImage.src, "(min-width: 992px) 58vw, 100vw")}
+              alt={topImage.alt || topImage.caption || "Furniture factory banner"}
+              width={1280}
+              height={720}
+              loading="lazy"
+              decoding="async"
+            />
             {topImage.caption && <span className="ffs-caption">{topImage.caption}</span>}
           </div>
         )}
@@ -188,11 +173,13 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
             {bottomImages.map((img, idx) => (
               <div className="ffs-box" key={idx}>
                 <img
-  src={img.src}
-  alt={img.alt || img.caption || "Furniture factory image"}
-  width={1280}
-  height={720}
-/>
+                  {...imgProps(img.src, "(min-width: 992px) 29vw, 100vw")}
+                  alt={img.alt || img.caption || "Furniture factory image"}
+                  width={1280}
+                  height={720}
+                  loading="lazy"
+                  decoding="async"
+                />
                 {img.caption && <span className="ffs-caption">{img.caption}</span>}
               </div>
             ))}
@@ -213,9 +200,11 @@ export default function FactoryImageSlider({ topImage = null, images = [] }) {
             <div className="ffs-slide" key={idx}>
               <div className="ffs-box">
                <img
-  src={img.src}
-  alt={img.alt || img.caption || "Furniture factory image"}
-/>
+                  {...imgProps(img.src, "100vw")}
+                  alt={img.alt || img.caption || "Furniture factory image"}
+                  loading="lazy"
+                  decoding="async"
+                />
                 {img.caption && <span className="ffs-caption">{img.caption}</span>}
               </div>
             </div>

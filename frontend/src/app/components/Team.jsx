@@ -5,38 +5,6 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const Team = () => {
-  // const teamdata = [
-  //   {
-  //     imgs: "/images/team/mansi-mam.webp",
-  //     name: "Senior Interior Designer",
-  //     designation: "Senior Interior Designer",
-  //     description: `Mansi designs creative and functional spaces, blending aesthetics with practical solutions for diverse projects.
-  // `,
-  //   },
-
-  //   {
-  //     imgs: "/images/team/lalit.webp",
-  //     name: "Lalit Mohan",
-  //     designation: "Digital Marketing Manager",
-  //     description: `Oversees online campaigns, SEO strategies, & content development to enhance brand visibility & engagement.
-  //   `,
-  //   },
-  //   {
-  //     imgs: "/images/team/akash.webp",
-  //     name: "Akash Gupta",
-  //     designation: "Commericial Architect",
-  //     description: `Akash focuses on sustainable, innovative designs, transforming spaces into functional works of art.
-  //   `,
-  //   },
-  //   {
-  //     imgs: "/images/team/anjeev.webp",
-  //     name: "Sanjeev",
-  //     designation: "Project Manager",
-  //     description: `Sanjeev ensures timely project execution, overseeing all stages from concept to completion with precision.
-  //   `,
-  //   },
-  // ];
-
   const [teamDataList, setTeamDataList] = useState([]);
   const [loading, setLoading] = useState(true);
 

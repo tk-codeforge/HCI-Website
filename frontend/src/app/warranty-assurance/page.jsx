@@ -8,17 +8,15 @@ import JsonLd from "../components/JsonLd";
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-export const revalidate = 0;
+// Was force-dynamic / force-no-store / revalidate = 0, which server-rendered this page
+// on every request (slow TTFB/FCP/LCP on mobile). Now cached and regenerated every 60s,
+// the same as the other CMS pages. CMS edits appear within 60 seconds.
+export const revalidate = 60;
 
 const getBaseUrl = () =>
   process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_API_DEV_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
-
-const getSiteUrl = () =>
-  process.env.NEXT_PUBLIC_SITE_URL || "https://hcinterior.in";
 
 async function getSeoData() {
   try {
@@ -41,15 +39,9 @@ const getWarrantyRecord = async () => {
   if (!baseUrl) return null;
 
   try {
-    const response = await fetch(
-      `${baseUrl}/cms-content/warranty`,
-      {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-        },
-      }
-    );
+    const response = await fetch(`${baseUrl}/cms-content/warranty`, {
+      next: { revalidate: 60 },
+    });
 
     if (!response.ok) return null;
 
@@ -72,15 +64,9 @@ const getLegacyWarrantyRecord = async () => {
   if (!baseUrl) return null;
 
   try {
-    const response = await fetch(
-      `${baseUrl}/cms-basic-pages/slug/warranty`,
-      {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-        },
-      }
-    );
+    const response = await fetch(`${baseUrl}/cms-basic-pages/slug/warranty`, {
+      next: { revalidate: 60 },
+    });
 
     if (!response.ok) return null;
 
@@ -107,12 +93,7 @@ const getWarrantyBanner = async () => {
   try {
     const response = await fetch(
       `${baseUrl}/cms-gallery-design/manage-banner?key=warranty`,
-      {
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache, no-store, must-revalidate",
-        },
-      }
+      { next: { revalidate: 60 } }
     );
 
     if (!response.ok) return null;
@@ -148,56 +129,16 @@ const normalizeJson = (value) => {
   return value;
 };
 
-// export async function generateMetadata() {
-//   const primary = await getWarrantyRecord();
-//   const fallback = primary ? null : await getLegacyWarrantyRecord();
-
-//   const selected = primary || fallback;
-
-//   if (!selected || !isPublished(selected.record, selected.source)) {
-//     return {
-//       title: "Warranty | High Creation Interior",
-//       description:
-//         "Warranty assurance and support information from High Creation Interior.",
-//       robots: {
-//         index: false,
-//         follow: true,
-//       },
-//     };
-//   }
-
-//   const seo =
-//     selected.record?.seo_content ||
-//     selected.json?.seo ||
-//     {};
-
-//   return {
-//     title:
-//       seo.meta_title ||
-//       "Warranty | High Creation Interior",
-//     description:
-//       seo.meta_description ||
-//       "Warranty assurance and support information from High Creation Interior.",
-//     keywords: seo.meta_keywords || undefined,
-//     alternates: {
-//       canonical:
-//         seo.canonical_url ||
-//         `${getSiteUrl()}/warranty`,
-//     },
-//   };
-// }
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
-  const title =
-    seo?.meta_title || "Warranty | High Creation Interior";
+  const title = seo?.meta_title || "Warranty | High Creation Interior";
   const description =
     seo?.meta_description ||
-   "Warranty assurance and support information from High Creation Interior.";
+    "Warranty assurance and support information from High Creation Interior.";
 
-   const ogTitle = seo?.og_title || title;
-const ogDescription = seo?.og_description || description;
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
@@ -213,17 +154,7 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
-        openGraph: {
+    openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
@@ -236,19 +167,16 @@ const ogDescription = seo?.og_description || description;
 }
 
 export default async function WarrantyPage() {
-  const seo = await getSeoData();
-  const [primary, banner] = await Promise.all([
+  // SEO, warranty content and banner are independent: fetch them together.
+  const [seo, primary, banner] = await Promise.all([
+    getSeoData(),
     getWarrantyRecord(),
     getWarrantyBanner(),
   ]);
 
-  const selected =
-    primary || (await getLegacyWarrantyRecord());
+  const selected = primary || (await getLegacyWarrantyRecord());
 
-  if (
-    !selected ||
-    !isPublished(selected.record, selected.source)
-  ) {
+  if (!selected || !isPublished(selected.record, selected.source)) {
     notFound();
   }
 
@@ -260,8 +188,8 @@ export default async function WarrantyPage() {
   };
 
   const HeroHeadingTag = HEADING_TAGS.includes(hero.headingTag) ? hero.headingTag : "h2";
-const heroEyebrowStyle = hero.eyebrowSize ? { fontSize: `${hero.eyebrowSize}px` } : undefined;
-const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descriptionSize}px` } : undefined;
+  const heroEyebrowStyle = hero.eyebrowSize ? { fontSize: `${hero.eyebrowSize}px` } : undefined;
+  const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descriptionSize}px` } : undefined;
 
   const summary = {
     enabled: true,
@@ -273,16 +201,11 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
     ...(content.process || {}),
   };
 
-  // const supportForm = {
-  //   enabled: true,
-  //   ...(content.supportForm || {}),
-  // };
-
   const supportForm = {
-  enabled: true,
-  contactItems: [],
-  ...(content.supportForm || {}),
-};
+    enabled: true,
+    contactItems: [],
+    ...(content.supportForm || {}),
+  };
 
   const cta = {
     enabled: true,
@@ -290,14 +213,10 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
   };
 
   const categories = Array.isArray(content.categories)
-    ? content.categories.filter(
-        (category) => category?.enabled !== false
-      )
+    ? content.categories.filter((category) => category?.enabled !== false)
     : [];
 
-  const heading =
-    banner?.banner_heading ??
-    "Warranty";
+  const heading = banner?.banner_heading ?? "Warranty";
 
   const description =
     banner?.banner_description ??
@@ -306,9 +225,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
   const policyHtml = content.html || "";
 
   const featuredCategories =
-    categories.length > 6
-      ? categories.slice(0, 6)
-      : categories;
+    categories.length > 6 ? categories.slice(0, 6) : categories;
 
   return (
     <MainLayout>
@@ -320,11 +237,9 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         sectionBgDescription={description}
         secBgDesClass="text-center bg-transparent text-white"
         bgImageUrl={banner?.banner_image || undefined}
-                bgImageAlt={banner?.banner_alt}
+        bgImageAlt={banner?.banner_alt}
         headingTag={banner?.banner_heading_tag || "h1"}
-        descriptionFontSize={
-          banner?.banner_description_font_size || 16
-        }
+        descriptionFontSize={banner?.banner_description_font_size || 16}
         sectionBgHeadingStyle={{
           textShadow: "0 2px 14px rgba(0,0,0,0.45)",
         }}
@@ -334,19 +249,20 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
       />
 
       <style dangerouslySetInnerHTML={{ __html: `
-
-      .hci-warranty .warranty-contact-value {
-  color: var(--hci-text);
-  text-decoration: none;
-  display: block;
-}
         .hci-warranty {
           --hci-orange: #ff914d;
+          --hci-orange-text: #c2500a;
           --hci-text: #4f5867;
           --hci-heading: #202020;
           --hci-border: #e9e9e9;
           --hci-soft: #faf9f7;
           background: #fff;
+        }
+
+        .hci-warranty .warranty-contact-value {
+          color: var(--hci-text);
+          text-decoration: none;
+          display: block;
         }
 
         .hci-warranty .warranty-container {
@@ -364,36 +280,27 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
           align-items: center;
           gap: 8px;
           margin-bottom: 14px;
-          color: var(--hci-orange);
+          color: var(--hci-orange-text);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: .14em;
           text-transform: uppercase;
         }
 
-        // .hci-warranty .warranty-intro h2 {
-        //   margin: 0 auto;
-        //   max-width: 820px;
-        //   color: var(--hci-heading);
-        //   font-size: clamp(30px, 4vw, 46px);
-        //   line-height: 1.12;
-        //   font-weight: 500;
-        //   letter-spacing: -.025em;
-        // }
-
         .hci-warranty .warranty-intro .warranty-heading {
-  margin: 0 auto;
-  max-width: 820px;
-  color: var(--hci-heading);
-  font-family: var(--font-outfit), sans-serif;
-  font-size: clamp(30px, 4vw, 46px);
-  line-height: 1.12;
-  font-weight: 600 !important;
-  letter-spacing: -.025em;
-}
-@media screen and (max-width: 767px) {
-  .hci-warranty .warranty-intro .warranty-heading { font-size: 32px !important; }
-}
+          margin: 0 auto;
+          max-width: 820px;
+          color: var(--hci-heading);
+          font-family: var(--font-outfit), sans-serif;
+          font-size: clamp(30px, 4vw, 46px);
+          line-height: 1.12;
+          font-weight: 600 !important;
+          letter-spacing: -.025em;
+        }
+
+        @media screen and (max-width: 767px) {
+          .hci-warranty .warranty-intro .warranty-heading { font-size: 32px !important; }
+        }
 
         .hci-warranty .warranty-intro p {
           max-width: 820px;
@@ -404,7 +311,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         }
 
         .hci-warranty .warranty-summary {
-          padding: 18px 0 62px;
+          padding: 18px 0 28px;
         }
 
         .hci-warranty .warranty-summary-head {
@@ -459,21 +366,10 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         }
 
         .hci-warranty .warranty-duration {
-          color: var(--hci-orange);
+          color: var(--hci-orange-text);
           font-size: 14px;
           font-weight: 700;
         }
-           .hci-warranty .warranty-summary {
-    padding: 18px 0 28px;      /* was 18px 0 62px */
-  }
-
-        .hci-warranty .warranty-policy {
-          padding: 24px 0 32 px;
-        }
-
-        .hci-warranty .warranty-process {
-    padding: 32px 0 32px;      /* was 55px 0 32px from the last fix — reduce the top */
-  }
 
         .hci-warranty .warranty-policy-inner {
           border-top: 1px solid var(--hci-border);
@@ -530,7 +426,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         }
 
         .hci-warranty .warranty-policy-content a {
-          color: var(--hci-orange);
+          color: var(--hci-orange-text);
           text-decoration: none;
         }
 
@@ -581,7 +477,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         .hci-warranty .warranty-support-copy span {
           display: block;
           margin-bottom: 11px;
-          color: var(--hci-orange);
+          color: var(--hci-orange-text);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: .13em;
@@ -619,7 +515,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
 
         .hci-warranty .warranty-step-number {
           margin-bottom: 22px;
-          color: var(--hci-orange);
+          color: var(--hci-orange-text);
           font-size: 12px;
           font-weight: 700;
           letter-spacing: .1em;
@@ -681,7 +577,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
           margin: 0 0 8px;
           font-size: clamp(24px, 3vw, 32px);
           font-weight: 500;
-           color: #fff !important;
+          color: #fff !important;
         }
 
         .hci-warranty .warranty-cta-box p {
@@ -698,7 +594,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
           gap: 9px;
           padding: 12px 18px;
           border-radius: 6px;
-          background: var(--hci-orange);
+          background: var(--hci-orange-text);
           color: #fff;
           text-decoration: none;
           font-weight: 700;
@@ -719,111 +615,75 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
         }
 
         @media (max-width: 767px) {
+          .warranty_banner {
+            min-height: 220px !important;
+            padding: 26px 16px !important;
+            background-position: 26% center !important;
+          }
 
-       .warranty_banner {
- min-height: 0 !important;
-    padding: 26px 16px !important;
-    background-position: 26% center !important;
-}
-  .warranty_banner {
-  min-height: 220px !important;
-}
+          .warranty_banner .secBgDesClass,
+          .warranty_banner p {
+            font-size: 14px !important;
+            line-height: 1.30 !important;
+            max-width: 260px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+          }
 
-.warranty_banner .secBgDesClass,
-  .warranty_banner p {
-    font-size: 14px !important;
-    line-height: 1.30 !important;
-    max-width: 260px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-  .hci-warranty .warranty-intro {
-    padding: 32px 0 34px !important;
-}
+          .hci-warranty .warranty-intro {
+            padding: 32px 0 34px !important;
+          }
 
-.hci-warranty .warranty-policy {
-  padding: 24px 0 32 px;   /* ← "32 px" has a stray space */
-}
-  .hci-warranty .warranty-policy {
-  padding: 24px 0 32px;
-}
+          .hci-warranty .warranty-policy {
+            padding: 24px 0 24px;
+          }
 
-.hci-warranty .warranty-policy {
-    padding-bottom: 24px !important;
-  }
-  .hci-warranty .warranty-process {
-    padding: 24px 0 16px !important;
-  }
-  .hci-warranty .warranty-support {
-    padding: 16px 0 55px !important;
-  }
+          .hci-warranty .warranty-process {
+            padding: 24px 0 16px !important;
+          }
 
-.hci-warranty .warranty-policy-content * {
-  height: auto !important;
-  max-height: none !important;
-}
+          .hci-warranty .warranty-support {
+            padding: 16px 0 55px !important;
+          }
 
-        .warranty_banner .sec_bgheading_lass {
-  font-size: clamp(22px, 7vw, 34px) !important;
-}
+          .hci-warranty .warranty-policy-content * {
+            height: auto !important;
+            max-height: none !important;
+          }
+
           .hci-warranty .warranty-container {
             width: min(100% - 24px, 1180px);
           }
 
-          .hci-warranty .warranty-intro {
-            padding: 48px 0 34px;
-          }
-
-          // .hci-warranty .warranty-grid,
-          // .hci-warranty .warranty-process-grid {
-          //   grid-template-columns: 1fr;
-          // }
-
           .hci-warranty .warranty-grid,
-.hci-warranty .warranty-process-grid {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  gap: 16px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;          
-  -ms-overflow-style: none;
-}
-
-.hci-warranty .warranty-grid::-webkit-scrollbar,
-.hci-warranty .warranty-process-grid::-webkit-scrollbar {
-  display: none;                  
-}
-
-.hci-warranty .warranty-card,
-.hci-warranty .warranty-process-card {
-  flex: 0 0 100%;
-  scroll-snap-align: center;
-  text-align: center;
-}
-
-.hci-warranty .warranty-card-icon,
-.hci-warranty .warranty-step-number {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-          .hci-warranty .warranty-policy {
-            padding-bottom: 55px;
+          .hci-warranty .warranty-process-grid {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 16px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
           }
 
-          // .hci-warranty .warranty-process,
-          // .hci-warranty .warranty-support {
-          //   padding: 55px 0;
-          // }
+          .hci-warranty .warranty-grid::-webkit-scrollbar,
+          .hci-warranty .warranty-process-grid::-webkit-scrollbar {
+            display: none;
+          }
 
-          .hci-warranty .warranty-process {
-  padding: 55px 0 32px;
-}
+          .hci-warranty .warranty-card,
+          .hci-warranty .warranty-process-card {
+            flex: 0 0 100%;
+            scroll-snap-align: center;
+            text-align: center;
+          }
 
-.hci-warranty .warranty-support {
-  padding: 32px 0 55px;
-}
+          .hci-warranty .warranty-card-icon,
+          .hci-warranty .warranty-step-number {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
           .hci-warranty .warranty-cta {
             padding-bottom: 55px;
           }
@@ -834,80 +694,71 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
             padding: 28px 24px;
           }
         }
-          @media (min-width: 768px) {
-  .warranty_banner {
-    min-height: 360px !important;
-    background-position: center 20% !important;
-    background-size: cover !important;
-  }
-}
+
+        @media (min-width: 768px) {
+          .warranty_banner {
+            min-height: 360px !important;
+            background-position: center 20% !important;
+            background-size: cover !important;
+          }
+        }
 
         .warranty_banner .sec_bgheading_lass {
-  font-size: clamp(26px, 6vw, 64px) !important;
-  line-height: 1.2 !important;
-  white-space: normal !important;
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
-  max-width: 100%;
-}
+          font-size: clamp(26px, 6vw, 64px) !important;
+          line-height: 1.2 !important;
+          white-space: normal !important;
+          overflow-wrap: break-word !important;
+          word-break: break-word !important;
+          max-width: 100%;
+        }
 
-.warranty_banner {
-  overflow: hidden;
-}
+        .warranty_banner {
+          overflow: hidden;
+        }
 
-.warranty_banner .container {
-  max-width: 100%;
-  padding-left: 16px;
-  padding-right: 16px;
-  box-sizing: border-box;
-}
+        .warranty_banner .container {
+          max-width: 100%;
+          padding-left: 16px;
+          padding-right: 16px;
+          box-sizing: border-box;
+        }
 
-.hci-warranty .warranty-contact-items { margin-top: 24px; }
-.hci-warranty .warranty-contact-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 14px 0; border-top: 1px solid var(--hci-border);
-}
-.hci-warranty .warranty-contact-icon {
-  position: relative;
-  width: 36px; height: 36px; border-radius: 50%;
-  background: #fff3e9; color: var(--hci-orange);
-  flex-shrink: 0;
-  overflow: hidden;
-}
+        .hci-warranty .warranty-contact-items { margin-top: 24px; }
+        .hci-warranty .warranty-contact-item {
+          display: flex; align-items: flex-start; gap: 12px;
+          padding: 14px 0; border-top: 1px solid var(--hci-border);
+        }
+        .hci-warranty .warranty-contact-icon {
+          position: relative;
+          width: 36px; height: 36px; border-radius: 50%;
+          background: #fff3e9; color: var(--hci-orange);
+          flex-shrink: 0;
+          overflow: hidden;
+        }
 
-.hci-warranty .warranty-contact-icon svg {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  width: 16px !important;
-  height: 16px !important;
-  margin: 0 !important;
-  transform: translate(-50%, -50%) !important;
-}
+        .hci-warranty .warranty-contact-icon svg {
+          position: absolute !important;
+          top: 50% !important;
+          left: 50% !important;
+          width: 16px !important;
+          height: 16px !important;
+          margin: 0 !important;
+          transform: translate(-50%, -50%) !important;
+        }
       ` }} />
 
       <main className="hci-warranty">
         {hero.enabled !== false && (
           <section className="warranty-intro">
             <div className="warranty-container">
-             {/* <div className="warranty-eyebrow">
+              <div className="warranty-eyebrow" style={heroEyebrowStyle}>
                 <FaShieldAlt />
                 {hero.eyebrow}
               </div>
 
-              <h2>{hero.heading}</h2>
+              <HeroHeadingTag className="warranty-heading">{hero.heading}</HeroHeadingTag>
 
-              <p>{hero.description}</p>
-              */}
-
-              <div className="warranty-eyebrow" style={heroEyebrowStyle}>
-  <FaShieldAlt />
-  {hero.eyebrow}
-</div>
-
-<HeroHeadingTag className="warranty-heading">{hero.heading}</HeroHeadingTag>
-
-<p style={heroDescriptionStyle}>{hero.description}</p>
+              <p style={heroDescriptionStyle}>{hero.description}</p>
             </div>
           </section>
         )}
@@ -927,11 +778,7 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
                     key={`${category.title}-${index}`}
                   >
                     <div className="warranty-card-icon">
-                      {index % 2 === 0 ? (
-                        <FaShieldAlt />
-                      ) : (
-                        <FaClock />
-                      )}
+                      {index % 2 === 0 ? <FaShieldAlt /> : <FaClock />}
                     </div>
 
                     <h4>{category.title}</h4>
@@ -997,35 +844,35 @@ const heroDescriptionStyle = hero.descriptionSize ? { fontSize: `${hero.descript
                   <h3>{supportForm.heading}</h3>
                   <p>{supportForm.description}</p>
                   {Array.isArray(supportForm.contactItems) && supportForm.contactItems.length > 0 && (
-  <div className="warranty-contact-items">
-    {supportForm.contactItems.map((item, index) => {
-      const Icon = item.icon === "mail" ? FaEnvelope : item.icon === "location" ? FaMapMarkerAlt : FaPhoneAlt;
+                    <div className="warranty-contact-items">
+                      {supportForm.contactItems.map((item, index) => {
+                        const Icon = item.icon === "mail" ? FaEnvelope : item.icon === "location" ? FaMapMarkerAlt : FaPhoneAlt;
 
-      const getHref = () => {
-        if (item.icon === "mail") return `mailto:${item.value}`;
-        if (item.icon === "phone" || !item.icon) return `tel:${String(item.value).replace(/[^\d+]/g, "")}`;
-        return null; // location: not auto-linked
-      };
-      const href = getHref();
+                        const getHref = () => {
+                          if (item.icon === "mail") return `mailto:${item.value}`;
+                          if (item.icon === "phone" || !item.icon) return `tel:${String(item.value).replace(/[^\d+]/g, "")}`;
+                          return null; // location: not auto-linked
+                        };
+                        const href = getHref();
 
-      return (
-        <div className="warranty-contact-item" key={index}>
-          <span className="warranty-contact-icon"><Icon /></span>
-          <div>
-            <strong>{item.label}</strong>
-            {href ? (
-              <a href={href} className="warranty-contact-value">
-                {item.value}
-              </a>
-            ) : (
-              <div className="warranty-contact-value">{item.value}</div>
-            )}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-)}
+                        return (
+                          <div className="warranty-contact-item" key={index}>
+                            <span className="warranty-contact-icon"><Icon /></span>
+                            <div>
+                              <strong>{item.label}</strong>
+                              {href ? (
+                                <a href={href} className="warranty-contact-value">
+                                  {item.value}
+                                </a>
+                              ) : (
+                                <div className="warranty-contact-value">{item.value}</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 <div className="warranty-support-form-box">

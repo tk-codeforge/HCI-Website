@@ -1,8 +1,8 @@
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import MainLayout from "../layouts/MainLayout";
-import { generateFAQSchema } from "@/utils/schemaGenerator";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
+
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -18,7 +18,7 @@ async function getFaqData() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-content/faqs`, {
-      // cache handled by page revalidate
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
@@ -27,10 +27,7 @@ async function getFaqData() {
     }
 
     const data = await res.json();
-    // The API seems to return the array directly based on your previous code (response.data)
-    // If the API returns { data: [...] }, adjust accordingly. 
-    // Based on 'setFaqData(response.data)', it likely returns the array directly or inside a data property.
-    return Array.isArray(data) ? data : (data.data || []); 
+    return Array.isArray(data) ? data : data.data || [];
   } catch (err) {
     console.error("FAQ Fetch Error:", err);
     return [];
@@ -38,32 +35,6 @@ async function getFaqData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 },
-//     });
-
-//     if (!res.ok) return null;
-
-//     const allTags = await res.json();
-
-//     // Match the specific page URL for FAQ
-//     if (Array.isArray(allTags)) {
-//       return allTags.find(
-//         (tag) =>
-//           tag.page_name === "https://hcinterior.in/faq" ||
-//           tag.page_name?.endsWith("/faq")
-//       );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
-
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -79,13 +50,14 @@ async function getSeoData() {
   }
 }
 
+// --- HELPER: Fetch Banner Data ---
 async function getBannerData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/cms-gallery-design/manage-banner?key=faq`, {
-      cache: "no-store",
-      headers: { Connection: "close" },
-    });
+    const res = await fetch(
+      `${baseURL}/cms-gallery-design/manage-banner?key=faq`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
     return await res.json();
   } catch (err) {
@@ -94,31 +66,6 @@ async function getBannerData() {
   }
 }
 
-// --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-
-//   const defaultTitle = "Here Know About FAQs Of High Creation Interior | Policy";
-//   const defaultDesc =
-//     "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
-//   const defaultCanonical = "https://hcinterior.in/faq";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       canonical: seoData?.page_name || defaultCanonical,
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//     keywords: seoData?.metaKeywords || "Interior Design FAQs, High Creation Interior Policy, Design Process, Pricing",
-//   };
-// }
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
@@ -126,10 +73,10 @@ export async function generateMetadata() {
     seo?.meta_title || "Here Know About FAQs Of High Creation Interior | Policy";
   const description =
     seo?.meta_description ||
-   "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
+    "Find answers to common questions about High Creation Interior. Our FAQ page covers design process, pricing, project timelines, cancellation policy, and more to help you understand our services";
 
-   const ogTitle = seo?.og_title || title;
-const ogDescription = seo?.og_description || description;
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
@@ -145,17 +92,7 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
-        openGraph: {
+    openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
@@ -169,53 +106,41 @@ const ogDescription = seo?.og_description || description;
 
 // --- MAIN SERVER COMPONENT ---
 export default async function FaqPage() {
-  const seo = await getSeoData();
-  const faqData = await getFaqData();
-  const faqSchema = generateFAQSchema(faqData);
+  // Fetch everything in parallel instead of sequentially
+  const [seo, faqData, bannerRecord] = await Promise.all([
+    getSeoData(),
+    getFaqData(),
+    getBannerData(),
+  ]);
 
-  const bannerRecord = await getBannerData();
   const bgHeading = bannerRecord?.banner_heading || "Frequently Asked Questions";
-const bgDescription = bannerRecord?.banner_description || "Get all the information you need" 
+  const bgDescription =
+    bannerRecord?.banner_description || "Get all the information you need";
 
   return (
     <MainLayout>
-      {/* {faqSchema && (
-        <script
-          id="faq-page-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
-      )} */}
       <JsonLd data={seo?.custom_schema} />
       <main>
-        {/* <BackgroundImageWithHeading
-          sectionBgImages="contact_wrapper faq_banner"
-          sectionBgHeading="Frequently Asked Questions"
-          secBgHeadingClass="sec_bgheading_lass"
-          sectionBgDescription="Get all the information you need"
-          secBgDesClass="text-center text-white"
-        /> */}
-
         <BackgroundImageWithHeading
-  sectionBgImages={"contact_wrapper faq_banner"}
-  sectionBgHeading={bgHeading}
-  secBgHeadingClass="sec_bgheading_lass force-white-heading"
-  sectionBgDescription={bgDescription}
-  secBgDesClass={"text-center bg-transparent text-white"}
-  bgImageUrl={bannerRecord?.banner_image}
-    bgImageAlt={bannerRecord?.banner_alt}
-  headingTag={bannerRecord?.banner_heading_tag || "h1"}
-  descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
-  sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
-  sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
-/>
+          sectionBgImages={"contact_wrapper faq_banner"}
+          sectionBgHeading={bgHeading}
+          secBgHeadingClass="sec_bgheading_lass force-white-heading"
+          sectionBgDescription={bgDescription}
+          secBgDesClass={"text-center bg-transparent text-white"}
+          bgImageUrl={bannerRecord?.banner_image}
+          bgImageAlt={bannerRecord?.banner_alt}
+          headingTag={bannerRecord?.banner_heading_tag || "h1"}
+          descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
+          sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
+          sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
+        />
 
         <section className="privacy my-5">
           <div className="container">
             <div className="text-center">
               <h2>High Creation Interior</h2>
               <h3>
-                <span className="font_stylish" style={{ color: "#ff914d" }}>
+                <span className="font_stylish" style={{ color: "#c2500a" }}>
                   Frequently Asked Questions
                 </span>
               </h3>
@@ -226,7 +151,7 @@ const bgDescription = bannerRecord?.banner_description || "Get all the informati
                     <div className="accordion" id="faqAccordion">
                       {faqData.map((faq, index) => (
                         <div className="accordion-item" key={index}>
-                          <h2 className="accordion-header">
+                          <h3 className="accordion-header">
                             <button
                               className={`accordion-button ${
                                 index === 0 ? "" : "collapsed"
@@ -239,7 +164,7 @@ const bgDescription = bannerRecord?.banner_description || "Get all the informati
                             >
                               {faq?.json_content?.title}
                             </button>
-                          </h2>
+                          </h3>
                           <div
                             id={`collapse${index}`}
                             className={`accordion-collapse collapse ${

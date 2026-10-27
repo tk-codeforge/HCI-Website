@@ -31,58 +31,6 @@ async function getAboutUsContent() {
   }
 }
 
-// --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 } 
-//     });
-
-//     if (!res.ok) return null;
-
-//     const allTags = await res.json();
-    
-//     // --- FIX IS HERE ---
-//     // The API returns 'page_name' as a full URL (e.g., https://hcinterior.in/about-us)
-//     // We strictly check if the URL ends with "/about-us" to be safe.
-//     if (Array.isArray(allTags)) {
-//         return allTags.find(tag => 
-//             tag.page_name === "https://hcinterior.in/about-us" || 
-//             tag.page_name?.endsWith("/about-us")
-//         );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
-
-// // --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-  
-//   const defaultTitle = "About Us | End To End Interior Design - High Creation Interior";
-//   const defaultDesc = "High Creation Interior delivering top notch interior design services in Noida & Delhi NCR | 8+ Years of experience | 1000+ Projects Done";
-//   const defaultCanonical = "https://hcinterior.in/about-us";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       // We use page_name because it contains the clean URL "https://hcinterior.in/about-us"
-//       // The 'meta_can_tag' field in your API has HTML tags (<link...>) which we cannot use directly here.
-//       canonical: seoData?.page_name || defaultCanonical, 
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//   };
-// }
 
 async function getSeoData() {
   try {
@@ -125,15 +73,6 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
         openGraph: {
       title: ogTitle,
       description: ogDescription,
@@ -179,14 +118,6 @@ export default async function AboutUs() {
       )}
       <main>
         <style>{`.about-rich p:last-child { margin-bottom: 0; }`}</style>
-        {/* Background Section */}
-        {/* <BackgroundImageRow
-          sectionBgImages="contact_wrapper about_us_banner"
-          sectionBgHeading="About Us"
-          secBgHeadingClass="sec_bgheading_lass about_mob"
-          sectionBgDescription="Get A Place Designed Exactly How You Wished"
-          secBgDesClass="text-center bg-transparent text-white"
-        /> */}
         <BackgroundImageRow
           sectionBgImages="contact_wrapper about_us_banner"
           sectionBgHeading={formData?.banner_heading || "About Us"}
@@ -210,16 +141,6 @@ export default async function AboutUs() {
               <div className="row justify-content-center">
                 <div className="col-6 d-flex justify-content-center">
                   {formData?.mid_image && (
-  //                   <img
-  //                     src={formData.mid_image}
-  //                     className="d-block"
-  //                     style={{ 
-  //   width: formData?.mid_image_size ? `${formData.mid_image_size}%` : '100%', 
-  //   maxWidth: 'none', 
-  //   height: 'auto' 
-  // }}
-  //                     alt={formData?.top_title || "About Us"}
-  //                   decoding="async"  loading="lazy" />
                       <MediaImg
                       src={formData.mid_image}
                                             alt={formData?.mid_image_alt}

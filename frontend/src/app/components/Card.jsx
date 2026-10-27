@@ -10,8 +10,6 @@ const Card = ({
     titleCard,
     titleClass,
     spanTitle = null,
-    // titleCard = null,
-    // titleClass = "",
     descriptionCard,
     buttonTextCard,
     linkCard,
@@ -37,7 +35,6 @@ const Card = ({
                         }}
                     />
                 </a>
-                {/* {imgSrc ? <img src={imgSrc} className="offerimg" alt={imgAlt} decoding="async"  loading="lazy" /> : null} */}
                 <div className="px-3 pt-3 card-body">
                     {spanTitle && <span>{spanTitle}</span>}
                     {cardLinkName ? (

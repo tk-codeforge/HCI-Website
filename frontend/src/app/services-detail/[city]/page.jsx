@@ -14,7 +14,9 @@ export const revalidate = 3600;
 
 // --- GSC FIX: Generate Metadata for correct Indexing & Canonical ---
 export async function generateMetadata({ params }) {
-  const city = params.city;
+  // Next.js 15+ supplies params as a Promise; await also works with older versions.
+  const resolvedParams = await params;
+  const city = resolvedParams?.city;
   try {
     // 👈 2. Fetch both City Data and Global SEO Data concurrently
     const [cityRes, seoData] = await Promise.all([
@@ -74,7 +76,9 @@ async function getCityData(city) {
 
 // --- GSC FIX: Converted to Server Component ---
 export default async function ServicesDetail({ params }) {
-  const city = params.city;
+  // Resolve dynamic route params before using the city slug in API requests.
+  const resolvedParams = await params;
+  const city = resolvedParams?.city;
   
   // 👈 5. Fetch City Data AND SEO Data for the actual page component
   const [pageData, seoData] = await Promise.all([

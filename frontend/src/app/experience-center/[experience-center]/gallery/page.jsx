@@ -21,40 +21,6 @@ async function getCenter(slug) {
   return res.json();
 }
 
-// --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata({ searchParams }) {
-//   const id = searchParams?.id;
-//   if (!id) return { title: "Experience Center Gallery" };
-
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/experience-center-assets/by-id/${id}`);
-//     if (!res.ok) throw new Error("Failed to fetch");
-//     const data = await res.json();
-    
-//     const title = data?.child_content?.title || "Gallery";
-    
-//     return {
-//       title: `${title} | High Creation Interior`,
-//       description: `Explore our ${title} at the High Creation Interior Experience Center.`,
-//       alternates: {
-//         canonical: `/${center}/gallery?id=${id}`
-//       },
-//     };
-//   } catch (error) {
-//     return { title: "Experience Center Gallery", robots: "noindex" };
-//   }
-// }
-
-// export async function generateMetadata({ params, searchParams }) {
-//   const center = params?.["experience-center"];
-//   const id = searchParams?.id;
-//   return buildGalleryMetadata({
-//     basePath: `/${center}/gallery`,
-//     id,
-//     itemApi: `/experience-center-assets/by-id/${id}`,
-//   });
-// }
 
 export async function generateMetadata({ params, searchParams }) {
   const { "experience-center": center } = await params;
@@ -71,12 +37,6 @@ export async function generateMetadata({ params, searchParams }) {
   });
 }
 
-// --- MAIN SERVER COMPONENT ---
-// export default async function ExperienceCenterGalleryPage({ searchParams }) {
-//   const id = searchParams?.id;
-//   if (!id) return notFound();
-
-//   let galleryData = null;
 
 export default async function ExperienceCenterGalleryPage({ params, searchParams }) {
   const { "experience-center": center } = await params;

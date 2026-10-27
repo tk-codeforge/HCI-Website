@@ -42,13 +42,6 @@ const BlogDetail = () => {
           (<script dangerouslySetInnerHTML={{ __html: blogDetails?.seo_content?.custom_code ?? "" }}></script>
           )}
       </head>
-      {/* {blogDetails?.seo_content?.custom_code && (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: blogDetails.seo_content.custom_code,
-          }}
-        />
-      )} */}
       <MainLayout>
         <main>
           <div className="blog_deatil">

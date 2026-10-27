@@ -1,13 +1,15 @@
 import { getGallerySlugMap, pageGalleryHref } from "@/utils/slugEdit";
 import MainLayout from "../layouts/MainLayout";
 import PortfolioCard from "../components/PortfolioCard";
-// import ExperienceForm from "./ExperienceForm";
 import ExperienceForm from "../components/ExperienceForm";
+import DeferredVideo from "../components/DeferredVideo";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
+
+const GALLERY_KEY = "experience-center-noida";
 
 // --- HELPER: Base URL Logic ---
 const getBaseUrl = () => {
@@ -21,7 +23,7 @@ async function getExperienceData() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-parent-child/experience_center`, {
-      // cache handled by page revalidate
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
@@ -40,7 +42,6 @@ async function getExperienceData() {
 async function getExperienceDataVideo() {
   try {
     const baseURL = getBaseUrl();
-    // Assuming the endpoint for the main experience center video follows the same naming convention
     const res = await fetch(`${baseURL}/cms-parent-child/experience_center_video`, {
       next: { revalidate: 60 },
     });
@@ -55,33 +56,6 @@ async function getExperienceDataVideo() {
     return [];
   }
 }
-
-// --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 },
-//     });
-
-//     if (!res.ok) return null;
-
-//     const allTags = await res.json();
-
-//     // Match the specific page URL for Experience Center
-//     if (Array.isArray(allTags)) {
-//       return allTags.find(
-//         (tag) =>
-//           tag.page_name === "https://hcinterior.in/experience-center" ||
-//           tag.page_name?.endsWith("/experience-center")
-//       );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
 
 async function getSeoData() {
   try {
@@ -98,33 +72,6 @@ async function getSeoData() {
   }
 }
 
-// --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-
-//   const defaultTitle = "High Creation Interior Experience Center Noida";
-//   const defaultDesc =
-//     "Explore our Interior experience center in Noida to feel the experience of your dream home interior with comfort, warmth, and unique design elements.";
-//   const defaultCanonical = "https://hcinterior.in/experience-center";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       canonical: seoData?.page_name || defaultCanonical,
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//     keywords:
-//       seoData?.metaKeywords ||
-//       "design idea, living room interior, living room design, living room decor, modular TV units, wall art, wall designs",
-//   };
-// }
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
@@ -134,8 +81,8 @@ export async function generateMetadata() {
     seo?.meta_description ||
     "Explore our Interior experience center in Noida to feel the experience of your dream home interior with comfort, warmth, and unique design elements.";
 
-    const ogTitle = seo?.og_title || title;
-const ogDescription = seo?.og_description || description;
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
@@ -151,17 +98,7 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
-        openGraph: {
+    openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
@@ -173,12 +110,44 @@ const ogDescription = seo?.og_description || description;
   };
 }
 
+// Responsive `sizes` per grid slot, so the browser doesn't download a larger
+// rendition than the card actually displays.
+const SIZES = {
+  col7: "(min-width: 1200px) 665px, (min-width: 992px) 560px, 100vw",
+  col12: "(min-width: 1200px) 1140px, (min-width: 992px) 960px, 100vw",
+  col9: "(min-width: 1200px) 855px, (min-width: 992px) 720px, 100vw",
+  col3: "(min-width: 1200px) 285px, (min-width: 992px) 240px, 100vw",
+  col6: "(min-width: 1200px) 570px, (min-width: 992px) 480px, 100vw",
+};
+
 // --- MAIN SERVER COMPONENT ---
 export default async function Experience() {
-  const seo = await getSeoData();
-  const slugMap = await getGallerySlugMap("experience-center-noida");
-  const experienceData = await getExperienceData();
-  const experienceDataVideo = await getExperienceDataVideo(); // Added video fetcher
+  // Fetch everything in parallel (was sequential -> slow TTFB).
+  const [seo, slugMap, experienceData, experienceDataVideo] = await Promise.all([
+    getSeoData(),
+    getGallerySlugMap(GALLERY_KEY),
+    getExperienceData(),
+    getExperienceDataVideo(),
+  ]);
+
+  const renderCard = (i, bgClass, sizes, extra = {}) => {
+    const item = experienceData[i];
+    if (!item) return null;
+    return (
+      <PortfolioCard
+        cardDetailLink={pageGalleryHref(GALLERY_KEY, slugMap, item?.id)}
+        portCard={"card_portfolio portfolio_1"}
+        portfolioImgBg={bgClass}
+        portfolioImg={item?.child_content?.image}
+        portfolioImgAlt={item?.child_content?.image_alt}
+        portfolioTitle={item?.child_content?.title}
+        portfolioImgSizes={sizes}
+        {...extra}
+      />
+    );
+  };
+
+  const whiteText = { portfolioClassCss: "text-white w-75 mb-0 my-2 team_designation" };
 
   return (
     <MainLayout>
@@ -186,22 +155,8 @@ export default async function Experience() {
       <main>
         {/* Video Section */}
         <section className="video_wrapper conatiner-fluid">
-          {/* Replaced hardcoded video with dynamic fetch logic matching other centers */}
           {experienceDataVideo[0]?.child_content?.image && (
-            <video
-              width="100%"
-              height="590"
-              className="object-fit-cover"
-              autoPlay
-              loop
-              muted
-              id="myVideo"
-            >
-              <source 
-                src={experienceDataVideo[0]?.child_content?.image} 
-                // type="video/mp4" 
-              />
-            </video>
+            <DeferredVideo src={experienceDataVideo[0].child_content.image} />
           )}
         </section>
 
@@ -210,28 +165,11 @@ export default async function Experience() {
           <div className="row mx-0 g-4">
             {/* Left Column (Items 0 & 1) */}
             <div className="col-lg-7">
-              {experienceData[0] && (
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[0]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={
-                    "portfolioimgall desig_gal_bg1 design_exper"
-                  }
-                  portfolioImg={experienceData[0]?.child_content?.image}
-                   portfolioImgAlt={experienceData[0]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[0]?.child_content?.title}
-                />
-              )}
-              {experienceData[1] && (
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[1]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={"portfolioimgall desig_gal_bg2"}
-                  portfolioImg={experienceData[1]?.child_content?.image}
-                   portfolioImgAlt={experienceData[1]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[1]?.child_content?.title}
-                />
-              )}
+              {/* First card = LCP image: eager + high fetch priority */}
+              {renderCard(0, "portfolioimgall desig_gal_bg1 design_exper", SIZES.col7, {
+                portfolioImgPriority: true,
+              })}
+              {renderCard(1, "portfolioimgall desig_gal_bg2", SIZES.col7)}
             </div>
 
             {/* Right Column (Form) */}
@@ -242,68 +180,31 @@ export default async function Experience() {
             {/* Bottom Section (Remaining Items) */}
             {experienceData[2] && (
               <div className="col-lg-12">
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[2]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={"portfolioimgall desig_gal_bg4"}
-                  portfolioImg={experienceData[2]?.child_content?.image}
-                   portfolioImgAlt={experienceData[2]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[2]?.child_content?.title}
-                />
+                {renderCard(2, "portfolioimgall desig_gal_bg4", SIZES.col12)}
               </div>
             )}
 
             {experienceData[3] && (
               <div className="col-lg-9">
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[3]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={"portfolioimgall desig_gal_bg5"}
-                  portfolioImg={experienceData[3]?.child_content?.image}
-                   portfolioImgAlt={experienceData[3]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[3]?.child_content?.title}
-                />
+                {renderCard(3, "portfolioimgall desig_gal_bg5", SIZES.col9)}
               </div>
             )}
 
             {experienceData[4] && (
               <div className="col-lg-3">
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[4]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={"portfolioimgall desig_gal_bg6"}
-                  portfolioImg={experienceData[4]?.child_content?.image}
-                   portfolioImgAlt={experienceData[4]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[4]?.child_content?.title}
-                />
+                {renderCard(4, "portfolioimgall desig_gal_bg6", SIZES.col3)}
               </div>
             )}
 
             {experienceData[5] && (
               <div className="col-lg-6">
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[5]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={"portfolioimgall desig_gal_bg7"}
-                  portfolioImg={experienceData[5]?.child_content?.image}
-                   portfolioImgAlt={experienceData[5]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[5]?.child_content?.title}
-                  portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
-                />
+                {renderCard(5, "portfolioimgall desig_gal_bg7", SIZES.col6, whiteText)}
               </div>
             )}
 
             {experienceData[6] && (
               <div className="col-lg-6">
-                <PortfolioCard
-                  cardDetailLink={pageGalleryHref("experience-center-noida", slugMap, experienceData[6]?.id)}
-                  portCard={"card_portfolio portfolio_1"}
-                  portfolioImgBg={"portfolioimgall desig_gal_bg8"}
-                  portfolioImg={experienceData[6]?.child_content?.image}
-                   portfolioImgAlt={experienceData[6]?.child_content?.image_alt}
-                  portfolioTitle={experienceData[6]?.child_content?.title}
-                  portfolioClassCss="text-white w-75 mb-0 my-2 team_designation"
-                />
+                {renderCard(6, "portfolioimgall desig_gal_bg8", SIZES.col6, whiteText)}
               </div>
             )}
           </div>

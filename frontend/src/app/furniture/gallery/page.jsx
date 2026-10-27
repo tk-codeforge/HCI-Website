@@ -21,18 +21,6 @@ async function getGalleryData(id) {
   }
 }
 
-// export async function generateMetadata({ searchParams }) {
-//   const id = searchParams?.id;
-//   const canonicalUrl = id 
-//     ? `${BASE_URL}/furniture/gallery?id=${id}` 
-//     : `${BASE_URL}/furniture/gallery`;
-
-//   return {
-//     alternates: {
-//       canonical: canonicalUrl,
-//     },
-//   };
-// }
 
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;

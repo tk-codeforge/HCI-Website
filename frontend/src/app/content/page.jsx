@@ -140,12 +140,6 @@ const Content = () => {
         <AuthMainLayout>
             <div className="container my-5">
                 <h1 className="mb-4 text-center">Pages List</h1>
-                {/* <div className="flex text-end mb-4">
-                    <button type="button" className="mt-3 btn know_more" data-bs-toggle="modal" data-bs-target="#addNewpageModal">
-                        Add New Page
-                    </button>
-
-                </div> */}
                 {loading ? (
                     <div className="text-center">Loading...</div>
                 ) : error ? (

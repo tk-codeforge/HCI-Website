@@ -1,7 +1,7 @@
 "use client";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-// import MainLayout from "../layouts/MainLayout";
+
 import Slider from "react-slick";
 import { MdOutlineChevronLeft, MdKeyboardArrowRight } from "react-icons/md";
 import api from "@/utils/api";
@@ -54,9 +54,7 @@ const SliderAbout = (props) => {
     speed: 500,
     slidesToShow: 3, // Default number of slides
     slidesToScroll: 1,
-    // className: "center",
-    // centerMode: true,
-    // centerPadding: "10px",
+    
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     responsive: [

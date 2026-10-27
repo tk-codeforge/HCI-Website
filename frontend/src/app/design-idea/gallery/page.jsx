@@ -1,173 +1,3 @@
-// import GalleryDetail from "../../components/GalleryDetail";
-// import MainLayout from "../../layouts/MainLayout";
-// import { defaultAltText } from "@/utils/helper";
-// import { notFound } from "next/navigation";
-// import JsonLd from "../../components/JsonLd";
-// import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
-// import DOMPurify from "isomorphic-dompurify";
-
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
-// const BASE_URL = "https://hcinterior.in";
-// const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-
-// // --- SERVER SIDE DATA FETCHING ---
-// async function getGalleryData(id) {
-//   try {
-//     const res = await fetch(`${API_BASE_URL}/cms-parent-child/by-id/${id}`, {
-//       next: { revalidate: 60 }, // Cache for 60 seconds
-//     });
-//     if (!res.ok) return null;
-//     return await res.json();
-//   } catch (error) {
-//     console.error("Gallery Fetch Error:", error);
-//     return null;
-//   }
-// }
-
-// // --- SEO METADATA (Canonical Fix) ---
-// // export async function generateMetadata({ searchParams }) {
-// //   const id = searchParams?.id;
-// //   const canonicalUrl = id 
-// //     ? `${BASE_URL}/design-idea/gallery?id=${id}` 
-// //     : `${BASE_URL}/design-idea/gallery`;
-
-// //   return {
-// //     alternates: {
-// //       canonical: canonicalUrl,
-// //     },
-// //   };
-// // }
-
-// export async function generateMetadata({ searchParams }) {
-//   const id = searchParams?.id;
-//   return buildGalleryMetadata({
-//     basePath: "/design-idea/gallery",
-//     id,
-//     itemApi: `/cms-parent-child/by-id/${id}`,
-//   });
-// }
-// // --- SERVER COMPONENT ---
-// const ResidentialProjectsGallery = async ({ searchParams }) => {
-//   const id = searchParams?.id;
-  
-//   // If no ID is present, we can't show specific gallery data
-//   if (!id) return notFound();
-
-//   const galleryData = await getGalleryData(id);
-
-//   // If API returns null/empty
-//   if (!galleryData) return notFound();
-
-//   const seo = await getGallerySeo({ basePath: "/design-idea/gallery", id });
-
-//   const images = galleryData?.child_images ?? [];
-//   const staticImages = images.slice(0, 6);
-//   const extraImages = images.slice(6);
-//   const title = galleryData?.child_content?.title ?? "Design Idea Gallery";
-//   const rawTag = galleryData?.child_content?.title_tag;
-// const TitleTag = TAGS.includes(rawTag) ? rawTag : "h4"; // h4 is what the page renders today
-// const description = galleryData?.child_content?.description || "";
-
-//   return (
-//     <MainLayout>
-//       <JsonLd data={seo?.custom_schema} />
-//       <main>
-//         <style>{`.gallery-desc p:last-child { margin-bottom: 0; }`}</style>
-//         <section className="container my-5">
-//           <div className="row g-4 mx-0">
-//             <div className="col-12 text-center mt-3">
-//   <TitleTag className="h4" style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 600 }}>
-//     {title}
-//   </TitleTag>
-//   {description && (
-//     <div
-//       className="gallery-desc mx-auto"
-//       style={{ maxWidth: "820px" }}
-//       dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
-//     />
-//   )}
-// </div>
-            
-//             {/* Static Fields for First 6 Images */}
-//             <div className="col-lg-6">
-//               <GalleryDetail
-//                 imgGalUrl={staticImages[0]?.image ?? "/images/detail-img/1.webp"}
-//                                 imgGalAlt={title || defaultAltText}
-//                 imgGalCmsAlt={staticImages[0]?.image_alt}
-//                 imgGalImgClass="w-100 detail_gal_img"
-//                 images={images} 
-//               /> 
-//             </div>
-//             <div className="col-lg-6">
-//               <GalleryDetail
-//                 imgGalUrl={staticImages[1]?.image ?? "/images/detail-img/6.webp"}
-//                                 imgGalAlt={title || defaultAltText}
-//                 imgGalCmsAlt={staticImages[1]?.image_alt}
-//                 imgGalImgClass="w-100 detail_gal_img"
-//                 images={images}
-//               />
-//             </div>
-//             <div className="col-lg-12">
-//               <GalleryDetail
-//                 imgGalUrl={staticImages[2]?.image ?? "/images/detail-img/3.webp"}
-//                                 imgGalAlt={title || defaultAltText}
-//                 imgGalCmsAlt={staticImages[2]?.image_alt}
-//                 imgGalImgClass="w-100 detail_gal_img2"
-//                 images={images}
-//               />
-//             </div>
-//             <div className="col-lg-6">
-//               <GalleryDetail
-//                 imgGalUrl={staticImages[3]?.image ?? "/images/detail-img/4.webp"}
-//                                 imgGalAlt={title || defaultAltText}
-//                 imgGalCmsAlt={staticImages[3]?.image_alt}
-//                 imgGalImgClass="w-100 detail_gal_img"
-//                 images={images}
-//               />
-//             </div>
-//             <div className="col-lg-6">
-//               <GalleryDetail
-//                 imgGalUrl={staticImages[4]?.image ?? "/images/detail-img/5.webp"}
-//                                 imgGalAlt={title || defaultAltText}
-//                 imgGalCmsAlt={staticImages[4]?.image_alt}
-//                 imgGalImgClass="w-100 detail_gal_img"
-//                 images={images}
-//               />
-//             </div>
-//             <div className="col-lg-12">
-//               <GalleryDetail
-//                 imgGalUrl={staticImages[5]?.image ?? "/images/detail-img/6.webp"}
-//                                 imgGalAlt={title || defaultAltText}
-//                 imgGalCmsAlt={staticImages[5]?.image_alt}
-//                 imgGalImgClass="w-100 detail_gal_img2"
-//                 images={images}
-//               />
-//             </div>
-
-//             {/* Dynamic Loop for Extra Images */}
-//             {extraImages.length > 0 &&
-//               extraImages.map((image, index) => (
-//                 <div key={index} className="col-lg-6">
-//                   <GalleryDetail
-//                     imgGalUrl={image.image}
-//                                         imgGalAlt={title || defaultAltText}
-//                     imgGalCmsAlt={image.image_alt}
-//                     imgGalImgClass="w-100 detail_gal_img"
-//                     images={extraImages} 
-//                   />
-//                 </div>
-//               ))}
-//           </div>
-//         </section>
-//         <hr />
-//       </main>
-//     </MainLayout>
-//   );
-// };
- 
-// export default ResidentialProjectsGallery;
-
-
 import GalleryDetail from "../../components/GalleryDetail";
 import MainLayout from "../../layouts/MainLayout";
 import { defaultAltText } from "@/utils/helper";
@@ -176,69 +6,64 @@ import JsonLd from "../../components/JsonLd";
 import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 import DOMPurify from "isomorphic-dompurify";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
-const BASE_URL = "https://hcinterior.in";
-const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const FALLBACK_IMAGES = [
+  "/images/detail-img/1.webp",
+  "/images/detail-img/6.webp",
+  "/images/detail-img/3.webp",
+  "/images/detail-img/4.webp",
+  "/images/detail-img/5.webp",
+  "/images/detail-img/6.webp",
+];
 
-// --- SERVER SIDE DATA FETCHING ---
 async function getGalleryData(id) {
   try {
-    const res = await fetch(`${API_BASE_URL}/cms-parent-child/by-id/${id}`, {
-      next: { revalidate: 60 }, // Cache for 60 seconds
-    });
-    if (!res.ok) return null;
-    return await res.json();
+    const response = await fetch(
+      `${API_BASE_URL}/cms-parent-child/by-id/${encodeURIComponent(id)}`,
+      { next: { revalidate: 60 } }
+    );
+
+    if (!response.ok) return null;
+    return await response.json();
   } catch (error) {
     console.error("Gallery Fetch Error:", error);
     return null;
   }
 }
 
-// --- SEO METADATA (Canonical Fix) ---
-// export async function generateMetadata({ searchParams }) {
-//   const id = searchParams?.id;
-//   const canonicalUrl = id 
-//     ? `${BASE_URL}/design-idea/gallery?id=${id}` 
-//     : `${BASE_URL}/design-idea/gallery`;
-
-//   return {
-//     alternates: {
-//       canonical: canonicalUrl,
-//     },
-//   };
-// }
-
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
+
   return buildGalleryMetadata({
     basePath: "/design-idea/gallery",
     id,
     itemApi: `/cms-parent-child/by-id/${id}`,
   });
 }
-// --- SERVER COMPONENT ---
-const ResidentialProjectsGallery = async ({ searchParams }) => {
+
+export default async function ResidentialProjectsGallery({ searchParams }) {
   const id = searchParams?.id;
-  
-  // If no ID is present, we can't show specific gallery data
   if (!id) return notFound();
 
-  // Gallery data and SEO data are independent, so fetch them together.
+  // Gallery content and SEO are independent; fetch them concurrently.
   const [galleryData, seo] = await Promise.all([
     getGalleryData(id),
     getGallerySeo({ basePath: "/design-idea/gallery", id }),
   ]);
 
-  // If API returns null/empty
   if (!galleryData) return notFound();
 
-  const images = galleryData?.child_images ?? [];
+  const images = Array.isArray(galleryData?.child_images)
+    ? galleryData.child_images
+    : [];
   const staticImages = images.slice(0, 6);
   const extraImages = images.slice(6);
-  const title = galleryData?.child_content?.title ?? "Design Idea Gallery";
+  const title = galleryData?.child_content?.title || "Design Idea Gallery";
   const rawTag = galleryData?.child_content?.title_tag;
-const TitleTag = TAGS.includes(rawTag) ? rawTag : "h4"; // h4 is what the page renders today
-const description = galleryData?.child_content?.description || "";
+  const TitleTag = HEADING_TAGS.includes(rawTag) ? rawTag : "h4";
+  const description = galleryData?.child_content?.description || "";
 
   return (
     <MainLayout>
@@ -248,33 +73,41 @@ const description = galleryData?.child_content?.description || "";
         <section className="container my-5">
           <div className="row g-4 mx-0">
             <div className="col-12 text-center mt-3">
-  <TitleTag className="h4" style={{ fontFamily: "var(--font-poppins), sans-serif", fontWeight: 600 }}>
-    {title}
-  </TitleTag>
-  {description && (
-    <div
-      className="gallery-desc mx-auto"
-      style={{ maxWidth: "820px" }}
-      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
-    />
-  )}
-</div>
-            
-            {/* Static Fields for First 6 Images */}
+              <TitleTag
+                className="h4"
+                style={{
+                  fontFamily: "var(--font-poppins), sans-serif",
+                  fontWeight: 600,
+                }}
+              >
+                {title}
+              </TitleTag>
+              {description ? (
+                <div
+                  className="gallery-desc mx-auto"
+                  style={{ maxWidth: "820px" }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(description),
+                  }}
+                />
+              ) : null}
+            </div>
+
+            {/* Keep the original six-card order and Bootstrap column layout. */}
             <div className="col-lg-6">
               <GalleryDetail
                 imgPriority
-                imgGalUrl={staticImages[0]?.image ?? "/images/detail-img/1.webp"}
-                                imgGalAlt={title || defaultAltText}
+                imgGalUrl={staticImages[0]?.image ?? FALLBACK_IMAGES[0]}
+                imgGalAlt={title || defaultAltText}
                 imgGalCmsAlt={staticImages[0]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
-                images={images} 
-              /> 
+                images={images}
+              />
             </div>
             <div className="col-lg-6">
               <GalleryDetail
-                imgGalUrl={staticImages[1]?.image ?? "/images/detail-img/6.webp"}
-                                imgGalAlt={title || defaultAltText}
+                imgGalUrl={staticImages[1]?.image ?? FALLBACK_IMAGES[1]}
+                imgGalAlt={title || defaultAltText}
                 imgGalCmsAlt={staticImages[1]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
@@ -282,8 +115,8 @@ const description = galleryData?.child_content?.description || "";
             </div>
             <div className="col-lg-12">
               <GalleryDetail
-                imgGalUrl={staticImages[2]?.image ?? "/images/detail-img/3.webp"}
-                                imgGalAlt={title || defaultAltText}
+                imgGalUrl={staticImages[2]?.image ?? FALLBACK_IMAGES[2]}
+                imgGalAlt={title || defaultAltText}
                 imgGalCmsAlt={staticImages[2]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img2"
                 images={images}
@@ -291,8 +124,8 @@ const description = galleryData?.child_content?.description || "";
             </div>
             <div className="col-lg-6">
               <GalleryDetail
-                imgGalUrl={staticImages[3]?.image ?? "/images/detail-img/4.webp"}
-                                imgGalAlt={title || defaultAltText}
+                imgGalUrl={staticImages[3]?.image ?? FALLBACK_IMAGES[3]}
+                imgGalAlt={title || defaultAltText}
                 imgGalCmsAlt={staticImages[3]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
@@ -300,8 +133,8 @@ const description = galleryData?.child_content?.description || "";
             </div>
             <div className="col-lg-6">
               <GalleryDetail
-                imgGalUrl={staticImages[4]?.image ?? "/images/detail-img/5.webp"}
-                                imgGalAlt={title || defaultAltText}
+                imgGalUrl={staticImages[4]?.image ?? FALLBACK_IMAGES[4]}
+                imgGalAlt={title || defaultAltText}
                 imgGalCmsAlt={staticImages[4]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img"
                 images={images}
@@ -309,33 +142,33 @@ const description = galleryData?.child_content?.description || "";
             </div>
             <div className="col-lg-12">
               <GalleryDetail
-                imgGalUrl={staticImages[5]?.image ?? "/images/detail-img/6.webp"}
-                                imgGalAlt={title || defaultAltText}
+                imgGalUrl={staticImages[5]?.image ?? FALLBACK_IMAGES[5]}
+                imgGalAlt={title || defaultAltText}
                 imgGalCmsAlt={staticImages[5]?.image_alt}
                 imgGalImgClass="w-100 detail_gal_img2"
                 images={images}
               />
             </div>
 
-            {/* Dynamic Loop for Extra Images */}
-            {extraImages.length > 0 &&
-              extraImages.map((image, index) => (
-                <div key={index} className="col-lg-6">
-                  <GalleryDetail
-                    imgGalUrl={image.image}
-                                        imgGalAlt={title || defaultAltText}
-                    imgGalCmsAlt={image.image_alt}
-                    imgGalImgClass="w-100 detail_gal_img"
-                    images={extraImages} 
-                  />
-                </div>
-              ))}
+            {/* Keep rendering any CMS images beyond the first six. */}
+            {extraImages.map((image, index) => (
+              <div
+                key={image?.id ?? image?.image ?? `extra-gallery-image-${index}`}
+                className="col-lg-6"
+              >
+                <GalleryDetail
+                  imgGalUrl={image?.image}
+                  imgGalAlt={title || defaultAltText}
+                  imgGalCmsAlt={image?.image_alt}
+                  imgGalImgClass="w-100 detail_gal_img"
+                  images={extraImages}
+                />
+              </div>
+            ))}
           </div>
         </section>
         <hr />
       </main>
     </MainLayout>
   );
-};
- 
-export default ResidentialProjectsGallery;
+}

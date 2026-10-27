@@ -21,13 +21,6 @@ const validateResume = (file) => {
 };
 
 export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText }) {
-  // const [formData, setFormData] = useState({
-  //   name: "",
-  //   email: "",
-  //   phone: "",
-  //   your_job_title: "",
-  //   resume: null,
-  // });
 
     const [formData, setFormData] = useState({
     name: "",
@@ -41,14 +34,6 @@ export default function CareerFormClient({ cmsSettings, jobId, jobTitle, jobText
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef(null);
 
-  // const handleInputChange = (e) => {
-  //   const { name, value, files } = e.target;
-  //   if (name === "resume" && files?.length > 0) {
-  //     setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
-  //   } else {
-  //     setFormData((prevData) => ({ ...prevData, [name]: value }));
-  //   }
-  // };
 
     const validateForm = () => {
     const newErrors = {};

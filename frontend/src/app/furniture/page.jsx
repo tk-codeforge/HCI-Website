@@ -39,30 +39,6 @@ async function getFurnitureData() {
     return [];
   }
 }
-
-// --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 },
-//     });
-//     if (!res.ok) return null;
-//     const allTags = await res.json();
-//     // Match the specific page URL for Furniture
-//     if (Array.isArray(allTags)) {
-//       return allTags.find(
-//         (tag) =>
-//           tag.page_name === "https://hcinterior.in/furniture" ||
-//           tag.page_name?.endsWith("/furniture")
-//       );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -96,29 +72,6 @@ async function getHeadingDescriptionData() {
   }
 }
 
-// --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-//   const defaultTitle = "Explore customized furniture design for your dream home";
-//   const defaultDesc =
-//     "Discover customized furniture designs tailored for your dream home, blending style, functionality, and personalization to create spaces you'll love.";
-//   const defaultCanonical = "https://hcinterior.in/furniture";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       canonical: seoData?.page_name || defaultCanonical,
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//   };
-// }
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
@@ -145,16 +98,6 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
         openGraph: {
       title: ogTitle,
       description: ogDescription,
@@ -232,26 +175,7 @@ const bannerImage = headingData?.bannerImage || "";
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
       <main>
-        {/* <div
-  className={bannerImage ? "w-100 d-flex align-items-center justify-content-center" : "container mt-5"}
-  style={bannerStyle}
->
-  <div className={bannerImage ? "container text-center py-5" : "text-center row mx-0 mb-3 mb-lg-5"}>
-            <HeadingTag id="furniture-heading" className="wallpaperHeading" style={headingStyle}>
-  {headingText}
-</HeadingTag>
-<p id="furniture-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
-  {descriptionText}
-</p>
-<style>{`
-  ${headingData?.headingColor ? `#furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
-  ${headingData?.descriptionColor ? `#furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
-  ${headingData?.descriptionFontSize ? `#furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
-  #furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
-  #furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
-`}</style>
-          </div>
-          </div> */}
+
 
                   {bannerImage ? (
                     <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}

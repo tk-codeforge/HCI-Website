@@ -1,542 +1,3 @@
-// import MainLayout from "../layouts/MainLayout";
-// import BackgroundImageRow from "../components/BackgroundImageRow";
-// import { defaultAltText } from "@/utils/helper";
-// import Image from "next/image";
-// import Link from "next/link";
-// import { FaArrowRight } from "react-icons/fa";
-// import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
-// import { MediaBg } from "../components/MediaImage";
-// import JsonLd from "../components/JsonLd";
-// const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-// const safeTag = (t, fallback) => (TAGS.includes(t) ? t : fallback);
-
-// // --- CONFIGURATION ---
-// export const revalidate = 60; // Regenerate page every 60 seconds
-
-// // --- HELPER: Base URL Logic ---
-// const getBaseUrl = () => {
-//   return process.env.NODE_ENV === "development"
-//     ? process.env.NEXT_PUBLIC_API_DEV_URL
-//     : process.env.NEXT_PUBLIC_API_BASE_URL;
-// };
-
-// // --- HELPER: Fetch Services Data ---
-// async function getServiceData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/cms-city`, {
-//       // cache handled by page revalidate
-//     });
-
-//     if (!res.ok) {
-//       console.error(`Failed to fetch services: ${res.status}`);
-//       return [];
-//     }
-
-//     return await res.json();
-//   } catch (err) {
-//     console.error("Services Fetch Error:", err);
-//     return [];
-//   }
-// }
-
-// // --- HELPER: Fetch SEO Data ---
-// // async function getSeoData() {
-// //   try {
-// //     const baseURL = getBaseUrl();
-// //     const res = await fetch(`${baseURL}/seo-tag`, {
-// //       next: { revalidate: 60 },
-// //     });
-
-// //     if (!res.ok) return null;
-
-// //     const allTags = await res.json();
-
-// //     if (Array.isArray(allTags)) {
-// //       return allTags.find(
-// //         (tag) =>
-// //           tag.page_name === "https://hcinterior.in/services" ||
-// //           tag.page_name?.endsWith("/services")
-// //       );
-// //     }
-// //     return null;
-// //   } catch (err) {
-// //     console.error("SEO Fetch Error:", err);
-// //     return null;
-// //   }
-// // }
-
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(
-//       `${baseURL}/seo-tag/route?path=${encodeURIComponent("/services")}`,
-//       { next: { revalidate: 60 } }
-//     );
-//     if (!res.ok) return null;
-//     return await res.json();
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
-
-// // --- DYNAMIC METADATA GENERATION ---
-// // export async function generateMetadata() {
-// //   const seoData = await getSeoData();
-
-// //   const defaultTitle = "Our Taganting Site Services Page";
-// //   const defaultDesc = "Our Taganting Site Services Page";
-// //   const defaultCanonical = "https://hcinterior.in/services";
-
-// //   return {
-// //     title: seoData?.title || defaultTitle,
-// //     description: seoData?.meta_description || defaultDesc,
-// //     alternates: {
-// //       canonical: seoData?.page_name || defaultCanonical,
-// //     },
-// //     openGraph: {
-// //       title: seoData?.title || defaultTitle,
-// //       description: seoData?.meta_description || defaultDesc,
-// //       url: seoData?.page_name || defaultCanonical,
-// //       type: "website",
-// //     },
-// //   };
-// // }
-
-// export async function generateMetadata() {
-//   const seo = await getSeoData();
-
-//   const title =
-//     seo?.meta_title || "Our Taganting Site Services Page";
-//   const description =
-//     seo?.meta_description ||
-//    "Our Taganting Site Services Page";
-
-//    const ogTitle = seo?.og_title || title;
-// const ogDescription = seo?.og_description || description;
-
-//   const canonical = getCanonicalUrl({
-//     canonicalUrl: seo?.canonical_url,
-//     fallbackPath: "/services",
-//   });
-//   const { index, follow } = seo
-//     ? getRobotsDirectives(seo)
-//     : { index: true, follow: true };
-
-//   return {
-//     title,
-//     description,
-//     ...(seo?.keywords && { keywords: seo.keywords }),
-//     alternates: { canonical },
-//     robots: { index, follow },
-//     // openGraph: {
-//     //   title,
-//     //   description,
-//     //   url: canonical,
-//     //   type: "website",
-//     //   ...(seo?.og_image && {
-//     //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-//     //   }),
-//     // },
-
-//         openGraph: {
-//       title: ogTitle,
-//       description: ogDescription,
-//       url: canonical,
-//       type: "website",
-//       images: seo?.og_image
-//         ? [{ url: seo.og_image, width: 1200, height: 630 }]
-//         : [{ url: "/images/new_hc_logo.png" }],
-//     },
-//   };
-// }
-
-// // --- MAIN SERVER COMPONENT ---
-// export default async function Services() {
-//   const seo = await getSeoData();
-//   const rawPageDataList = await getServiceData();
-
-//   // Fetch CMS page data (Banner & Custom Content)
-//   let cmsData = null;
-//   let recordImage = null;
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/cms-content/services_page`, { cache: "no-store" });
-//     if (res.ok) {
-//       const jsonRes = await res.json();
-//       const record = Array.isArray(jsonRes) ? jsonRes.data?.[0] || jsonRes[0] : jsonRes;
-//       cmsData = record?.json_content || record;
-//       recordImage = record?.image || null;
-//     }
-//   } catch (err) {
-//     console.error("CMS Services Content Fetch Error:", err);
-//   }
-
-//   const customServices = cmsData?.blocks || cmsData?.services || [];
-//   const hasCustomContent = Array.isArray(customServices) && customServices.length > 0;
-
-//   // --- SORTING LOGIC FOR FALLBACK ---
-//   const normalizeCity = (value) =>
-//   (value || "").toLowerCase().trim().replace(/[\s_-]+/g, "");
-
-// // Handles known real-world naming differences between what's stored
-// // and the desired display order.
-// const cityAliases = { gurgaon: "gurugram" };
-
-// const resolveCityKey = (value) => {
-//   const normalized = normalizeCity(value);
-//   return cityAliases[normalized] || normalized;
-// };
-
-// const desiredOrder = [
-//   "noida",
-//   "ghaziabad",
-//   "greater noida",
-//   "delhi",
-//   "dwarka",
-//   "faridabad",
-//   "gurugram",
-//   "manesar"
-// ].map(normalizeCity);
-
-// let pageDataList = [];
-// if (!hasCustomContent && rawPageDataList && Array.isArray(rawPageDataList)) {
-//   pageDataList = [...rawPageDataList].sort((a, b) => {
-//     const indexA = desiredOrder.indexOf(resolveCityKey(a.city_type));
-//     const indexB = desiredOrder.indexOf(resolveCityKey(b.city_type));
-
-//     if (indexA !== -1 && indexB !== -1) {
-//       return indexA - indexB;
-//     }
-//     if (indexA !== -1) return -1;
-//     if (indexB !== -1) return 1;
-
-//     return 0;
-//   });
-// }
-
-//   // Strict Fallback Order matching your exact code requirements
-//   // const fallbackImages = [
-//   //   "/images/services/1-min.png", // 0: Noida
-//   //   "/images/services/2-min.png", // 1: Ghaziabad
-//   //   "/images/services/3-min.png", // 2: Greater Noida
-//   //   "/images/services/4-min.png", // 3: Delhi
-//   //   "/images/services/5-min.png", // 4: Dwarka
-//   //   "/images/services/6-min.png", // 5: Faridabad
-//   //   "/images/services/8-min.png", // 6: Gurugram
-//   //   "/images/services/7-min.png", // 7: Manesar
-//   // ];
-
-//   const activeItems = hasCustomContent ? customServices : pageDataList;
-
-//  const bannerHeading = cmsData?.banner?.heading || cmsData?.bannerHeading || "Services";
-// const bannerDesc = cmsData?.banner?.description || cmsData?.bannerDescription || "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
-// const bannerHeadingColor = cmsData?.bannerHeadingColor || "#ffffff";
-// const bannerDescriptionColor = cmsData?.bannerDescriptionColor || "#ffffff";
-// const bannerHeadingTag = safeTag(cmsData?.bannerHeadingTag, "h1"); // use the tag the banner renders today as the fallback
-// const bannerDescriptionSize = Number(cmsData?.bannerDescriptionSize) || 14;
-//   let rawBannerImg =
-//   cmsData?.banner?.image ||
-//   cmsData?.bg_image ||
-//   cmsData?.image ||    
-//   recordImage;
-
-// const hasCustomBanner =
-//   rawBannerImg && typeof rawBannerImg === "string" && rawBannerImg.trim() !== "";
-//   const bannerImageAlt = cmsData?.bg_image_alt?.trim() || bannerHeading;
-
-//   return (
-//     <MainLayout>
-//       <JsonLd data={seo?.custom_schema} />
-//       <style dangerouslySetInnerHTML={{__html: `
-// .services-page-wrapper .secbgbesclass {
-//   border-left: none !important;
-// } 
-//         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
-//         .font-outfit { font-family: var(--font-outfit), sans-serif; }
-//         .font-quicksand { font-family: var(--font-quicksand), sans-serif; }
-
-//         .services-custom-bg .sectionbg.services {
-//   background-image: var(--services-bg-image) !important;
-//   background-size: cover !important;
-//   background-position: center !important;
-// }
-
-// .services-custom-bg .sectionbg.services .services-bg-img {
-//   object-position: center !important;
-// }
-        
-//         .modern-service-row { padding: 4rem 0; border-bottom: 1px solid #f1f5f9; transition: background 0.3s ease; }
-//         .modern-service-row:hover { background: #fdfdfd; }
-//         .modern-service-row:last-child { border-bottom: none; }
-        
-//         .service-img-wrapper { 
-//             position: relative; 
-//             width: 100%; 
-//             aspect-ratio: 4/3; 
-//             border-radius: 20px; 
-//             overflow: hidden; 
-//             box-shadow: 0 20px 40px rgba(0,0,0,0.06); 
-//             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
-//         }
-//         .modern-service-row:hover .service-img-wrapper {
-//             transform: translateY(-8px);
-//             box-shadow: 0 30px 50px rgba(0,0,0,0.12);
-//         }
-
-//         .service-img-wrapper img {
-//             transition: transform 0.7s ease;
-//         }
-//         .modern-service-row:hover .service-img-wrapper img {
-//             transform: scale(1.05);
-//         }
-
-//         .service-badge { 
-//             display: inline-block; 
-//             padding: 6px 16px; 
-//             background: #fff4ed; 
-//             color: var(--hc-primary); 
-//             border-radius: 30px; 
-//             font-size: 13px; 
-//             font-weight: 700; 
-//             letter-spacing: 1px; 
-//             text-transform: uppercase; 
-//             margin-bottom: 1rem; 
-//         }
-
-//         .btn-modern-primary {
-//             display: inline-flex;
-//             align-items: center;
-//             gap: 10px;
-//             padding: 12px 28px;
-//             background: white;
-//             color: #ff914d !important;
-//             border: 2px solid #ff914d;
-//             font-weight: 600;
-//             border-radius: 30px;
-//             text-decoration: none;
-//             transition: all 0.3s ease;
-//             box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
-//         }
-//         .btn-modern-primary:hover {
-//             background: linear-gradient(135deg, var(--hc-primary) 0%, #ff5722 100%);
-//             color: #ffffff !important;
-//             transform: translateY(-3px);
-//             box-shadow: 0 15px 25px rgba(255, 145, 77, 0.25);
-//         }
-
-//         .service-rich-text {
-//     max-height: 250px; /* Adjust this value slightly if you want more or less text to show */
-//     overflow: hidden;
-//     position: relative;
-//     /* This ensures that if your CMS sends raw text with 'Enters', they render as new lines */
-//     white-space: pre-line; 
-// }
-
-// .service-rich-text::after,
-// .service-description-wrapper::after {
-//     content: none !important;
-//     display: none !important;
-// }
-
-// .service-rich-text p {
-//     margin-bottom: 1.25rem;
-//     line-height: 1.6;
-// }
-//         .service-rich-text img { max-width: 100%; height: auto; border-radius: 12px; }
-
-//         .service-description-wrapper {
-//     position: relative;
-//     max-height: 215px;
-//     overflow: hidden;
-// }
-
-// /* NEW: Fade the bottom of collapsed service content */
-// .service-description-wrapper::after {
-//     content: "";
-//     position: absolute;
-//     left: 0;
-//     right: 0;
-//     bottom: 0;
-//     height: 70px;
-//     background: linear-gradient(
-//         to bottom,
-//         rgba(255,255,255,0),
-//         #fff
-//     );
-//     pointer-events: none;
-// }
-
-// .services-page-wrapper .sec_bgheading_lass {
-//   color: var(--services-heading-color, #ffffff) !important;
-//   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
-// }
-
-// .services-page-wrapper .secbgbesclass {
-//   color: var(--services-description-color, #ffffff) !important;
-//   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
-//   font-size: var(--services-description-size, 14px) !important;
-// }
-//   @media (max-width: 768px) {
-//   .services-page-wrapper {
-//     overflow-x: hidden;
-//     width: 100%;
-//     max-width: 100vw;
-//   }
-//     .services-custom-bg .sectionbg.services {
-//     position: relative;
-//     height: 0 !important;
-//     padding-top: 31.25% !important; 
-//     background-size: cover !important;
-//     background-position: 25% center !important;
-//     background-repeat: no-repeat !important;
-//     background-color: transparent !important;
-//     min-height: unset !important;
-//     overflow: hidden;
-//   }
-
-//   .services-custom-bg .sectionbg.services > .container {
-//     position: absolute !important;
-//     inset: 0;
-//     display: flex;
-//     align-items: center;
-//   }
-
-//     .services-custom-bg .sectionbg.services .services-bg-img {
-//     object-position: 45% center !important;
-//   }
-// }
-
-//       `}} />
-
-//       <main
-//   className={hasCustomBanner ? "services-page-wrapper services-custom-bg" : "services-page-wrapper"}
-//   style={{
-//     "--services-heading-color": bannerHeadingColor,
-//     "--services-description-color": bannerDescriptionColor,
-//     "--services-description-size": `${bannerDescriptionSize}px`,
-//     ...(hasCustomBanner ? { "--services-bg-image": `url(${rawBannerImg})` } : {}),
-//   }}
-// >
-//         <BackgroundImageRow
-//   sectionBgImages={"sectionbg services"}
-//   sectionBgHeading={bannerHeading}
-//   headingTag={bannerHeadingTag}
-//   secBgHeadingClass="sec_bgheading_lass"
-//   sectionBgDescription={bannerDesc}
-//      descriptionFontSize={bannerDescriptionSize}
-//   secBgDesClass="secbgbesclass"
-//   noDivider
-//   bgImageUrl={hasCustomBanner ? rawBannerImg : undefined}
-//   bgImageAlt={bannerImageAlt}
-//   bgImageClassName="services-bg-img"
-// />
-
-//         <div className="container py-5">
-//           {activeItems && activeItems.length > 0 ? (
-//             activeItems.map((item, index) => {
-//               // Strictly enforce fallback images matching index order (0 -> 1-min.png for Noida, etc.)
-//               // const fallbackImg = fallbackImages[index] || fallbackImages[index % fallbackImages.length];
-//               const isEven = index % 2 === 0;
-
-//               let targetLink = item?.button_url || item?.buttonLink;
-//               if (!targetLink) {
-//                 const cityValue = item?.city_type?.toLowerCase().trim() || "";
-//                 let citySlug = cityValue.replace(/[\s_]+/g, '-');
-//                 if (citySlug === "gurugram") citySlug = "gurgaon";
-//                 targetLink = cityValue ? `/interior-designers-in-${citySlug}` : "#";
-//               }
-
-//               const titleText = hasCustomContent 
-//                 ? (item?.title || "") 
-//                 : (item?.main_title ?? `Interior Designers in ${(item?.city_type || "").toUpperCase()}`);
-              
-//               const safeDescription = hasCustomContent 
-//                 ? (item?.description || "") 
-//                 : (item?.main_description || "");
-
-//               // const itemImage = hasCustomContent 
-//               //   ? (item?.image || fallbackImg) 
-//               //   : (fallbackImg); // Enforces strict array fallback order for cities
-//               const itemImage = item?.image || null;
-//               const CardTag = safeTag(item?.headingTag, "h2");
-
-//               const btnText = item?.button_text || item?.buttonText || "Read More";
-
-//               return (
-//                 <div className="modern-service-row" key={item.id || index}>
-//                   <div className="row g-3 g-lg-5 align-items-center">
-                    
-//                     {/* IMAGE COLUMN */}
-//                     {/* <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
-//                       <div className="service-img-wrapper">
-//                         <Image 
-//                           src={itemImage} 
-//                           alt={titleText || defaultAltText}
-//                           fill
-//                           sizes="(max-width: 768px) 100vw, 50vw"
-//                           style={{ objectFit: 'cover' }}
-//                         />
-//                       </div>
-//                     </div> */}
-
-//                                         <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
-//                       <div className="service-img-wrapper">
-//                         {itemImage ? (
-//                           <Image 
-//                             src={itemImage} 
-//                             alt={item?.image_alt?.trim() || titleText || defaultAltText}
-//                             fill
-//                             sizes="(max-width: 768px) 100vw, 50vw"
-//                             style={{ objectFit: 'cover' }}
-//                           />
-//                         ) : (
-//                           <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
-//                             No image
-//                           </div>
-//                         )}
-//                       </div>
-//                     </div>
-
-//                     {/* CONTENT COLUMN */}
-//                     <div className={`col-lg-6 ${isEven ? 'order-lg-2' : 'order-lg-1'} ps-lg-5`}>
-//   <span className="service-badge font-quicksand">Premium Interiors</span>
-  
-//   <CardTag className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(2rem, 3vw, 2.5rem)', lineHeight: '1.2' }}>
-//   {titleText}
-// </CardTag>
-  
-//   {/* Apply the CSS class directly here */}
-//   <div 
-//     className="service-rich-text mb-4 text-muted" 
-//     dangerouslySetInnerHTML={{ __html: safeDescription }} 
-//   />
-
-//   <div className="d-flex align-items-center">
-//     <Link href={targetLink} className="btn-modern-primary font-quicksand">
-//       {btnText} <FaArrowRight />
-//     </Link>
-//   </div>
-// </div>
-
-//                   </div>
-//                 </div>
-//               );
-//             })
-//           ) : (
-//             <div className="text-center my-5 py-5">
-//               <div className="spinner-border text-primary mb-3" role="status"></div>
-//               <p className="font-quicksand text-muted">Loading services...</p>
-//             </div>
-//           )}
-//         </div>
-//       </main>
-//     </MainLayout>
-//   );
-// }
-
-
 import MainLayout from "../layouts/MainLayout";
 import BackgroundImageRow from "../components/BackgroundImageRow";
 import { defaultAltText } from "@/utils/helper";
@@ -547,23 +8,27 @@ import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
 
 const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-const safeTag = (t, fallback) => (TAGS.includes(t) ? t : fallback);
+const safeTag = (tag, fallback) => (TAGS.includes(tag) ? tag : fallback);
 
-// --- CONFIGURATION ---
-export const revalidate = 60; // Regenerate page every 60 seconds
+// Keep page data fresh while allowing Next.js to cache the page and its API requests.
+export const revalidate = 60;
 
-// --- HELPER: Base URL Logic ---
-const getBaseUrl = () => {
-  return process.env.NODE_ENV === "development"
+const getBaseUrl = () =>
+  process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_API_DEV_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
-};
 
-// --- HELPER: Fetch Services Data ---
 async function getServiceData() {
+  const baseURL = getBaseUrl();
+  if (!baseURL) {
+    console.error("Services Fetch Error: API base URL is not configured.");
+    return [];
+  }
+
   try {
-    const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/cms-city`);
+    const res = await fetch(`${baseURL}/cms-city`, {
+      next: { revalidate: 60 },
+    });
 
     if (!res.ok) {
       console.error(`Failed to fetch services: ${res.status}`);
@@ -571,32 +36,68 @@ async function getServiceData() {
     }
 
     return await res.json();
-  } catch (err) {
-    console.error("Services Fetch Error:", err);
+  } catch (error) {
+    console.error("Services Fetch Error:", error);
     return [];
   }
 }
 
-// --- HELPER: Fetch SEO Data ---
 async function getSeoData() {
+  const baseURL = getBaseUrl();
+  if (!baseURL) {
+    console.error("SEO Fetch Error: API base URL is not configured.");
+    return null;
+  }
+
   try {
-    const baseURL = getBaseUrl();
     const res = await fetch(
       `${baseURL}/seo-tag/route?path=${encodeURIComponent("/services")}`,
       { next: { revalidate: 60 } }
     );
     if (!res.ok) return null;
     return await res.json();
-  } catch (err) {
-    console.error("SEO Fetch Error:", err);
+  } catch (error) {
+    console.error("SEO Fetch Error:", error);
     return null;
   }
 }
 
-// --- DYNAMIC METADATA GENERATION ---
+async function getServicesPageContent() {
+  const baseURL = getBaseUrl();
+  if (!baseURL) {
+    console.error("CMS Services Content Fetch Error: API base URL is not configured.");
+    return { cmsData: null, recordImage: null };
+  }
+
+  try {
+    // Previously cache: "no-store" forced this route to render dynamically and
+    // prevented the page's ISR setting from helping mobile TTFB.
+    const res = await fetch(`${baseURL}/cms-content/services_page`, {
+      next: { revalidate: 60 },
+    });
+
+    if (!res.ok) {
+      console.error(`CMS Services Content Fetch Error: ${res.status}`);
+      return { cmsData: null, recordImage: null };
+    }
+
+    const jsonRes = await res.json();
+    const record = Array.isArray(jsonRes)
+      ? jsonRes.data?.[0] || jsonRes[0]
+      : jsonRes;
+
+    return {
+      cmsData: record?.json_content || record || null,
+      recordImage: record?.image || null,
+    };
+  } catch (error) {
+    console.error("CMS Services Content Fetch Error:", error);
+    return { cmsData: null, recordImage: null };
+  }
+}
+
 export async function generateMetadata() {
   const seo = await getSeoData();
-
   const title = seo?.meta_title || "Our Taganting Site Services Page";
   const description = seo?.meta_description || "Our Taganting Site Services Page";
   const ogTitle = seo?.og_title || title;
@@ -628,35 +129,21 @@ export async function generateMetadata() {
   };
 }
 
-// --- MAIN SERVER COMPONENT ---
 export default async function Services() {
-  const seo = await getSeoData();
-  const rawPageDataList = await getServiceData();
+  // Run independent API requests concurrently to avoid serial server wait time.
+  const [seo, rawPageDataList, pageContent] = await Promise.all([
+    getSeoData(),
+    getServiceData(),
+    getServicesPageContent(),
+  ]);
 
-  let cmsData = null;
-  let recordImage = null;
-  try {
-    const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/cms-content/services_page`, { cache: "no-store" });
-    if (res.ok) {
-      const jsonRes = await res.json();
-      const record = Array.isArray(jsonRes) ? jsonRes.data?.[0] || jsonRes[0] : jsonRes;
-      cmsData = record?.json_content || record;
-      recordImage = record?.image || null;
-    }
-  } catch (err) {
-    console.error("CMS Services Content Fetch Error:", err);
-  }
-
+  const { cmsData, recordImage } = pageContent;
   const customServices = cmsData?.blocks || cmsData?.services || [];
   const hasCustomContent = Array.isArray(customServices) && customServices.length > 0;
 
-  // --- SORTING LOGIC FOR FALLBACK ---
   const normalizeCity = (value) =>
     (value || "").toLowerCase().trim().replace(/[\s_-]+/g, "");
-
   const cityAliases = { gurgaon: "gurugram" };
-
   const resolveCityKey = (value) => {
     const normalized = normalizeCity(value);
     return cityAliases[normalized] || normalized;
@@ -670,201 +157,205 @@ export default async function Services() {
     "dwarka",
     "faridabad",
     "gurugram",
-    "manesar"
+    "manesar",
   ].map(normalizeCity);
 
   let pageDataList = [];
-  if (!hasCustomContent && rawPageDataList && Array.isArray(rawPageDataList)) {
+  if (!hasCustomContent && Array.isArray(rawPageDataList)) {
     pageDataList = [...rawPageDataList].sort((a, b) => {
       const indexA = desiredOrder.indexOf(resolveCityKey(a.city_type));
       const indexB = desiredOrder.indexOf(resolveCityKey(b.city_type));
-
-      if (indexA !== -1 && indexB !== -1) {
-        return indexA - indexB;
-      }
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-
       return 0;
     });
   }
 
   const activeItems = hasCustomContent ? customServices : pageDataList;
-
-  const bannerHeading = cmsData?.banner?.heading || cmsData?.bannerHeading || "Services";
-  const bannerDesc = cmsData?.banner?.description || cmsData?.bannerDescription || "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
+  const bannerHeading =
+    cmsData?.banner?.heading || cmsData?.bannerHeading || "Services";
+  const bannerDesc =
+    cmsData?.banner?.description ||
+    cmsData?.bannerDescription ||
+    "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
   const bannerHeadingColor = cmsData?.bannerHeadingColor || "#ffffff";
   const bannerDescriptionColor = cmsData?.bannerDescriptionColor || "#ffffff";
   const bannerHeadingTag = safeTag(cmsData?.bannerHeadingTag, "h1");
   const bannerDescriptionSize = Number(cmsData?.bannerDescriptionSize) || 14;
-  
-  let rawBannerImg =
-    cmsData?.banner?.image ||
-    cmsData?.bg_image ||
-    cmsData?.image ||    
-    recordImage;
-
+  const rawBannerImg =
+    cmsData?.banner?.image || cmsData?.bg_image || cmsData?.image || recordImage;
   const hasCustomBanner =
-    rawBannerImg && typeof rawBannerImg === "string" && rawBannerImg.trim() !== "";
+    typeof rawBannerImg === "string" && rawBannerImg.trim() !== "";
   const bannerImageAlt = cmsData?.bg_image_alt?.trim() || bannerHeading;
 
   return (
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{ __html: `
+        .services-page-wrapper {
+          --hc-primary: #ff914d;
+          --hc-dark: #0f172a;
+        }
+        .services-page-wrapper .font-outfit {
+          font-family: var(--font-outfit), sans-serif;
+        }
+        .services-page-wrapper .font-quicksand {
+          font-family: var(--font-quicksand), sans-serif;
+        }
         .services-page-wrapper .secbgbesclass {
           border-left: none !important;
-        } 
-        :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
-        .font-outfit { font-family: var(--font-outfit), sans-serif; }
-        .font-quicksand { font-family: var(--font-quicksand), sans-serif; }
-
-        .services-custom-bg .sectionbg.services {
-          background-image: var(--services-bg-image) !important;
-          background-size: cover !important;
-          background-position: center !important;
+          color: var(--services-description-color, #ffffff) !important;
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
+          font-size: var(--services-description-size, 14px) !important;
         }
-
-        .services-custom-bg .sectionbg.services .services-bg-img {
-          object-position: center !important;
-        }
-        
-        .modern-service-row { padding: 4rem 0; border-bottom: 1px solid #f1f5f9; transition: background 0.3s ease; }
-        .modern-service-row:hover { background: #fdfdfd; }
-        .modern-service-row:last-child { border-bottom: none; }
-        
-        .service-img-wrapper { 
-            position: relative; 
-            width: 100%; 
-            aspect-ratio: 4/3; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.06); 
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
-        }
-        .modern-service-row:hover .service-img-wrapper {
-            transform: translateY(-8px);
-            box-shadow: 0 30px 50px rgba(0,0,0,0.12);
-        }
-
-        .service-img-wrapper img {
-            transition: transform 0.7s ease;
-        }
-        .modern-service-row:hover .service-img-wrapper img {
-            transform: scale(1.05);
-        }
-
-        .service-badge { 
-            display: inline-block; 
-            padding: 6px 16px; 
-            background: #fff4ed; 
-            color: var(--hc-primary); 
-            border-radius: 30px; 
-            font-size: 13px; 
-            font-weight: 700; 
-            letter-spacing: 1px; 
-            text-transform: uppercase; 
-            margin-bottom: 1rem; 
-        }
-
-        .btn-modern-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 28px;
-            background: white;
-            color: #ff914d !important;
-            border: 2px solid #ff914d;
-            font-weight: 600;
-            border-radius: 30px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
-        }
-        .btn-modern-primary:hover {
-            background: linear-gradient(135deg, var(--hc-primary) 0%, #ff5722 100%);
-            color: #ffffff !important;
-            transform: translateY(-3px);
-            box-shadow: 0 15px 25px rgba(255, 145, 77, 0.25);
-        }
-
-        .service-rich-text {
-            max-height: 250px;
-            overflow: hidden;
-            position: relative;
-            white-space: pre-line; 
-        }
-
-        .service-rich-text::after,
-        .service-description-wrapper::after {
-            content: none !important;
-            display: none !important;
-        }
-
-        .service-rich-text p {
-            margin-bottom: 1.25rem;
-            line-height: 1.6;
-        }
-        .service-rich-text img { max-width: 100%; height: auto; border-radius: 12px; }
-
-        .service-description-wrapper {
-            position: relative;
-            max-height: 215px;
-            overflow: hidden;
-        }
-
         .services-page-wrapper .sec_bgheading_lass {
           color: var(--services-heading-color, #ffffff) !important;
           text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
         }
 
-        .services-page-wrapper .secbgbesclass {
-          color: var(--services-description-color, #ffffff) !important;
-          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
-          font-size: var(--services-description-size, 14px) !important;
+        /* Use the MediaImg element as the single banner image source. The old
+           !important CSS background requested the same banner a second time. */
+        .services-page-wrapper.services-custom-bg .sectionbg.services {
+          background-image: none !important;
         }
+        .services-page-wrapper.services-custom-bg .sectionbg.services .services-bg-img {
+          object-position: center;
+        }
+
+        .services-page-wrapper .modern-service-row {
+          padding: 4rem 0;
+          border-bottom: 1px solid #f1f5f9;
+        }
+        .services-page-wrapper .modern-service-row:last-child {
+          border-bottom: none;
+        }
+        .services-page-wrapper .service-img-wrapper {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 4 / 3;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+        }
+        .services-page-wrapper .service-img-wrapper img {
+          display: block;
+        }
+        .services-page-wrapper .service-badge {
+          display: inline-block;
+          padding: 6px 16px;
+          background: #fff4ed;
+          color: var(--hc-primary);
+          border-radius: 30px;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          margin-bottom: 1rem;
+        }
+        .services-page-wrapper .btn-modern-primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 28px;
+          background: #ffffff;
+          color: var(--hc-primary) !important;
+          border: 2px solid var(--hc-primary);
+          font-weight: 600;
+          border-radius: 30px;
+          text-decoration: none;
+          box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+        }
+        .services-page-wrapper .service-rich-text {
+          max-height: 250px;
+          overflow: hidden;
+          position: relative;
+          white-space: pre-line;
+        }
+        .services-page-wrapper .service-rich-text p {
+          margin-bottom: 1.25rem;
+          line-height: 1.6;
+        }
+        .services-page-wrapper .service-rich-text img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 12px;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .services-page-wrapper .modern-service-row {
+            transition: background 0.3s ease;
+          }
+          .services-page-wrapper .modern-service-row:hover {
+            background: #fdfdfd;
+          }
+          .services-page-wrapper .modern-service-row .service-img-wrapper {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+          }
+          .services-page-wrapper .modern-service-row:hover .service-img-wrapper {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.12);
+          }
+          .services-page-wrapper .service-img-wrapper img {
+            transition: transform 0.7s ease;
+          }
+          .services-page-wrapper .modern-service-row:hover .service-img-wrapper img {
+            transform: scale(1.05);
+          }
+          .services-page-wrapper .btn-modern-primary {
+            transition: color 0.3s ease, background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+          }
+          .services-page-wrapper .btn-modern-primary:hover {
+            background: linear-gradient(135deg, var(--hc-primary) 0%, #ff5722 100%);
+            color: #ffffff !important;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(255, 145, 77, 0.25);
+          }
+        }
+
         @media (max-width: 768px) {
           .services-page-wrapper {
             overflow-x: hidden;
             width: 100%;
-            max-width: 100vw;
+            max-width: 100%;
           }
-          .services-custom-bg .sectionbg.services {
+          .services-page-wrapper .modern-service-row {
+            padding: 2rem 0;
+          }
+          .services-page-wrapper.services-custom-bg .sectionbg.services {
             position: relative;
             height: 0 !important;
-            padding-top: 31.25% !important; 
-            background-size: cover !important;
-            background-position: 25% center !important;
-            background-repeat: no-repeat !important;
+            padding-top: 31.25% !important;
             background-color: transparent !important;
             min-height: unset !important;
             overflow: hidden;
           }
-
-          .services-custom-bg .sectionbg.services > .container {
+          .services-page-wrapper.services-custom-bg .sectionbg.services > .container {
             position: absolute !important;
             inset: 0;
             display: flex;
             align-items: center;
           }
-
-          .services-custom-bg .sectionbg.services .services-bg-img {
+          .services-page-wrapper.services-custom-bg .sectionbg.services .services-bg-img {
             object-position: 45% center !important;
           }
         }
-      `}} />
+      ` }} />
 
       <main
-        className={hasCustomBanner ? "services-page-wrapper services-custom-bg" : "services-page-wrapper"}
+        className={
+          hasCustomBanner
+            ? "services-page-wrapper services-custom-bg"
+            : "services-page-wrapper"
+        }
         style={{
           "--services-heading-color": bannerHeadingColor,
           "--services-description-color": bannerDescriptionColor,
           "--services-description-size": `${bannerDescriptionSize}px`,
-          ...(hasCustomBanner ? { "--services-bg-image": `url(${rawBannerImg})` } : {}),
         }}
       >
         <BackgroundImageRow
-          sectionBgImages={"sectionbg services"}
+          sectionBgImages="sectionbg services"
           sectionBgHeading={bannerHeading}
           headingTag={bannerHeadingTag}
           secBgHeadingClass="sec_bgheading_lass"
@@ -875,60 +366,47 @@ export default async function Services() {
           bgImageUrl={hasCustomBanner ? rawBannerImg : undefined}
           bgImageAlt={bannerImageAlt}
           bgImageClassName="services-bg-img"
+          bgImageSizes="100vw"
         />
 
         <div className="container py-5">
-          {activeItems && activeItems.length > 0 ? (
+          {activeItems.length > 0 ? (
             activeItems.map((item, index) => {
               const isEven = index % 2 === 0;
-
               let targetLink = item?.button_url || item?.buttonLink;
+
               if (!targetLink) {
                 const cityValue = item?.city_type?.toLowerCase().trim() || "";
-                let citySlug = cityValue.replace(/[\s_]+/g, '-');
+                let citySlug = cityValue.replace(/[\s_]+/g, "-");
                 if (citySlug === "gurugram") citySlug = "gurgaon";
-                targetLink = cityValue ? `/interior-designers-in-${citySlug}` : "#";
+                targetLink = cityValue
+                  ? `/interior-designers-in-${citySlug}`
+                  : "#";
               }
 
-              const titleText = hasCustomContent 
-                ? (item?.title || "") 
-                : (item?.main_title ?? `Interior Designers in ${(item?.city_type || "").toUpperCase()}`);
-              
-              const safeDescription = hasCustomContent 
-                ? (item?.description || "") 
-                : (item?.main_description || "");
-
+              const titleText = hasCustomContent
+                ? item?.title || ""
+                : item?.main_title ?? `Interior Designers in ${(item?.city_type || "").toUpperCase()}`;
+              const safeDescription = hasCustomContent
+                ? item?.description || ""
+                : item?.main_description || "";
               const itemImage = item?.image || null;
               const CardTag = safeTag(item?.headingTag, "h2");
               const btnText = item?.button_text || item?.buttonText || "Read More";
-
-              // 🚀 PERFORMANCE FIX: Prioritize the first image for immediate LCP loading
               const isFirstItem = index === 0;
 
               return (
                 <div className="modern-service-row" key={item.id || index}>
                   <div className="row g-3 g-lg-5 align-items-center">
-                    
-                    {/* IMAGE COLUMN */}
-                    <div className={`col-lg-6 ${isEven ? 'order-lg-1' : 'order-lg-2'}`}>
+                    <div className={`col-lg-6 ${isEven ? "order-lg-1" : "order-lg-2"}`}>
                       <div className="service-img-wrapper">
                         {itemImage ? (
-                          // <Image 
-                          //   src={itemImage} 
-                          //   alt={item?.image_alt?.trim() || titleText || defaultAltText}
-                          //   fill
-                          //   sizes="(max-width: 768px) 100vw, 50vw"
-                          //   priority={isFirstItem}
-                          //   fetchPriority={isFirstItem ? "high" : "auto"}
-                          //   style={{ objectFit: 'cover' }}
-                          // />
-
-                                                    <Image 
-                            src={itemImage} 
+                          <Image
+                            src={itemImage}
                             alt={item?.image_alt?.trim() || titleText || defaultAltText}
                             width={1200}
                             height={900}
-                            sizes="(max-width: 768px) 100vw, 50vw"
+                            sizes="(max-width: 767px) calc(100vw - 2rem), (max-width: 991px) calc(100vw - 3rem), 50vw"
                             priority={isFirstItem}
                             fetchPriority={isFirstItem ? "high" : "auto"}
                             style={{
@@ -947,33 +425,33 @@ export default async function Services() {
                       </div>
                     </div>
 
-                    {/* CONTENT COLUMN */}
-                    <div className={`col-lg-6 ${isEven ? 'order-lg-2' : 'order-lg-1'} ps-lg-5`}>
+                    <div className={`col-lg-6 ${isEven ? "order-lg-2" : "order-lg-1"} ps-lg-5`}>
                       <span className="service-badge font-quicksand">Premium Interiors</span>
-                      
-                      <CardTag className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(2rem, 3vw, 2.5rem)', lineHeight: '1.2' }}>
+                      <CardTag
+                        className="font-outfit fw-bold text-dark mb-4"
+                        style={{ fontSize: "clamp(2rem, 3vw, 2.5rem)", lineHeight: "1.2" }}
+                      >
                         {titleText}
                       </CardTag>
-                      
-                      <div 
-                        className="service-rich-text mb-4 text-muted" 
-                        dangerouslySetInnerHTML={{ __html: safeDescription }} 
+
+                      <div
+                        className="service-rich-text mb-4 text-muted"
+                        dangerouslySetInnerHTML={{ __html: safeDescription }}
                       />
 
                       <div className="d-flex align-items-center">
                         <Link href={targetLink} className="btn-modern-primary font-quicksand">
-                          {btnText} <FaArrowRight />
+                          {btnText} <FaArrowRight aria-hidden="true" />
                         </Link>
                       </div>
                     </div>
-
                   </div>
                 </div>
               );
             })
           ) : (
             <div className="text-center my-5 py-5">
-              <div className="spinner-border text-primary mb-3" role="status"></div>
+              <div className="spinner-border text-primary mb-3" role="status" aria-label="Loading services" />
               <p className="font-quicksand text-muted">Loading services...</p>
             </div>
           )}

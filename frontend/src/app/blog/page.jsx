@@ -23,22 +23,6 @@ const getBaseUrl = () =>
     ? process.env.NEXT_PUBLIC_API_DEV_URL
     : process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// --- Dynamic Metadata for Pagination ---
-// export async function generateMetadata({ searchParams }) {
-//   const page = searchParams?.page || "1";
-//   const canonicalUrl = page === "1" 
-//     ? "https://hcinterior.in/blog" 
-//     : `https://hcinterior.in/blog?page=${page}`;
-
-//   return {
-//     title: "Latest News And Updates | High Creation Interior",
-//     description: "Latest News & Updates From High Creation Interior In Noida. Discover premium interior design blogs and insights.",
-//     alternates: {
-//       canonical: canonicalUrl,
-//     },
-//   };
-// }
-
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -80,16 +64,6 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
         openGraph: {
       title: ogTitle,
       description: ogDescription,
@@ -383,15 +357,7 @@ const bannerStyle = bannerImage
                       <div className="featured-blog-card row g-0 align-items-center">
                         <div className="col-lg-7">
                           <div className="card-img-wrapper" style={{ aspectRatio: '10/6' }}>
-                            {/* <Image 
-                              src={featuredBlog.image || "/images/Blog/blo_img1.webp"} 
-                              alt={featuredBlog.image_alt || featuredBlog.title || defaultAltText}
-                              fill
-                              sizes="(max-width: 992px) 100vw, 60vw"
-                              style={{ objectFit: 'cover' }}
-                              priority
-                            /> */}
-
+    
                                                         <Image 
                               src={featuredBlog.image || "/images/Blog/blo_img1.webp"} 
                               alt={featuredBlog.image_alt || featuredBlog.title || defaultAltText}
@@ -503,17 +469,6 @@ const bannerStyle = bannerImage
             </>
           )}
         </div>
-
-        {/* --- SEO CONTENT SECTION UTILIZING ExpandableRichText --- */}
-        {/* <div className="container mt-5 pt-4">
-          <div className="bg-white p-4 p-lg-5 rounded-4 border shadow-sm">
-            <div className="d-flex align-items-center gap-3 mb-4">
-              <h2 className="font-outfit fw-bold m-0">About High Creation Blog</h2>
-            </div> */}
-            {/* 🌟 THIS IS WHERE WE USE THE GOD TIER EXPANDABLE PARAGRAPH COMPONENT 🌟 */}
-            {/* <ExpandableRichText htmlContent={seoPageDescription} maxHeight={160} className="rich-text-content font-poppins text-muted" />
-          </div>
-        </div> */}
 
       </main>
       <hr className="m-0" />

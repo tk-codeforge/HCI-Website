@@ -10,12 +10,6 @@ const DEFAULT_LOCATIONS = [
     address: "H-56, 1st Floor, Sector-63, Noida, Uttar Pradesh- 201301",
     mapSrc: "https://www.google.com/maps?q=H-56,+1st+Floor,+Sector-63,+Noida,+Uttar+Pradesh-+201301&output=embed",
   },
-  // {
-  //   id: 2,
-  //   type: "Corporate Office",
-  //   address: "DDC Arcade, 1st Floor, Plot No 1 Main, Sector 48 Road, Badshahpur Sohna Rd, Opposite Vipul Business Park, Gurugram, Haryana 122018",
-  //   mapSrc: "https://www.google.com/maps?q=DDC+Arcade,+Badshahpur+Sohna+Rd,+Gurugram,+Haryana&output=embed",
-  // },
 
   // --- 2. Experience Center ---
   {
@@ -24,12 +18,7 @@ const DEFAULT_LOCATIONS = [
     address: "H101, LGF, Sector-63, Noida, Uttar Pradesh- 201301",
     mapSrc: "https://www.google.com/maps?q=H101,+LGF,+Sector-63,+Noida,+Uttar+Pradesh-+201301&output=embed",
   },
-  // {
-  //   id: 4,
-  //   type: "Experience Center",
-  //   address: "4th Floor, Jmd Galleria Mall, Unit Nos. 402, Sector-47 & 48, Sohna - Gurgaon Rd, Gurugram, Haryana 122001",
-  //   mapSrc: "https://www.google.com/maps?q=Jmd+Galleria+Mall,+Sector-47,+Gurugram,+Haryana&output=embed",
-  // },
+  
   {
     id: 4,
     type: "Experience Center",

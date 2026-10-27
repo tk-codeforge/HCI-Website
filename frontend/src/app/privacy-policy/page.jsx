@@ -18,7 +18,7 @@ async function getPrivacyPolicyContent() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-content/privacy_policy`, {
-      // cache handled by page revalidate
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
@@ -35,31 +35,6 @@ async function getPrivacyPolicyContent() {
 }
 
 // --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 },
-//     });
-
-//     if (!res.ok) return null;
-
-//     const allTags = await res.json();
-
-//     // Match the specific page URL for Privacy Policy
-//     if (Array.isArray(allTags)) {
-//       return allTags.find(
-//         (tag) =>
-//           tag.page_name === "https://hcinterior.in/privacy-policy" ||
-//           tag.page_name?.endsWith("/privacy-policy")
-//       );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -75,13 +50,14 @@ async function getSeoData() {
   }
 }
 
+// --- HELPER: Fetch Banner Data ---
 async function getBannerData() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/cms-gallery-design/manage-banner?key=privacy_policy`, {
-      cache: "no-store",
-      headers: { Connection: "close" },
-    });
+    const res = await fetch(
+      `${baseURL}/cms-gallery-design/manage-banner?key=privacy_policy`,
+      { next: { revalidate: 60 } }
+    );
     if (!res.ok) return null;
     return await res.json();
   } catch (err) {
@@ -91,40 +67,16 @@ async function getBannerData() {
 }
 
 // --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-
-//   const defaultTitle = "Privacy Policy";
-//   const defaultDesc =
-//     "Read the Privacy Policy of High Creation Interior to understand how we protect your personal information. Learn about data collection, usage, and your rights.";
-//   const defaultCanonical = "https://hcinterior.in/privacy-policy";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       canonical: seoData?.page_name || defaultCanonical,
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//   };
-// }
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
-  const title =
-    seo?.meta_title || "Privacy Policy";
+  const title = seo?.meta_title || "Privacy Policy";
   const description =
     seo?.meta_description ||
-   "Read the Privacy Policy of High Creation Interior to understand how we protect your personal information. Learn about data collection, usage, and your rights.";
+    "Read the Privacy Policy of High Creation Interior to understand how we protect your personal information. Learn about data collection, usage, and your rights.";
 
-   const ogTitle = seo?.og_title || title;
-const ogDescription = seo?.og_description || description;
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
@@ -140,17 +92,7 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
-
-        openGraph: {
+    openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
@@ -164,49 +106,38 @@ const ogDescription = seo?.og_description || description;
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Privacy() {
-  const seo = await getSeoData();
-  const pageData = await getPrivacyPolicyContent();
+  // Independent fetches run together instead of one after another.
+  const [seo, pageData, bannerRecord] = await Promise.all([
+    getSeoData(),
+    getPrivacyPolicyContent(),
+    getBannerData(),
+  ]);
 
-  const bannerRecord = await getBannerData();
   const bgHeading = bannerRecord?.banner_heading || "Privacy Policy";
-const bgDescription = bannerRecord?.banner_description || "Get all the information you need";
+  const bgDescription =
+    bannerRecord?.banner_description || "Get all the information you need";
 
   return (
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
-      {/* <BackgroundImageWithHeading
-        sectionBgImages={"contact_wrapper privacy_policy_banner"}
-        sectionBgHeading="Privacy Policy"
-        secBgHeadingClass="sec_bgheading_lass"
-        sectionBgDescription="Get all the information you need"
-        secBgDesClass={"text-center text-white"}
-      /> */}
 
       <BackgroundImageWithHeading
-  sectionBgImages={"contact_wrapper privacy_policy_banner"}
-  sectionBgHeading={bgHeading}
-  secBgHeadingClass="sec_bgheading_lass force-white-heading"
-  sectionBgDescription={bgDescription}
-  secBgDesClass={"text-center bg-transparent text-white"}
-  bgImageUrl={bannerRecord?.banner_image}
-    bgImageAlt={bannerRecord?.banner_alt}
-  headingTag={bannerRecord?.banner_heading_tag || "h1"}
-  descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
-  sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
-  sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
-/>
+        sectionBgImages={"contact_wrapper privacy_policy_banner"}
+        sectionBgHeading={bgHeading}
+        secBgHeadingClass="sec_bgheading_lass force-white-heading"
+        sectionBgDescription={bgDescription}
+        secBgDesClass={"text-center bg-transparent text-white"}
+        bgImageUrl={bannerRecord?.banner_image}
+        bgImageAlt={bannerRecord?.banner_alt}
+        headingTag={bannerRecord?.banner_heading_tag || "h1"}
+        descriptionFontSize={bannerRecord?.banner_description_font_size || 16}
+        sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
+        sectionBgDescriptionStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
+      />
       <main>
         <section className="privacy my-5">
           <div className="container">
             <div className="row mx-0">
-              <div>
-                {/* <h2>High Creation Interior</h2>
-                <h3>
-                  <span className="font_stylish" style={{ color: "#ff914d" }}>
-                    Privacy Policy
-                  </span>
-                </h3> */}
-              </div>
               {/* Render HTML content from CMS */}
               <div dangerouslySetInnerHTML={{ __html: pageData }} />
             </div>

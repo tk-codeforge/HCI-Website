@@ -19,10 +19,6 @@ export default function GalleryClient({ galleryData }) {
           <div className="row g-4 mx-0">
             <h4 className="ps-3 mt-3">{galleryData?.child_content?.title ?? "Experience Center Gallery"}</h4>
 
-            {/* Dynamic Grid Mapping — no limit on how many child images
-                there are. Paired two-per-row (col-lg-6 each); if the count
-                is odd, the trailing single image spans the full row
-                (col-lg-12) instead of sitting next to empty space. */}
             {validImages.map((item, index) => {
               const isLastOdd = index === validImages.length - 1 && validImages.length % 2 === 1;
               const colClass = isLastOdd ? "col-lg-12" : "col-lg-6";

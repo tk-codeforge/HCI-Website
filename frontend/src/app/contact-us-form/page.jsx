@@ -12,22 +12,7 @@ const ContactUsForm = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Get authToken from Redux store
     const authToken = useSelector((state) => state.auth.authToken);
-
-    // Load DataTables and initialize it after the component is rendered
-    // const loadDataTable = async () => {
-    //     try {
-    //         await import("datatables.net");
-    //         await import("datatables.net-dt/css/jquery.dataTables.min.css");
-
-    //         $(document).ready(function () {
-    //             $("#contactsTable").DataTable();
-    //         });
-    //     } catch (error) {
-    //         console.error("Failed to load DataTables:", error);
-    //     }
-    // };
 
     useEffect(() => {
         const fetchContacts = async () => {
@@ -40,9 +25,6 @@ const ContactUsForm = () => {
 
                 setContacts(response.data);
                 setLoading(false);
-
-                // Load DataTables after data is fetched
-                // loadDataTable();
             } catch (err) {
                 setError("Failed to fetch contact us form data. Please try again.");
                 setLoading(false);
@@ -53,9 +35,7 @@ const ContactUsForm = () => {
 
         // Cleanup DataTable on component unmount
         return () => {
-            // if ($.fn.DataTable.isDataTable("#contactsTable")) {
-            //     $("#contactsTable").DataTable().destroy(true);
-            // }
+    
         };
     }, [authToken]);
 

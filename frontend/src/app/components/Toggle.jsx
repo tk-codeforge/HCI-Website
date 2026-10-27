@@ -4,18 +4,6 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { FaBars } from "react-icons/fa";
 import api from "@/utils/api";
 
-// const DEFAULT_SERVING_AREAS = [
-//   { label: "Interior Designers In Noida", href: "/interior-designers-in-noida" },
-//   { label: "Interior Designers in Ghaziabad", href: "/interior-designers-in-ghaziabad" },
-//   { label: "Interior Designers in Greater Noida", href: "/interior-designers-in-greater-noida" },
-//   { label: "Interior Designers in Delhi", href: "/interior-designers-in-delhi" },
-//   { label: "Interior Designers in Dwarka", href: "/interior-designers-in-dwarka" },
-//   { label: "Interior Designers in Faridabad", href: "/interior-designers-in-faridabad" },
-//   { label: "Interior Designers in Gurugram", href: "/interior-designers-in-gurgaon" },
-//   { label: "Interior Designers In Manesar", href: "/interior-designers-in-manesar" },
-//   { label: "Interior Designers in Sohna", href: "/interior-designer-in-sohna-gurgaon" },
-//   { label: "Interior Designer in Noida Extension", href: "/interior-designer-in-noida-extension" }
-// ];
 
 const DEFAULT_MENU = [
   { label: "Design Ideas", href: "", dropdown: [
@@ -91,26 +79,6 @@ const [menu, setMenu] = useState(DEFAULT_MENU);
     fetchLookMenu();
   }, []);
 
-//   useEffect(() => {
-//   const fetchServingArea = async () => {
-//     try {
-//       const res = await api.get("/cms-content/navbar_serving_area");
-//       if (res.data) {
-//         const record = Array.isArray(res.data) ? res.data[0] : res.data;
-//         const content = record?.json_content || {};
-//         if (content.items && content.items.length > 0) {
-//           setServingAreaItems(content.items);
-//         }
-//       }
-//     } catch (err) {
-//       console.error("Error fetching serving area menu:", err);
-//       // keep DEFAULT_SERVING_AREAS as fallback
-//     }
-//   };
-
-//   fetchServingArea();
-// }, []);
-
 useEffect(() => {
   const fetchMenu = async () => {
     try {
@@ -124,7 +92,7 @@ useEffect(() => {
       }
     } catch (err) {
       console.error("Error fetching header menu:", err);
-      // keep DEFAULT_MENU as fallback
+     
     }
   };
 
@@ -312,68 +280,6 @@ const getColumn = (label) => {
               {/* Right Column Links */}
               <div className="col-lg-8">
                 <div className="row mobile-menu-grid">
-                  
-                  {/* 1st - Projects */}
-                  {/* <div className="col-lg-3 mobile-menu-column">
-                    <h5 className="stylish-section-title">Projects</h5>
-                    <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
-                      <li><a href="/residential-projects" className="offcanvas_anchor" onClick={closeSidebar}>Residential Projects</a></li>
-                      <li><a href="/luxury-projects" className="offcanvas_anchor" onClick={closeSidebar}>Luxury Projects</a></li>
-                    </ul>
-                  </div> */}
-
-                  {/* 2nd - Experience Center */}
-                  {/* <div className="col-lg-3 mobile-menu-column">
-                    <h5 className="stylish-section-title">Experience Center</h5>
-                    <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
-                      <li><a href="/experience-center-new-delhi/" className="offcanvas_anchor" onClick={closeSidebar}>New Delhi Experience Center</a></li>
-                      <li><a href="/experience-center/" className="offcanvas_anchor" onClick={closeSidebar}>Noida Experience Center</a></li>
-                      <li><a href="/experience-center-noida-extension/" className="offcanvas_anchor" onClick={closeSidebar}>Noida Extension Experience Center</a></li>
-                      <li><a href="/experience-center-gurugram/" className="offcanvas_anchor" onClick={closeSidebar}>Gurgaon Experience Center</a></li>
-                      <li><a href="/experience-center-faridabad/" className="offcanvas_anchor" onClick={closeSidebar}>Faridabad Experience Center</a></li>
-                    </ul>
-                  </div> */}
-
-                  {/* 3rd - Cities */}
-                  {/* <div className="col-lg-3 mobile-menu-column">
-                    <h5 className="stylish-section-title">Cities</h5>
-                    <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
-                      <li><a href="/interior-designers-in-noida" className="offcanvas_anchor" onClick={closeSidebar}>Designers In Noida</a></li>
-                      <li><a href="/interior-designers-in-ghaziabad" className="offcanvas_anchor" onClick={closeSidebar}>Designers in Ghaziabad</a></li>
-                      <li><a href="/interior-designers-in-greater-noida" className="offcanvas_anchor" onClick={closeSidebar}>Designers in Greater Noida</a></li>
-                      <li><a href="/interior-designers-in-delhi" className="offcanvas_anchor" onClick={closeSidebar}>Designers in Delhi</a></li>
-                      <li><a href="/interior-designers-in-dwarka" className="offcanvas_anchor" onClick={closeSidebar}>Designers in Dwarka</a></li>
-                      <li><a href="/best-interior-designers-in-faridabad" className="offcanvas_anchor" onClick={closeSidebar}>Designers in Faridabad</a></li>
-                      <li><a href="/interior-designers-in-gurgaon" className="offcanvas_anchor" onClick={closeSidebar}>Designers in Gurugram</a></li>
-                      <li><a href="/interior-designers-in-manesar" className="offcanvas_anchor" onClick={closeSidebar}>Designers In Manesar</a></li>
-                      <li><a href="/interior-designer-in-sohna-gurgaon" className="offcanvas_anchor" onClick={closeSidebar}>Designers In Sohna</a></li>
-                    </ul>
-                  </div> */}
-                  {/* 3rd - Cities */}
-{/* <div className="col-lg-3 mobile-menu-column">
-  <h5 className="stylish-section-title">Cities</h5>
-  <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
-    {servingAreaItems.map((item, idx) => (
-      <li key={idx}>
-        <a href={item.href} className="offcanvas_anchor" onClick={closeSidebar}>
-          {item.label}
-        </a>
-      </li>
-    ))}
-  </ul>
-</div> */}
-
-                  {/* 4th - Design Ideas */}
-                  {/* <div className="col-lg-3 mobile-menu-column">
-                    <h5 className="stylish-section-title">Design Ideas</h5>
-                    <ul className="list-unstyled mb-0 d-flex flex-column align-items-center align-items-lg-start">
-                      <li><a href="/furniture/" className="offcanvas_anchor" onClick={closeSidebar}>Furniture</a></li>
-                      <li><a href="/ready-togo-design/" className="offcanvas_anchor" onClick={closeSidebar}>Ready To Go</a></li>
-                      <li><a href="/sustainable-furniture/" className="offcanvas_anchor" onClick={closeSidebar}>Sustainable</a></li>
-                      <li><a href="/spacesaving-furniture/" className="offcanvas_anchor" onClick={closeSidebar}>Space-Saving</a></li>
-                      <li><a href="/wallpaper/" className="offcanvas_anchor" onClick={closeSidebar}>Wallpapers</a></li>
-                    </ul>
-                  </div> */}
 
                   {/* 1st - Projects (maps to "Portfolio" heading) */}
 <div className="col-lg-3 mobile-menu-column">

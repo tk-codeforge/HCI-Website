@@ -25,12 +25,6 @@ const RowImage = (props) => {
         </div>
         <div className={`d-flex align-items-center col-lg-${12 - imageColLg} col-md-${12 - imageColMd} col-${12 - imageCol}`}>
           <div className={props.divclass}>
-            {/* 🌟 SEO FIX: Changed to h2 but kept the h3 visual size */}
-            {/* <h2 className="h3">
-              {props.titleHeading}
-              <span className={props.subHeadingClass}>{props.subHeading}</span>
-            </h2>
-            <p>{props.description}</p> */}
 
             {SubTag ? (
   <>

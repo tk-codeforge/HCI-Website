@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import api from "../../utils/api";
 import { buildLeadMetadata } from "../../utils/leadForms";
 import { validateLeadField } from "../../utils/leadValidation";
 
@@ -44,6 +43,44 @@ export const EXPERIENCE_FORM_DEFAULT_CONFIG = {
 };
 
 const FIELD_ORDER = ["fullName", "contactNo", "email", "place", "query"];
+
+// Static stylesheet hoisted out of the component so it is not rebuilt on
+// every keystroke re-render.
+const FORM_STYLES = `
+  .form_experience_center .exp-heading,
+  .form_experience_center .exp-subheading,
+  .form_experience_center .exp-checkbox-label {
+    color: var(--experience-font-color) !important;
+  }
+  .form_experience_center .exp-checkbox-link {
+    color: #ffc107 !important;
+    text-decoration: none;
+  }
+  .form_experience_center .exp-submit-btn {
+    background-color: var(--experience-submit-bg) !important;
+    border-color: var(--experience-submit-bg) !important;
+    color: var(--experience-submit-color) !important;
+  }
+  .form_experience_center .exp-field-error {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+`;
+
+const sanitizePhone = (value) => {
+  let digits = value.replace(/\D/g, "");
+  if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
+  return digits.slice(0, 10);
+};
+
+const validateField = (name, rawValue, fieldCfg) => {
+  const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
+  if (!value) {
+    return fieldCfg?.required ? `${fieldCfg?.label || "This field"} is required.` : "";
+  }
+  return validateLeadField(name, value);
+};
 
 export function renderCheckboxText(text, links) {
   const usableLinks = (links || []).filter((l) => l?.text);
@@ -108,100 +145,13 @@ export default function ExperienceFormClient({ initialConfig }) {
 
   const [submissionError, setSubmissionError] = useState("");
   const [submissionMessage, setSubmissionMessage] = useState("");
-  // const [fieldErrors, setFieldErrors] = useState({
-  //   fullName: false,
-  //   email: false,
-  //   contactNo: false,
-  //   place: false,
-  //   query: false,
-  //   termsAccepted: false,
-  // });
-
-    const [fieldErrors, setFieldErrors] = useState({});
-
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  // };
-
-  // const handleCheckboxChange = (e) => {
-  //   const { name, checked } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: checked }));
-  // };
-
-  // const validateForm = () => {
-  //   const errors = {};
-  //   FIELD_ORDER.forEach((key) => {
-  //     const fieldCfg = config.fields[key];
-  //     if (!fieldCfg?.enabled) {
-  //       errors[key] = false;
-  //       return;
-  //     }
-  //     if (key === "email") {
-  //       errors[key] =
-  //         fieldCfg.required && !/^\S+@\S+\.\S+$/.test(formData.email);
-  //     } else {
-  //       errors[key] = fieldCfg.required && formData[key].trim() === "";
-  //     }
-  //   });
-
-  //   errors.termsAccepted = !formData.termsAccepted;
-  //   setFieldErrors(errors);
-  //   return !Object.values(errors).some((error) => error === true);
-  // };
-
-    const sanitizePhone = (value) => {
-    let digits = value.replace(/\D/g, "");
-    if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
-    return digits.slice(0, 10);
-  };
-
-  // Required-ness comes from the CMS (fieldCfg.required); format is always checked when filled
-  // const validateField = (name, rawValue, fieldCfg) => {
-  //   const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-  //   const label = fieldCfg?.label || "This field";
-
-  //   if (!value) return fieldCfg?.required ? `${label} is required.` : "";
-
-  //   switch (name) {
-  //     case "fullName":
-  //       if (value.length < 2) return `${label} must be at least 2 characters.`;
-  //       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-  //         return `${label} can only contain letters and spaces.`;
-  //       return "";
-  //     case "contactNo":
-  //       if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit mobile number.";
-  //       if (!/^[6-9]/.test(value))
-  //         return "Mobile number must start with 6, 7, 8 or 9.";
-  //       return "";
-  //     case "email":
-  //       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-  //         return "Enter a valid email address.";
-  //       return "";
-  //     case "place":
-  //       if (value.length < 2) return "Enter a valid place.";
-  //       return "";
-  //     case "query":
-  //       if (value.length < 10) return "Query must be at least 10 characters.";
-  //       return "";
-  //     default:
-  //       return "";
-  //   }
-  // };
-
-    const validateField = (name, rawValue, fieldCfg) => {
-    const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-    if (!value) {
-      return fieldCfg?.required ? `${fieldCfg?.label || "This field"} is required.` : "";
-    }
-    return validateLeadField(name, value);
-  };
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleInputChange = (e) => {
     const { name } = e.target;
     let value = e.target.value;
-if (name === "contactNo") value = sanitizePhone(value);
-if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
+    if (name === "contactNo") value = sanitizePhone(value);
+    if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // keep the error live once the field has been validated
@@ -249,20 +199,14 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-        setSubmissionError("");
+    setSubmissionError("");
     if (!validateForm()) {
       setSubmissionError("Please correct the highlighted fields.");
       return;
     }
 
     const formRequestedData = {
-      // name: formData.fullName,
-      // email: formData.email,
-      // mobile: formData.contactNo,
-      // place: formData.place,
-      // query: formData.query,
-
-            name: formData.fullName.trim(),
+      name: formData.fullName.trim(),
       email: formData.email.trim().toLowerCase(),
       mobile: formData.contactNo.trim(),
       place: formData.place.trim(),
@@ -276,6 +220,8 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
     };
 
     try {
+      // Loaded on demand: keeps the HTTP client out of the initial JS path.
+      const { default: api } = await import("../../utils/api");
       const response = await api.post("/user-queries", formRequestedData);
       if (response.status === 201) {
         setSubmissionMessage("Form submitted successfully!");
@@ -287,7 +233,7 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
           query: "",
           termsAccepted: false,
         });
-                setFieldErrors({});
+        setFieldErrors({});
         setTimeout(() => {
           window.location.href = "/thank-you";
         }, 300);
@@ -311,34 +257,12 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
     "--experience-submit-color": config.submitButton.textColor || "#ffffff",
   };
 
+  const fieldLabel = (key) =>
+    config.fields[key]?.label || config.fields[key]?.placeholder || key;
+
   return (
     <div className="form_experience_center mx-0" style={wrapperStyle}>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            .form_experience_center .exp-heading,
-            .form_experience_center .exp-subheading,
-            .form_experience_center .exp-checkbox-label {
-              color: var(--experience-font-color) !important;
-            }
-            .form_experience_center .exp-checkbox-link {
-              color: #ffc107 !important;
-              text-decoration: none; 
-            }
-            .form_experience_center .exp-submit-btn {
-              background-color: var(--experience-submit-bg) !important;
-              border-color: var(--experience-submit-bg) !important;
-              color: var(--experience-submit-color) !important;
-            }
-
-                        .form_experience_center .exp-field-error {
-              color: #ff6b6b;
-              font-size: 13px;
-              margin-top: 4px;
-            }
-          `,
-        }}
-      />
+      <style dangerouslySetInnerHTML={{ __html: FORM_STYLES }} />
       <form onSubmit={handleSubmit} noValidate>
         <h5 className="text-center exp-heading" style={{ color: "var(--experience-font-color)" }}>
           {config.heading}
@@ -353,15 +277,16 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
               type="text"
               className={`form-control ${fieldErrors.fullName ? "is-invalid" : ""}`}
               placeholder={config.fields.fullName.placeholder}
+              aria-label={fieldLabel("fullName")}
               name="fullName"
               value={formData.fullName}
               onChange={handleInputChange}
               required={config.fields.fullName.required}
-                            onBlur={handleInputBlur}
+              onBlur={handleInputBlur}
               maxLength={60}
               autoComplete="name"
             />
-                        {fieldErrors.fullName && <div className="exp-field-error">{fieldErrors.fullName}</div>}
+            {fieldErrors.fullName && <div className="exp-field-error">{fieldErrors.fullName}</div>}
           </div>
         )}
 
@@ -372,15 +297,16 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
               className={`form-control ${fieldErrors.contactNo ? "is-invalid" : ""}`}
               name="contactNo"
               placeholder={config.fields.contactNo.placeholder}
+              aria-label={fieldLabel("contactNo")}
               value={formData.contactNo}
               onChange={handleInputChange}
               required={config.fields.contactNo.required}
-                            onBlur={handleInputBlur}
+              onBlur={handleInputBlur}
               inputMode="numeric"
               maxLength={10}
               autoComplete="tel-national"
             />
-                        {fieldErrors.contactNo && <div className="exp-field-error">{fieldErrors.contactNo}</div>}
+            {fieldErrors.contactNo && <div className="exp-field-error">{fieldErrors.contactNo}</div>}
           </div>
         )}
 
@@ -390,15 +316,16 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
               type="email"
               className={`form-control ${fieldErrors.email ? "is-invalid" : ""}`}
               placeholder={config.fields.email.placeholder}
+              aria-label={fieldLabel("email")}
               name="email"
               value={formData.email}
               onChange={handleInputChange}
               required={config.fields.email.required}
-                            onBlur={handleInputBlur}
+              onBlur={handleInputBlur}
               maxLength={100}
               autoComplete="email"
             />
-                        {fieldErrors.email && <div className="exp-field-error">{fieldErrors.email}</div>}
+            {fieldErrors.email && <div className="exp-field-error">{fieldErrors.email}</div>}
           </div>
         )}
 
@@ -411,12 +338,13 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
               value={formData.place}
               onChange={handleInputChange}
               placeholder={config.fields.place.placeholder}
+              aria-label={fieldLabel("place")}
               required={config.fields.place.required}
-                            onBlur={handleInputBlur}
+              onBlur={handleInputBlur}
               maxLength={60}
               autoComplete="address-level2"
             />
-                        {fieldErrors.place && <div className="exp-field-error">{fieldErrors.place}</div>}
+            {fieldErrors.place && <div className="exp-field-error">{fieldErrors.place}</div>}
           </div>
         )}
 
@@ -426,14 +354,15 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
               className={`form-control ${fieldErrors.query ? "is-invalid" : ""}`}
               name="query"
               placeholder={config.fields.query.placeholder}
+              aria-label={fieldLabel("query")}
               rows="3"
               value={formData.query}
               onChange={handleInputChange}
               required={config.fields.query.required}
-                            onBlur={handleInputBlur}
+              onBlur={handleInputBlur}
               maxLength={500}
             ></textarea>
-                        {fieldErrors.query && <div className="exp-field-error">{fieldErrors.query}</div>}
+            {fieldErrors.query && <div className="exp-field-error">{fieldErrors.query}</div>}
           </div>
         )}
 
@@ -446,16 +375,17 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
         <div className="mb-3 form-check">
           <input
             type="checkbox"
+            id="exp-terms-accepted"
             className={`form-check-input ${fieldErrors.termsAccepted ? "is-invalid" : ""}`}
             name="termsAccepted"
             checked={formData.termsAccepted}
             onChange={handleCheckboxChange}
             required
           />
-          <label className="form-check-label exp-checkbox-label">
+          <label htmlFor="exp-terms-accepted" className="form-check-label exp-checkbox-label">
             {renderCheckboxText(config.checkboxText, config.checkboxLinks)}
           </label>
-                    {fieldErrors.termsAccepted && <div className="exp-field-error">{fieldErrors.termsAccepted}</div>}
+          {fieldErrors.termsAccepted && <div className="exp-field-error">{fieldErrors.termsAccepted}</div>}
         </div>
 
         {submissionError && <div className="text-center alert alert-danger">{submissionError}</div>}

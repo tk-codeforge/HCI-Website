@@ -11,17 +11,6 @@ export default function GalleryClient({ galleryData }) {
           <div className="row g-4 mx-0">
             <h4 className="ps-3 mt-3">{galleryData?.child_content?.title ?? "Faridabad Gallery"}</h4>
             
-            {/* Dynamic Grid Mapping
-            {galleryData.child_images?.map((item, index) => (
-              <div key={index} className="col-lg-6">
-                <GalleryDetail
-                  imgGalUrl={item.image ?? `/images/detail-img/${index + 1}.webp`}
-                  imgGalAlt={defaultAltText}
-                  imgGalImgClass="w-100 detail_gal_img"
-                  images={galleryData.child_images}
-                />
-              </div>
-            ))} */}
 
             {/* Dynamic Grid Mapping: 2 half-width, then 1 full-width, repeating */}
 {galleryData.child_images?.map((item, index, all) => {

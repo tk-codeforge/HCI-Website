@@ -1,40 +1,30 @@
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
+import MainLayout from "../../layouts/MainLayout";
 import { notFound } from "next/navigation";
 import JsonLd from "../../components/JsonLd";
 import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
+const BASE_PATH = "/experience-center-gurugram/gallery";
+
 export const dynamic = "force-dynamic";
-
-// --- SEO FIX ---
-// export async function generateMetadata({ searchParams }) {
-//   const id = searchParams?.id;
-//   if (!id) return { title: "Gurugram Experience Center" };
-
-//   try {
-//     const response = await api.get(`/cms-parent-child/by-id/${id}`);
-//     const data = response.data;
-//     const title = data?.child_content?.title || "Gurugram Gallery";
-    
-//     return {
-//       title: title,
-//       description: `Explore our ${title} at High Creation Interior Gurugram.`,
-//       alternates: {
-//         canonical: `/experience-center-gurugram/gallery?id=${id}`,
-//       },
-//     };
-//   } catch (error) {
-//     return { title: "Gurugram Experience Center", robots: "noindex" };
-//   }
-// }
 
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
   return buildGalleryMetadata({
-    basePath: "/experience-center-gurugram/gallery",
+    basePath: BASE_PATH,
     id,
     itemApi: `/cms-parent-child/by-id/${id}`,
   });
+}
+
+async function fetchGallery(id) {
+  try {
+    const response = await api.get(`/cms-parent-child/by-id/${id}`);
+    return { data: response.data, notFound: false };
+  } catch (err) {
+    return { data: null, notFound: err.response?.status === 404 };
+  }
 }
 
 // --- SERVER COMPONENT ---
@@ -42,21 +32,20 @@ export default async function GurugramGalleryPage({ searchParams }) {
   const id = searchParams?.id;
   if (!id) return notFound();
 
-  let galleryData = null;
-  try {
-    const response = await api.get(`/cms-parent-child/by-id/${id}`);
-    galleryData = response.data;
-  } catch (err) {
-    if (err.response?.status === 404) return notFound();
-  }
+  // Independent requests -> run in parallel (was sequential, adding to TTFB).
+  const [galleryResult, seo] = await Promise.all([
+    fetchGallery(id),
+    getGallerySeo({ basePath: BASE_PATH, id }),
+  ]);
 
-  if (!galleryData) return notFound();
-  const seo = await getGallerySeo({ basePath: "/experience-center-gurugram/gallery", id });
+  if (galleryResult.notFound || !galleryResult.data) return notFound();
 
-   return (
-    <> 
-     <JsonLd data={seo?.custom_schema} />
-    <GalleryClient galleryData={galleryData} />
+  return (
+    <>
+      <JsonLd data={seo?.custom_schema} />
+      <MainLayout>
+        <GalleryClient galleryData={galleryResult.data} />
+      </MainLayout>
     </>
   );
 }

@@ -8,6 +8,7 @@ import {
   FaExpandArrowsAlt,
 } from "react-icons/fa";
 import { useMediaAltMap } from "./MediaImage";
+import { canOptimize, optimizedSrcSet } from "@/utils/optimizedImage";
 
 const FALLBACK_IMAGES = [
   "/images/detail-img/1.webp",
@@ -18,11 +19,26 @@ const FALLBACK_IMAGES = [
   "/images/detail-img/6.webp",
 ];
 
-const TILE_COLUMNS = ["col-lg-6", "col-lg-6", "col-lg-12", "col-lg-6", "col-lg-6", "col-lg-12"];
+const TILE_COLUMNS = [
+  "col-lg-6",
+  "col-lg-6",
+  "col-lg-12",
+  "col-lg-6",
+  "col-lg-6",
+  "col-lg-12",
+];
+
+// These column classes stack below Bootstrap's lg breakpoint. Keep sizes in
+// sync with the actual rendered width so mobile does not download an oversized
+// desktop variant or select a too-small tablet variant.
+const HALF_TILE_SIZES =
+  "(max-width: 575px) calc(100vw - 48px), (max-width: 767px) 516px, (max-width: 991px) 696px, (max-width: 1199px) 456px, (max-width: 1399px) 546px, 636px";
+const FULL_TILE_SIZES =
+  "(max-width: 575px) calc(100vw - 48px), (max-width: 767px) 516px, (max-width: 991px) 696px, (max-width: 1199px) 936px, (max-width: 1399px) 1116px, 1296px";
 
 function getMediaFilename(src) {
   if (!src) return "";
-  const filename = String(src).split("?")[0].split("/").pop() || "";
+  const filename = String(src).split("?")[0].split("#")[0].split("/").pop() || "";
   try {
     return decodeURIComponent(filename);
   } catch {
@@ -30,7 +46,19 @@ function getMediaFilename(src) {
   }
 }
 
-export default function GalleryGrid({ images = [], galleryTitle, defaultAltText = "Interior design gallery" }) {
+function getResponsiveImageProps(src, sizes) {
+  if (!src || !canOptimize(src)) return {};
+  return {
+    srcSet: optimizedSrcSet(src),
+    sizes,
+  };
+}
+
+export default function GalleryGrid({
+  images = [],
+  galleryTitle,
+  defaultAltText = "Interior design gallery",
+}) {
   const imageList = Array.isArray(images) ? images : [];
   const altMap = useMediaAltMap();
   const [activeIndex, setActiveIndex] = useState(0);
@@ -38,22 +66,26 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const previousBodyOverflow = useRef("");
 
-  // Preserve the original six-tile gallery layout while reserving space before
-  // image downloads complete. Later images stay lazy-loaded; the first is the LCP candidate.
+  // Keep the existing six-tile layout and fallback sources.
   const tiles = useMemo(
     () =>
-      FALLBACK_IMAGES.map((fallbackSrc, index) => ({
-        src: imageList[index]?.image ?? fallbackSrc,
-        cmsAlt: imageList[index]?.image_alt || "",
-        index,
-      })),
+      FALLBACK_IMAGES.map((fallbackSrc, index) => {
+        const src = imageList[index]?.image || fallbackSrc;
+        const sizes = index === 2 || index === 5 ? FULL_TILE_SIZES : HALF_TILE_SIZES;
+        return {
+          src,
+          cmsAlt: imageList[index]?.image_alt || "",
+          index,
+          responsiveImageProps: getResponsiveImageProps(src, sizes),
+        };
+      }),
     [imageList]
   );
 
   const resolveAlt = useCallback(
     (src, cmsAlt, fallback = galleryTitle || defaultAltText) => {
       const filename = getMediaFilename(src);
-      return cmsAlt || altMap[filename] || fallback;
+      return cmsAlt || altMap?.[filename] || fallback;
     },
     [altMap, galleryTitle, defaultAltText]
   );
@@ -66,7 +98,8 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
   const activeAlt = resolveAlt(
     activeImage,
     activeCmsAlt,
-    imageList[activeIndex]?.title || `${galleryTitle || defaultAltText} - image ${activeIndex + 1}`
+    imageList[activeIndex]?.title ||
+      `${galleryTitle || defaultAltText} - image ${activeIndex + 1}`
   );
 
   const openLightbox = useCallback(
@@ -133,7 +166,6 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
 
   useEffect(
     () => () => {
-      // Also restore page scrolling if the route changes while the lightbox is open.
       document.body.style.overflow = previousBodyOverflow.current;
     },
     []
@@ -155,17 +187,18 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
             >
               <img
                 src={tile.src}
+                {...tile.responsiveImageProps}
                 alt={resolveAlt(tile.src, tile.cmsAlt)}
                 width={1200}
                 height={675}
                 className="premium-thumbnail"
                 decoding="async"
                 loading={index === 0 ? "eager" : "lazy"}
-                fetchPriority={index === 0 ? "high" : "auto"}
+                fetchPriority={index === 0 ? "high" : undefined}
               />
               <span className="thumbnail-overlay" aria-hidden="true">
                 <span className="view-btn">
-                  <FaExpandArrowsAlt className="me-2" /> View Full Size
+                  <FaExpandArrowsAlt className="me-2" aria-hidden="true" /> View Full Size
                 </span>
               </span>
             </button>
@@ -174,21 +207,23 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
       ))}
 
       {isFullScreen && (
-        <div
-          className="lightbox-backdrop"
-          onClick={handleClose}
-          role="presentation"
-        >
+        <div className="lightbox-backdrop" onClick={handleClose} role="presentation">
           <button
             type="button"
             className="glass-btn close-btn shadow-sm"
             onClick={handleClose}
             aria-label="Close full-size image"
           >
-            <FaTimes />
+            <FaTimes aria-hidden="true" />
           </button>
 
-          <div className="lightbox-content" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="lightbox-content"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${galleryTitle || defaultAltText} image viewer`}
+          >
             {activeImage && (
               <img
                 src={activeImage}
@@ -197,6 +232,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
                 height={1100}
                 className="lightbox-img"
                 decoding="async"
+                loading="eager"
               />
             )}
 
@@ -208,7 +244,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
                   onClick={handlePrev}
                   aria-label="Previous image"
                 >
-                  <FaChevronLeft />
+                  <FaChevronLeft aria-hidden="true" />
                 </button>
                 <button
                   type="button"
@@ -216,7 +252,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
                   onClick={handleNext}
                   aria-label="Next image"
                 >
-                  <FaChevronRight />
+                  <FaChevronRight aria-hidden="true" />
                 </button>
                 <div className="image-counter font-poppins" aria-live="polite">
                   {activeIndex + 1} / {imageList.length}
@@ -235,6 +271,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
           background: transparent;
           cursor: pointer;
           aspect-ratio: 16 / 9;
+          touch-action: manipulation;
         }
 
         .premium-thumbnail {
@@ -242,12 +279,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.35s ease;
-        }
-
-        .gallery-item-wrapper:hover .premium-thumbnail,
-        .gallery-thumbnail-button:focus-visible .premium-thumbnail {
-          transform: scale(1.035);
+          transition: transform 0.25s ease;
         }
 
         .thumbnail-overlay {
@@ -258,13 +290,8 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
           justify-content: center;
           background: linear-gradient(to top, rgba(0, 0, 0, 0.48), transparent);
           opacity: 0;
-          transition: opacity 0.2s ease;
+          transition: opacity 0.15s ease;
           pointer-events: none;
-        }
-
-        .gallery-item-wrapper:hover .thumbnail-overlay,
-        .gallery-thumbnail-button:focus-visible .thumbnail-overlay {
-          opacity: 1;
         }
 
         .view-btn {
@@ -285,8 +312,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(15, 23, 42, 0.95);
-          backdrop-filter: blur(8px);
+          background: rgba(15, 23, 42, 0.96);
         }
 
         .lightbox-content {
@@ -318,6 +344,7 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
           background: rgba(255, 255, 255, 0.1);
           color: #fff;
           cursor: pointer;
+          touch-action: manipulation;
         }
 
         .close-btn {
@@ -352,8 +379,23 @@ export default function GalleryGrid({ images = [], galleryTitle, defaultAltText 
           letter-spacing: 2px;
         }
 
-        @media (hover: none) {
-          .thumbnail-overlay { display: none; }
+        @media (hover: hover) and (pointer: fine) {
+          .gallery-item-wrapper:hover .premium-thumbnail,
+          .gallery-thumbnail-button:focus-visible .premium-thumbnail {
+            transform: scale(1.025);
+          }
+
+          .gallery-item-wrapper:hover .thumbnail-overlay,
+          .gallery-thumbnail-button:focus-visible .thumbnail-overlay {
+            opacity: 1;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .premium-thumbnail,
+          .thumbnail-overlay {
+            transition: none;
+          }
         }
 
         @media (max-width: 768px) {

@@ -51,9 +51,6 @@ const galleryDescription = galleryData?.child_content?.description;
         <main>
           <section className="container my-5">
             <div className="row g-4 mx-0">
-              {/* <h4 className="ps-3 mt-3">
-                {galleryData?.child_content?.title ?? "Space saving furniture"}
-              </h4> */}
 
               <div className="col-12 text-center mt-3">
   <TitleTag className="mb-3">{galleryTitle}</TitleTag>

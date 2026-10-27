@@ -12,42 +12,6 @@ const sanitizePhone = (value) => {
   return digits.slice(0, 10);
 };
 
-// const validateField = (name, rawValue) => {
-//   const value = typeof rawValue === "string" ? rawValue.trim() : rawValue;
-//   switch (name) {
-//     case "fullName":
-//       if (!value) return "Full name is required.";
-//       if (value.length < 2) return "Full name must be at least 2 characters.";
-//       if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(value))
-//         return "Full name can only contain letters and spaces.";
-//       return "";
-//     case "contactNo":
-//       if (!value) return "Phone number is required.";
-//       if (!/^\d{10}$/.test(value)) return "Enter a valid 10-digit phone number.";
-//       if (!/^[6-9]/.test(value))
-//         return "Phone number must start with 6, 7, 8 or 9.";
-//       return "";
-//     case "email":
-//       if (!value) return "Email is required.";
-//       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
-//         return "Enter a valid email address.";
-//       return "";
-//     case "place":
-//       if (!value) return "Location is required.";
-//       if (value.length < 2) return "Enter a valid location.";
-//       return "";
-//     case "query":
-//       if (!value) return "Please tell us your requirements.";
-//       if (value.length < 10) return "Please enter at least 10 characters.";
-//       return "";
-//     case "termsAccepted":
-//       return value ? "" : "You must accept the Terms & Conditions.";
-//     default:
-//       return "";
-//   }
-// };
-
-// 🌟 1. THE SMART SIDEBAR FORM
 export function SidebarForm({ city }) {
   const pathname = usePathname();
   // Added 'place' to the initial state
@@ -55,11 +19,6 @@ export function SidebarForm({ city }) {
   const [status, setStatus] = useState({ error: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState({});
-
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  // };
 
     const validateForm = () => {
     const newErrors = {};
@@ -137,30 +96,7 @@ if (name === "email") value = value.toLowerCase().replace(/\s/g, "");
   return (
     <div className="sidebar-widget mb-4 bg-white p-4 rounded-4 shadow-sm border">
       <h4 className="fw-bold font-outfit mb-4 text-center">Get Free Consultation</h4>
-      {/* <form onSubmit={handleSubmit}>
-        {status.error && <div className="alert alert-danger small py-2">{status.error}</div>}
-        
-        <div className="mb-3 position-relative">
-          <FaUser className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
-          <input type="text" className="form-control border-0 bg-light p-3 ps-5 rounded-3" name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="Full Name" required />
-        </div>
-        
-        <div className="mb-3 position-relative">
-          <FaPhoneAlt className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
-          <input type="tel" className="form-control border-0 bg-light p-3 ps-5 rounded-3" name="contactNo" value={formData.contactNo} onChange={handleInputChange} placeholder="Phone Number" required />
-        </div>
-
       
-        <div className="mb-3 position-relative">
-          <FaMapMarkerAlt className="position-absolute text-muted" style={{ top: '16px', left: '15px' }} />
-          <input type="text" className="form-control border-0 bg-light p-3 ps-5 rounded-3" name="place" value={formData.place} onChange={handleInputChange} placeholder="Location / City" required />
-        </div>
-
-        <button type="submit" className="btn btn-warning w-100 fw-bold text-white py-3 rounded-3 shadow-sm" style={{ background: 'linear-gradient(to right, #ff914d, #ff5722)' }}>
-        Submit
-        </button>
-      </form> */}
-
             <form onSubmit={handleSubmit} noValidate>
         {status.error && <div className="alert alert-danger small py-2">{status.error}</div>}
 
@@ -237,15 +173,6 @@ export function BottomContactForm({ mapSrc }) {
   const [submitted, setSubmitted] = useState(false);
     const [errors, setErrors] = useState({});
 
-  // const handleInputChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({ ...prev, [name]: value }));
-  // };
-
-  // const handleCheckboxChange = (e) => {
-  //   setFormData((prev) => ({ ...prev, termsAccepted: e.target.checked }));
-  // };
-
     const validateForm = () => {
     const newErrors = {};
     ["fullName", "contactNo", "email", "place", "query", "termsAccepted"].forEach((f) => {
@@ -281,21 +208,12 @@ export function BottomContactForm({ mapSrc }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if (!formData.termsAccepted) {
-    //   setStatus({ error: "You must agree to the Terms & Conditions.", message: "" });
-    //   return;
-    // }
 
         setStatus({ error: "", message: "" });
     if (!validateForm()) return;
 
     try {
       const response = await api.post("/user-queries", {
-        // name: formData.fullName, 
-        // mobile: formData.contactNo, 
-        // email: formData.email, 
-        // place: formData.place, 
-        // query: formData.query,
 
                 name: formData.fullName.trim(),
         mobile: formData.contactNo.trim(),
@@ -356,19 +274,6 @@ export function BottomContactForm({ mapSrc }) {
               <form className="row g-3 font-poppins" onSubmit={handleSubmit} noValidate >
                 {status.error && <div className="col-12"><div className="alert alert-danger">{status.error}</div></div>}
                 
-                {/* <div className="col-md-6"><input type="text" className="form-control p-3 bg-light border-0" value={formData.fullName} name="fullName" placeholder="Full Name" required onChange={handleInputChange} /></div>
-                <div className="col-md-6"><input type="text" className="form-control p-3 bg-light border-0" name="contactNo" value={formData.contactNo} placeholder="Contact No." required onChange={handleInputChange} /></div>
-                <div className="col-md-12"><input type="email" className="form-control p-3 bg-light border-0" name="email" value={formData.email} placeholder="Email" required onChange={handleInputChange} /></div>
-                <div className="col-md-12"><input type="text" className="form-control p-3 bg-light border-0" name="place" value={formData.place} onChange={handleInputChange} placeholder="City / Location" required /></div>
-                <div className="col-md-12"><textarea className="form-control p-3 bg-light border-0" name="query" value={formData.query} placeholder="Tell us about your requirements..." rows="4" onChange={handleInputChange}></textarea></div>
-                
-                <div className="col-12">
-                  <div className="form-check mt-2">
-                    <input className="form-check-input" type="checkbox" checked={formData.termsAccepted} id="termsAcceptedBottom" name="termsAccepted" required onChange={handleCheckboxChange} />
-                    <label className="form-check-label text-muted small" htmlFor="termsAcceptedBottom">I agree to the Terms & Conditions</label>
-                  </div>
-                </div> */}
-
                                 <div className="col-md-6">
                   <input type="text" className={`form-control p-3 bg-light ${errors.fullName ? "border border-danger" : "border-0"}`} name="fullName" value={formData.fullName} placeholder="Full Name *" aria-label="Full Name" autoComplete="name" maxLength={60} required onChange={handleInputChange} onBlur={handleInputBlur} />
                   {errors.fullName && <div className="text-danger small mt-1">{errors.fullName}</div>}
