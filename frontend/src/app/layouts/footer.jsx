@@ -14,48 +14,6 @@ import { useEffect, useState } from "react";
 import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 
-// const Footer = () => {
-//   const [footerlink, setData] = useState([]);
-//   const [settings, setSettings] = useState({});
-//   const currentYear = new Date().getFullYear();
-  
-//   const [allProfilesData, setAllProfilesData] = useState({});
-// const [visibilityRules, setVisibilityRules] = useState([]);
-// const pathname = usePathname();
-
-// useEffect(() => {
-
-//   const fetchFooterProfiles = async () => {
-//   try {
-//     const res = await api.get("/cms-content/footer_profiles");
-//     const record = Array.isArray(res.data) ? res.data[0] : res.data;
-//     let parsed = record?.json_content;
-//     if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
-//       parsed = JSON.parse(parsed.json_content);
-//     } else if (typeof parsed === "string") {
-//       try { parsed = JSON.parse(parsed); } catch { parsed = {}; }
-//     }
-//     setAllProfilesData(parsed || {});
-//   } catch (err) { console.error("Error fetching footer profiles:", err); }
-// };
-
-// const fetchVisibilityRules = async () => {
-//   try {
-//     const res = await api.get("/cms-content/footer_page_rules");
-//     const record = Array.isArray(res.data) ? res.data[0] : res.data;
-//     let parsed = record?.json_content;
-//     if (parsed && typeof parsed === "object" && typeof parsed.json_content === "string") {
-//       parsed = JSON.parse(parsed.json_content);
-//     } else if (typeof parsed === "string") {
-//       try { parsed = JSON.parse(parsed); } catch { parsed = []; }
-//     }
-//     setVisibilityRules(Array.isArray(parsed) ? parsed : []);
-//   } catch (err) { console.error("Error fetching visibility rules:", err); }
-// };
-
-//   fetchFooterProfiles();
-//   fetchVisibilityRules();
-// }, []);
 
 const Footer = ({
   initialProfiles = {},
@@ -114,63 +72,7 @@ const shouldHide = matchedRule?.type === "hidden";
 const resolvedProfileKey = matchedRule?.profileKey || "default";
 const cmsFooter = allProfilesData[resolvedProfileKey] || allProfilesData["default"] || null;
 
-  // useEffect(() => {
-  //   // 1. Fetch Footer Links
-  //   const fetchfooterlink = async () => {
-  //     try {
-  //       const response = await api.get("/footer-link");
-        
-  //       const priorityOrder = [
-  //         "Noida", 
-  //         "Ghaziabad", 
-  //         "Greater Noida", 
-  //         "Delhi", 
-  //         "Dwarka", 
-  //         "Faridabad", 
-  //         "Gurugram", 
-  //         "Manesar"
-  //       ];
-
-  //       const sortedLinks = response.data.sort((a, b) => {
-  //         const indexA = priorityOrder.findIndex(city => 
-  //           a.title.toLowerCase().includes(city.toLowerCase())
-  //         );
-  //         const indexB = priorityOrder.findIndex(city => 
-  //           b.title.toLowerCase().includes(city.toLowerCase())
-  //         );
-          
-  //         const safeIndexA = indexA === -1 ? 999 : indexA;
-  //         const safeIndexB = indexB === -1 ? 999 : indexB;
-          
-  //         return safeIndexA - safeIndexB;
-  //       });
-
-  //       setData(sortedLinks);
-  //     } catch (err) {
-  //       console.error("Error fetching SEO data:", err);
-  //     }
-  //   };
-
-  //   // 2. Fetch Site Settings
-  //   const fetchSiteSettings = async () => {
-  //     try {
-  //       const response = await api.get("/site-settings");
-  //       let rawData = response.data?.data || response.data;
-  //       const settingsData = Array.isArray(rawData) ? rawData[0] : rawData;
-        
-  //       if(settingsData) {
-  //         setSettings(settingsData);
-  //       }
-  //     } catch (err) {
-  //       console.error("Error fetching Site Settings:", err);
-  //     }
-  //   };
-
-  //   fetchfooterlink();
-  //   fetchSiteSettings();
-  //   // fetchCmsFooter();
-  // }, [resolvedProfileKey]);
-
+  
   useEffect(() => {
   const fetchfooterlink = async () => {
     try {
@@ -266,14 +168,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
     line-height: 1.4;
   }
 
-//   .footer_li a, 
-// .footer_wrapper .font-quicksand a, 
-// .footer_wrapper .font-quicksand p:not(.footer-desc-content p), 
-// .footer_wrapper .font-quicksand div:not(.footer-desc-content *) {
-//   font-size: 13.5px !important;
-//   font-weight: 400 !important;
-//   line-height: 1.4;
-// }
 
   /* Prevent contact details from inheriting bold weights */
   .footer_contact_link {
@@ -473,41 +367,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
   line-height: 1.4 !important;
 }
 
-// .footer-linkcloud-para {
-//   margin: 0;
-//   line-height: 1.9;
-// }
-// .footer-linkcloud-para .cloud-link-item {
-//   display: inline;
-//   white-space: nowrap;
-// }
-// .footer-linkcloud-para .cloud-link-item:not(:first-child)::before {
-//   content: "\\2022";
-//   display: inline-block;
-//   margin: 0 8px;
-//   color: var(--dynamic-footer-text);
-//   opacity: 0.7;
-// }
-// .footer-linkcloud-para a,
-// .footer-linkcloud-para a:link,
-// .footer-linkcloud-para a:visited {
-//   color: var(--dynamic-footer-text) !important;
-//   text-decoration: none !important;
-// }
-// .footer-linkcloud-para a:hover,
-// .footer-linkcloud-para a:focus,
-// .footer-linkcloud-para a:active {
-//   color: #ff914d !important;
-//   text-decoration: none !important;
-// }
-//   .footer-linkcloud-para a {
-//   color: var(--dynamic-footer-text) !important;
-//   text-decoration: none !important;
-// }
-// .footer-linkcloud-para a:hover {
-//   color: #ff914d !important;
-//   text-decoration: none !important;
-// }
 
 .footer-linkcloud-container {
   margin: 0;
@@ -519,17 +378,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
   word-break: break-word;
 }
 
-/* This adds the dot after every item exactly like your inspect screenshot */
-// .cloud-link-item::after {
-//   content: "\\2022"; /* Unicode for a bullet point */
-//   display: inline-block;
-//   font-size: 20px;
-//   margin: 0 10px; /* Spacing around the dot */
-//   color: inherit;
-//   opacity: 0.6;
-//   vertical-align: middle;
-//   line-height: 1;
-// }
 
 .cloud-link-item::before {
   content: "\\2022";
@@ -550,23 +398,11 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
   .cloud-link-item:last-child a {
   margin-right: 0;     /* no trailing space after the last link */
 }
-// .cloud-link-item:first-child::before {
-//   margin-left: 0;
-// }
 
-/* Removes the dot from the very last link in the cloud */
-// .cloud-link-item:last-child::after {
-//   content: "";
-//   // margin: 0;
-// }
   @media (max-width: 991px) {
   .footer_wrapper {
     padding-bottom: 80px !important; /* Adjust height based on your bottom nav bar */
   }
-  //   .footer-linkcloud-container {
-  //   padding-left: 16px !important;
-  //   padding-right: 16px !important;
-  // }
 }
 
 `}} />
@@ -831,23 +667,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
                             {sec.title}
                           </HorizontalHeading>
                         )}
-                        {/* <ul className="m-0 ps-3" style={{
-  listStyleType: "disc",
-  display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
-  columnGap: "10px",
-  rowGap: "2px",
-}}> */}
-
-{/* <ul className="d-flex flex-wrap m-0 ps-3" style={{ listStyleType: "disc", columnGap: "10px", rowGap: "2px" }}>
-                          {(sec.cloudLinks || []).map((cLink, cIdx) => (
-                            <li key={cIdx} style={{ display: "list-item", listStylePosition: "inside" }} >
-                              <a href={cLink.url} className="small">
-                                {cLink.label}
-                              </a>
-                            </li>
-                          ))}
-                        </ul> */}
+            
 
                         <div className="footer-linkcloud-container mb-0">
   {(sec.cloudLinks || []).map((cLink, cIdx) => (
@@ -858,16 +678,7 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
     </span>
   ))}
 </div>
-                        
-                        {/* <p className="footer-linkcloud-para small mb-0">
-  {(sec.cloudLinks || []).map((cLink, cIdx) => (
-    <span key={cIdx} className="cloud-link-item">
-      <a href={cLink.url} className="small">
-        {cLink.label}
-      </a>
-    </span>
-  ))}
-</p> */}
+                    
                       </div>
                     )}
                     {idx < horizontalSections.length - 1 && <hr className="my-3 text-muted opacity-50 section-divider" />}
