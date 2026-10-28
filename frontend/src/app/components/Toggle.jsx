@@ -4,6 +4,25 @@ import { IoCloseCircleOutline } from "react-icons/io5";
 import { FaBars } from "react-icons/fa";
 import api from "@/utils/api";
 
+// These two fonts were pulled in with @import inside the <style> below, which blocks the
+// first paint on every page. They are only needed by the sidebar, so they are now added
+// once when the browser is idle (phones only) or when the sidebar is first opened.
+const SIDEBAR_FONT_HREFS = [
+  "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap",
+  "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap",
+];
+let sidebarFontsRequested = false;
+const loadSidebarFonts = () => {
+  if (sidebarFontsRequested || typeof document === "undefined") return;
+  sidebarFontsRequested = true;
+  SIDEBAR_FONT_HREFS.forEach((href) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    document.head.appendChild(link);
+  });
+};
+
 
 const DEFAULT_MENU = [
   { label: "Design Ideas", href: "", dropdown: [
@@ -51,35 +70,29 @@ const DEFAULT_MENU = [
   ]},
 ];
 
-const Toggle = () => {
-  const [lookMenu, setLookMenu] = useState([]);
-  const [error, setError] = useState("");
+const Toggle = ({ initialMenu = null }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  // const [servingAreaItems, setServingAreaItems] = useState(DEFAULT_SERVING_AREAS);
-const [menu, setMenu] = useState(DEFAULT_MENU);
+  const [menu, setMenu] = useState(initialMenu || DEFAULT_MENU);
 
-  const openSidebar = () => setIsOpen(true);
+  const openSidebar = () => {
+    loadSidebarFonts();
+    setIsOpen(true);
+  };
   const closeSidebar = () => setIsOpen(false);
 
+  // Phones show this sidebar, so warm the fonts up when the browser is idle.
   useEffect(() => {
-    setLoading(true);
-    const fetchLookMenu = async () => {
-      try {
-        const response = await api.get("/look-menu");
-        setLookMenu(response.data); 
-      } catch (err) {
-        console.error("Error fetching design idea:", err);
-        setError("Failed to load design ideas. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLookMenu();
+    if (!window.matchMedia("(max-width: 991px)").matches) return undefined;
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(loadSidebarFonts, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(loadSidebarFonts, 3000);
+    return () => clearTimeout(id);
   }, []);
 
 useEffect(() => {
+  if (initialMenu) return; // already server-rendered from CMS
   const fetchMenu = async () => {
     try {
       const res = await api.get("/cms-content/navbar_header_menu");
@@ -97,7 +110,7 @@ useEffect(() => {
   };
 
   fetchMenu();
-}, []);
+}, [initialMenu]);
 
 const getColumn = (label) => {
   const found = menu.find((h) => h.label === label);
@@ -111,9 +124,6 @@ const getColumn = (label) => {
   return (
     <div>
       <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
-
         .menu-toggle-btn {
           transition: all 0.3s ease;
           color: #333;

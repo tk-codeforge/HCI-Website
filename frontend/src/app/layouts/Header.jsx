@@ -165,7 +165,7 @@ const DEFAULT_MENU = [
   {heading.label}
 </button>
       <ul className={`dropdown-menu border-0 shadow-sm ${activeDropdown === key ? "show" : ""}`}>
-        {heading.dropdown.map((item, i) => (
+        {(heading.dropdown || []).map((item, i) => (
           <li key={i}>
             <a className="dropdown-item py-2" href={item.href}>
               {item.label}

@@ -11,7 +11,6 @@ import {
 } from "react-icons/fa";
 import api from "@/utils/api";
 import { useEffect, useState } from "react";
-import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 
 
@@ -231,7 +230,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
       padding-left: 14px !important;
     }
 
-    /* ... keep your existing nowrap rules below this ... */
     .footer-legal-links-col + div p,
     .footer-legal-links-col ~ div .social-links {
       white-space: nowrap;
@@ -239,22 +237,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
     .footer-legal-links-col ~ div .social-links {
       flex-wrap: nowrap !important;
     }
-
-  .footer-legal-links-col + div p,
-  .footer-legal-links-col ~ div .social-links {
-    white-space: nowrap;
-  }
-  .footer-legal-links-col ~ div .social-links {
-    flex-wrap: nowrap !important;
-  }
-
-  .footer-legal-links-col ul.footer-legal-2col {
-    display: grid;
-    grid-template-columns: repeat(2, max-content);
-    justify-content: center;
-    row-gap: 4px;
-    column-gap: 0;
-  }
 }
   
   /* 1. Added !important to colors so they override any global link hover colors */
@@ -318,23 +300,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
 .footer_wrapper h6, .footer_wrapper h6 a {
   color: var(--dynamic-footer-text) !important;
 }
-  .footer-bottom-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-
-  .hover-orange {
-    color: inherit;
-    transition: color 0.3s ease;
-  }
-
-  .hover-orange:hover {
-    color: #f97316;
-  }
-
   /* 4. Ensure horizontal section action words have no underline on hover */
   .action-word-link {
     font-weight: 400 !important;
@@ -429,7 +394,6 @@ const hasAnythingAboveHorizontal = hasVerticalColumns || hasBottomBarContent;
                               className="img-fluid"
                               width={150}
                               height={150}
-                              priority
                               data-no-lazy="1"
                               style={{ maxWidth: "180px", mixBlendMode: "multiply" }}
                             />

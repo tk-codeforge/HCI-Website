@@ -1,22 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 // Importing sleek outline icons from react-icons
-import { MdOutlineHome, MdOutlinePhotoLibrary, MdOutlineCalculate, MdMenu } from "react-icons/md";
+import { MdOutlineHome, MdOutlinePhotoLibrary, MdOutlineCalculate } from "react-icons/md";
 import { HiSparkles } from "react-icons/hi2";
 import Toggle from './Toggle';
 
-export default function MobileBottomBar() {
-  const [isVisible, setIsVisible] = useState(false);
+export default function MobileBottomBar({ initialMenu = null }) {
   const pathname = usePathname();
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
-  if (!isVisible) return null;
 
   // Your exact brand primary color
   const brandOrange = '#ff914d'; 
@@ -24,6 +16,8 @@ export default function MobileBottomBar() {
   const isActive = (path) => pathname === path;
   const isInclude = (path) => pathname.includes(path);
 
+  // prefetch={false}: this bar is on every page, and prefetching all four routes as soon as
+  // it appears downloaded four extra pages on every phone visit.
   return (
     <div 
       className="fixed-bottom bg-white d-lg-none d-flex justify-content-between align-items-end pb-2 pt-2 shadow-lg" 
@@ -36,6 +30,7 @@ export default function MobileBottomBar() {
       {/* 1. Home */}
       <Link 
         href="/" 
+        prefetch={false}
         className="text-decoration-none d-flex flex-column align-items-center flex-grow-1"
         style={{ color: isActive('/') ? brandOrange : '#6c757d' }}
       >
@@ -46,6 +41,7 @@ export default function MobileBottomBar() {
       {/* 2. Design Ideas */}
       <Link 
         href="/design-idea" 
+        prefetch={false}
         className="text-decoration-none d-flex flex-column align-items-center flex-grow-1"
         style={{ color: isInclude('/design-idea') ? brandOrange : '#6c757d' }}
       >
@@ -57,6 +53,8 @@ export default function MobileBottomBar() {
       <div className="d-flex flex-column align-items-center position-relative flex-grow-1">
         <Link 
           href="/contact" 
+          prefetch={false}
+          aria-label="Let's begin"
           className="rounded-circle d-flex justify-content-center align-items-center shadow-lg"
           style={{ 
             width: '56px', 
@@ -76,6 +74,7 @@ export default function MobileBottomBar() {
       {/* 4. Get Estimate */}
       <Link 
         href="/estimator-for-home" 
+        prefetch={false}
         className="text-decoration-none d-flex flex-column align-items-center flex-grow-1"
         style={{ color: isInclude('/estimator-for-home') ? brandOrange : '#6c757d' }}
       >
@@ -84,15 +83,14 @@ export default function MobileBottomBar() {
       </Link>
 
       {/* 5. More (Hamburger) */}
-      {/* Note: In part 2, we keep the top hamburger menu but you can trigger it from here if you prefer */}
-      <button 
+      {/* A div, not a button: Toggle renders its own <button>, and a button inside a button
+          is invalid HTML. That is why this bar could only be rendered after mount. */}
+      <div
         className="btn btn-link text-decoration-none d-flex flex-column align-items-center flex-grow-1 p-0 border-0"
         style={{ color: '#6c757d' }}
-        // onClick={() => document.querySelector('.navbar-toggler')?.click()} // Automatically triggers your top header menu
       >
-        <Toggle />
-        {/* <span className="fw-bold">MORE</span> */}
-      </button>
+        <Toggle initialMenu={initialMenu} />
+      </div>
     </div>
   );
 }
