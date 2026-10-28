@@ -95,29 +95,43 @@ const description = galleryData?.child_content?.description;
         </section>
 
         {/* Dynamic Masonry-Style Grid */}
-        <section className="container">
-          <div className="row g-4">
-            {images.map((img, index) => {
-              // Create a dynamic pattern: Mix of tall (col-lg-12) and standard (col-lg-6) blocks.
-              // Every 3rd image spans full width, others take half width.
-              const isLarge = (index + 1) % 3 === 0; 
-              
-              return (
-                <div key={index} className={isLarge ? "col-lg-12 col-12" : "col-lg-6 col-md-6 col-12"}>
-                  <div style={{ height: isLarge ? '500px' : '350px' }}>
-                    <GalleryDetail
-                      imgGalUrl={img?.image ?? "/images/default.jpg"}
-                      imgGalAlt={img?.title || defaultAltText}
-                      imgGalCmsAlt={img?.image_alt}
-                      imgGalImgClass="" // Class removed as styling is now handled by the component
-                      images={images} 
-                    />
-                  </div>
-                </div>
-              );
-            })}
+<section className="container">
+  <style
+    dangerouslySetInnerHTML={{
+      __html: `
+        .gallery-tile { width: 100%; height: auto; }
+
+        @media (min-width: 768px) {
+          .gallery-tile { height: 350px; }
+          .gallery-tile.is-large { height: 500px; }
+        }
+      `,
+    }}
+  />
+
+  <div className="row g-4">
+    {images.map((img, index) => {
+      const isLarge = (index + 1) % 3 === 0;
+
+      return (
+        <div
+          key={index}
+          className={isLarge ? "col-lg-12 col-12" : "col-lg-6 col-md-6 col-12"}
+        >
+          <div className={`gallery-tile${isLarge ? " is-large" : ""}`}>
+            <GalleryDetail
+              imgGalUrl={img?.image ?? "/images/default.jpg"}
+              imgGalAlt={img?.title || defaultAltText}
+              imgGalCmsAlt={img?.image_alt}
+              imgGalImgClass=""
+              images={images}
+            />
           </div>
-        </section>
+        </div>
+      );
+    })}
+  </div>
+</section>
 
       </main>
     </MainLayout>
