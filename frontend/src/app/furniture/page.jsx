@@ -6,6 +6,7 @@ import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg } from "../components/MediaImage";
 import JsonLd from "../components/JsonLd";
+
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
 
@@ -19,7 +20,7 @@ const getBaseUrl = () => {
 // --- HELPER: Strip HTML to prevent Hydration Mismatches ---
 const stripHtml = (html) => {
   if (!html) return "";
-  return html.replace(/<[^>]*>?/gm, '');
+  return html.replace(/<[^>]*>?/gm, "");
 };
 
 // --- HELPER: Fetch Furniture Data ---
@@ -27,7 +28,8 @@ async function getFurnitureData() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-parent-child/furniture`, {
-      // cache handled by page revalidate
+      // Explicit cache window, same as the other fetches on this page.
+      next: { revalidate: 60 },
     });
     if (!res.ok) {
       console.error(`Failed to fetch furniture data: ${res.status}`);
@@ -39,6 +41,7 @@ async function getFurnitureData() {
     return [];
   }
 }
+
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -81,8 +84,8 @@ export async function generateMetadata() {
     seo?.meta_description ||
     "Discover customized furniture designs tailored for your dream home, blending style, functionality, and personalization to create spaces you'll love.";
 
-    const ogTitle = seo?.og_title || title;
-const ogDescription = seo?.og_description || description;
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
@@ -98,7 +101,7 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-        openGraph: {
+    openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
@@ -112,48 +115,44 @@ const ogDescription = seo?.og_description || description;
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Furniture() {
-  const seo = await getSeoData();
-  const slugMap = await getGallerySlugMap("furniture");
-  const rawData = await getFurnitureData();
-  
-  // Strictly ensure it's an array so .map() never triggers a TypeError
-  const exclusiveDesignData = Array.isArray(rawData) ? rawData : (rawData?.data || []);
+  // Four independent fetches: run them together instead of one after another.
+  const [seo, slugMap, rawData, headingData] = await Promise.all([
+    getSeoData(),
+    getGallerySlugMap("furniture"),
+    getFurnitureData(),
+    getHeadingDescriptionData(),
+  ]);
 
-  const headingData = await getHeadingDescriptionData();
+  // Strictly ensure it's an array so .map() never triggers a TypeError
+  const exclusiveDesignData = Array.isArray(rawData) ? rawData : rawData?.data || [];
 
   const HeadingTag = headingData?.headingTag || "h1";
-const headingText = headingData?.headingText || "Furniture";
-const headingStyle = {
-  textShadow: buildTextShadow(
+  const headingText = headingData?.headingText || "Furniture";
+  const headingShadow = buildTextShadow(
     headingData?.headingShadowEnabled,
     headingData?.headingShadowIntensity
-  ),
-  fontFamily: "inherit",
-  ...(headingData?.headingColor && { color: headingData.headingColor }),
-};
-
-const descriptionText =
-  headingData?.descriptionText ||
-  "Why settle for ordinary when your home can be one of a kind? Our customized furniture is designed around your space, your style, and your story. Thoughtfully crafted for a flawless fit, every piece transforms everyday living into a personalized experience of comfort, elegance, and functionality."
-const descriptionStyle = {
-  ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
-  textShadow: buildTextShadow(
+  );
+  const descriptionShadow = buildTextShadow(
     headingData?.descriptionShadowEnabled,
     headingData?.descriptionShadowIntensity
-  ),
-};
+  );
+  const headingStyle = {
+    textShadow: headingShadow,
+    fontFamily: "inherit",
+    ...(headingData?.headingColor && { color: headingData.headingColor }),
+  };
 
-const bannerImage = headingData?.bannerImage || "";
-  const bannerStyle = bannerImage
-    ? {
-        backgroundImage: `url("${bannerImage}")`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        aspectRatio: "1900 / 441",
-      }
-    : {};
+  const descriptionText =
+    headingData?.descriptionText ||
+    "Why settle for ordinary when your home can be one of a kind? Our customized furniture is designed around your space, your style, and your story. Thoughtfully crafted for a flawless fit, every piece transforms everyday living into a personalized experience of comfort, elegance, and functionality.";
+  const descriptionStyle = {
+    ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+    textShadow: descriptionShadow,
+  };
 
-      const headingBlock = (
+  const bannerImage = headingData?.bannerImage || "";
+
+  const headingBlock = (
     <>
       <HeadingTag id="furniture-heading" className="wallpaperHeading" style={headingStyle}>
         {headingText}
@@ -165,8 +164,8 @@ const bannerImage = headingData?.bannerImage || "";
   ${headingData?.headingColor ? `#furniture-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#furniture-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#furniture-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
-  #furniture-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
-  #furniture-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+  #furniture-heading { text-shadow: ${headingShadow} !important; }
+  #furniture-description { text-shadow: ${descriptionShadow} !important; }
 `}</style>
     </>
   );
@@ -175,10 +174,11 @@ const bannerImage = headingData?.bannerImage || "";
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
       <main>
-
-
-                  {bannerImage ? (
-                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
+        {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            alt={headingData?.bannerAlt}
+            fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -189,16 +189,17 @@ const bannerImage = headingData?.bannerImage || "";
             <div className="text-center row mx-0 mb-3 mb-lg-5">{headingBlock}</div>
           </div>
         )}
-          <section className={bannerImage ? "container my-5" : "container mb-5"}>
+        <section className={bannerImage ? "container my-5" : "container mb-5"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => {
-                
                 // Safe fallbacks using || to strictly prevent empty string crashes
                 const safeImage = design?.child_content?.image || "/images/Bhk/1bhk.png";
                 const safeTitle = design?.child_content?.title || defaultAltText;
                 const safeDescription = stripHtml(design?.child_content?.description);
                 const safeId = design?.id || index;
+                // First card is the LCP element only when there is no hero banner.
+                const isLcpCard = index === 0 && !bannerImage;
 
                 return (
                   <div key={index} className="col-lg-6 col-md-6 col-12">
@@ -207,8 +208,14 @@ const bannerImage = headingData?.bannerImage || "";
                       wallpaperCard="wallpapercard"
                       imgWallpaper={safeImage}
                       wallpaperImgClass="wallpaperclass"
+                      // Request a resized rendition instead of the original CMS file.
+                      optimizeImage
+                      imgSizes="(min-width: 1200px) 570px, (min-width: 992px) 480px, (min-width: 768px) 50vw, 100vw"
+                      imgPriority={isLcpCard}
+                      // Everything else loads lazily (the browser default is eager).
+                      imgLazy={!isLcpCard}
                       altWallpaper={safeTitle}
-                                            cmsAltWallpaper={design?.child_content?.image_alt}
+                      cmsAltWallpaper={design?.child_content?.image_alt}
                       portfolioTitle={safeTitle !== defaultAltText ? safeTitle : "Furniture Design"}
                       wallpaperDescriptiion={safeDescription}
                       descriptionClass="team_description mb-0"

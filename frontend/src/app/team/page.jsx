@@ -4,6 +4,7 @@ import BackgroundImageRow from "../components/BackgroundImageRow";
 import TeamMediaGallery from "../components/TeamMediaGallery";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
+import LazyVideo from "../components/LazyVideo";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -33,14 +34,12 @@ async function getSeoData() {
 async function getBannerData() {
   try {
     const baseURL = getBaseUrl();
-    console.log("BANNER FETCH URL:", `${baseURL}/cms-gallery-design/manage-banner`);
     const res = await fetch(`${baseURL}/cms-gallery-design/manage-banner?key=team`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: { Connection: "close" },
     });
     if (!res.ok) return null;
     const data = await res.json();
-    console.log("BANNER DATA RECEIVED:", data);
     return data;
   } catch (err) {
     console.error("Banner Fetch Error:", err);
@@ -51,7 +50,7 @@ async function getBannerData() {
 async function getTeamPageMedia() {
   try {
     const baseURL = getBaseUrl();
-    const res = await fetch(`${baseURL}/cms-content/team_page_media`, { cache: "no-store" });
+    const res = await fetch(`${baseURL}/cms-content/team_page_media`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     return await res.json();
   } catch (err) {
@@ -99,13 +98,15 @@ const ogDescription = seo?.og_description || description;
 
 // --- MAIN SERVER COMPONENT ---
 export default async function TeamGallerys() {
-  const seo = await getSeoData();
-
-  const bannerRecord = await getBannerData();
+  // Independent requests: run together instead of one after another.
+  const [seo, bannerRecord, teamPageMedia] = await Promise.all([
+    getSeoData(),
+    getBannerData(),
+    getTeamPageMedia(),
+  ]);
 const bgHeading = bannerRecord?.banner_heading || "Teams";
 const bgDescription = bannerRecord?.banner_description || "Great design starts with great people—meet our passionate designers, planners, and innovators who turn ideas into beautiful interiors and dreams into reality.";
 
-const teamPageMedia = await getTeamPageMedia();
 const teamMediaItems = teamPageMedia?.json_content?.items || [];
 const hasMedia = teamMediaItems.length > 0;
   return (
@@ -266,18 +267,12 @@ sectionBgHeadingStyle={{ textShadow: "2px 2px 4px rgba(0,0,0,0.8)" }}
       className="video-container shadow-lg w-100"
       style={{ borderRadius: "15px", overflow: "hidden", backgroundColor: "#000" }}
     >
-      <video
+      <LazyVideo
+        src="/team.MP4"
         width="100%"
-        autoPlay
-        loop
-        muted
-        playsInline
         controls
         style={{ display: "block", width: "100%", maxHeight: "70vh", objectFit: "contain" }}
-      >
-        <source src="/team.MP4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      />
     </div>
   )}
 </section>

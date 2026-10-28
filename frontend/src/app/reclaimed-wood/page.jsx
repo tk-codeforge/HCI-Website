@@ -38,9 +38,8 @@ async function getReclaimedWoodData() {
     const baseURL = getBaseUrl();
     const res = await fetch(
       `${baseURL}/cms-parent-child/sustainable_furniture_reclaimed_wood`,
-      {
-        // cache handled by page revalidate
-      }
+      // Explicit cache window, same as the other fetches on this page.
+      { next: { revalidate: 60 } }
     );
 
     if (!res.ok) {
@@ -54,7 +53,6 @@ async function getReclaimedWoodData() {
     return [];
   }
 }
-
 
 async function getSeoData() {
   try {
@@ -89,7 +87,6 @@ async function getHeadingDescriptionData() {
   }
 }
 
-
 export async function generateMetadata() {
   const seo = await getSeoData();
 
@@ -97,10 +94,10 @@ export async function generateMetadata() {
     seo?.meta_title || "Custom Reclaimed wood furniture for your home - High Creation Interior";
   const description =
     seo?.meta_description ||
-   "Bring character to your home with High Creation Interior's custom reclaimed wood furniture, blending sustainability with timeless craftsmanship and unique designs.";
+    "Bring character to your home with High Creation Interior's custom reclaimed wood furniture, blending sustainability with timeless craftsmanship and unique designs.";
 
-   const ogTitle = seo?.og_title || title;
-const ogDescription = seo?.og_description || description;
+  const ogTitle = seo?.og_title || title;
+  const ogDescription = seo?.og_description || description;
 
   const canonical = getCanonicalUrl({
     canonicalUrl: seo?.canonical_url,
@@ -116,7 +113,7 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-        openGraph: {
+    openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
@@ -130,69 +127,67 @@ const ogDescription = seo?.og_description || description;
 
 // --- MAIN SERVER COMPONENT ---
 export default async function ReclaimedWood() {
-  const seo = await getSeoData();
-  const slugMap = await getGallerySlugMap("reclaimed-wood");
-  const exclusiveDesignData = await getReclaimedWoodData();
-
-  const headingData = await getHeadingDescriptionData();
+  // Four independent fetches: run them together instead of one after another.
+  const [seo, slugMap, exclusiveDesignData, headingData] = await Promise.all([
+    getSeoData(),
+    getGallerySlugMap("reclaimed-wood"),
+    getReclaimedWoodData(),
+    getHeadingDescriptionData(),
+  ]);
 
   const HeadingTag = headingData?.headingTag || "h1";
-const headingText = headingData?.headingText || "Reclaimed Wood";
-const headingStyle = {
-  textShadow: buildTextShadow(
-      headingData?.headingShadowEnabled,
-      headingData?.headingShadowIntensity
-    ),
-  fontFamily: "inherit",
-  ...(headingData?.headingColor && { color: headingData.headingColor }),
-};
+  const headingText = headingData?.headingText || "Reclaimed Wood";
+  const headingShadow = buildTextShadow(
+    headingData?.headingShadowEnabled,
+    headingData?.headingShadowIntensity
+  );
+  const descriptionShadow = buildTextShadow(
+    headingData?.descriptionShadowEnabled,
+    headingData?.descriptionShadowIntensity
+  );
+  const headingStyle = {
+    textShadow: headingShadow,
+    fontFamily: "inherit",
+    ...(headingData?.headingColor && { color: headingData.headingColor }),
+  };
 
-const descriptionText =
-  headingData?.descriptionText ||
-  "High Creation Interior's custom reclaimed wood furniture. Each piece is crafted with care, using sustainable wood to create unique designs that stand out. By choosing reclaimed materials, you’re not only helping the environment but also bringing history and charm into your living space. Our furniture combines timeless craftsmanship with modern style, ensuring that every item is both durable and beautiful. From rustic tables to custom storage pieces, our reclaimed wood furniture brings a touch of nature and individuality to your home, making it a truly special place to live."
-const descriptionStyle = {
-  ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
-  textShadow: buildTextShadow(
-      headingData?.descriptionShadowEnabled,
-      headingData?.descriptionShadowIntensity
-    ),
-};
+  const descriptionText =
+    headingData?.descriptionText ||
+    "High Creation Interior's custom reclaimed wood furniture. Each piece is crafted with care, using sustainable wood to create unique designs that stand out. By choosing reclaimed materials, you’re not only helping the environment but also bringing history and charm into your living space. Our furniture combines timeless craftsmanship with modern style, ensuring that every item is both durable and beautiful. From rustic tables to custom storage pieces, our reclaimed wood furniture brings a touch of nature and individuality to your home, making it a truly special place to live.";
+  const descriptionStyle = {
+    ...(headingData?.descriptionColor && { color: headingData.descriptionColor }),
+    textShadow: descriptionShadow,
+  };
 
-const bannerImage = headingData?.bannerImage || "";
-const bannerStyle = bannerImage
-  ? {
-      backgroundImage: `url("${bannerImage}")`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      aspectRatio: "1900 / 441",
-    }
-  : {};
+  const bannerImage = headingData?.bannerImage || "";
 
   const headingBlock = (
     <>
-    <HeadingTag id="reclaimed-wood-heading" className="wallpaperHeading" style={headingStyle}>
-  {headingText}
-</HeadingTag>
-<p id="reclaimed-wood-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
-  {descriptionText}
-</p>
-<style>{`
+      <HeadingTag id="reclaimed-wood-heading" className="wallpaperHeading" style={headingStyle}>
+        {headingText}
+      </HeadingTag>
+      <p id="reclaimed-wood-description" className="px-lg-5 fs-6 text-muted" style={descriptionStyle}>
+        {descriptionText}
+      </p>
+      <style>{`
   ${headingData?.headingColor ? `#reclaimed-wood-heading { color: ${headingData.headingColor} !important; }` : ""}
   ${headingData?.descriptionColor ? `#reclaimed-wood-description { color: ${headingData.descriptionColor} !important; }` : ""}
   ${headingData?.descriptionFontSize ? `#reclaimed-wood-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
-  #reclaimed-wood-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
-    #reclaimed-wood-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
+  #reclaimed-wood-heading { text-shadow: ${headingShadow} !important; }
+  #reclaimed-wood-description { text-shadow: ${descriptionShadow} !important; }
 `}</style>
-</>
+    </>
   );
 
   return (
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
       <main>
-
-                  {bannerImage ? (
-                    <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
+        {bannerImage ? (
+          <MediaBg
+            src={bannerImage}
+            alt={headingData?.bannerAlt}
+            fallbackAlt={headingText}
             className="w-100 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
           >
@@ -204,7 +199,7 @@ const bannerStyle = bannerImage
           </div>
         )}
 
-          <section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}>
+        <section className={bannerImage ? "container my-5 rattan_wrapper" : "container mb-5 rattan_wrapper"}>
           <div className="row g-4 mx-0">
             {exclusiveDesignData && exclusiveDesignData.length > 0 ? (
               exclusiveDesignData.map((design, index) => (
@@ -216,12 +211,18 @@ const bannerStyle = bannerImage
                       design?.child_content?.image ?? "/images/Bhk/1bhk.png"
                     }
                     wallpaperImgClass="wallpaperclass"
+                    // Request a resized rendition instead of the original CMS file.
+                    optimizeImage
+                    imgSizes="(min-width: 1200px) 380px, (min-width: 992px) 320px, (min-width: 768px) 50vw, 100vw"
+                    // First card is the LCP element only when there is no hero banner.
+                    imgPriority={index === 0 && !bannerImage}
+                    // Everything else loads lazily (the browser default is eager).
+                    imgLazy={!(index === 0 && !bannerImage)}
                     altWallpaper={
                       design?.child_content?.title ?? defaultAltText
                     }
-                                        cmsAltWallpaper={design?.child_content?.image_alt}
+                    cmsAltWallpaper={design?.child_content?.image_alt}
                     portfolioTitle={design?.child_content?.title}
-                    // wallpaperDescriptiion={design?.child_content?.description}
                     wallpaperDescriptiion={stripHtml(design?.child_content?.description)}
                     descriptionClass="team_description mb-0"
                     textBtnWallpaper="View Design"

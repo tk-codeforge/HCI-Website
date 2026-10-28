@@ -1,4 +1,3 @@
-import { preload } from "react-dom";
 import api from "@/utils/api";
 import GalleryClient from "./GalleryClient";
 import { notFound } from "next/navigation";
@@ -10,7 +9,6 @@ import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 export const dynamic = "force-dynamic";
 
 const GALLERY_BASE_PATH = "/residential-projects/project-gallery";
-const FALLBACK_FIRST_IMAGE = "/images/detail-img/1.webp";
 
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
@@ -44,9 +42,10 @@ export default async function ResidentialProjectsPage({ searchParams }) {
   const portfolioData = projectResponse?.data;
   if (!portfolioData) return notFound();
 
-  // Preload only the first visible gallery image; leave remaining images lazy.
-  const firstImage = portfolioData?.child_images?.[0]?.image || FALLBACK_FIRST_IMAGE;
-  if (firstImage) preload(firstImage, { as: "image", fetchPriority: "high" });
+  // The first gallery image is rendered as an eager, fetchPriority="high" <img>
+  // (imgPriority in GalleryClient), so it is discovered straight from the HTML.
+  // The old preload() fetched the ORIGINAL full-size file while the <img>
+  // requested a resized /_next/image rendition, so the image downloaded twice.
 
   return (
     <MainLayout>

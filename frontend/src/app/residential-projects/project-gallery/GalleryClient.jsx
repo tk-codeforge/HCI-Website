@@ -1,5 +1,3 @@
-"use client";
-
 import GalleryDetail from "../../components/GalleryDetail";
 import { defaultAltText } from "@/utils/helper";
 
@@ -48,7 +46,12 @@ const GALLERY_SLOTS = [
 ];
 
 export default function GalleryClient({ portfolioData }) {
-  const images = portfolioData?.child_images ?? [];
+  // Only the fields GalleryDetail uses (this array is serialized once per card).
+  const images = (portfolioData?.child_images ?? []).map((img) => ({
+    image: img?.image,
+    image_alt: img?.image_alt,
+    title: img?.title,
+  }));
   const savedTag = portfolioData?.title_tag;
   const TitleTag = HEADING_TAGS.includes(savedTag) ? savedTag : "h4";
   const galleryTitle = portfolioData?.title ?? "Luxury Projects";
@@ -72,6 +75,7 @@ export default function GalleryClient({ portfolioData }) {
                   imgGalCmsAlt={image?.image_alt}
                   imgGalImgClass={slot.imageClass}
                   images={images}
+                  imgPriority={slot.index === 0}
                 />
               </div>
             );

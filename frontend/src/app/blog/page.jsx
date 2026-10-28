@@ -1,4 +1,3 @@
-import React from "react";
 import { format } from "date-fns"; 
 import MainLayout from "../layouts/MainLayout";
 import Image from "next/image";
@@ -9,9 +8,7 @@ import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaImg } from "../components/MediaImage";
 import JsonLd from "../components/JsonLd";
-
-// 🌟 IMPORT OUR GLOBAL PREMIUM TEXT EXPANDER
-import ExpandableRichText from "../components/ModernPara";
+import { optimizedSrcSet } from "@/utils/optimizedImage";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60; 
@@ -110,10 +107,14 @@ async function getHeadingDescriptionData() {
 
 // --- MAIN SERVER COMPONENT ---
 export default async function Blog({ searchParams }) {
-  const seo = await getSeoData();
   const page = searchParams?.page || "1";
-  const rawBlogs = await getBlogsData(page);
-  
+  // SEO, blogs and heading data are independent: fetch them together.
+  const [seo, rawBlogs, headingData] = await Promise.all([
+    getSeoData(),
+    getBlogsData(page),
+    getHeadingDescriptionData(),
+  ]);
+
   // Filter out draft/inactive blogs
   const allBlogs = rawBlogs.filter(blog => {
     if (blog.status === undefined || blog.status === null) return true;
@@ -125,8 +126,6 @@ export default async function Blog({ searchParams }) {
   const isPageOne = page === "1";
   const featuredBlog = (isPageOne && allBlogs.length > 0) ? allBlogs[0] : null;
   const regularBlogs = featuredBlog ? allBlogs.slice(1) : allBlogs;
-
-    const headingData = await getHeadingDescriptionData();
 
 const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Latest News & Updates";
@@ -158,30 +157,15 @@ const badgeStyle = {
 };
 
 const bannerImage = headingData?.bannerImage || "";
+// The banner <img> below covers the whole section, so the section no longer also loads
+// the same file as a CSS background (that was a second full-size download).
 const bannerStyle = bannerImage
   ? {
-      backgroundImage: `url("${bannerImage}")`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
       aspectRatio: "1900 / 441",
       padding: 0,
       position: "relative",
     }
   : {};
-
-  // SEO Content for the bottom of the page
-  const seoPageDescription = `
-    <h2>The Ultimate Guide to Interior Design Trends</h2>
-    <p>Designing your dream home requires a perfect balance of aesthetics, functionality, and personal style. At High Creation Interior, we believe that every space has a unique story to tell. Whether you are looking to revamp a compact apartment in Delhi or design a sprawling luxury villa in Gurgaon, understanding the core principles of interior design is essential.</p>
-    <p>Our expert designers continuously explore global design trends, from minimalist Scandinavian concepts to opulent Art Deco styles. We integrate sustainable materials, smart home technology, and bespoke furniture to create environments that are not only visually stunning but also highly practical for modern living.</p>
-    <h3>Why Choose Professional Interior Designers?</h3>
-    <ul>
-      <li><strong>Space Optimization:</strong> Maximizing every square foot of your property.</li>
-      <li><strong>Cost Efficiency:</strong> Avoiding costly mistakes and sourcing materials at trade prices.</li>
-      <li><strong>Flawless Execution:</strong> Managing contractors, timelines, and quality control.</li>
-    </ul>
-    <p>Browse through our extensive library of articles above to discover DIY tips, color psychology, lighting strategies, and much more. Let us inspire your next home transformation journey.</p>
-  `;
 
   return (
     <MainLayout>
@@ -191,7 +175,7 @@ const bannerStyle = bannerImage
         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
         .font-outfit { font-family: var(--font-outfit), sans-serif; }
         .font-poppins { font-family: var(--font-poppins), sans-serif; }
-        .text-gradient { background: linear-gradient(135deg, #ff914d 0%, #ff5722 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .text-gradient { background: linear-gradient(135deg, #c2500a 0%, #bf3a0a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
         .blog-hero-section {
           background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -297,7 +281,9 @@ const bannerStyle = bannerImage
     {bannerImage && (
     <MediaImg
       src={bannerImage}
-            alt={headingData?.bannerAlt}
+      srcSet={optimizedSrcSet(bannerImage)}
+      sizes="100vw"
+      alt={headingData?.bannerAlt}
       fallbackAlt={headingText}
        width={1900}
       height={441}
@@ -411,13 +397,7 @@ const bannerStyle = bannerImage
                         <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                           <div className="modern-blog-card">
                             <div className="card-img-wrapper">
-                              {/* <Image 
-                                src={blog.image || "/images/Blog/blo_img1.webp"} 
-                                alt={blog.image_alt || blog.title || defaultAltText}
-                                fill
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                style={{ objectFit: 'cover' }}
-                              /> */}
+
 
                                                             <Image 
                                 src={blog.image || "/images/Blog/blo_img1.webp"} 

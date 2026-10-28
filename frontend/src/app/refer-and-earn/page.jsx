@@ -15,7 +15,7 @@ async function getBannerData() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-gallery-design/manage-banner?key=refer_and_earn`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: { Connection: "close" },
     });
     if (!res.ok) return null;
@@ -30,7 +30,7 @@ async function getPageContent() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-content/refer_and_earn`, {
-      cache: "no-store",
+      next: { revalidate: 60 },
       headers: { Connection: "close" },
     });
     if (!res.ok) return null;
@@ -82,15 +82,6 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
 
         openGraph: {
       title: ogTitle,
@@ -103,11 +94,13 @@ const ogDescription = seo?.og_description || description;
     },
   };
 }
-// const ReferEarn = () => {
 export default async function ReferEarn() {
-  const seo = await getSeoData();
-  const bannerRecord = await getBannerData();
-  const pageRecord = await getPageContent();
+  // Independent requests: run together instead of one after another.
+  const [seo, bannerRecord, pageRecord] = await Promise.all([
+    getSeoData(),
+    getBannerData(),
+    getPageContent(),
+  ]);
   const bgHeading = bannerRecord?.banner_heading || "Refer & Earn";
 const bgDescription = bannerRecord?.banner_description || "Get all the information you need";
 
@@ -157,22 +150,7 @@ const formHeading = contentData.form_heading || "Refer and Earn";
 
   return (
     <div>
-       {/* <head>
-        <title>Refer & Earn - High Creation Interior	 </title>
-        <meta
-          name="description"
-          content="Refer & Earn - High Creation Interior	"
-        />
-        <link rel="canonical" href="https://hcinterior.in/refer-and-earn" />	
-      </head> */}
       
-        {/* <BackgroundImageWithHeading
-          sectionBgImages={"  refer-and-earn refer_and_earn_banner  "}
-          sectionBgHeading="Refer & Earn"
-          secBgHeadingClass="sec_bgheading_lass"
-          sectionBgDescription="Get all the information you need"
-          secBgDesClass={"text-center text-white"}
-        /> */}
         <MainLayout>
           <JsonLd data={seo?.custom_schema} />
         <BackgroundImageWithHeading
@@ -191,51 +169,12 @@ const formHeading = contentData.form_heading || "Refer and Earn";
         <section className="privacy my-5">
           <div className="container">
             <div className="text-center">
-              {/* <h2>High Creation Interior</h2>
-              <h3>
-                <span className="font_stylish" style={{ color: "#ff914d" }}>
-                  Refer & Earn
-                </span>
-              </h3> */}
               <HeadingTag>{mainHeading}</HeadingTag>
 {mainDescription && (
   <p style={{ fontSize: `${mainDescriptionFontSize}px` }}>{mainDescription}</p>
 )}
 <h3>
-  {/* <span className="font_stylish" style={{ color: "#ff914d" }}>
-    Refer & Earn
-  </span> */}
 </h3>
-              {/* <div className="row g-4 py-4 mx-0">
-                <div className="col-12 col-lg-4 col-md-4">
-                  <BoxIcon
-                    iconImage="/images/referral.svg"
-                    iconAlt=""
-                    iconWidth=""
-                    IconBoxHeading="Refer Your Friends"
-                    IconBoxDescription="Refer your friend and unlock amazing rewards!"
-                  />
-                </div>
-                <div className="col-12 col-lg-4 col-md-4">
-                  <BoxIcon
-                    iconImage="/images/book.svg"
-                    iconAlt=""
-                    iconWidth=""
-                    IconBoxHeading="They Book With Us"
-                    IconBoxDescription="When your friend books with us, both of you enjoy exclusive benefits."
-                  />
-                </div>
-                <div className="col-12 col-lg-4 col-md-4">
-                  <BoxIcon
-                    iconImage="/images/reward.svg"
-                    iconAlt=""
-                    iconWidth=""
-                    IconBoxHeading="And Get Exciting Rewards"
-                    IconBoxDescription="Earn exciting rewards together and make unforgettable memories!"
-                  />
-                </div>
-               
-              </div> */}
 
               <div className="row g-4 py-4 mx-0">
   {iconItems.map((item, idx) => (
@@ -257,17 +196,6 @@ const formHeading = contentData.form_heading || "Refer and Earn";
                 <div className="col-lg-10">
                 <div className="row justify-content-center">
                   <div className="col-lg-5 pe-lg-0">
-                  {/* <div
-  className="bg-image"
-  style={{
-    // backgroundImage: "url('/images/refer-and-earn.jpg')",
-    backgroundImage: `url('${formImage}')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    width: "100%",
-    height: "100%",
-  }}
-></div> */}
 
 <div className="bg-image" style={{ position: "relative", width: "100%", height: "100%" }}>
   <img
@@ -280,10 +208,6 @@ const formHeading = contentData.form_heading || "Refer and Earn";
 </div>
                   </div>
                   <div className="col-lg-7 ps-lg-0">
-                    {/* <div className="refer_form " style={{ }}>
-                      <h4 className="text-black form_heading mb-3">
-                        Refer and Earn
-                      </h4> */}
                       <div
   className="refer_form"
   style={{
@@ -296,181 +220,6 @@ const formHeading = contentData.form_heading || "Refer and Earn";
   <h4 className="form_heading mb-3">
     {formHeading}
   </h4>
-                      {/* <form className="row">
-                        <div className="col-md-6 mb-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="validationCustom01"
-                            placeholder="Your Friend's Name"
-                            required=""
-                          />
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="validationCustom05"
-                            placeholder="Your Friend's Number"
-                            required=""
-                          />
-                        </div>
-
-                        <div className="col-md-6 mb-3">
-                          <input
-                            type="email"
-                            className="form-control"
-                            id="validationCustom03"
-                            placeholder="Your Friend's Email"
-                            required=""
-                          />
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <select
-                            className="form-select form-control"
-                            aria-label="Default select example"
-                            defaultValue=""
-                          >
-                            <option value="" hidden>
-                              Place
-                            </option>
-                            <option value="1">Noida</option>
-                            <option value="2">New delhi</option>
-                            <option value="3">Agra</option>
-                          </select>
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="validationCustom06"
-                            placeholder="Other Place"
-                            required=""
-                          />
-                        </div>
-                        <div className="col-md-6 mb-3">
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="validationCustom06"
-                            placeholder="your Phone No."
-                            required=""
-                          />
-                        </div>
-
-                        <div className="col-12 mt-3 d-flex m-auto justify-content-center">
-                          <button
-                            className="btn know_more px-5 py-2"
-                            type="submit"
-                          >
-                            Submit Now
-                          </button>
-                        </div>
-                      </form> */}
-         {/* <form className="row">             
-{formFields.friend_name.shown && (
-  <div className="col-md-6 mb-3">
-    <input
-      type="text"
-      className="form-control"
-      id="validationCustom01"
-      placeholder={formFields.friend_name.placeholder}
-      required={formFields.friend_name.required}
-    />
-  </div>
-)}
-
-{formFields.friend_number.shown && (
-  <div className="col-md-6 mb-3">
-    <input
-      type="text"
-      className="form-control"
-      id="validationCustom05"
-      placeholder={formFields.friend_number.placeholder}
-      required={formFields.friend_number.required}
-    />
-  </div>
-)}
-
-
-{formFields.friend_email.shown && (
-  <div className="col-md-6 mb-3">
-    <input
-      type="email"
-      className="form-control"
-      id="validationCustom03"
-      placeholder={formFields.friend_email.placeholder}
-      required={formFields.friend_email.required}
-    />
-  </div>
-)}
-
-
-{formFields.place.shown && (
-  <div className="col-md-6 mb-3">
-    <select
-      className="form-select form-control"
-      aria-label="Default select example"
-      defaultValue=""
-      required={formFields.place.required}
-    >
-      <option value="" hidden>{formFields.place.placeholder}</option>
-      <option value="1">Noida</option>
-      <option value="2">New delhi</option>
-      <option value="3">Agra</option>
-    </select>
-  </div>
-)}
-
-
-{formFields.other_place.shown && (
-  <div className="col-md-6 mb-3">
-    <input
-      type="text"
-      className="form-control"
-      id="validationCustom06"
-      placeholder={formFields.other_place.placeholder}
-      required={formFields.other_place.required}
-    />
-  </div>
-)}
-
-
-{formFields.phone_no.shown && (
-  <div className="col-md-6 mb-3">
-    <input
-      type="text"
-      className="form-control"
-      id="validationCustom07"
-      placeholder={formFields.phone_no.placeholder}
-      required={formFields.phone_no.required}
-    />
-  </div>
-)}
-<style>{`
-  .refer_form .form_heading {
-    color: var(--form-heading-color) !important;
-  }
-  .refer_form .know_more {
-    background-color: var(--submit-btn-bg-color) !important;
-    color: var(--submit-btn-text-color) !important;
-    border-color: var(--submit-btn-bg-color) !important;
-  }
-`}</style>
-<div className="col-12 mt-3 d-flex m-auto justify-content-center">
-      <button 
-        className="btn know_more px-5 py-2" 
-        type="submit"
-        style={{ 
-          backgroundColor: submitButtonBgColor, 
-          color: submitButtonColor,
-          borderColor: submitButtonBgColor 
-        }}
-      >
-        {submitButtonText}
-      </button>
-    </div>
-  </form> */}
 
   <ReferFormClient
   formFields={formFields}
@@ -493,4 +242,3 @@ const formHeading = contentData.form_heading || "Refer and Earn";
   );
 };
 
-// export default ReferEarn;

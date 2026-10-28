@@ -1,10 +1,32 @@
 "use client";
-import React from "react";
 import BackgroundImageWithHeading from "../components/BackgroundImageWithHeading";
 import DOMPurify from "isomorphic-dompurify";
+import { canOptimize, optimizedUrl, optimizedSrcSet } from "@/utils/optimizedImage";
 
 const TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 const safeTag = (t, fallback) => (TAGS.includes(t) ? t : fallback);
+
+// Same <img> and classes as before, but resized through /_next/image (the originals are
+// full-size) and only the first, above-the-fold image is eager and high priority. It was
+// lazy before, so the browser only found the LCP image after layout.
+function OfferImage({ src, alt, scale, priority }) {
+  const optimizable = canOptimize(src);
+  return (
+    <img
+      src={optimizable ? optimizedUrl(src, 828) : src}
+      srcSet={optimizedSrcSet(src, [384, 640, 828, 1080])}
+      sizes={optimizable ? "(max-width: 767px) 75vw, 450px" : undefined}
+      alt={alt}
+      className="offer-img"
+      width={1200}
+      height={900}
+      style={{ "--img-scale": scale }}
+      loading={priority ? "eager" : "lazy"}
+      fetchPriority={priority ? "high" : undefined}
+      decoding="async"
+    />
+  );
+}
 
 export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
   return (
@@ -59,7 +81,8 @@ export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
             margin: 0;
           }
 
-          .offer-list li {
+          .offer-list li,
+          .offer-desc ul li {
             position: relative;
             padding-left: 35px;
             margin-bottom: 1rem;
@@ -69,7 +92,9 @@ export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
           }
 
           /* Custom Brand-Colored Checkmarks */
-          .offer-list li::before {
+          .offer-list li::before,
+          .offer-desc ul li::before,
+          .offer-desc p:has(img[alt="Tick icon"])::before {
             content: '✔';
             position: absolute;
             left: 0;
@@ -116,12 +141,6 @@ export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 3px 12px rgba(0, 0, 0, 0.75);
           }
 
-          .what-we-offer-section.wwo-custom-bg .what_we_offer_banner {
-            background-image: var(--wwo-bg-image) !important;
-            background-size: cover !important;
-            background-position: center !important;
-          }
-
                     .offer-desc {
             font-family: var(--font-poppins), sans-serif;
             font-size: 1.05rem;
@@ -130,50 +149,12 @@ export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
           .offer-desc p { margin: 0 0 1rem; }
                     /* A bulleted list in the editor gets the same tick as the old points */
           .offer-desc ul { list-style: none; padding: 0; margin: 0 0 1rem; }
-          .offer-desc ul li {
-            position: relative;
-            padding-left: 35px;
-            margin-bottom: 1rem;
-            font-family: var(--font-poppins), sans-serif;
-            font-size: 1.05rem;
-            line-height: 1.6;
-          }
-          .offer-desc ul li::before {
-            content: '✔';
-            position: absolute;
-            left: 0;
-            top: 2px;
-            color: #ff914d;
-            font-size: 1.1rem;
-            background: rgba(255, 145, 77, 0.15);
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-          }
 
                     /* Tick icon inserted from the toolbar: draw the same ✔ badge as the list, hide the image */
           .offer-desc p:has(img[alt="Tick icon"]) {
             position: relative;
             padding-left: 35px;
             margin-bottom: 1rem;
-          }
-          .offer-desc p:has(img[alt="Tick icon"])::before {
-            content: '✔';
-            position: absolute;
-            left: 0;
-            top: 2px;
-            color: #ff914d;
-            font-size: 1.1rem;
-            background: rgba(255, 145, 77, 0.15);
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
           }
           .offer-desc p:has(img[alt="Tick icon"]) img[alt="Tick icon"] {
             display: none;
@@ -197,7 +178,6 @@ export default function WhatWeOfferClient({ OFFERINGS, bannerData }) {
         style={{
           "--wwo-heading-color": bannerData.headingColor,
           "--wwo-description-color": bannerData.descriptionColor,
-          ...(bannerData.bgImage ? { "--wwo-bg-image": `url(${bannerData.bgImage})` } : {}),
         }}
       >
         <BackgroundImageWithHeading
@@ -234,14 +214,11 @@ descriptionFontSize={bannerData.descriptionSize}
                     }`}
                   >
                     <div className="offer-img-container">
-                      <img
+                      <OfferImage
                         src={offer.img}
                         alt={offer.imgAlt || offer.title}
-                        className="offer-img"
-                        width={1200}
-                        height={900}
-                        style={{ "--img-scale": offer.imageSize / 100 }}
-                        loading="lazy"
+                        scale={offer.imageSize / 100}
+                        priority={index === 0}
                       />
                     </div>
                   </div>
@@ -256,20 +233,11 @@ descriptionFontSize={bannerData.descriptionSize}
                     }`}
                   >
                     <div className="offer-content px-2 px-md-0">
-                      {/* <h2 className="offer-title">{offer.title}</h2>
-
-                      <ul className="offer-list">
-                        {offer.points.map((point, i) => (
-                          <li key={i}>{point}</li>
-                        ))}
-                      </ul> */}
-
                       <OfferTag className="offer-title">{offer.title}</OfferTag>
 
 {offer.description ? (
   <div
     className="offer-desc"
-    // dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(offer.description) }}
     dangerouslySetInnerHTML={{
   __html: DOMPurify.sanitize(
     offer.description.replace(/(<img[^>]*alt="Tick icon"[^>]*>)(\s|&nbsp;)+/gi, "$1")

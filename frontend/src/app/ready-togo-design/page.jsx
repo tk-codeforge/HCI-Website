@@ -7,6 +7,7 @@ import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { MediaBg, MediaImg } from "../components/MediaImage";
 import JsonLd from "../components/JsonLd";
+import { canOptimize, optimizedUrl, optimizedSrcSet } from "@/utils/optimizedImage";
 
 // --- CONFIGURATION ---
 export const revalidate = 60; // Regenerate page every 60 seconds
@@ -33,12 +34,23 @@ const stripHtml = (html = "") =>
     .replace(/\s+/g, " ")
     .trim();
 
+// The card images are full-size CMS uploads. Serve resized versions (PageSpeed measured
+// about 3.3 MB of savings on this page); the originals stay as the fallback src.
+const cardImgProps = (src) =>
+  canOptimize(src)
+    ? {
+        src: optimizedUrl(src, 828),
+        srcSet: optimizedSrcSet(src, [384, 640, 828, 1080]),
+        sizes: "(min-width: 768px) 50vw, 100vw",
+      }
+    : { src };
+
 // --- HELPER: Fetch Ready To Go Design Data ---
 async function getReadyToGoDesignData() {
   try {
     const baseURL = getBaseUrl();
     const res = await fetch(`${baseURL}/cms-parent-child/ready_to_go_design`, {
-      // cache handled by page revalidate
+      next: { revalidate: 60 },
     });
 
     if (!res.ok) {
@@ -54,32 +66,6 @@ async function getReadyToGoDesignData() {
 }
 
 // --- HELPER: Fetch SEO Data ---
-// async function getSeoData() {
-//   try {
-//     const baseURL = getBaseUrl();
-//     const res = await fetch(`${baseURL}/seo-tag`, {
-//       next: { revalidate: 60 },
-//     });
-
-//     if (!res.ok) return null;
-
-//     const allTags = await res.json();
-
-//     // Match the specific page URL for Ready To Go Design
-//     if (Array.isArray(allTags)) {
-//       return allTags.find(
-//         (tag) =>
-//           tag.page_name === "https://hcinterior.in/ready-togo-design" ||
-//           tag.page_name?.endsWith("/ready-togo-design")
-//       );
-//     }
-//     return null;
-//   } catch (err) {
-//     console.error("SEO Fetch Error:", err);
-//     return null;
-//   }
-// }
-
 async function getSeoData() {
   try {
     const baseURL = getBaseUrl();
@@ -112,30 +98,6 @@ async function getHeadingDescriptionData() {
     return null;
   }
 }
-// --- DYNAMIC METADATA GENERATION ---
-// export async function generateMetadata() {
-//   const seoData = await getSeoData();
-
-//   const defaultTitle = "Ready To Go Interior Design : High Creation Interior";
-//   const defaultDesc =
-//     "Explore our Ready-To-Go Interior Design solutions, offering stylish, pre-designed spaces that blend functionality and aesthetics for a hassle-free transformation.";
-//   const defaultCanonical = "https://hcinterior.in/ready-togo-design";
-
-//   return {
-//     title: seoData?.title || defaultTitle,
-//     description: seoData?.meta_description || defaultDesc,
-//     alternates: {
-//       canonical: seoData?.page_name || defaultCanonical,
-//     },
-//     openGraph: {
-//       title: seoData?.title || defaultTitle,
-//       description: seoData?.meta_description || defaultDesc,
-//       url: seoData?.page_name || defaultCanonical,
-//       type: "website",
-//     },
-//   };
-// }
-
 
 export async function generateMetadata() {
   const seo = await getSeoData();
@@ -163,15 +125,6 @@ const ogDescription = seo?.og_description || description;
     ...(seo?.keywords && { keywords: seo.keywords }),
     alternates: { canonical },
     robots: { index, follow },
-    // openGraph: {
-    //   title,
-    //   description,
-    //   url: canonical,
-    //   type: "website",
-    //   ...(seo?.og_image && {
-    //     images: [{ url: seo.og_image, width: 1200, height: 630 }],
-    //   }),
-    // },
 
         openGraph: {
       title: ogTitle,
@@ -186,11 +139,13 @@ const ogDescription = seo?.og_description || description;
 }
 // --- MAIN SERVER COMPONENT ---
 export default async function ReadyToGoDesign() {
-  const seo = await getSeoData();
-  const slugMap = await getGallerySlugMap("ready-togo-design");
-  const exclusiveDesignData = await getReadyToGoDesignData();
-
-  const headingData = await getHeadingDescriptionData();
+  // Independent requests run together instead of one after another.
+  const [seo, slugMap, exclusiveDesignData, headingData] = await Promise.all([
+    getSeoData(),
+    getGallerySlugMap("ready-togo-design"),
+    getReadyToGoDesignData(),
+    getHeadingDescriptionData(),
+  ]);
 
   const HeadingTag = headingData?.headingTag || "h1";
 const headingText = headingData?.headingText || "Ready To Go Design";
@@ -215,14 +170,7 @@ const descriptionStyle = {
 };
 
 const bannerImage = headingData?.bannerImage || "";
-const bannerStyle = bannerImage
-  ? {
-      backgroundImage: `url("${bannerImage}")`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-     aspectRatio: "1900 / 441",
-    }
-  : {};
+
 
     const headingBlock = (
     <>
@@ -294,7 +242,7 @@ const bannerStyle = bannerImage
         /* Call to Action Button */
         .rtd-btn {
           margin-top: auto;
-          color: #ff914d;
+          color: #c2500a;
           display: inline-flex;
           align-items: center;
           transition: color 0.3s ease;
@@ -320,35 +268,12 @@ const bannerStyle = bannerImage
       <main className="bg-light pb-5">
         
         {/* --- PREMIUM HEADER SECTION --- */}
-        {/* <section
-  className={
-    bannerImage
-      ? "py-5 border-bottom shadow-sm mb-5 d-flex align-items-center justify-content-center"
-      : "py-5 bg-white border-bottom shadow-sm mb-5"
-  }
-  style={bannerStyle}
->
-          <div className="container text-center">
-            <HeadingTag id="ready-to-go-design-heading" className="wallpaperHeading" style={headingStyle}>
-  {headingText}
-</HeadingTag>
-<p id="ready-to-go-design-description" className="rtd-header-text fs-6 text-muted mx-auto" style={descriptionStyle}>
-  {descriptionText}
-</p>
-<style>{`
-  ${headingData?.headingColor ? `#ready-to-go-design-heading { color: ${headingData.headingColor} !important; }` : ""}
-  ${headingData?.descriptionColor ? `#ready-to-go-design-description { color: ${headingData.descriptionColor} !important; }` : ""}
-  ${headingData?.descriptionFontSize ? `#ready-to-go-design-description { font-size: ${headingData.descriptionFontSize}px !important; }` : ""}
-  #ready-to-go-design-heading { text-shadow: ${buildTextShadow(headingData?.headingShadowEnabled, headingData?.headingShadowIntensity)} !important; }
-  #ready-to-go-design-description { text-shadow: ${buildTextShadow(headingData?.descriptionShadowEnabled, headingData?.descriptionShadowIntensity)} !important; }
-`}</style>
-          </div>
-        </section> */}
-
                 {bannerImage ? (
                     <MediaBg src={bannerImage} alt={headingData?.bannerAlt} fallbackAlt={headingText}
             className="py-5 border-bottom shadow-sm mb-5 d-flex align-items-center justify-content-center"
             style={{ aspectRatio: "1900 / 441" }}
+            priority
+            optimizeImage
           >
             <div className="container text-center">{headingBlock}</div>
           </MediaBg>
@@ -369,23 +294,19 @@ const bannerStyle = bannerImage
                     className="premium-rtd-card text-decoration-none h-100"
                   >
                     
+                    {/* the first card is the LCP image, unless a banner sits above it */}
                     <div className="rtd-img-wrapper">
-                     {/* <img 
-                        src={design?.child_content?.image ?? "/images/Bhk/1bhk.png"} 
-                        alt={design?.child_content?.title ?? defaultAltText} 
-                        className="rtd-img"
-                        decoding="async"
-                        loading="lazy"
-                      /> */}
-
                       <MediaImg
-  src={design?.child_content?.image ?? "/images/Bhk/1bhk.png"}
-    alt={design?.child_content?.image_alt}
-  fallbackAlt={design?.child_content?.title ?? defaultAltText}
-  width={1200}
-  height={800}
-  className="rtd-img"
-/>
+                        {...cardImgProps(design?.child_content?.image ?? "/images/Bhk/1bhk.png")}
+                        alt={design?.child_content?.image_alt}
+                        fallbackAlt={design?.child_content?.title ?? defaultAltText}
+                        width={1200}
+                        height={800}
+                        className="rtd-img"
+                        {...(!bannerImage && index === 0
+                          ? { loading: "eager", fetchPriority: "high" }
+                          : {})}
+                      />
                     </div>
                     
                     <div className="rtd-content">

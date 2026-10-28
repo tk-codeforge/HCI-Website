@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { toast } from "react-toastify";
-import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
 import { validateLeadField } from "@/utils/leadValidation";
 
@@ -24,6 +23,28 @@ const sanitizePhone = (value) => {
   if (digits.length > 10 && digits.startsWith("91")) digits = digits.slice(2);
   return digits.slice(0, 10);
 };
+
+// Static stylesheet hoisted out of the component (not rebuilt on each keystroke).
+const FORM_STYLES = `
+        .refer_form .form_heading {
+          color: var(--form-heading-color) !important;
+        }
+        .refer_form .know_more {
+          background-color: var(--submit-btn-bg-color) !important;
+          color: var(--submit-btn-text-color) !important;
+          border-color: var(--submit-btn-bg-color) !important;
+        }
+        .refer_form .refer-field-error {
+          display: inline-block;
+          margin-top: 4px;
+          padding: 2px 8px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.9);
+          color: #dc3545;
+          font-size: 13px;
+          text-align: left;
+        }
+      `;
 
 const FieldError = ({ msg }) => (msg ? <div className="refer-field-error">{msg}</div> : null);
 
@@ -106,6 +127,8 @@ if (name === "friend_email") value = value.toLowerCase().replace(/\s/g, "");
     // ASSUMPTION: sends to the same /user-queries endpoint as your other lead forms.
     // If you have a dedicated referral endpoint, change the URL and payload here.
     try {
+      // Loaded on demand: keeps the HTTP client out of the initial JS path.
+      const { default: api } = await import("@/utils/api");
       const response = await api.post("/user-queries", {
         name: formData.friend_name.trim(),
         mobile: formData.friend_number.trim(),
@@ -210,26 +233,7 @@ if (name === "friend_email") value = value.toLowerCase().replace(/\s/g, "");
         </div>
       )}
 
-      <style>{`
-        .refer_form .form_heading {
-          color: var(--form-heading-color) !important;
-        }
-        .refer_form .know_more {
-          background-color: var(--submit-btn-bg-color) !important;
-          color: var(--submit-btn-text-color) !important;
-          border-color: var(--submit-btn-bg-color) !important;
-        }
-        .refer_form .refer-field-error {
-          display: inline-block;
-          margin-top: 4px;
-          padding: 2px 8px;
-          border-radius: 6px;
-          background: rgba(255, 255, 255, 0.9);
-          color: #dc3545;
-          font-size: 13px;
-          text-align: left;
-        }
-      `}</style>
+      <style dangerouslySetInnerHTML={{ __html: FORM_STYLES }} />
 
       <div className="col-12 mt-3 d-flex m-auto justify-content-center">
         <button

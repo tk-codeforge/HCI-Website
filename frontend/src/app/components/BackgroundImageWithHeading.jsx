@@ -1,4 +1,3 @@
-"use client";
 import { MediaImg } from "./MediaImage";
 import { canOptimize, optimizedSrcSet } from "@/utils/optimizedImage";
 
