@@ -8,9 +8,11 @@ export async function getPageSEO(pageUrlIdentifier, options = {}) {
   
       const pathQuery = pageUrlIdentifier.startsWith('/') ? pageUrlIdentifier : `/${pageUrlIdentifier}`;
 
-      const fetchOptions = Number.isFinite(options?.revalidate) && options.revalidate > 0
-        ? { next: { revalidate: options.revalidate } }
+      const requestedRevalidate = Number(options?.revalidate);
+      const fetchOptions = Number.isFinite(requestedRevalidate) && requestedRevalidate > 0
+        ? { next: { revalidate: requestedRevalidate } }
         : { cache: "no-store" };
+
       const res = await fetch(`${baseURL}/seo-tag/route?path=${encodeURIComponent(pathQuery)}`, fetchOptions);
   
       if (res.ok) {

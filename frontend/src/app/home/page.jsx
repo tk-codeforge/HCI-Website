@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import HeroCarousel from "./clientHome/HeroCarousel";
 import HomeContent from "./HomeContent"; 
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
@@ -77,6 +76,19 @@ const jsonLd = {
   ]
 };
 
+// Used only when the CMS endpoint is unavailable or has no active banners.
+// The local image is already used as the existing HeroCarousel image fallback.
+const FALLBACK_BANNER = {
+  id: "homepage-fallback-banner",
+  banner_image: "/images/home-banner-1.png",
+  title: "High Creation Interior",
+  sub_title: "Design Your Dream Home",
+  description: "Thoughtfully designed home interiors for your lifestyle and budget.",
+  button_text: "Explore Residential Projects",
+  button_link: "/residential-projects",
+  is_active: true,
+};
+
 // --- HELPER: Native Fetch for Next.js Caching ---
 async function getBannerData() {
   try {
@@ -95,13 +107,15 @@ async function getBannerData() {
     }
 
     const data = await res.json();
-    // return data?.json_content || [];
-        return (data?.json_content || []).filter(
+    const activeBanners = (Array.isArray(data?.json_content) ? data.json_content : []).filter(
       (b) => b && b.is_active !== false && b.is_active !== "false"
     );
+
+    // A temporary CMS/API failure should not produce a completely blank hero.
+    return activeBanners.length > 0 ? activeBanners : [FALLBACK_BANNER];
   } catch (err) {
     console.error("Banner Fetch Error:", err);
-    return [];
+    return [FALLBACK_BANNER];
   }
 }
 
@@ -133,10 +147,9 @@ export default async function Home() {
       {/* 1. Hero Carousel */}
       <HeroCarousel bannerData={bannerData} carouselSpeed={carouselSpeed} />
 
-      {/* 2. The Rest of the Page */}
-      <Suspense fallback={<div className="py-5 text-center"></div>}>
-        <HomeContent />
-      </Suspense>
+      {/* Render the complete homepage content on the server. Avoid an empty
+          Suspense fallback that can leave the page blank when scripts fail. */}
+      <HomeContent />
     </>
   );
 }

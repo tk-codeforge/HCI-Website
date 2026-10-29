@@ -9,6 +9,9 @@ import { buildLeadMetadata } from "@/utils/leadForms";
 // WhatsApp enquiries + the phone link in the final call-to-action.
 const CONTACT_NUMBER = "919810506301";
 const CONTACT_DISPLAY = "+91 98105 06301";
+// The estimator copy that lives inside this landing-page folder (app/design-your-dream-space/estimator-for-home).
+// A relative path keeps working on localhost, stage2.hcinterior.in and production.
+const ESTIMATOR_PATH = "/design-your-dream-space/estimator-for-home";
 // Number used by the "Call" buttons and the floating call button.
 const CALL_NUMBER = "917070701373";
 const CALL_DISPLAY = "+91 70707 01373";
@@ -220,6 +223,12 @@ const experienceCenters = [
     phone: "+91 70707 01373",
     telephone: "+917070701373",
   },
+  {
+    city: "Faridabad",
+    address: "1st Floor, Plot No 24, near old Faridabad Metro Station, Sector 20A, Faridabad, Haryana 121002",
+    phone: "+91 70707 01373",
+    telephone: "+917070701373",
+  },
 ];
 
 const locations = [
@@ -236,17 +245,21 @@ const locations = [
 ];
 
 const serviceAreas = [
-  { city: "Noida", description: "Interior designers in Noida" },
-  { city: "Ghaziabad", description: "Interior designers in Ghaziabad" },
-  { city: "Greater Noida", description: "Interior designers in Greater Noida" },
-  { city: "Noida Extension", description: "Interior designers in Noida Extension" },
-  { city: "Delhi", description: "Interior designers in Delhi" },
-  { city: "Dwarka", description: "Interior designers in Dwarka" },
-  { city: "Gurugram", description: "Interior designers in Gurugram" },
-  { city: "Manesar", description: "Interior designers in Manesar" },
-  { city: "Sohna", description: "Interior designers in Sohna" },
-  { city: "Faridabad", description: "Interior designers in Faridabad" },
+  { city: "Noida" },
+  { city: "Ghaziabad" },
+  { city: "Greater Noida" },
+  { city: "Noida Extension" },
+  { city: "Delhi" },
+  { city: "Dwarka" },
+  { city: "Gurugram" },
+  { city: "Manesar" },
+  { city: "Sohna" },
+  { city: "Faridabad" },
 ];
+
+// Mobile slider shows the serving areas four at a time (2 x 2); desktop keeps the normal two-column grid.
+const locationGroups = [];
+for (let i = 0; i < serviceAreas.length; i += 4) locationGroups.push(serviceAreas.slice(i, i + 4));
 
 function Icon({ name, size = 22 }) {
   const common = {
@@ -500,6 +513,7 @@ function MobileCardSlider({ className = "", label = "Cards", children, onActiveI
 
   return (
     <div className="hci-mobile-slider-shell">
+      <div className="hci-mobile-slider-frame">
       <div
         ref={trackRef}
         className={`hci-mobile-slider-track ${className}`.trim()}
@@ -509,6 +523,27 @@ function MobileCardSlider({ className = "", label = "Cards", children, onActiveI
         onFocusCapture={revealControls}
       >
         {items}
+      </div>
+      {items.length > 1 && activeIndex > 0 ? (
+        <button
+          type="button"
+          className="hci-mobile-slider-arrow is-prev"
+          aria-label={`Previous ${label.toLowerCase()}`}
+          onClick={() => goToIndex(activeIndex - 1)}
+        >
+          <Icon name="arrow" size={18} />
+        </button>
+      ) : null}
+      {items.length > 1 && activeIndex < items.length - 1 ? (
+        <button
+          type="button"
+          className="hci-mobile-slider-arrow is-next"
+          aria-label={`Next ${label.toLowerCase()}`}
+          onClick={() => goToIndex(activeIndex + 1)}
+        >
+          <Icon name="arrow" size={18} />
+        </button>
+      ) : null}
       </div>
       {items.length > 1 ? (
         <div
@@ -538,11 +573,10 @@ const LEAD_FIELD_MAP = {
   phone: "contact",
   email: "email",
   city: "place",
-  requirement: "query",
   consent: "termsAndConditions",
 };
-const LEAD_FIELDS = ["name", "phone", "email", "city", "requirement", "consent"];
-const EMPTY_LEAD = { name: "", phone: "", email: "", city: "", requirement: "", consent: false };
+const LEAD_FIELDS = ["name", "phone", "email", "city", "consent"];
+const EMPTY_LEAD = { name: "", phone: "", email: "", city: "", consent: false };
 
 const sanitizeLeadPhone = (value) => {
   let digits = value.replace(/\D/g, "");
@@ -562,7 +596,11 @@ const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(EMPTY_LEAD);
   const [errors, setErrors] = useState({});
 
-  const validateField = (name, value) => validateLeadField(LEAD_FIELD_MAP[name], value);
+  // Email is optional: an empty value is fine, but anything typed is still checked by the shared email rules.
+  const validateField = (name, value) => {
+    if (name === "email" && !String(value).trim()) return "";
+    return validateLeadField(LEAD_FIELD_MAP[name], value);
+  };
 
   const handleChange = (event) => {
     const { name } = event.target;
@@ -605,9 +643,8 @@ const [submitError, setSubmitError] = useState("");
     const response = await api.post("/user-queries", {
       name: formData.name.trim(),
       mobile: formData.phone.trim(),
-      email: formData.email.trim().toLowerCase(),
+      ...(formData.email.trim() ? { email: formData.email.trim().toLowerCase() } : {}),
       place: formData.city.trim(),
-      query: formData.requirement.trim(),
       ...buildLeadMetadata({
         pathname,
         leadFormType,
@@ -644,7 +681,7 @@ const [submitError, setSubmitError] = useState("");
     onBlur: handleBlur,
     className: errors[name] ? "is-invalid" : "",
     "aria-invalid": errors[name] ? true : undefined,
-    required: true,
+    required: name !== "email",
   });
 
   return (
@@ -671,7 +708,7 @@ const [submitError, setSubmitError] = useState("");
           {errors.phone && <small className="hci-form-error">{errors.phone}</small>}
         </label>
         <label>
-          <span>Email address <b className="hci-req">*</b></span>
+          <span>Email address</span>
           <input
             {...fieldProps("email")}
             type="email"
@@ -696,16 +733,6 @@ const [submitError, setSubmitError] = useState("");
             ))}
           </datalist>
           {errors.city && <small className="hci-form-error">{errors.city}</small>}
-        </label>
-        <label className="hci-form-full">
-          <span>Your requirement <b className="hci-req">*</b></span>
-          <textarea
-            {...fieldProps("requirement")}
-            rows={3}
-            maxLength={500}
-            placeholder="Tell us about your space and what you need…"
-          />
-          {errors.requirement && <small className="hci-form-error">{errors.requirement}</small>}
         </label>
       </div>
       <label className="hci-form-consent">
@@ -775,14 +802,15 @@ function LeadPopup({ open, ctaText, onClose }) {
 /* Always-visible quick contact buttons. The estimate pill appears once the top form scrolls out of view. */
 function FloatingDock({ showEstimate, onEstimate }) {
   return (
-    <div className="hci-dock" aria-label="Quick contact">
+    <div className={`hci-dock${showEstimate ? " has-bar" : ""}`} aria-label="Quick contact">
       <button
         type="button"
         className={`hci-dock-estimate${showEstimate ? "" : " is-hidden"}`}
         onClick={onEstimate}
         tabIndex={showEstimate ? 0 : -1}
       >
-        Get Design Quote
+        <span className="hci-dock-label-desktop">Get Design Quote</span>
+        <span className="hci-dock-label-mobile">Let’s Get Started</span>
       </button>
       <a
         className="hci-dock-btn hci-dock-whatsapp"
@@ -1026,7 +1054,6 @@ const HCI_PAGE_CSS = `
         .hci-page .hci-location-card-copy { min-width: 0; display: flex; flex: 1; flex-direction: column; gap: 1px; }
         .hci-page .hci-location-card-copy strong { color: #fff; font-size: 20px; line-height: 1.25; font-weight: 650; }
         .hci-page .hci-location-card-copy small { color: #d0dfd8; font-size: 14px; line-height: 1.45; }
-        .hci-page .hci-location-card-arrow { flex: 0 0 auto; color: #c0d2c9; }
         .hci-page .hci-faq-item button { font-size: 15px; }
         .hci-page .hci-faq-item > p { font-size: 14px; }
         .hci-page .hci-faq-toggle { background: #fff0e6; color: #ed7836; }
@@ -1089,9 +1116,6 @@ const HCI_PAGE_CSS = `
         .hci-page .hci-directions-button:hover { background: #ff7f36; transform: translateY(-1px); }
         .hci-page .hci-see-center-button { border: 2px solid #174b3c; background: #fff; color: #171a17 !important; }
         .hci-page .hci-see-center-button:hover { background: #174b3c; color: #fff !important; }
-        .hci-page .hci-experience-more { margin: 4px 0 0; color: #68716a; font-size: 16px; }
-        .hci-page .hci-experience-more a { color: #ff783e !important; }
-        .hci-page .hci-experience-more a:hover { text-decoration: underline; }
         @media (max-width: 1080px) {
         .hci-page .hci-stats-inner { width: calc(100% - 40px); }
         .hci-page .hci-stat { padding: 20px 18px; }
@@ -1122,7 +1146,6 @@ const HCI_PAGE_CSS = `
         .hci-page .hci-experience-phone { margin-bottom: 19px; font-size: 15px; }
         .hci-page .hci-experience-actions { gap: 9px; }
         .hci-page .hci-directions-button, .hci-page .hci-see-center-button { min-height: 44px; padding: 0 14px; font-size: 13px; }
-        .hci-page .hci-experience-more { font-size: 14px; margin-top: 12px; }
         }
 
         /* ============================================================
@@ -1208,8 +1231,6 @@ const HCI_PAGE_CSS = `
         .hci-card-image { position: relative; height: 230px; display: block; overflow: hidden; background: #eee9e1; }
         .hci-card-image img { transition: transform .6s ease; }
         .hci-service-card:hover .hci-card-image img { transform: scale(1.08); }
-        .hci-image-arrow { position: absolute; right: 14px; bottom: 14px; width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--hci-navy); transition: background .3s ease, color .3s ease, transform .3s ease; }
-        .hci-service-card:hover .hci-image-arrow { background: var(--hci-orange); color: #fff; transform: rotate(-45deg); }
         .hci-service-content { flex: 1; display: flex; flex-direction: column; padding: 24px 24px 26px; }
         .hci-card-number { color: #878c85; font-size: 11px; font-weight: 800; letter-spacing: .13em; }
         .hci-service-content h3 { min-height: 2.5em; margin: 10px 0; color: var(--hci-navy); font-size: 21px; line-height: 1.25; letter-spacing: -.035em; }
@@ -1236,8 +1257,6 @@ const HCI_PAGE_CSS = `
         .hci-room-card-1 .hci-room-card-text h3 { font-size: clamp(30px, 3vw, 42px); }
         .hci-room-more { display: block; max-height: 0; overflow: hidden; color: #ffc9a3; font-size: 14px; font-weight: 700; opacity: 0; transform: translateY(6px); transition: max-height .35s ease, margin .35s ease, opacity .35s ease, transform .35s ease; }
         .hci-room-card:hover .hci-room-more, .hci-room-card:focus-visible .hci-room-more { max-height: 28px; margin-top: 8px; opacity: 1; transform: none; }
-        .hci-round-arrow { width: 46px; height: 46px; flex: 0 0 46px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.7); border-radius: 50%; color: #fff; transition: background .3s ease, border-color .3s ease, transform .3s ease; }
-        .hci-room-card:hover .hci-round-arrow { border-color: var(--hci-orange); background: var(--hci-orange); transform: rotate(-45deg); }
 
         /* ---------- "Every room should earn its place": interactive story ---------- */
         .hci-story-section { display: grid; grid-template-columns: 1fr 1fr; background: #f8f6f2; }
@@ -1283,8 +1302,6 @@ const HCI_PAGE_CSS = `
         .hci-gallery-chip { position: absolute; z-index: 2; top: 18px; left: 18px; padding: 7px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; background: rgba(255,255,255,.18); backdrop-filter: blur(10px); font-size: 12px; font-weight: 650; }
         .hci-gallery-caption { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
         .hci-gallery-caption h3 { margin: 0; color: #fff; font-size: 24px; line-height: 1.2; letter-spacing: -.03em; text-shadow: 0 2px 12px rgba(0,0,0,.45); }
-        .hci-gallery-arrow { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 50%; background: #fff; color: var(--hci-navy); transition: background .3s ease, color .3s ease, transform .3s ease; }
-        .hci-gallery-card:hover .hci-gallery-arrow { background: var(--hci-orange); color: #fff; transform: rotate(-45deg); }
         .hci-image-disclaimer { margin: 28px 0 0; color: #8a8b84; font-size: 12px; line-height: 1.6; text-align: right; }
 
         /* ---------- Tablet ---------- */
@@ -1479,8 +1496,6 @@ const HCI_PAGE_CSS = `
         .hci-page .hci-dock-estimate { border: 0; cursor: pointer; font-family: inherit; }
         /* Cards are display-only now. */
         .hci-page .hci-service-card, .hci-page .hci-room-card, .hci-page .hci-gallery-card, .hci-page .hci-location-card { cursor: default; }
-        .hci-page .hci-experience-more button { padding: 0; border: 0; background: none; color: #ff783e; font: inherit; cursor: pointer; }
-        .hci-page .hci-experience-more button:hover { text-decoration: underline; }
         .hci-page button.hci-see-center-button { cursor: pointer; font-family: inherit; }
         @media (max-width: 760px) {
           .hci-page .hci-section-actions { width: 100%; justify-content: flex-start; }
@@ -1569,15 +1584,113 @@ const HCI_PAGE_CSS = `
           .hci-page .hci-final-actions .hci-button-icon { display: none; }
         }
 
-        /* ---------- Mobile: no extra empty space under the footer ---------- */
-        @media (max-width: 760px) {
-          body { padding-bottom: 0 !important; margin-bottom: 0 !important; }
-          .hci-landing-footer, .hci-landing-footer > footer { margin-bottom: 0 !important; padding-bottom: 14px !important; }
+
+        /* ---------- Home type selector: theme follows the mouse ---------- */
+        .hci-page .hci-property-option { cursor: pointer; }
+        .hci-page .hci-property-option:hover { background: var(--hci-orange); border-color: var(--hci-orange); color: #fff; box-shadow: 0 7px 17px rgba(255,145,77,.18); transform: translateY(-2px); }
+        .hci-page .hci-property-options:hover .hci-property-option.is-selected:not(:hover) { background: #fff; border-color: #e2dbd1; color: var(--hci-navy); box-shadow: none; }
+
+        /* ---------- Process steps: hover effect ---------- */
+        .hci-page .hci-process-step { position: relative; cursor: default; transition: transform .3s ease; }
+        .hci-page .hci-process-step:hover { transform: translateY(-6px); }
+        .hci-page .hci-process-marker span { transition: background .3s ease, color .3s ease, transform .3s ease, box-shadow .3s ease; }
+        .hci-page .hci-process-step:hover .hci-process-marker span { background: var(--hci-orange); color: #fff; transform: scale(1.12); box-shadow: 0 8px 18px rgba(255,145,77,.38); }
+        .hci-page .hci-process-step .hci-process-marker i { transition: background .3s ease; }
+        .hci-page .hci-process-step:hover .hci-process-marker i { background: var(--hci-orange); }
+        .hci-page .hci-process-step h3 { transition: color .3s ease; }
+        .hci-page .hci-process-step:hover h3 { color: var(--hci-orange-deep); }
+
+        /* ---------- Experience centers: four cards ---------- */
+        @media (min-width: 1200px) {
+          .hci-page .hci-experience-grid { grid-template-columns: repeat(4, minmax(0,1fr)); gap: 20px; }
+          .hci-page .hci-experience-content { padding: 26px 22px 24px; }
+          .hci-page .hci-experience-content h3 { font-size: 28px; }
+          .hci-page .hci-experience-content p { min-height: 140px; font-size: 15px; }
+          .hci-page .hci-directions-button, .hci-page .hci-see-center-button { min-height: 44px; padding: 0 15px; font-size: 14px; }
         }
+        @media (min-width: 761px) and (max-width: 1199px) {
+          .hci-page .hci-experience-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+          .hci-page .hci-experience-content p { min-height: 0; }
+        }
+
+
+
+        /* ---------- Header: full width, logo at the far left ---------- */
+        .hci-header { position: fixed; top: 0; left: 0; right: 0; z-index: 70; height: 88px; background: rgba(255,255,255,.97); backdrop-filter: blur(10px); border-bottom: 1px solid #eee9e1; box-shadow: 0 4px 18px rgba(35,39,34,.05); }
+        .hci-header-spacer { height: 88px; }
+        .hci-header-inner { width: 100%; height: 100%; margin: 0; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .hci-page .hci-header-logo { padding: 0; border: 0; background: none; cursor: pointer; display: inline-flex; align-items: center; }
+        .hci-page .hci-header-logo img { width: auto; height: 66px; object-fit: contain; }
+        .hci-page .hci-header-cta { min-height: 48px; padding: 0 26px; font-size: 15px; font-weight: 600; white-space: nowrap; }
+
+        /* ---------- Slider arrows (mobile only) ---------- */
+        .hci-mobile-slider-frame { position: relative; }
+        .hci-mobile-slider-arrow { display: none; }
+        .hci-location-group { display: contents; }
+
+        @media (max-width: 760px) {
+          .hci-header, .hci-header-spacer { height: 68px; }
+          .hci-header-inner { padding: 0 14px; }
+          .hci-page .hci-header-logo img { height: 50px; }
+          .hci-page .hci-header-cta { min-height: 40px; padding: 0 18px; font-size: 13px; }
+
+          .hci-page .hci-mobile-slider-arrow { position: absolute; top: 50%; z-index: 3; width: 34px; height: 34px; margin-top: -17px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; color: #232722; box-shadow: 0 6px 16px rgba(0,0,0,.24); cursor: pointer; transition: background .2s ease, color .2s ease; }
+          .hci-page .hci-mobile-slider-arrow:active { background: #ff914d; color: #fff; }
+          .hci-page .hci-mobile-slider-arrow.is-prev { left: -14px; }
+          .hci-page .hci-mobile-slider-arrow.is-prev svg { transform: rotate(180deg); }
+          .hci-page .hci-mobile-slider-arrow.is-next { right: -14px; }
+
+          /* Room inspiration: the arch card becomes a rounded square like the others. */
+          .hci-page .hci-room-card-3 { border-radius: 28px; }
+
+          /* Serving areas: slides of 2 x 2 cards. */
+          .hci-page .hci-mobile-slider-track .hci-location-group { flex: 0 0 100%; width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-content: start; scroll-snap-align: start; }
+          .hci-page .hci-location-group .hci-location-card { min-height: 66px; padding: 10px; gap: 8px; border-radius: 14px; }
+          .hci-page .hci-location-group .hci-location-card-icon { width: 34px; height: 34px; flex-basis: 34px; }
+          .hci-page .hci-location-group .hci-location-card-icon svg { width: 18px; height: 18px; }
+          .hci-page .hci-location-group .hci-location-card-copy strong { font-size: 15px; line-height: 1.25; }
+
+          /* Floating buttons: Get Design Quote becomes a bar at the bottom, WhatsApp / call sit above it. */
+          .hci-dock { transition: bottom .25s ease; }
+          .hci-dock.has-bar { bottom: 78px; }
+          .hci-page .hci-dock-estimate { position: fixed; left: 14px; right: 14px; bottom: 14px; width: auto; min-height: 50px; padding: 0 18px; justify-content: center; font-size: 15px; border-radius: 999px; }
+          .hci-page .hci-final-cta-copy { padding-bottom: 90px; }
+        }
+
+
+        /* ---------- Hero headline: height follows the text ---------- */
+        .hci-page .hci-hero-title { min-height: 0; margin-bottom: 24px; }
+        .hci-hero-typed { display: grid; }
+        .hci-hero-sizer, .hci-hero-live { grid-area: 1 / 1; }
+        .hci-hero-sizer { visibility: hidden; pointer-events: none; }
+
+        /* ---------- Floating quote button label ---------- */
+        .hci-dock-label-mobile { display: none; }
+        @media (max-width: 760px) {
+          .hci-dock-label-desktop { display: none; }
+          .hci-dock-label-mobile { display: inline; }
+        }
+
+        /* ---------- Experience cards: compact, address / phone / buttons aligned (desktop + tablet) ---------- */
+        @media (min-width: 761px) {
+          .hci-page .hci-experience-content { padding: 22px 22px 22px; }
+          .hci-page .hci-experience-pin { width: 44px; height: 44px; margin-bottom: 14px; }
+          .hci-page .hci-experience-content h3 { font-size: 27px; }
+          .hci-page .hci-experience-content p { flex: 1 1 auto; min-height: 0; margin: 0 0 12px; font-size: 14.5px; line-height: 1.6; }
+          .hci-page .hci-experience-phone { margin-bottom: 16px; }
+        }
+
+
+        /* ---------- Mobile hero: headline reserves only two lines, so the gap stays small ---------- */
+        @media (max-width: 760px) {
+          .hci-hero-sizer { display: none; }
+          .hci-page .hci-hero-title { min-height: 2.2em; margin-bottom: 14px; }
+        }
+
 `;
 
 export default function HCILandingPage() {
-  const [homeType, setHomeType] = useState("3 BHK");
+  const [homeType, setHomeType] = useState("1 BHK");
   const [openFaq, setOpenFaq] = useState(0);
   const [statValues, setStatValues] = useState([0, 0, 0, 0]);
   const [formInView, setFormInView] = useState(true);
@@ -1673,7 +1786,15 @@ export default function HCILandingPage() {
 
   const goToEstimator = (type) => {
     setHomeType(type);
-    window.location.href = `/estimator-for-home?homeType=${encodeURIComponent(type)}`;
+    const url = `${ESTIMATOR_PATH}?homeType=${encodeURIComponent(type)}`;
+    // Desktop: open the estimator in a new tab so the landing page stays open. Mobile: same tab.
+    const isDesktop = typeof window.matchMedia === "function" && window.matchMedia("(min-width: 761px)").matches;
+    if (isDesktop) {
+      // "noopener" makes window.open return null even on success, so its result is not checked.
+      window.open(url, "_blank", "noopener");
+      return;
+    }
+    window.location.href = url;
   };
 
   return (
@@ -1690,6 +1811,19 @@ export default function HCILandingPage() {
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
       />
 
+      {/* HEADER: logo left, Get Design Quote right. Both open the consultation pop-up. */}
+      <header className="hci-header">
+        <div className="hci-header-inner">
+          <button type="button" className="hci-header-logo" onClick={() => openForm("Get Design Quote")} aria-label="High Creation Interior – open the consultation form">
+            <img src="/images/new_hc_logo.png" alt="High Creation Interior" />
+          </button>
+          <button type="button" className="hci-button hci-button-primary hci-header-cta" onClick={() => openForm("Get Design Quote")}>
+            Get Design Quote
+          </button>
+        </div>
+      </header>
+      <div className="hci-header-spacer" aria-hidden="true" />
+
       {/* HERO: typing headline + consultation form at the very top */}
       <section className="hci-hero" id="top">
         <div className="hci-hero-bg" aria-hidden="true">
@@ -1699,12 +1833,18 @@ export default function HCILandingPage() {
           <div className="hci-hero-copy">
             <h1 className="hci-hero-title">
               <span className="hci-sr-only">Creating better homes: interior design with complete customization and in-house production across Delhi NCR</span>
-              <span aria-hidden="true">{typedText}</span>
-              <span className="hci-caret" aria-hidden="true" />
+              {/* Hidden copies of every phrase reserve exactly the height of the longest one,
+                  so the gap under the headline matches the text instead of a fixed minimum. */}
+              <span className="hci-hero-typed" aria-hidden="true">
+                {heroPhrases.map((phrase) => (
+                  <span className="hci-hero-sizer" key={phrase}>{phrase}</span>
+                ))}
+                <span className="hci-hero-live">{typedText}<span className="hci-caret" /></span>
+              </span>
             </h1>
             <p className="hci-hero-areas">
               <Icon name="pin" size={19} />
-              <span>Our Interior Design services available in Gurugram, Noida, Faridabad, Noida Extension, Manesar and Sohna.</span>
+              <span>Our Interior Design services available in Gurugram, Noida, Ghaziabad, Faridabad, Noida Extension, Manesar and Sohna.</span>
             </p>
             <ul className="hci-hero-points">
               {heroPoints.map((item) => (
@@ -1767,7 +1907,6 @@ export default function HCILandingPage() {
             <article className="hci-service-card" key={service.number}>
               <div className="hci-card-image">
                 <img src={service.image} alt={`${service.title} design inspiration`} loading="lazy" />
-                <span className="hci-image-arrow"><Icon name="arrow" size={18} /></span>
               </div>
               <div className="hci-service-content">
                 <span className="hci-card-number">{service.number} / SERVICE</span>
@@ -1798,7 +1937,6 @@ export default function HCILandingPage() {
                     <span className="hci-room-label">{room.label}</span>
                     <h3>{room.title}</h3>
                   </div>
-                  <span className="hci-round-arrow"><Icon name="arrow" size={18} /></span>
                 </div>
               </div>
             ))}
@@ -1856,7 +1994,6 @@ export default function HCILandingPage() {
               <span className="hci-gallery-chip">{card.category}</span>
               <div className="hci-gallery-caption">
                 <h3>{card.title}</h3>
-                <span className="hci-gallery-arrow"><Icon name="arrow" size={18} /></span>
               </div>
             </TiltCard>
           ))}
@@ -1892,11 +2029,6 @@ export default function HCILandingPage() {
               </article>
             ))}
           </MobileCardSlider>
-          <p className="hci-experience-more">
-            Also serving customers in{" "}
-            <button type="button" onClick={() => openForm("Schedule visit - Faridabad")}>Faridabad</button> and{" "}
-            <button type="button" onClick={() => openForm("Schedule visit - New Delhi")}>New Delhi</button>.
-          </p>
         </div>
       </section>
 
@@ -1907,15 +2039,18 @@ export default function HCILandingPage() {
             <h2 id="hci-serving-title">Thoughtful interiors,<br />closer to home.</h2>
             <p>Connect with HC Interior for design guidance across Delhi NCR. Choose your city to explore local services.</p>
           </div>
-          <div className="hci-location-grid">
-            {serviceAreas.map((location) => (
-              <div className="hci-location-card" key={location.city}>
-                <span className="hci-location-card-icon"><Icon name="pin" size={22} /></span>
-                <span className="hci-location-card-copy"><strong>{location.city}</strong><small>{location.description}</small></span>
-                <span className="hci-location-card-arrow"><Icon name="arrow" size={20} /></span>
+          <MobileCardSlider className="hci-location-grid" label="Serving areas">
+            {locationGroups.map((group, groupIndex) => (
+              <div className="hci-location-group" key={`areas-${groupIndex}`}>
+                {group.map((location) => (
+                  <div className="hci-location-card" key={location.city}>
+                    <span className="hci-location-card-icon"><Icon name="pin" size={22} /></span>
+                    <span className="hci-location-card-copy"><strong>{location.city}</strong></span>
+                  </div>
+                ))}
               </div>
             ))}
-          </div>
+          </MobileCardSlider>
         </div>
       </section>
 

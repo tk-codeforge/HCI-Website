@@ -10,11 +10,64 @@ import api from "@/utils/api";
 // the browser downloads only the version for its screen. Before, both versions were
 // rendered with `priority`, which preloaded and downloaded BOTH on every device.
 const FILL_STYLE = { position: "absolute", inset: 0, width: "100%", height: "100%", color: "transparent" };
+const isVideoSource = (value) => /\.(?:mp4|webm|ogg|mov)(?:[?#].*)?$/i.test(String(value || ""));
+
+// Carousel videos load and play directly. Poster images are intentionally not
+// used here; the About section is the only video area with a poster fallback.
+function HeroBannerVideo({ src, active, title }) {
+  const videoRef = React.useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    if (!active) {
+      video.pause();
+      return undefined;
+    }
+
+    const tryPlay = () => {
+      const promise = video.play();
+      if (promise && typeof promise.catch === "function") {
+        promise.catch(() => {
+          // Browsers may block autoplay; keep the active video source attached.
+        });
+      }
+    };
+
+    if (video.readyState >= 2) {
+      tryPlay();
+    } else {
+      video.addEventListener("canplay", tryPlay, { once: true });
+    }
+
+    return () => {
+      video.pause();
+      video.removeEventListener("canplay", tryPlay);
+    };
+  }, [active, src]);
+
+  return (
+    <video
+      ref={videoRef}
+      className="banner-media"
+      autoPlay={Boolean(active)}
+      loop
+      muted
+      playsInline
+      preload={active ? "auto" : "none"}
+      src={active ? src : undefined}
+      aria-label={title || undefined}
+    />
+  );
+}
 
 function HeroPicture({ desktopSrc, mobileSrc, alt, mobileAlt, isFirstSlide }) {
   const quality = 75;
+  // A mobile video must be rendered by HeroBannerVideo, never as an <img src="...mp4">.
+  const mobileImageSrc = mobileSrc && !isVideoSource(mobileSrc) ? mobileSrc : null;
 
-  if (!mobileSrc) {
+  if (!mobileImageSrc) {
     return (
       <Image
         src={desktopSrc}
@@ -33,7 +86,7 @@ function HeroPicture({ desktopSrc, mobileSrc, alt, mobileAlt, isFirstSlide }) {
 
     const common = { width: 1920, height: 800, sizes: "100vw", quality, style: FILL_STYLE };
   const desktop = getImageProps({ ...common, src: desktopSrc, alt }).props;
-  const mobile = getImageProps({ ...common, width: 768, height: 960, src: mobileSrc, alt: mobileAlt }).props;
+  const mobile = getImageProps({ ...common, width: 768, height: 960, src: mobileImageSrc, alt: mobileAlt }).props;
 
   return (
     <picture>
@@ -135,6 +188,7 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
         .home-hero .embla__container { display: flex; height: 100%; }
         .home-hero .embla__slide { flex: 0 0 100%; min-width: 0; position: relative; }
         .home-hero .banner-media { object-fit: cover; object-position: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        .home-hero .banner-video-shell { position: absolute; inset: 0; width: 100%; height: 100%; }
         
         /* Mobile vs Desktop image toggle classes */
         .home-hero .desktop-banner { display: none !important; }
@@ -281,28 +335,18 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
         <div className="embla__container">
           {activeBanners.map((banner, index) => {
             const mediaSrc = isMobile && banner?.mobile_banner_image ? banner.mobile_banner_image : banner?.banner_image;
-const isVideo = /\.(mp4|webm|ogg)$/i.test(mediaSrc || "");
+            const isVideo = isVideoSource(mediaSrc);
             const isFirstSlide = index === 0;
             const isActiveSlide = index === selectedIndex;
-            const hasVideoPoster = Boolean(banner?.banner_image_poster);
-            // If a poster is available, keep off-screen video slides poster-only.
-            // For older CMS entries without a poster, retain metadata loading so
-            // their visual behavior does not regress while the carousel advances.
-            const shouldAttachVideoSource = isActiveSlide || !hasVideoPoster;
 
             return (
               <div className="embla__slide" key={banner.id || index}>
                 {isVideo ? (
-                  <video
-                  key={mediaSrc}
-                    className="banner-media"
-                    autoPlay={Boolean(isActiveSlide)}
-                    loop
-                    muted
-                    playsInline
-                    preload={isActiveSlide || !hasVideoPoster ? "metadata" : "none"}
-                    poster={banner?.banner_image_poster || undefined}
-                    src={shouldAttachVideoSource ? mediaSrc : undefined}
+                  <HeroBannerVideo
+                    key={`${banner.id || index}-${mediaSrc}`}
+                    src={mediaSrc}
+                    active={isActiveSlide}
+                    title={banner?.title?.trim() || "High Creation Interior banner"}
                   />
                 ) : (
                   <HeroPicture

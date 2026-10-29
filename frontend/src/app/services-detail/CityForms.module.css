@@ -1,0 +1,69 @@
+.fieldWrap {
+  position: relative;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  color: #64748b;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.iconInput:global(.form-control) {
+  padding-left: 48px !important;
+  padding-right: 16px !important;
+  min-height: 48px;
+  font-family: inherit;
+}
+
+/* Red border + message shown on validation errors */
+.inputInvalid:global(.form-control),
+.inputInvalid:global(.form-control):focus {
+  border: 1px solid #dc3545 !important;
+  box-shadow: none;
+}
+
+.errorText {
+  color: #dc3545;
+  font-size: 14px;
+  margin: 6px 0 0 4px;
+  line-height: 1.3;
+}
+
+.legalRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 12px 0 18px;
+}
+
+.legalCheckbox {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.legalLabel {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+
+.legalLabel a {
+  color: #334155;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legalLabel a:focus-visible {
+  outline: 2px solid #ff914d;
+  outline-offset: 2px;
+}

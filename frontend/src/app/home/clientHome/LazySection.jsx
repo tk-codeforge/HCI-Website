@@ -1,31 +1,52 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 
+/**
+ * Renders children in the initial HTML for SEO, accessibility and no-JS visits.
+ * Browser-native content-visibility defers off-screen layout/paint without
+ * requiring IntersectionObserver to make the content appear.
+ */
 export default function LazySection({ children, placeholderHeight = "500px", className = "" }) {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isNearViewport, setIsNearViewport] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    // In browsers without IntersectionObserver, content remains visible and
+    // the native content-visibility fallback is harmless.
+    if (!("IntersectionObserver" in window)) {
+      setIsNearViewport(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
+          setIsNearViewport(true);
           observer.disconnect();
         }
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px 0px" }
     );
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
+    observer.observe(element);
     return () => observer.disconnect();
   }, []);
 
+  const reservedSize = String(placeholderHeight || "500px").trim();
+
   return (
-    <div ref={containerRef} className={className} style={{ minHeight: isVisible ? "auto" : placeholderHeight }}>
-      {isVisible ? children : null}
+    <div
+      ref={containerRef}
+      className={className ? `home-lazy-section ${className}` : "home-lazy-section"}
+      style={{
+        contentVisibility: isNearViewport ? "visible" : "auto",
+        containIntrinsicSize: isNearViewport ? "auto 0px" : `auto ${reservedSize}`,
+      }}
+    >
+      {children}
     </div>
   );
 }

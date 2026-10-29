@@ -1,7 +1,6 @@
 import HCILandingPage from "./HCILandingPage";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import JsonLd from "../components/JsonLd";
-import Footer from "../layouts/footer";
 
 const ROUTE = "/creating-dream-space";
 const REVALIDATE_SECONDS = 60;
@@ -97,7 +96,6 @@ export default async function CreatingBestHomesPage() {
     <>
       <JsonLd data={seo?.custom_schema} />
       <HCILandingPage />
-      <Footer />
     </>
   );
 }

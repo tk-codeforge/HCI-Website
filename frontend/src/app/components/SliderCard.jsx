@@ -44,8 +44,10 @@ const PrevArrow = ({ onClick }) => {
 };
 
 // const SliderCard = (props) => {
-  const SliderCard = ({ endpoint = "ready_to_go_design", linkBase = "/ready-togo-design/gallery" }) => {
-  const [sliderListData, setSliderListData] = useState([]);
+  const SliderCard = ({ endpoint = "ready_to_go_design", linkBase = "/ready-togo-design/gallery", initialData }) => {
+  const [sliderListData, setSliderListData] = useState(() => (
+    Array.isArray(initialData) ? initialData : []
+  ));
 
   const fetchContentManagerPages = useCallback(async () => {
     try {

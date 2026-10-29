@@ -26,13 +26,15 @@ import Card from "../components/Card";
 import BgImageCard from "../components/BgImageCard";
 import RoomOfice from "../components/RoomOfice";
 import HomeAbout3D from "../components/HomeAbout3D";
+import DeferredMediaVideo from "../components/DeferredMediaVideo";
 import EstimateCalculator from "./clientHome/EstimateCalculator";
 
 // --- DYNAMIC IMPORTS ---
 const Blogs = dynamic(() => import("../components/Blogs"));
-const SliderCard = dynamic(() => import("../components/SliderCard"), { ssr: false, loading: () => <div style={{ height: "400px", background: "#f8f9fa", width: "100%" }} /> });
-const VideoTestimonialSlider = dynamic(() => import("../components/VideoTestimonialSlider"), { ssr: false, loading: () => <div style={{ height: "400px", background: "#f8f9fa", width: "100%" }} /> });
-const CounterRow = dynamic(() => import("../components/CounterRow"), { ssr: false, loading: () => <div style={{ height: "300px", background: "#f8f9fa", width: "100%" }} /> });
+// Keep homepage sections server-renderable; they receive server-fetched initial data below.
+const SliderCard = dynamic(() => import("../components/SliderCard"));
+const VideoTestimonialSlider = dynamic(() => import("../components/VideoTestimonialSlider"));
+const CounterRow = dynamic(() => import("../components/CounterRow"));
 
 const stripHtml = (html = "") =>
   String(html ?? "")
@@ -61,7 +63,7 @@ async function getRemainingData() {
   };
 
   try {
-    const [designIdea, contentData, blogsData, whyChooseUsRaw,estimateBannerRaw , estimateCardsRaw , theWayWeWorkRaw, whatWeOfferRaw, headingManagementRaw, furnitureFactoryRaw ] = await Promise.all([
+    const [designIdea, contentData, blogsData, whyChooseUsRaw, estimateBannerRaw, estimateCardsRaw, theWayWeWorkRaw, whatWeOfferRaw, headingManagementRaw, furnitureFactoryRaw, readyToGoDesignsRaw, testimonialsRaw] = await Promise.all([
       fetchData("/cms-parent-child/designer_choice"),
 
       fetchData("/cms-content/home_page_content_what_we_are"),
@@ -74,6 +76,8 @@ async function getRemainingData() {
        fetchData("/cms-content/what_we_offer"),
        fetchData("/cms-content/home_page_heading_management"),
        fetchData("/cms-content/home_page_content_furniture_factory"),
+       fetchData("/cms-parent-child/ready_to_go_design"),
+       fetchData("/cms-content/home_page_content"),
     ]);
 
     let whatWeOfferData = null;
@@ -205,16 +209,31 @@ if (furnitureFactoryRaw) {
   };
 }
 
-    return { designIdea: designIdea || [], content: contentData || [], blogs: Array.isArray(blogsData) ? blogsData.slice(0, 3) : [], theWayWeWorkData,whyChooseUsData, estimateBannerData, estimateCardsData, whatWeOfferData, headingsData, furnitureFactoryData };
+    return {
+      designIdea: Array.isArray(designIdea) ? designIdea : [],
+      content: Array.isArray(contentData) ? contentData : [],
+      blogs: Array.isArray(blogsData) ? blogsData.slice(0, 3) : [],
+      readyToGoDesigns: Array.isArray(readyToGoDesignsRaw) ? readyToGoDesignsRaw : [],
+      testimonials: Array.isArray(testimonialsRaw) ? testimonialsRaw : [],
+      theWayWeWorkData,
+      whyChooseUsData,
+      estimateBannerData,
+      estimateCardsData,
+      whatWeOfferData,
+      headingsData,
+      furnitureFactoryData,
+    };
   } catch (err) {
     return {
-      designIdea: [], content: [], blogs: [],
+      designIdea: [], content: [], blogs: [], readyToGoDesigns: [], testimonials: [],
       theWayWeWorkData: { heading: "The Way We Work", headingTag: "h2", bg_image: "", cards: [] },
       furnitureFactoryData: { heading: "Large Modular Furniture Factories", headingColor: "#000000", description: "", buttonText: "View More", buttonLink: "/furniture/", video: "", image1: "", image1Caption: "", image2: "", image2Caption: "" },
       whyChooseUsData: { heading: "Why Choose us", headingColor: "#222222", cards: [] },
       estimateBannerData: null, estimateCardsData: [], whatWeOfferData: null, headingsData: {}  };
   }
 }
+
+const isVideoUrl = (value) => /\.(?:mp4|webm|ogg|mov)(?:[?#].*)?$/i.test(String(value || ""));
 
 const formatDate = (dateString) => {
   if (!dateString) return "Date not available";
@@ -249,7 +268,7 @@ async function getAboutData() {
 }
 
 export default async function HomeContent() {
-  const [{ designIdea, content, blogs, theWayWeWorkData, whyChooseUsData, estimateBannerData,estimateCardsData,whatWeOfferData, headingsData , furnitureFactoryData}, aboutData] = await Promise.all([getRemainingData(), getAboutData()]);
+  const [{ designIdea, content, blogs, readyToGoDesigns, testimonials, theWayWeWorkData, whyChooseUsData, estimateBannerData, estimateCardsData, whatWeOfferData, headingsData, furnitureFactoryData }, aboutData] = await Promise.all([getRemainingData(), getAboutData()]);
   const readyToGoDesignsHeading = headingsData?.ready_to_go_designs || {};
   const designersChoiceHeading = headingsData?.designers_choice || {};
   const celebratingExcellenceHeading = headingsData?.celebrating_excellence || {};
@@ -287,12 +306,12 @@ const FactoryHeadingTag = safeHeadingTag(furnitureFactoryData.headingTag);
         
 const dynamicBgUrl = theWayWeWorkData.bg_image || "";
 const offerBgUrl = whatWeOfferData?.bg_image || "";
-// Prefer a related CMS image as a lightweight video poster/backdrop.
-const factoryVideoPoster =
-  furnitureFactoryData.topImage ||
-  furnitureFactoryData.image1 ||
-  furnitureFactoryData.image2 ||
-  "";
+// Prefer a related CMS IMAGE as the poster; never use a second video URL.
+const factoryVideoPoster = [
+  furnitureFactoryData.topImage,
+  furnitureFactoryData.image1,
+  furnitureFactoryData.image2,
+].find((value) => value && !isVideoUrl(value)) || "/images/home-banner-1.png";
 
   
   const WAY_WE_WORK_PALETTE = [
@@ -889,7 +908,7 @@ const targetId = `step-${index + 1}`;
                 <RtgdHeadingTag className="h2 fw-bold mb-0 rtgd-heading-color">{readyToGoDesignsHeading.text || "with Our Exclusive Design Choices"}</RtgdHeadingTag>
               </div>
             </div>
-            <SliderCard />
+            <SliderCard initialData={readyToGoDesigns} />
           </div>
         </section>
       </LazySection>
@@ -985,7 +1004,7 @@ const targetId = `step-${index + 1}`;
   border-radius: 16px;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #000;
+  background: linear-gradient(135deg, #f4f4f4 0%, #e4e4e4 100%);
   isolation: isolate;
 }
   .factory-video-wrap video {
@@ -1001,8 +1020,17 @@ const targetId = `step-${index + 1}`;
   display: none;
 }
 .factory-video-wrap .fv-main {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   z-index: 1;
+  border-radius: 16px;
+}
+.factory-video-wrap .fv-main .deferred-media-video-element {
+  object-fit: contain;
+  border-radius: 16px;
 }
 
 .factory-video-wrap video { pointer-events: none; }
@@ -1064,20 +1092,18 @@ const targetId = `step-${index + 1}`;
                         decoding="async"
                       />
                     ) : null}
-                    <video
-                      className="fv-main"
+                    <DeferredMediaVideo
                       src={furnitureFactoryData.video}
-                      poster={factoryVideoPoster || undefined}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="none"
-                      disablePictureInPicture
-                      disableRemotePlayback
-                      controlsList="nodownload nofullscreen noremoteplayback"
-                      tabIndex={-1}
-                      aria-hidden="true"
+                      poster={factoryVideoPoster}
+                      alt="High Creation's in-house furniture manufacturing facility"
+                      className="fv-main"
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                      videoStyle={{ objectFit: "contain", borderRadius: "16px" }}
+                      posterStyle={{ objectFit: "contain" }}
+                      autoPlayDesktop
+                      active
+                      showPlayButtonOnMobile
+                      posterLoading="lazy"
                     />
                   </div>
                 </div>
@@ -1208,7 +1234,7 @@ const targetId = `step-${index + 1}`;
             <style>{`.wps-span-color { color: ${whatPeopleSayHeading.spanColor} !important; }`}</style>
           )}
           <div className="mb-5 text-center"><WpsSpanTag className="text-orange-force wps-span-color">{whatPeopleSayHeading.spanText || "What People Say"}</WpsSpanTag></div>
-          <VideoTestimonialSlider />
+          <VideoTestimonialSlider initialData={testimonials} />
         </section>
       </LazySection>
       

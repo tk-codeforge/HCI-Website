@@ -94,27 +94,43 @@ const VideoPopup = ({ items, index, onChange, onClose }) => {
   );
 };
 
-const VideoTestimonial = () => {
-  const [youtubeVideos, setYoutubeVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
+const VideoTestimonial = ({ initialData }) => {
+  const hasServerData = Array.isArray(initialData);
+  const [youtubeVideos, setYoutubeVideos] = useState(() => (
+    hasServerData ? initialData : []
+  ));
+  // If the server supplied an array (even an empty one), render fallback cards
+  // immediately instead of exposing a client-only loading message in the HTML.
+  const [loading, setLoading] = useState(!hasServerData);
   const [error, setError] = useState("");
   const [openIndex, setOpenIndex] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
+    // Server-fetched records already provide the first render. If they are
+    // present, no duplicate browser request is needed. An empty server result
+    // still has hard-coded fallback video cards in the initial HTML.
+    if (hasServerData && initialData.length > 0) return;
+
+    let cancelled = false;
     const fetchYoutubeVideos = async () => {
       try {
         const response = await api.get("/cms-content/home_page_content");
-        setYoutubeVideos(response.data);
+        if (!cancelled && Array.isArray(response.data)) {
+          setYoutubeVideos(response.data);
+          setError("");
+        }
       } catch (err) {
         console.error("Error fetching YouTube videos:", err);
-        setError("Failed to load videos. Please try again.");
+        // Keep the server-rendered fallback cards rather than replacing the
+        // section with an error message when the API is temporarily unavailable.
+        if (!hasServerData && !cancelled) setError("Failed to load videos. Please try again.");
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchYoutubeVideos();
-  }, []);
+    return () => { cancelled = true; };
+  }, [hasServerData, initialData]);
 
   // Normalise CMS rows (or fallback ids) into one list used by both cards and popup.
   // Optional CMS fields: json_content.name, json_content.city, json_content.review

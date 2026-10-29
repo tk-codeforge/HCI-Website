@@ -1,13 +1,14 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import React, { useEffect, useState } from "react";
 import api from "@/utils/api";
 import DOMPurify from "isomorphic-dompurify";
 import { canOptimize, optimizedUrl, optimizedSrcSet } from "@/utils/optimizedImage";
+import DeferredMediaVideo from "./DeferredMediaVideo";
 
 const TITLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
 
 const ABOUT_IMAGE_RATIO = "4 / 3";
+const isVideoSource = (value) => /\.(?:mp4|webm|ogg|mov)(?:[?#].*)?$/i.test(String(value || ""));
 
 const AboutImage = ({ src, alt }) => {
     const optimizable = canOptimize(src);
@@ -28,38 +29,28 @@ const AboutImage = ({ src, alt }) => {
 };
 
 
-// Mobile and desktop wrappers are both in the HTML and CSS hides one. A hidden
-// <video autoPlay> still downloads, so the file was fetched twice. The source is
-// now attached only to the video that is actually displayed.
-const AboutVideo = ({ src, minHeight }) => {
-    const ref = useRef(null);
-
-    useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
-        const attach = () => {
-            if (el.offsetParent === null || el.getAttribute("src") === src) return;
-            el.src = src;
-            el.play().catch(() => {});
-        };
-        attach();
-        window.addEventListener("resize", attach);
-        return () => window.removeEventListener("resize", attach);
-    }, [src]);
-
-    return (
-        <video
-            ref={ref}
-            loop
-            muted
-            playsInline
-            preload="none"
-            className="w-100 rounded-4 shadow-lg object-fit-cover"
-            style={{ minHeight, backgroundColor: "#f8f9fa" }}
-        />
-    );
-};
-
+// Keep a CMS image visible while the video is deferred. If the API video stalls
+// or fails, the image remains in place instead of a blank gray media block.
+const AboutVideo = ({ src, poster, alt, minHeight }) => (
+    <DeferredMediaVideo
+        src={src}
+        poster={poster && !isVideoSource(poster) ? poster : "/images/home-banner-1.png"}
+        alt={alt || "High Creation Interior"}
+        className="w-100 rounded-4 shadow-lg"
+        style={{
+            width: "100%",
+            height: minHeight,
+            minHeight,
+            borderRadius: "1rem",
+        }}
+        videoStyle={{ objectFit: "cover" }}
+        posterStyle={{ objectFit: "cover" }}
+        autoPlayDesktop
+        active
+        showPlayButtonOnMobile
+        posterLoading="lazy"
+    />
+);
 
 const HomeAbout3D = ({ initialData = null }) => {
     const [data, setData] = useState(initialData);
@@ -94,7 +85,7 @@ const HomeAbout3D = ({ initialData = null }) => {
                         {/* --- MOBILE DISPLAY (< 768px) --- */}
                         <div className="d-block d-md-none w-100">
                             {data.video && data.show_video_mobile ? (
-                                <AboutVideo src={data.video} minHeight="350px" />
+                                <AboutVideo src={data.video} poster={data.image} alt={data.image_alt || data.title || "About High Creation"} minHeight="350px" />
                             ) : data.image ? (
                                 <AboutImage src={data.image} alt={data.image_alt || data.title || "About High Creation"} />
                             ) : null}
@@ -103,7 +94,7 @@ const HomeAbout3D = ({ initialData = null }) => {
                         {/* --- DESKTOP DISPLAY (>= 768px) --- */}
                         <div className="d-none d-md-block w-100">
                             {data.video && data.show_video_desktop ? (
-                                <AboutVideo src={data.video} minHeight="500px" />
+                                <AboutVideo src={data.video} poster={data.image} alt={data.image_alt || data.title || "About High Creation"} minHeight="500px" />
                             ) : data.image ? (
                                 <AboutImage src={data.image} alt={data.image_alt || data.title || "About High Creation"} />
                             ) : null}
