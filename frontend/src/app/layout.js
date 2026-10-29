@@ -1,3 +1,4 @@
+import "bootstrap/dist/css/bootstrap.min.css";
 import "../../public/style/style.css";
 import "./globals.css";
 import ClientProvider from "../store/ClientProvider";
@@ -10,7 +11,7 @@ import { GoogleTagManager, GoogleAnalytics } from '@next/third-parties/google';
 
 const LazyToast = dynamic(() => import("./common/LazyToast"), { ssr: false });
 
-const greatVibes = Great_Vibes({ subsets: ['latin'], display: 'swap', weight: ['400'], variable: '--font-great-vibes' });
+const greatVibes = Great_Vibes({ subsets: ['latin'], display: 'swap', weight: ['400'], variable: '--font-great-vibes', preload: false });
 const poppins = Poppins({ subsets: ['latin'], display: 'swap', weight: ['400', '500','600', '700', '800'], variable: '--font-poppins' });
 const outfit = Outfit({ subsets: ['latin'], display: 'swap', weight: ['400', '600'], variable: '--font-outfit' });
 
@@ -45,7 +46,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
         <link rel="preconnect" href="https://connect.facebook.net" />
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
 
@@ -97,11 +97,10 @@ export default function RootLayout({ children }) {
 
         <ClientProvider>{children}</ClientProvider>
         <LazyToast />
+        <GoogleTagManager gtmId="GTM-PRVJK9N" />
+        <GoogleAnalytics gaId="G-MJZK1MXG9E" />
+        <GoogleAnalytics gaId="AW-11474758205" />
       </body>
-      
-      <GoogleTagManager gtmId="GTM-PRVJK9N" />
-      <GoogleAnalytics gaId="G-MJZK1MXG9E" />
-      <GoogleAnalytics gaId="AW-11474758205" />
     </html>
   );
 }
@@ -120,7 +119,7 @@ export default function RootLayout({ children }) {
 
 // const LazyToast = dynamic(() => import("./common/LazyToast"), { ssr: false });
 
-// const greatVibes = Great_Vibes({ subsets: ['latin'], display: 'swap', weight: ['400'], variable: '--font-great-vibes' });
+// const greatVibes = Great_Vibes({ subsets: ['latin'], display: 'swap', weight: ['400'], variable: '--font-great-vibes', preload: false });
 // const poppins = Poppins({ subsets: ['latin'], display: 'swap', weight: ['400', '500','600', '700', '800'], variable: '--font-poppins' });
 // const outfit = Outfit({ subsets: ['latin'], display: 'swap', weight: ['400', '600'], variable: '--font-outfit' });
 

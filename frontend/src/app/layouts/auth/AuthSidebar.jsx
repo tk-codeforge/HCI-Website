@@ -46,6 +46,10 @@ function AuthSidebar() {
             <style dangerouslySetInnerHTML={{__html: `
                 /* 🌟 LIGHT, CLEAN, MODERN THEME */
                 .modern-sidebar-wrapper {
+                    width: 100%;
+                    min-width: 0;
+                    max-width: none;
+                    box-sizing: border-box;
                     height: 100vh;
                     overflow-y: auto;
                     background-color: #ffffff;
@@ -133,8 +137,9 @@ function AuthSidebar() {
                 }
 
                 /* Mobile Responsiveness */
-                @media (max-width: 991px) {
+                @media (max-width: 767.98px) {
                     .modern-sidebar-wrapper {
+                        width: 100%;
                         max-width: 280px;
                         box-shadow: 4px 0 15px rgba(0,0,0,0.05);
                     }

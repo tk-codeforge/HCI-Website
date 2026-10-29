@@ -3,8 +3,8 @@ import { defaultAltText } from "@/utils/helper";
 import { notFound } from "next/navigation";
 import Image from "next/image"; 
 import Link from "next/link";
-import { headers } from "next/headers"; 
 import DOMPurify from "isomorphic-dompurify";
+import { headers } from "next/headers";
 
 import {
   FaMapMarkerAlt, FaArrowRight, FaUser, FaShieldAlt, FaGem, FaClock,
@@ -28,8 +28,8 @@ import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import { getPageSEO } from "@/utils/getSEO"; 
 import { getBackendImageUrl } from "@/utils/helper";
 
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
+/* Keep this CMS route dynamically rendered. Only the exact one-level paths
+   present in the CWV PDF opt their API reads into a 60-second data cache. */
 export const revalidate = 0;
 
 const cityUrlMap = {
@@ -50,6 +50,82 @@ const isValidSlug = (slug) => {
   return true;
 };
 
+
+// Only one-level CMS paths present in the attached CWV report opt into data caching.
+const PDF_CWV_TARGET_SLUGS = new Set([
+  "creating-the-home-of-your-dreams",
+  "estimator-for-home",
+  "how-to-decorate-your-home-for-diwali-under-rs5000",
+  "thank-you",
+  "interior-decorators-in-south-delhi",
+  "interior-designer-in-crossings-republik-ghaziabad",
+  "interior-designer-in-sector-150-noida",
+  "contact",
+  "interior-designer-in-sector-84-faridabad",
+  "job-application",
+  "interior-designers-in-noida",
+  "bedroom-dressing-table-design",
+  "best-interior-designers-in-faridabad",
+  "interior-designers-in-gurgaon",
+  "cozy-living-room-ideas-to-elevate-your-home",
+  "services",
+  "interior-designers-in-vaishali-ghaziabad",
+  "bedroom-wall-design-ideas",
+  "know-about-lighting-without-false-ceiling",
+  "experience-center-new-delhi",
+  "experience-center",
+  "interior-designer-in-wave-city-ghaziabad",
+  "how-its-works",
+  "spacesaving-furniture",
+  "design-idea",
+  "top-interior-designer-in-kavi-nagar-ghaziabad",
+  "interior-designers-in-greater-noida",
+  "interior-designer-in-sector-82-faridabad",
+  "interior-designers-in-golf-course-road-gurgaon",
+  "pista-green-colour-combination",
+  "staircase-as-per-vastu",
+  "reclaimed-wood",
+  "experience-center-faridabad",
+  "best-interior-designer-in-sector-137-noida",
+  "user-queries",
+  "product",
+  "thankyou",
+  "furniture",
+  "interior-designers-in-manesar",
+  "cancelletion-policy",
+  "term-and-condition",
+  "top-wall-moulding-designs",
+  "interior-designer-in-sector-83-faridabad",
+  "faq",
+  "interior-designer-in-greater-faridabad",
+  "interior-designer-in-noida-extension",
+  "interior-designers-in-raj-nagar-ghaziabad",
+  "warranty-assurance",
+  "luxury-bedroom-interior-design",
+  "refer-and-earn",
+  "team",
+  "blog",
+  "what-we-offer",
+  "residential-projects",
+  "designer-choice",
+  "statement-mirror-designs",
+  "interior-designer-in-sector-104-noida",
+  "ready-togo-design",
+]);
+
+const isPdfCwvTarget = (slug) => PDF_CWV_TARGET_SLUGS.has(slug);
+
+const getCmsFetchOptions = (slug) =>
+  isPdfCwvTarget(slug)
+    ? { next: { revalidate: 60 } }
+    : {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      };
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 
 const isDraftStatus = (data) => {
@@ -59,24 +135,21 @@ const isDraftStatus = (data) => {
   return status === "draft" || status === "inactive" || status === "0";
 };
 
-async function getRecentBlogs() {
+async function getRecentBlogs(slug) {
   try {
-    const res = await fetch(`${API_BASE_URL}/cms-blog`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE_URL}/cms-blog`, getCmsFetchOptions(slug));
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data.slice(0, 4) : [];
   } catch (error) { return []; }
 }
 
-async function getExcellenceStats() {
+async function getExcellenceStats(slug) {
   try {
-    const res = await fetch(`${API_BASE_URL}/cms-content/excellence_stats`, { 
-      cache: "no-store",
-      headers: { 
-        'Cache-Control': 'no-cache, no-store, must-revalidate', 
-        'Pragma': 'no-cache' 
-      }
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/cms-content/excellence_stats`,
+      getCmsFetchOptions(slug)
+    );
 
     if (!res.ok) return null;
     
@@ -100,10 +173,10 @@ async function getExcellenceStats() {
 
 async function getBlogData(slug) {
   try {
-    const res = await fetch(`${API_BASE_URL}/cms-blog/blog-slug/${encodeURIComponent(slug)}`, {
-      cache: "no-store", 
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/cms-blog/blog-slug/${encodeURIComponent(slug)}`,
+      getCmsFetchOptions(slug)
+    );
     if (!res.ok) return null;
     let data = await res.json();
     if (!data || data.success === false) return null;
@@ -119,10 +192,10 @@ async function getBlogData(slug) {
 
 async function getCmsPageData(slug) {
   try {
-    const res = await fetch(`${API_BASE_URL}/cms-pages/slug/${encodeURIComponent(slug)}`, {
-      cache: "no-store", 
-      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/cms-pages/slug/${encodeURIComponent(slug)}`,
+      getCmsFetchOptions(slug)
+    );
     if (!res.ok) return null;
     let data = await res.json();
     if (!data || data.success === false) return null;
@@ -147,7 +220,7 @@ export async function generateMetadata({ params }) {
   const [blogData, cmsData, seoData] = await Promise.all([
     getBlogData(slug).catch(() => null),
     getCmsPageData(slug).catch(() => null),
-    getPageSEO(`/${slug}`).catch(() => null)
+    getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
   ]);
 
   let data = blogData || cmsData;
@@ -216,6 +289,19 @@ const toHttps = (url) =>
     ? url.replace(new RegExp(`^http://(${OWN_HOSTS})`, "i"), "https://$1")
     : url;
 
+// Rich-text CMS images are below the page hero. Keep their existing attributes,
+// but decode asynchronously and lazy-load them when the CMS has not specified
+// explicit loading behavior. This avoids competing with the hero/LCP image.
+const addCmsImageLoadingHints = (html) => {
+  if (typeof html !== "string" || !html.includes("<img")) return html;
+  return html.replace(/<img\b([^>]*)>/gi, (tag, attributes) => {
+    let next = attributes;
+    if (!/\bloading\s*=/i.test(next)) next += ' loading="lazy"';
+    if (!/\bdecoding\s*=/i.test(next)) next += ' decoding="async"';
+    return `<img${next}>`;
+  });
+};
+
 const DynamicRootPage = async ({ params }) => {
   headers();
   const slug = params.blog;
@@ -230,15 +316,15 @@ const DynamicRootPage = async ({ params }) => {
     await Promise.all([
       getBlogData(slug).catch(() => null),
       getCmsPageData(slug).catch(() => null),
-      getPageSEO(`/${slug}`).catch(() => null),
-      getRecentBlogs().catch(() => []),
-      getExcellenceStats().catch(() => null),
+      getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+      getRecentBlogs(slug).catch(() => []),
+      getExcellenceStats(slug).catch(() => null),
       (async () => {
         try {
-          const setRes = await fetch(`${API_BASE_URL}/site-settings`, {
-            cache: "no-store",
-            headers: { "Cache-Control": "no-cache" },
-          });
+          const setRes = await fetch(
+            `${API_BASE_URL}/site-settings`,
+            getCmsFetchOptions(slug)
+          );
           if (!setRes.ok) return null;
           const rawSettings = await setRes.json();
           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
@@ -284,8 +370,14 @@ const DynamicRootPage = async ({ params }) => {
   const displayCity = slug.split(/-|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   // const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
   const safeContent = pageData?.content
-  ? forceHttpsHtml(DOMPurify.sanitize(pageData.content))
-  : "";
+    ? (isPdfCwvTarget(slug)
+        ? addCmsImageLoadingHints(forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+        : forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+    : "";
+  const rawDescription = forceHttpsHtml(pageData?.description || "");
+  const richDescription = isPdfCwvTarget(slug)
+    ? addCmsImageLoadingHints(rawDescription)
+    : rawDescription;
 
   let heroImageSrc = getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg');
 
@@ -506,7 +598,7 @@ const DynamicRootPage = async ({ params }) => {
                  <div className="details font-poppins rich-text-content ck-content">
                    {/* <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
                    */}
-                   <div dangerouslySetInnerHTML={{ __html: forceHttpsHtml(pageData.description) }} />
+                   <div dangerouslySetInnerHTML={{ __html: richDescription }} />
                   </div>
                 </div>
               </div>

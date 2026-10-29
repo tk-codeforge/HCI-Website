@@ -39,7 +39,7 @@ import { getPageSEO } from "@/utils/getSEO";
 
 // 🌟 1. Replace static metadata with dynamic generation
 export async function generateMetadata() {
-  const seoData = await getPageSEO("/"); // Fetch SEO for the home route
+  const seoData = await getPageSEO("/", { revalidate: 60 }); // Fetch SEO for the home route
 
   // If no SEO data is found in CMS, return empty object to trigger layout.js fallbacks
   if (!seoData) return {};
@@ -57,7 +57,7 @@ export async function generateMetadata() {
 
 export default async function App() {
   // 🌟 2. Fetch SEO again to get the customSchema (Next.js deduplicates this fetch automatically)
-  const seoData = await getPageSEO("/");
+  const seoData = await getPageSEO("/", { revalidate: 60 });
 
   return (
     <>

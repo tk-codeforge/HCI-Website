@@ -1003,8 +1003,8 @@ const ThankYou = ({ initialData = null }) => {
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
-    fetchThankYouPage();
-  }, [fetchThankYouPage]);
+    if (!initialData) fetchThankYouPage();
+  }, [fetchThankYouPage, initialData]);
 
   useEffect(() => {
     const start = () => setShowConfetti(true);

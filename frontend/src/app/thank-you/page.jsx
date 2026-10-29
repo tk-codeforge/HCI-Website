@@ -2036,7 +2036,6 @@ export async function generateMetadata() {
 // Returns { cms } (cms may be null if there is no record yet), or null if the
 // request failed, in which case the client component fetches by itself.
 async function getThankYouCms() {
-   const seo = await getSeoData();
   try {
     const res = await fetch(`${getBaseUrl()}/cms-content/redirect_thank_you`, {
       next: { revalidate: 60 },

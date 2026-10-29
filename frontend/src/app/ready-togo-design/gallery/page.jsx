@@ -5,14 +5,15 @@ import { notFound } from "next/navigation";
 import JsonLd from "../../components/JsonLd";
 import { buildGalleryMetadata, getGallerySeo } from "@/utils/gallerySeo";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
-const BASE_URL = "https://hcinterior.in";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
 
 async function getGalleryData(id) {
   try {
     const res = await fetch(`${API_BASE_URL}/cms-parent-child/by-id/${id}`, {
       next: { revalidate: 60 },
     });
+
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {
@@ -21,21 +22,9 @@ async function getGalleryData(id) {
   }
 }
 
-// export async function generateMetadata({ searchParams }) {
-//   const id = searchParams?.id;
-//   const canonicalUrl = id 
-//     ? `${BASE_URL}/ready-togo-design/gallery?id=${id}` 
-//     : `${BASE_URL}/ready-togo-design/gallery`;
-
-//   return {
-//     alternates: {
-//       canonical: canonicalUrl,
-//     },
-//   };
-// }
-
 export async function generateMetadata({ searchParams }) {
   const id = searchParams?.id;
+
   return buildGalleryMetadata({
     basePath: "/ready-togo-design/gallery",
     id,
@@ -45,27 +34,29 @@ export async function generateMetadata({ searchParams }) {
 
 const ResidentialProjectsGallery = async ({ searchParams }) => {
   const id = searchParams?.id;
-  
   if (!id) return notFound();
 
   const galleryData = await getGalleryData(id);
-
   if (!galleryData) return notFound();
-  const seo = await getGallerySeo({ basePath: "/ready-togo-design/gallery", id });
 
+  const seo = await getGallerySeo({
+    basePath: "/ready-togo-design/gallery",
+    id,
+  });
   const images = galleryData?.child_images ?? [];
   const title = galleryData?.child_content?.title ?? "Ready to go Gallery";
-  const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
-const savedTag = galleryData?.child_content?.title_tag;
-const TitleTag = HEADING_TAGS.includes(savedTag) ? savedTag : "h1";
-const description = galleryData?.child_content?.description;
+  const description = galleryData?.child_content?.description;
+  const headingTags = ["h1", "h2", "h3", "h4", "h5", "h6"];
+  const savedTag = galleryData?.child_content?.title_tag;
+  const TitleTag = headingTags.includes(savedTag) ? savedTag : "h1";
 
-  // If there are no images, show a graceful fallback
   if (images.length === 0) {
     return (
       <MainLayout>
         <main className="container my-5 py-5 text-center">
-           <h2 className="font-outfit text-muted">No images found for this gallery.</h2>
+          <h2 className="font-outfit text-muted">
+            No images found for this gallery.
+          </h2>
         </main>
       </MainLayout>
     );
@@ -74,65 +65,55 @@ const description = galleryData?.child_content?.description;
   return (
     <MainLayout>
       <JsonLd data={seo?.custom_schema} />
-      <main className="bg-light pb-5">
-        
-        {/* Modern Header Section */}
-        <section className="py-5 bg-white border-bottom shadow-sm mb-5">
+      <main className="bg-light pb-5 ready-gallery-page">
+        <section className="py-5 bg-white border-bottom shadow-sm mb-5 ready-gallery-heading">
           <div className="container text-center">
-             {/* <h1 className="font-outfit fw-bold text-dark mb-2">{title}</h1>
-             <p className="font-poppins text-muted mb-0">Explore our exclusive, ready-to-execute designs.</p> */}
-             <TitleTag className="font-outfit fw-bold text-dark mb-2">{title}</TitleTag>
-{description ? (
-  <div
-    className="gallery-description font-poppins text-muted mx-auto"
-    style={{ maxWidth: "900px" }}
-    dangerouslySetInnerHTML={{ __html: description }}
-  />
-) : (
-  <p className="font-poppins text-muted mb-0">Explore our exclusive, ready-to-execute designs.</p>
-)}
+            <TitleTag className="font-outfit fw-bold text-dark mb-2">
+              {title}
+            </TitleTag>
+            {description ? (
+              <div
+                className="gallery-description font-poppins text-muted mx-auto"
+                style={{ maxWidth: "900px" }}
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            ) : (
+              <p className="font-poppins text-muted mb-0">
+                Explore our exclusive, ready-to-execute designs.
+              </p>
+            )}
           </div>
         </section>
 
-        {/* Dynamic Masonry-Style Grid */}
-<section className="container">
-  <style
-    dangerouslySetInnerHTML={{
-      __html: `
-        .gallery-tile { width: 100%; height: auto; }
+        <section className="container ready-gallery-container">
+          <div className="row g-4 ready-gallery-grid">
+            {images.map((img, index) => {
+              // Preserve the existing desktop pattern: every third card is wide.
+              const isLarge = (index + 1) % 3 === 0;
+              const columnClass = isLarge
+                ? "col-lg-12 col-12"
+                : "col-lg-6 col-md-6 col-12";
+              const frameClass = isLarge
+                ? "ready-gallery-card-frame ready-gallery-card-frame--large"
+                : "ready-gallery-card-frame";
 
-        @media (min-width: 768px) {
-          .gallery-tile { height: 350px; }
-          .gallery-tile.is-large { height: 500px; }
-        }
-      `,
-    }}
-  />
-
-  <div className="row g-4">
-    {images.map((img, index) => {
-      const isLarge = (index + 1) % 3 === 0;
-
-      return (
-        <div
-          key={index}
-          className={isLarge ? "col-lg-12 col-12" : "col-lg-6 col-md-6 col-12"}
-        >
-          <div className={`gallery-tile${isLarge ? " is-large" : ""}`}>
-            <GalleryDetail
-              imgGalUrl={img?.image ?? "/images/default.jpg"}
-              imgGalAlt={img?.title || defaultAltText}
-              imgGalCmsAlt={img?.image_alt}
-              imgGalImgClass=""
-              images={images}
-            />
+              return (
+                <div key={img?.id ?? img?.image ?? index} className={columnClass}>
+                  <div className={frameClass}>
+                    <GalleryDetail
+                      imgGalUrl={img?.image ?? "/images/default.jpg"}
+                      imgGalAlt={img?.title || defaultAltText}
+                      imgGalCmsAlt={img?.image_alt}
+                      imgGalImgClass=""
+                      images={images}
+                      imgPriority={index === 0}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-      );
-    })}
-  </div>
-</section>
-
+        </section>
       </main>
     </MainLayout>
   );

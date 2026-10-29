@@ -1,6 +1,6 @@
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 
-export async function getPageSEO(pageUrlIdentifier) {
+export async function getPageSEO(pageUrlIdentifier, options = {}) {
     try {
       const baseURL = process.env.NODE_ENV === "development" 
         ? process.env.NEXT_PUBLIC_API_DEV_URL 
@@ -8,9 +8,10 @@ export async function getPageSEO(pageUrlIdentifier) {
   
       const pathQuery = pageUrlIdentifier.startsWith('/') ? pageUrlIdentifier : `/${pageUrlIdentifier}`;
 
-      const res = await fetch(`${baseURL}/seo-tag/route?path=${encodeURIComponent(pathQuery)}`, { 
-        cache: "no-store" 
-      });
+      const fetchOptions = Number.isFinite(options?.revalidate) && options.revalidate > 0
+        ? { next: { revalidate: options.revalidate } }
+        : { cache: "no-store" };
+      const res = await fetch(`${baseURL}/seo-tag/route?path=${encodeURIComponent(pathQuery)}`, fetchOptions);
   
       if (res.ok) {
         const pageSeo = await res.json();
