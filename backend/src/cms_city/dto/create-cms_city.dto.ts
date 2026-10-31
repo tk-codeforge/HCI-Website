@@ -57,4 +57,40 @@ banner_title_tag?: string;
 @IsOptional()
 @IsIn(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 side_title_tag?: string;
+
+// JSON settings sent by the CMS as a string
+@IsOptional()
+@IsString()
+city_settings?: string;
+
+// Project image alt text
+@IsOptional()
+@IsString()
+@MaxLength(255)
+project_image_1_alt?: string;
+
+@IsOptional()
+@IsString()
+@MaxLength(255)
+project_image_2_alt?: string;
+
+@IsOptional()
+@IsString()
+@MaxLength(255)
+project_image_3_alt?: string;
+
+@IsOptional()
+@IsString()
+@MaxLength(255)
+project_image_4_alt?: string;
+
+@IsOptional()
+@IsString()
+@MaxLength(255)
+project_image_5_alt?: string;
+
+@IsOptional()
+@IsString()
+@MaxLength(255)
+project_image_6_alt?: string;
 }
