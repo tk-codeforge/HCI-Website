@@ -40,7 +40,7 @@ const ResidentialProjectsGallery = ({ initialData }) => {
     };
 
     fetchContentManagerPages();
-  }, []);
+  }, [initialData]);
 
   const images = galleryData?.child_images ?? [];
   const savedTag = galleryData?.child_content?.title_tag;

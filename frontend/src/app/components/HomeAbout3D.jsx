@@ -69,7 +69,7 @@ const HomeAbout3D = ({ initialData = null }) => {
             }
         };
         fetchAboutData();
-    }, []);
+    }, [initialData]);
 
     if (loading || !data) return null;
     const TitleTag = TITLE_TAGS.includes(data.title_tag) ? data.title_tag : "h1";

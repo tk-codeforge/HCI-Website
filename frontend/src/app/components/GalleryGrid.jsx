@@ -59,7 +59,7 @@ export default function GalleryGrid({
   galleryTitle,
   defaultAltText = "Interior design gallery",
 }) {
-  const imageList = Array.isArray(images) ? images : [];
+ const imageList = useMemo(() => (Array.isArray(images) ? images : []), [images]);
   const altMap = useMediaAltMap();
   const [activeIndex, setActiveIndex] = useState(0);
   const [fallbackActiveImage, setFallbackActiveImage] = useState(null);

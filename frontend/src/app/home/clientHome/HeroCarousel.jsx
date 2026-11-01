@@ -94,6 +94,7 @@ function HeroPicture({ desktopSrc, mobileSrc, alt, mobileAlt, isFirstSlide }) {
       <source media="(min-width: 768px)" srcSet={desktop.srcSet} sizes="100vw" />
       <img
         {...mobile}
+        alt={mobile.alt || alt || ""}
         className="banner-media"
         loading={isFirstSlide ? "eager" : "lazy"}
         fetchPriority={isFirstSlide ? "high" : "auto"}
@@ -120,7 +121,7 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
         }
       })
       .catch((err) => console.error("Failed to load carousel speed", err));
-  }, []);
+ }, [carouselSpeed]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, duration: 100 }, 

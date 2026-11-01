@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
+import AuthMainLayout from "../../../layouts/auth/AuthMainLayout";
 import Tabs from "@/app/components/Tabs";
 
 

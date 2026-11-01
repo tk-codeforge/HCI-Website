@@ -4450,7 +4450,7 @@ side_image_alt: item.side_image_alt ?? ""
                                             legacyPhotos={legacyPhotos}
                                         />
                                         <BlogsHeadingEditor value={cityContent.blogs} onChange={updateCityContent} />
-                                <div className="col-12"><hr /><h5 className="mb-2">Design Inspiration Blogs</h5><p className="text-muted small">Choose up to six blogs for this city's Design Inspiration block. If no selection is saved, the page continues showing the same first four blogs as its default.</p></div>
+                                <div className="col-12"><hr /><h5 className="mb-2">Design Inspiration Blogs</h5><p className="text-muted small">Choose up to six ...blogs for this city{"'"}s Design Inspiration block.... If no selection is saved, the page continues showing the same first four blogs as its default.</p></div>
                                 <div className="col-12">
                                     {blogsList.length ? (
                                         <div className="row border rounded p-3 mx-0" style={{ maxHeight: "240px", overflowY: "auto" }}>
