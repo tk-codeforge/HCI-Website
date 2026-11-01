@@ -7,8 +7,8 @@ import api from "@/utils/api";
 import { buildLeadMetadata } from "@/utils/leadForms";
 
 // WhatsApp enquiries + the phone link in the final call-to-action.
-const CONTACT_NUMBER = "919810506301";
-const CONTACT_DISPLAY = "+91 98105 06301";
+const CONTACT_NUMBER = "917070701373";
+const CONTACT_DISPLAY = "+91 70707 01373";
 // The estimator copy that lives inside this landing-page folder (app/design-your-dream-space/estimator-for-home).
 // A relative path keeps working on localhost, stage2.hcinterior.in and production.
 const ESTIMATOR_PATH = "/design-your-dream-space/estimator-for-home";
@@ -645,6 +645,7 @@ const [submitError, setSubmitError] = useState("");
       mobile: formData.phone.trim(),
       ...(formData.email.trim() ? { email: formData.email.trim().toLowerCase() } : {}),
       place: formData.city.trim(),
+      query: "",
       ...buildLeadMetadata({
         pathname,
         leadFormType,
@@ -1844,7 +1845,7 @@ export default function HCILandingPage() {
             </h1>
             <p className="hci-hero-areas">
               <Icon name="pin" size={19} />
-              <span>Our Interior Design services available in Gurugram, Noida, Ghaziabad, Faridabad, Noida Extension, Manesar and Sohna.</span>
+              <span>Our Interior Design services available in Delhi, Gurugram, Noida, Ghaziabad, Faridabad, Noida Extension, Manesar and Sohna.</span>
             </p>
             <ul className="hci-hero-points">
               {heroPoints.map((item) => (
@@ -2075,7 +2076,7 @@ export default function HCILandingPage() {
 
       <section className="hci-final-cta" id="contact">
         <div className="hci-final-cta-image"><img src={images.dining} alt="Bright dining and living interior inspiration" loading="lazy" /></div>
-        <div className="hci-final-cta-copy"><span className="hci-eyebrow">THE FIRST STEP IS A CONVERSATION</span><h2>Let’s plan a home<br />that works for you.</h2><p>Share your space, your ideas and what matters most. Start a discussion with HC Interior.</p><div className="hci-final-actions"><button type="button" className="hci-button hci-button-primary" onClick={() => openForm("Book a consultation")}>Book a consultation <span className="hci-button-icon"><Icon name="phone-call" size={14} /></span></button><a className="hci-phone-link" href="tel:+919810506301"><Icon name="phone" size={17} /> {CONTACT_DISPLAY}</a></div></div>
+        <div className="hci-final-cta-copy"><span className="hci-eyebrow">THE FIRST STEP IS A CONVERSATION</span><h2>Let’s plan a home<br />that works for you.</h2><p>Share your space, your ideas and what matters most. Start a discussion with HC Interior.</p><div className="hci-final-actions"><button type="button" className="hci-button hci-button-primary" onClick={() => openForm("Book a consultation")}>Book a consultation <span className="hci-button-icon"><Icon name="phone-call" size={14} /></span></button><a className="hci-phone-link" href={`tel:+${CALL_NUMBER}`}><Icon name="phone" size={17} /> {CONTACT_DISPLAY}</a></div></div>
       </section>
 
       <FloatingDock showEstimate={!formInView} onEstimate={() => openForm("Get Design Quote")} />
