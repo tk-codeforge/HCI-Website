@@ -94,10 +94,11 @@
 //     "/((?!api|_next/static|_next/image|images|favicon.ico|sitemap.xml|robots.txt).*)",
 //   ],
 // };
+
 import { NextResponse } from "next/server";
 
 const SLUG_FOLDER = /^\/([a-z0-9-]+)\/((?:project-)?gallery)(?:\/([^/]+))?\/?$/;
-const SLUG_SKIP = ["cms", "api", "dashboard"]; // admin/internal routes, never touched
+const SLUG_SKIP = ["cms", "api", "dashboard", "blog"];
 const redirectNoCache = (dest, status) => {
   const res = NextResponse.redirect(dest, status);
   res.headers.set("Cache-Control", "no-store, max-age=0"); // editable URLs: browsers must not cache these
@@ -127,18 +128,31 @@ export async function middleware(request) {
   }
 
   // --- 2. SPECIAL CASE: Blog ID Redirects (From your Excel Sheet) ---
+  // const blogIdRedirects = {
+  //   "36": "/modern-backlight-pvc-ceiling-design-for-small-rooms",
+  //   "33": "/top-notch-office-interior-designer-in-noida-2024",
+  //   "27": "/elevating-home-aesthatics-with-interior-designers-in-noida",
+  //   "17": "/difference-between-luxury-interior-designers-normal-interior-designers",
+  //   "42": "/types-of-sofa-design",
+  //   "23": "/top-10-interior-design-companies-in-noida",
+  //   "31": "/10-best-stunning-bathroom-cabinet-designs-for-small-space-elevate-your-bathroom-aesthetics",
+  //   "26": "/home-interior-design-company-in-delhi-ncr",
+  //   "18": "/how-to-arrange-plants-in-living-room",
+  //   "9": "/top-10-interior-designers-in-delhi"
+  // };
+
   const blogIdRedirects = {
-    "36": "/modern-backlight-pvc-ceiling-design-for-small-rooms",
-    "33": "/top-notch-office-interior-designer-in-noida-2024",
-    "27": "/elevating-home-aesthatics-with-interior-designers-in-noida",
-    "17": "/difference-between-luxury-interior-designers-normal-interior-designers",
-    "42": "/types-of-sofa-design",
-    "23": "/top-10-interior-design-companies-in-noida",
-    "31": "/10-best-stunning-bathroom-cabinet-designs-for-small-space-elevate-your-bathroom-aesthetics",
-    "26": "/home-interior-design-company-in-delhi-ncr",
-    "18": "/how-to-arrange-plants-in-living-room",
-    "9": "/top-10-interior-designers-in-delhi"
-  };
+  "36": "/blog/modern-backlight-pvc-ceiling-design-for-small-rooms",
+  "33": "/blog/top-notch-office-interior-designer-in-noida-2024",
+  "27": "/blog/elevating-home-aesthatics-with-interior-designers-in-noida",
+  "17": "/blog/difference-between-luxury-interior-designers-normal-interior-designers",
+  "42": "/blog/types-of-sofa-design",
+  "23": "/blog/top-10-interior-design-companies-in-noida",
+  "31": "/blog/10-best-stunning-bathroom-cabinet-designs-for-small-space-elevate-your-bathroom-aesthetics",
+  "26": "/blog/home-interior-design-company-in-delhi-ncr",
+  "18": "/blog/how-to-arrange-plants-in-living-room",
+  "9": "/blog/top-10-interior-designers-in-delhi"
+};
 
   if (pathname === "/blog-detail" && searchParams.has("id")) {
     const id = searchParams.get("id");
@@ -162,8 +176,8 @@ export async function middleware(request) {
     "/reallife-portfolio": "/residential-projects",
     "/design-excellence-awards": "/awards",
     "/design-excellence-awards/": "/awards",
-    "/blog/two-colour-combination-for-kitchen-laminates": "/two-colour-combination-for-kitchen-laminates",
-    "/blog/pooja-room-designs": "/pooja-room-designs",
+    // "/blog/two-colour-combination-for-kitchen-laminates": "/two-colour-combination-for-kitchen-laminates",
+    // "/blog/pooja-room-designs": "/pooja-room-designs",
     "/top-10-interior-designers-and-decorators-trends-in-delhi": "/top-10-interior-designers-in-delhi",
     "/best-interior-designers-in-delhi": "/best-interior-designers-in-delhi-ncr",
     "/category/blogs": "/blog",

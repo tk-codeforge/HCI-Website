@@ -296,6 +296,9 @@ export class SeoTagService {
     } else if (key.startsWith('/services-detail/')) {
       keys.push(`/interior-designers-in-${key.replace('/services-detail/', '')}`);
     }
+    else if (key.startsWith('/blog/') && key.split('/').length === 3) {
+  keys.push(key.replace('/blog/', '/'));
+}
 
     const rows = await this.seoTagRepository.find({
       where: { status: 'active' },

@@ -594,7 +594,7 @@ const CmsBlog = () => {
                                             {item.status === "Published" && item.seo_content?.slug && (
                                                 <a
                                                     className="ms-2 btn btn-outline-success mb-2"
-                                                    href={`/${item.seo_content.slug}`}
+                                                    href={`/blog/${item.seo_content.slug}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                 >

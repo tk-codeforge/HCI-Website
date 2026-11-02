@@ -496,7 +496,7 @@ const EstimatorClient = () => {
             </div>
           </div>
           <div className="triangle-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+            <svg viewBox="0 0 50 100">
               <path
                 d="M0,0 L50,50 L0,100"
                 stroke="var(--step_border_color)"
@@ -519,7 +519,7 @@ const EstimatorClient = () => {
             </div>
           </div>
           <div className="triangle-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+            <svg viewBox="0 0 50 100">
               <path
                 d="M0,0 L50,50 L0,100"
                 stroke="var(--step_border_color)"
@@ -542,7 +542,7 @@ const EstimatorClient = () => {
             </div>
           </div>
           <div className="triangle-wrapper">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 100">
+            <svg viewBox="0 0 50 100">
               <path
                 d="M0,0 L50,50 L0,100"
                 stroke="var(--step_border_color)"

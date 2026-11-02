@@ -31,3 +31,6 @@ export const getBackendImageUrl = (path) => {
     return `${API_BASE}/uploads${path}`;
 };
 export const defaultAltText = "High Creation Interior Image";
+
+export const getBlogHref = (blog) =>
+  blog?.seo_content?.slug ? `/blog/${blog.seo_content.slug}` : `/blog-detail?id=${blog?.id}`;

@@ -57,8 +57,9 @@ const Footer = ({
     } catch (err) { console.error("Error fetching visibility rules:", err); }
   };
 
-  if (Object.keys(initialProfiles).length === 0) fetchFooterProfiles();
+    if (Object.keys(initialProfiles).length === 0) fetchFooterProfiles();
   if (initialRules.length === 0) fetchVisibilityRules();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
 const matchesPattern = (pattern, path) =>
@@ -98,8 +99,9 @@ const cmsFooter = allProfilesData[resolvedProfileKey] || allProfilesData["defaul
     }
   };
 
-  if (initialLinks.length === 0) fetchfooterlink();
+    if (initialLinks.length === 0) fetchfooterlink();
   if (Object.keys(initialSettings).length === 0) fetchSiteSettings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
     const verticalColumns = cmsFooter?.verticalColumns || [];

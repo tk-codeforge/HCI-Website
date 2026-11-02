@@ -425,14 +425,14 @@ import CustomUploadAdapterPlugin, {
 import "ckeditor5/ckeditor5.css";
 
 const ARROW_SVG_MARKUP = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16">
+<svg viewBox="0 0 448 512" width="16" height="16">
     <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z" fill="#333333"/>
 </svg>`;
 
 const ARROW_DATA_URI = `data:image/svg+xml,${encodeURIComponent(ARROW_SVG_MARKUP)}`;
 
 const TICK_SVG_MARKUP = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+<svg viewBox="0 0 24 24" width="24" height="24">
     <circle cx="12" cy="12" r="12" fill="#ff914d" fill-opacity="0.18"/>
     <path d="M7 12.6l3.4 3.4L17.2 8.8" fill="none" stroke="#ff914d" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
@@ -469,7 +469,7 @@ class InsertArrowIcon extends Plugin {
                 withText: false,
                 tooltip: true,
                 icon: `
-                    <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 448 512">
                         <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
                     </svg>
                 `,
@@ -498,7 +498,7 @@ class InsertTickIcon extends Plugin {
                 withText: false,
                 tooltip: true,
                 icon: `
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
                         <path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>

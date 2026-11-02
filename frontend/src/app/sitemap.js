@@ -65,10 +65,29 @@ export default async function sitemap() {
     const allCmsPages = cmsPagesRes.ok ? await cmsPagesRes.json() : [];
     const allCmsCities = cmsCityRes.ok ? await cmsCityRes.json() : [];
 
+    const blogSlugPaths = new Set(
+  allBlogs.filter((b) => b?.seo_content?.slug).map((b) => `/${b.seo_content.slug}`)
+);
+
+const toBlogSeo = (seo = {}) => {
+  const slug = seo?.slug;
+  const c = seo?.canonical_url;
+  if (!slug || !c) return seo;
+  try {
+    const u = new URL(c, SITE_URL);
+    if (u.pathname.replace(/\/+$/, "") === `/${slug}`) {
+      return { ...seo, canonical_url: `${SITE_URL}/blog/${slug}` };
+    }
+  } catch {}
+  return seo;
+};
+
     const pageRoutes = allSeoTags
       .filter(
         (tag) => tag?.status === "active" && shouldIncludeInSitemap(tag)
       )
+
+      .filter((r) => r && !blogSlugPaths.has(new URL(r.url).pathname))
       .map((tag) =>
         buildSitemapEntry({
           seoData: tag,
@@ -90,15 +109,27 @@ export default async function sitemap() {
           shouldIncludeInSitemap(blog?.seo_content) &&
           (blog?.seo_content?.canonical_url || blog?.seo_content?.slug)
       )
+      // .map((blog) =>
+      //   buildSitemapEntry({
+      //     seoData: blog?.seo_content || {},
+      //     fallbackPath: `/${blog?.seo_content?.slug || `blog-detail?id=${blog.id}`}`,
+      //     lastModified: blog.updated_at,
+      //     defaultChangeFrequency: "weekly",
+      //     defaultPriority: 0.64,
+      //   })
+      // );
+
       .map((blog) =>
-        buildSitemapEntry({
-          seoData: blog?.seo_content || {},
-          fallbackPath: `/${blog?.seo_content?.slug || `blog-detail?id=${blog.id}`}`,
-          lastModified: blog.updated_at,
-          defaultChangeFrequency: "weekly",
-          defaultPriority: 0.64,
-        })
-      );
+  buildSitemapEntry({
+    seoData: toBlogSeo(blog?.seo_content || {}),
+    fallbackPath: blog?.seo_content?.slug
+      ? `/blog/${blog.seo_content.slug}`
+      : `/blog-detail?id=${blog.id}`,
+    lastModified: blog.updated_at,
+    defaultChangeFrequency: "weekly",
+    defaultPriority: 0.64,
+  })
+);
 
     const cmsPageRoutes = allCmsPages
       .filter(

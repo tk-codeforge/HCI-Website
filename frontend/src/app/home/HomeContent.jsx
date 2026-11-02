@@ -4,6 +4,7 @@ import {
   FaMapMarkerAlt, FaGem, FaUser, FaTools, 
   FaStar, FaAward, FaTrophy
 } from "react-icons/fa";
+import { getBlogHref } from "@/utils/helper";
 
 import DOMPurify from "isomorphic-dompurify";
 
@@ -1217,7 +1218,9 @@ const targetId = `step-${index + 1}`;
               {blogs.map((blog, index) => (
                 // <div key={index} className="col-lg-4 col-md-6 col-12">
                 <div key={index} className="col-lg-4 col-md-6 col-12 d-flex">
-                  <Blogs blogCard="blog_cards" imgSrcBlog={blog?.image || "/images/default.jpg"} blogImglink={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} blogImgALt={blog?.title || "Blog Image"} blogClassImg="card-img-top rounded-4 object-fit-cover" blogdate={blog?.published_on ? formatDate(blog.published_on) : "Date not available"} blogTitle={blog?.title || "Untitled Blog"} buttonBlog="Continue Reading" blogBtnHref={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} writer_name={blog?.writer_name || "High Creation"} />
+                  {/* <Blogs blogCard="blog_cards" imgSrcBlog={blog?.image || "/images/default.jpg"} blogImglink={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} blogImgALt={blog?.title || "Blog Image"} blogClassImg="card-img-top rounded-4 object-fit-cover" blogdate={blog?.published_on ? formatDate(blog.published_on) : "Date not available"} blogTitle={blog?.title || "Untitled Blog"} buttonBlog="Continue Reading" blogBtnHref={`/${blog?.seo_content?.slug || `blog-detail?id=${blog?.id}`}`} writer_name={blog?.writer_name || "High Creation"} /> */}
+
+                  <Blogs blogCard="blog_cards" imgSrcBlog={blog?.image || "/images/default.jpg"} blogImglink={getBlogHref(blog)} blogImgALt={blog?.title || "Blog Image"} blogClassImg="card-img-top rounded-4 object-fit-cover" blogdate={blog?.published_on ? formatDate(blog.published_on) : "Date not available"} blogTitle={blog?.title || "Untitled Blog"} buttonBlog="Continue Reading" blogBtnHref={getBlogHref(blog)} writer_name={blog?.writer_name || "High Creation"} />
                 </div>
               ))}
             </CarouselRow>

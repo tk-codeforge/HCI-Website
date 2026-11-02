@@ -242,6 +242,7 @@ function AuthSidebar() {
                         <Link href="/cms/home-page-content" className={`sub-menu-link ${isActive('/cms/home-page-content')}`}>Static Content Blocks</Link>
                         <Link href="/cms/manage-why-choose-us" className={`sub-menu-link ${isActive('/cms/manage-why-choose-us')}`}>Why Choose Us</Link>
                         <Link href="/cms/creating-the-home-of-your-dreams" className={`sub-menu-link ${isActive('/cms/creating-the-home-of-your-dreams')}`}>Creating Dreams</Link>
+                        <Link href="/cms/design-your-dream-space" className={`sub-menu-link ${isActive('/cms/design-your-dream-space')}`}>Design Your Dream Space</Link>
                         <Link href="/cms/manage-the-way-we-work" className={`sub-menu-link ${isActive('/cms/manage-the-way-we-work')}`}>The Way We Work</Link>
                         <Link href="/cms/manage-what-we-offer" className={`sub-menu-link ${isActive('/cms/manage-what-we-offer')}`}>Explore What We Offer</Link>
                         <Link href="/cms/homePage-furniture-factory" className={`sub-menu-link ${isActive('/cms/homePage-furniture-factory')}`}>Factory</Link>

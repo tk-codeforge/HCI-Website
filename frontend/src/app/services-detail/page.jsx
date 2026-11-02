@@ -2512,7 +2512,7 @@
 
 import { notFound } from "next/navigation";
 import MainLayout from "../layouts/MainLayout";
-import { defaultAltText } from "@/utils/helper";
+import { defaultAltText, getBlogHref } from "@/utils/helper";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
 import Image from "next/image"; 
 import Link from "next/link";
@@ -3204,7 +3204,9 @@ const SideTag = safeTag(pageData?.side_title_tag, "h3");
                       <MobileSlider label="Design inspiration" className="row g-4 font-poppins mobile-slider-wrapper">
                         {designInspirationBlogs.map((blog, idx) => (
                           <div className="col-md-6" key={idx}>
-                            <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+                            {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+
+                            <Link href={getBlogHref(blog)} className="text-decoration-none">
                               <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
                                 <img src={blog.image || "/images/default.jpg"} alt={blog.title} 
                                 width={80} height={80}

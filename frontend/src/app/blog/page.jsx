@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import MainLayout from "../layouts/MainLayout";
 import Image from "next/image";
 import Link from "next/link";
-import { defaultAltText } from "@/utils/helper";
+import { defaultAltText, getBlogHref } from "@/utils/helper";
 import { FaArrowRight, FaCalendarAlt, FaUserCircle } from "react-icons/fa";
 import { buildTextShadow } from "@/utils/textShadow";
 import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
@@ -339,7 +339,8 @@ const bannerStyle = bannerImage
               {featuredBlog && (
                 <div className="row mb-5 pb-4">
                   <div className="col-12">
-                    <Link href={`/${featuredBlog.seo_content?.slug || `blog-detail?id=${featuredBlog.id}`}`} className="text-decoration-none">
+                    {/* <Link href={`/${featuredBlog.seo_content?.slug || `blog-detail?id=${featuredBlog.id}`}`} className="text-decoration-none"> */}
+                    <Link href={getBlogHref(featuredBlog)} className="text-decoration-none">
                       <div className="featured-blog-card row g-0 align-items-center">
                         <div className="col-lg-7">
                           <div className="card-img-wrapper" style={{ aspectRatio: '10/6' }}>
@@ -394,7 +395,8 @@ const bannerStyle = bannerImage
                   <div className="row g-4">
                     {regularBlogs.map((blog, index) => (
                       <div className="col-md-6 col-lg-4" key={blog.id || index}>
-                        <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+                        {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+                        <Link href={getBlogHref(blog)} className="text-decoration-none">
                           <div className="modern-blog-card">
                             <div className="card-img-wrapper">
 

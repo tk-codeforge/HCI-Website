@@ -11,6 +11,7 @@ import { EstimaterModule } from './modules/estimater/estimater.module';
 import { ContactModule } from './modules/contact/contact.module';
 import { BlogsModule } from './modules/blogs/blogs.module';
 import { ContactUsModule } from './modules/contact-us/contact-us.module';
+import { CmsLandingPageModule } from './cms-landing-page/cms-landing-page.module';
 import { ContentManagerModule } from './modules/content-manager/content-manager.module';
 import { QueriesModule } from './modules/queries/queries.module';
 import { ConfigModule } from '@nestjs/config';
@@ -89,6 +90,7 @@ import { SlugEditModule } from './slug-edit/slug-edit.module';
     CmsExperienceCenterModule,
     CmsReallifePortfolioModule,
     CmsContentModule,
+    CmsLandingPageModule,
     CmsCityModule,
     CmsParentChildModule,
     PortfolioProjectModule,

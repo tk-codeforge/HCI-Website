@@ -1,6 +1,5 @@
 import MainLayout from "../layouts/MainLayout";
-import { defaultAltText } from "@/utils/helper";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Image from "next/image"; 
 import Link from "next/link";
 import DOMPurify from "isomorphic-dompurify";
@@ -23,10 +22,10 @@ import {
   generateBreadcrumbSchema, 
   generateFAQSchema 
 } from "@/utils/schemaGenerator";
-import { getCanonicalUrl, getRobotsDirectives } from "@/utils/seoHelpers";
+import { getCanonicalUrl, getRobotsDirectives, SITE_URL } from "@/utils/seoHelpers";
 
 import { getPageSEO } from "@/utils/getSEO"; 
-import { getBackendImageUrl } from "@/utils/helper";
+import { defaultAltText, getBlogHref, getBackendImageUrl } from "@/utils/helper";
 
 /* Keep this CMS route dynamically rendered. Only the exact one-level paths
    present in the CWV PDF opt their API reads into a 60-second data cache. */
@@ -209,37 +208,115 @@ async function getCmsPageData(slug) {
   }
 }
 
-export async function generateMetadata({ params }) {
+// export async function generateMetadata({ params }) {
+//   headers();
+//   const slug = params.blog;
+
+//   if (!isValidSlug(slug)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const [blogData, cmsData, seoData] = await Promise.all([
+//     getBlogData(slug).catch(() => null),
+//     getCmsPageData(slug).catch(() => null),
+//     getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   ]);
+
+//   let data = blogData || cmsData;
+
+//   if (!data || isDraftStatus(data)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+//   const canonicalUrl = getCanonicalUrl({
+//     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//     fallbackPath: `/${slug}`,
+//   });
+
+//     const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+//   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+//   const fallbackImage =
+//   toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+//   const og = seoData?.openGraph;
+//   const ogImages = og?.images?.length
+//     ? og.images
+//     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+//   return {
+//     title,
+//     description,
+//     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+//     alternates: { canonical: canonicalUrl },
+//     robots,
+//     openGraph: {
+//       title: og?.title || title,
+//       description: og?.description || description,
+//       url: canonicalUrl,
+//       siteName: "High Creation Interior",
+//       locale: "en_IN",
+//       type: "website",
+//       images: ogImages,
+//     },
+//     twitter: {
+//       card: "summary_large_image",
+//       title: seoData?.twitter?.title || og?.title || title,
+//       description: seoData?.twitter?.description || og?.description || description,
+//       images: seoData?.twitter?.images?.length
+//         ? seoData.twitter.images
+//         : ogImages.map((i) => i.url),
+//     },
+//   };
+// }
+
+
+// Old blog canonicals are stored as https://hcinterior.in/<slug>; point them to /blog/<slug>.
+// Any other custom canonical (different path / external domain) is left untouched.
+const fixBlogCanonical = (canonical, slug) => {
+  try {
+    const u = new URL(canonical, SITE_URL);
+    if (u.pathname.replace(/\/+$/, "") === `/${slug}`) u.pathname = `/blog/${slug}`;
+    return u.toString();
+  } catch {
+    return `${SITE_URL}/blog/${slug}`;
+  }
+};
+
+export async function buildMetadata(slug, inBlogRoute = false) {
   headers();
-  const slug = params.blog;
 
   if (!isValidSlug(slug)) {
     return { title: "Not Found", robots: { index: false, follow: true } };
   }
 
+  const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
   const [blogData, cmsData, seoData] = await Promise.all([
     getBlogData(slug).catch(() => null),
     getCmsPageData(slug).catch(() => null),
-    getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+    getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
   ]);
 
-  let data = blogData || cmsData;
+  // /blog/<slug> serves blogs only; the root route keeps serving CMS pages (and redirects blogs).
+  let data = inBlogRoute ? blogData : (blogData || cmsData);
 
   if (!data || isDraftStatus(data)) {
     return { title: "Not Found", robots: { index: false, follow: true } };
   }
 
   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
-  const canonicalUrl = getCanonicalUrl({
+  let canonicalUrl = getCanonicalUrl({
     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
-    fallbackPath: `/${slug}`,
+    fallbackPath: seoPath,
   });
+  if (inBlogRoute) canonicalUrl = fixBlogCanonical(canonicalUrl, slug);
 
-    const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+  const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
   const description = seoData?.description || data?.seo_content?.meta_description || "";
 
   const fallbackImage =
-  toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+    toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
   const og = seoData?.openGraph;
   const ogImages = og?.images?.length
     ? og.images
@@ -269,6 +346,10 @@ export async function generateMetadata({ params }) {
         : ogImages.map((i) => i.url),
     },
   };
+}
+
+export async function generateMetadata({ params }) {
+  return buildMetadata(params.blog);
 }
 
 const parseJsonSafe = (data) => {
@@ -302,9 +383,47 @@ const addCmsImageLoadingHints = (html) => {
   });
 };
 
-const DynamicRootPage = async ({ params }) => {
+// const DynamicRootPage = async ({ params }) => {
+//   headers();
+//   const slug = params.blog;
+
+//   if (!isValidSlug(slug)) {
+//     notFound();
+//   }
+
+//   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+//   // remove serial network waits on mobile connections.
+//   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+//     await Promise.all([
+//       getBlogData(slug).catch(() => null),
+//       getCmsPageData(slug).catch(() => null),
+//       getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getRecentBlogs(slug).catch(() => []),
+//       getExcellenceStats(slug).catch(() => null),
+//       (async () => {
+//         try {
+//           const setRes = await fetch(
+//             `${API_BASE_URL}/site-settings`,
+//             getCmsFetchOptions(slug)
+//           );
+//           if (!setRes.ok) return null;
+//           const rawSettings = await setRes.json();
+//           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+//         } catch (error) {
+//           console.error("Settings fetch failed", error);
+//           return null;
+//         }
+//       })(),
+//     ]);
+
+//   const pageData = blogResult || cmsResult;
+//   const pageType = blogResult ? "blog" : "cms-page";
+
+
+const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
   headers();
   const slug = params.blog;
+  const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
 
   if (!isValidSlug(slug)) {
     notFound();
@@ -316,7 +435,7 @@ const DynamicRootPage = async ({ params }) => {
     await Promise.all([
       getBlogData(slug).catch(() => null),
       getCmsPageData(slug).catch(() => null),
-      getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+      getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
       getRecentBlogs(slug).catch(() => []),
       getExcellenceStats(slug).catch(() => null),
       (async () => {
@@ -334,6 +453,11 @@ const DynamicRootPage = async ({ params }) => {
         }
       })(),
     ]);
+
+  // Old root URL of a blog -> new /blog/<slug> URL
+  if (blogResult && !inBlogRoute) permanentRedirect(`/blog/${slug}`);
+  // /blog/<anything that is not a blog> -> 404 (CMS/city pages must not duplicate under /blog/)
+  if (inBlogRoute && !blogResult) notFound();
 
   const pageData = blogResult || cmsResult;
   const pageType = blogResult ? "blog" : "cms-page";
@@ -613,7 +737,8 @@ const DynamicRootPage = async ({ params }) => {
                       <h4 className="widget-title">Related Articles</h4>
                       <div className="d-flex flex-column gap-2">
                         {recentBlogs.map((blog, idx) => (
-                          <Link key={idx} href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+                          // <Link key={idx} href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+                          <Link key={idx} href={getBlogHref(blog)} className="text-decoration-none">  
                             <div className="sidebar-blog-card d-flex align-items-center gap-3">
                               <img 
                                 // src={blog.image || "/images/default.jpg"} 
@@ -738,7 +863,8 @@ const DynamicRootPage = async ({ params }) => {
                           <div className="row g-4 font-poppins mobile-slider-wrapper">
                             {recentBlogs.map((blog, idx) => (
                               <div className="col-md-6" key={idx}>
-                                <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+                                {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+                                <Link href={getBlogHref(blog)} className="text-decoration-none">
                                   <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
                                     <img 
                                     // src={blog.image || "/images/default.jpg"}
