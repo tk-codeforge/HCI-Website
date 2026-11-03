@@ -107,9 +107,25 @@ async function getBannerData() {
     }
 
     const data = await res.json();
-    const activeBanners = (Array.isArray(data?.json_content) ? data.json_content : []).filter(
-      (b) => b && b.is_active !== false && b.is_active !== "false"
-    );
+    // const activeBanners = (Array.isArray(data?.json_content) ? data.json_content : []).filter(
+    //   (b) => b && b.is_active !== false && b.is_active !== "false"
+    // );
+
+        // const clean = (v) => (typeof v === "string" ? v.replace(/\u00a0/g, " ").trim() : v);
+
+        const clean = (v) => {
+  if (Array.isArray(v)) v = v.join(" ");
+  return typeof v === "string" ? v.replace(/\u00a0/g, " ").trim() : v;
+};
+
+    const activeBanners = (Array.isArray(data?.json_content) ? data.json_content : [])
+      .filter((b) => b && b.is_active !== false && b.is_active !== "false")
+      .map((b) => ({
+        ...b,
+        title: clean(b.title),
+        sub_title: clean(b.sub_title),
+        description: clean(b.description),
+      }));
 
     // A temporary CMS/API failure should not produce a completely blank hero.
     return activeBanners.length > 0 ? activeBanners : [FALLBACK_BANNER];

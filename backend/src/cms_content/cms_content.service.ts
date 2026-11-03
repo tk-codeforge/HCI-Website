@@ -996,7 +996,11 @@ mid_sub_span_title_tag: updateCmsContentDto?.json_content?.mid_sub_span_title_ta
     } 
     else if (action === 'add' || action === 'update') {
       const slideData: any = {};
-      slideData.title = updateCmsContentDto?.title || '';
+      // slideData.title = updateCmsContentDto?.title || '';
+      const rawTitle = Array.isArray(updateCmsContentDto?.title)
+  ? updateCmsContentDto.title[updateCmsContentDto.title.length - 1]
+  : updateCmsContentDto?.title;
+slideData.title = typeof rawTitle === 'string' ? rawTitle.replace(/\u00a0/g, ' ').trim() : '';
       slideData.sub_title = updateCmsContentDto?.sub_title || '';
       slideData.top_slogan = updateCmsContentDto?.top_slogan || '';
       slideData.description = updateCmsContentDto?.description || '';

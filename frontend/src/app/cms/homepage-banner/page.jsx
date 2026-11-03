@@ -252,7 +252,7 @@ const CmsHomepageBanner = () => {
                                 </div>
                                 <div className="mb-3 col-md-6">
                                     <label className="form-label">Title</label>
-                                    <input type="text" className="form-control" name="title" value={formData.title} onChange={handleInputChange} required />
+                                    <input type="text" className="form-control" name="title" value={formData.title} onChange={handleInputChange} />
                                 </div>
                                 <div className="mb-3 col-md-6">
                                     <label className="form-label">Sub Title</label>

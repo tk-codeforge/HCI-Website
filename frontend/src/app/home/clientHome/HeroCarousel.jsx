@@ -339,6 +339,9 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
             const isVideo = isVideoSource(mediaSrc);
             const isFirstSlide = index === 0;
             const isActiveSlide = index === selectedIndex;
+            const rawTitle = Array.isArray(banner?.title) ? banner.title.join(" ") : banner?.title;
+const headingText =
+  typeof rawTitle === "string" ? rawTitle.replace(/\u00a0/g, " ").trim() : "";
 
             return (
               <div className="embla__slide" key={banner.id || index}>
@@ -347,14 +350,17 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
                     key={`${banner.id || index}-${mediaSrc}`}
                     src={mediaSrc}
                     active={isActiveSlide}
-                    title={banner?.title?.trim() || "High Creation Interior banner"}
+                    // title={banner?.title?.trim() || "High Creation Interior banner"}
+                    title={headingText || "High Creation Interior banner"}
                   />
                 ) : (
                   <HeroPicture
                     desktopSrc={banner?.banner_image ?? "/images/home-banner-1.png"}
                     mobileSrc={banner?.mobile_banner_image}
-                    alt={banner?.title?.trim() || "High Creation Interior Banner"}
-                    mobileAlt={banner?.title?.trim() || "High Creation Interior Mobile Banner"}
+                    // alt={banner?.title?.trim() || "High Creation Interior Banner"}
+                    // mobileAlt={banner?.title?.trim() || "High Creation Interior Mobile Banner"}
+                    alt={headingText || "High Creation Interior Banner"}
+mobileAlt={headingText || "High Creation Interior Mobile Banner"}
                     isFirstSlide={isFirstSlide}
                   />
                 )}
@@ -363,11 +369,19 @@ export default function HeroCarousel({ bannerData, carouselSpeed = null }) {
                   <div className="banner-content-wrapper">
                     {banner?.top_slogan && <div className="banner-top-slogan" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{banner.top_slogan}</div>}
                     
-                    {isFirstSlide ? (
+                    {/* {isFirstSlide ? (
                       <h1 className="home_banner_heading" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{banner?.title}</h1>
                     ) : (
                       <h2 className="home_banner_heading" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{banner?.title}</h2>
-                    )}
+                    )} */}
+
+                    {headingText ? (
+  isFirstSlide ? (
+    <h1 className="home_banner_heading" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{headingText}</h1>
+  ) : (
+    <h2 className="home_banner_heading" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{headingText}</h2>
+  )
+) : null}
                     
                     {banner?.sub_title && <div className="font_stylish_home" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{banner.sub_title}</div>}
                     {banner?.description && <p className="banner-desc" style={{ textShadow: '0px 4px 12px rgba(0,0,0,0.9), 0px 1px 3px rgba(0,0,0,0.8)' }}>{banner.description}</p>}
