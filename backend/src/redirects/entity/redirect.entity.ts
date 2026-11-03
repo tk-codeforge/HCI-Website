@@ -17,6 +17,9 @@ export class Redirect {
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
+  @Column({ type: 'boolean', default: false })
+is_url_rewrite: boolean;
+
   @CreateDateColumn()
   created_at: Date;
 

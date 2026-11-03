@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Request,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { RedirectsService } from './redirects.service';
 import { CreateRedirectDto } from './dto/create-redirect.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -20,6 +31,21 @@ export class RedirectsController {
   createBulk(@Body() createRedirectDtos: CreateRedirectDto[], @Request() req) {
     return this.redirectsService.createBulk(createRedirectDtos, req.user);
   }
+
+  // Check whether a custom URL mapping is available.
+@UseGuards(AuthGuard('jwt'))
+@Get('check')
+check(
+  @Query('old_url') oldUrl: string,
+  @Query('new_url') newUrl: string,
+  @Query('excludeId') excludeId?: string,
+) {
+  return this.redirectsService.checkMapping(
+    oldUrl,
+    newUrl,
+    excludeId ? Number(excludeId) : undefined,
+  );
+}
 
   @Get()
   findAll() {
