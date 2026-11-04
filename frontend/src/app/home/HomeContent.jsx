@@ -1270,6 +1270,7 @@
 
 
 
+
 import dynamic from "next/dynamic";
 import { 
   FaShieldAlt, FaClock, FaCheckCircle, FaHome, 
@@ -2299,7 +2300,15 @@ const targetId = `step-${index + 1}`;
 }
 
 .factory-video-wrap .fv-bg {
-  display: none;
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(22px) brightness(0.85);
+  transform: scale(1.15);
+  pointer-events: none;
 }
 .factory-video-wrap .fv-main {
   position: absolute;
@@ -2316,6 +2325,14 @@ const targetId = `step-${index + 1}`;
 }
 
 .factory-video-wrap video { pointer-events: none; }
+
+.factory-video-wrap .deferred-media-video-poster {
+  transition: opacity 250ms ease-out;
+}
+/* Video is playing: hide only the sharp poster; the blurred backdrop stays */
+.factory-video-wrap .fv-main[data-video-state="ready"] .deferred-media-video-poster {
+  opacity: 0;
+}
 
 @media (min-width: 992px) {
   .factory-video-wrap {
@@ -2366,7 +2383,7 @@ const targetId = `step-${index + 1}`;
                   <div className="factory-video-wrap">
                     {factoryVideoPoster ? (
                       <img
-                        className="fv-bg d-none d-lg-block"
+                        className="fv-bg"
                         src={factoryVideoPoster}
                         alt=""
                         aria-hidden="true"
@@ -2379,7 +2396,7 @@ const targetId = `step-${index + 1}`;
                       poster={factoryVideoPoster}
                       alt="High Creation's in-house furniture manufacturing facility"
                       className="fv-main"
-                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", background: "transparent" }}
                       videoStyle={{ objectFit: "contain", borderRadius: "16px" }}
                       posterStyle={{ objectFit: "contain" }}
                       autoPlayDesktop
