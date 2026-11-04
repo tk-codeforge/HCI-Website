@@ -1,58 +1,77 @@
 "use client";
 import { useEffect } from "react";
 
-// Reads ?highlight=<text> from the URL (set by the admin search bar), waits for
-// the page's table rows to load, then scrolls to the matching row and highlights it.
+// Highlights a table row for a URL picked in the admin search bar.
+// Triggered two ways:
+//  1) on load, from ?highlight=<text> in the address (coming from another page)
+//  2) via the "hc:highlight" window event (picked a result on the SAME page)
 const CLASS = "hc-search-highlight";
 
 const SearchHighlighter = () => {
     useEffect(() => {
-        const term = new URLSearchParams(window.location.search).get("highlight");
-        if (!term) return;
-
-        const needle = term.trim().toLowerCase();
-        let done = false;
         let observer;
         let timers = [];
-
-        const findRows = () => {
-            const rows = Array.from(document.querySelectorAll("tbody tr"));
-            // 1) prefer a row that has a cell exactly equal to the URL
-            const exact = rows.filter((tr) =>
-                Array.from(tr.children).some((td) => td.textContent.trim().toLowerCase() === needle)
-            );
-            if (exact.length) return exact;
-            // 2) otherwise any row containing it
-            return rows.filter((tr) => tr.textContent.toLowerCase().includes(needle));
-        };
 
         const clear = () => {
             document.querySelectorAll(`.${CLASS}`).forEach((el) => el.classList.remove(CLASS));
             document.removeEventListener("mousedown", clear);
         };
 
-        const tryHighlight = () => {
-            if (done) return;
-            const rows = findRows();
-            if (!rows.length) return;
-            done = true;
+        const stop = () => {
             observer?.disconnect();
-            rows.forEach((tr) => tr.classList.add(CLASS));
-            rows[0].scrollIntoView({ behavior: "smooth", block: "center" });
-            document.addEventListener("mousedown", clear);
-            timers.push(setTimeout(clear, 15000));
+            observer = null;
+            timers.forEach(clearTimeout);
+            timers = [];
         };
 
-        tryHighlight();
-        if (!done) {
-            observer = new MutationObserver(tryHighlight);
-            observer.observe(document.body, { childList: true, subtree: true });
-            timers.push(setTimeout(() => observer?.disconnect(), 10000)); // stop waiting after 10s
-        }
+        const run = (term) => {
+            stop();
+            clear();
+            const needle = String(term || "").trim().toLowerCase();
+            if (!needle) return;
+            let done = false;
+
+            const findRows = () => {
+                const rows = Array.from(document.querySelectorAll("tbody tr"));
+                const exact = rows.filter((tr) =>
+                    Array.from(tr.children).some((td) => td.textContent.trim().toLowerCase() === needle)
+                );
+                if (exact.length) return exact;
+                return rows.filter((tr) => tr.textContent.toLowerCase().includes(needle));
+            };
+
+            const tryHighlight = () => {
+                if (done) return;
+                const rows = findRows();
+                if (!rows.length) return;
+                done = true;
+                observer?.disconnect();
+                rows.forEach((tr) => tr.classList.add(CLASS));
+                rows[0].scrollIntoView({ behavior: "smooth", block: "center" });
+                // small delay so the click that picked the result doesn't clear it
+                timers.push(setTimeout(() => document.addEventListener("mousedown", clear), 300));
+                timers.push(setTimeout(clear, 15000));
+            };
+
+            tryHighlight();
+            if (!done) {
+                observer = new MutationObserver(tryHighlight);
+                observer.observe(document.body, { childList: true, subtree: true });
+                timers.push(setTimeout(() => observer?.disconnect(), 10000));
+            }
+        };
+
+        // 1) arriving from another page
+        const initial = new URLSearchParams(window.location.search).get("highlight");
+        if (initial) run(initial);
+
+        // 2) picking a result on the page you're already on
+        const onEvent = (e) => run(e.detail);
+        window.addEventListener("hc:highlight", onEvent);
 
         return () => {
-            observer?.disconnect();
-            timers.forEach(clearTimeout);
+            window.removeEventListener("hc:highlight", onEvent);
+            stop();
             document.removeEventListener("mousedown", clear);
         };
     }, []);

@@ -215,6 +215,14 @@ const AdminSearch = () => {
         setOpen(false);
         inputRef.current?.blur();
         const qs = item.highlight ? `?highlight=${encodeURIComponent(item.highlight)}` : "";
+        if (item.target === pathname) {
+            // Already on this page: it won't remount, so tell the highlighter directly
+            if (item.highlight) {
+                window.history.replaceState(null, "", `${item.target}${qs}`);
+                window.dispatchEvent(new CustomEvent("hc:highlight", { detail: item.highlight }));
+            }
+            return;
+        }
         router.push(`${item.target}${qs}`);
     };
 
