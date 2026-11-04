@@ -75,7 +75,8 @@ const [editorVersion, setEditorVersion] = useState(0);
           setContentId(record.id);
           const content = record.json_content || {};
 
-          setBannerHeading(content.bannerHeading || "Services");
+          // setBannerHeading(content.bannerHeading || "Services");
+          setBannerHeading(typeof content.bannerHeading === "string" ? content.bannerHeading : "Services");
 setBannerDescription(content.bannerDescription || "");
 setBannerHeadingColor(content.bannerHeadingColor || "#ffffff");
 setBannerDescriptionColor(content.bannerDescriptionColor || "#ffffff");
@@ -165,7 +166,7 @@ setBannerDescriptionSize(Number(content.bannerDescriptionSize) || 14);
       setSaving(true);
       
       const payload = { 
-  bannerHeading, 
+  bannerHeading: bannerHeading.trim(), 
   bannerDescription,
   bannerHeadingColor,
   bannerDescriptionColor,
@@ -270,7 +271,9 @@ bannerDescriptionSize,
 
 <div className="col-md-6">
   <label className="form-label fw-bold">Banner Heading</label>
-  <input type="text" className="form-control" value={bannerHeading} onChange={(e) => setBannerHeading(e.target.value)} />
+  {/* <input type="text" className="form-control" value={bannerHeading} onChange={(e) => setBannerHeading(e.target.value)} /> */}
+  <input type="text" className="form-control" placeholder="Leave empty to hide the heading"
+  value={bannerHeading} onChange={(e) => setBannerHeading(e.target.value)} />
 </div>
 <div className="col-md-3">
   <label className="form-label fw-bold">Heading Tag</label>

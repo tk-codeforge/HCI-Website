@@ -196,7 +196,10 @@ export default async function HowItsWorkPage() {
   );
 
   const bannerData = {
-    heading: content.bannerHeading || "We make home interiors a breeze!",
+    heading:
+  typeof content.bannerHeading === "string"
+    ? content.bannerHeading.trim()
+    : "We make home interiors a breeze!",
     headingColor: content.bannerHeadingColor || "#ffffff",
     description: content.bannerDescription || "",
     descriptionColor: content.bannerDescriptionColor || "#ffffff",

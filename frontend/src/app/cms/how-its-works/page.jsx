@@ -353,7 +353,7 @@ const handleDeleteStep = async (index) => {
     try {
         const formDataToSend = new FormData();
         formDataToSend.append("json_content", JSON.stringify({
-            bannerHeading: bannerData.heading,
+            bannerHeading: (bannerData.heading || "").trim(),
             bannerHeadingColor: bannerData.headingColor,
             bannerDescription: bannerData.description,
             bannerDescriptionColor: bannerData.descriptionColor,
@@ -430,7 +430,7 @@ bannerDescriptionSize: Number(bannerData.descriptionSize) || 20,
         <label className="form-label">Banner Heading</label>
         <input type="text" className="form-control" name="heading"
             placeholder="e.g. Our Design Process"
-            value={bannerData.heading} onChange={handleBannerChange} required />
+            value={bannerData.heading} onChange={handleBannerChange} />
     </div>
     <div className="col-md-3">
         <label className="form-label">Heading Tag</label>

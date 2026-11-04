@@ -99,6 +99,8 @@ const BackgroundImageWithHeading = (props) => {
   const HeadingTag = props.headingTag || "h1";
   const hasBgImage =
     props.bgImageUrl && typeof props.bgImageUrl === "string" && props.bgImageUrl.trim() !== "";
+    const hasHeading =
+  typeof props.sectionBgHeading === "string" && props.sectionBgHeading.trim() !== "";
   const hasMobileBgImage =
     props.mobileBgImageUrl && typeof props.mobileBgImageUrl === "string" && props.mobileBgImageUrl.trim() !== "";
 
@@ -147,7 +149,7 @@ const BackgroundImageWithHeading = (props) => {
         <div className="container" style={hasBgImage ? { position: "relative", zIndex: 1 } : undefined}>
           <div className="row justify-content-center align-items-center">
             <div className="col-lg-12">
-              <HeadingTag
+              {/* <HeadingTag
                 className={props.secBgHeadingClass}
                 style={{
                   color: "#ffffff",
@@ -156,8 +158,21 @@ const BackgroundImageWithHeading = (props) => {
                 }}
               >
                 {props.sectionBgHeading}
-              </HeadingTag>
-              <p
+              </HeadingTag> */}
+
+              {hasHeading && (
+  <HeadingTag
+    className={props.secBgHeadingClass}
+    style={{
+      color: "#ffffff",
+      textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+      ...(props.sectionBgHeadingStyle || {}),
+    }}
+  >
+    {props.sectionBgHeading}
+  </HeadingTag>
+)}
+              {/* <p
                 className={props.secBgDesClass}
                 style={{
                   fontSize: props.descriptionFontSize,
@@ -165,7 +180,17 @@ const BackgroundImageWithHeading = (props) => {
                 }}
               >
                 {props.sectionBgDescription}
-              </p>
+              </p> */}
+
+
+              {props.sectionBgDescription?.trim() && (
+  <p className={props.secBgDesClass} style={{
+                  fontSize: props.descriptionFontSize,
+                  ...(props.sectionBgDescriptionStyle || {}),
+                }}>
+    {props.sectionBgDescription}
+  </p>
+)}
             </div>
           </div>
         </div>

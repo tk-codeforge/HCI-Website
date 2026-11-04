@@ -5,6 +5,11 @@ const BackgroundImageRow = (props) => {
   const HeadingTag = props.headingTag || "h1";
   const hasBgImage = Boolean(props.bgImageUrl);
 
+  const hasHeading =
+  typeof props.sectionBgHeading === "string" && props.sectionBgHeading.trim() !== "";
+  const hasDescription =
+  typeof props.sectionBgDescription === "string" && props.sectionBgDescription.trim() !== "";
+
   // Use responsive Next.js image candidates for the banner when supported.
   // Keep the original URL as src so MediaImg can still resolve Media Library alt text.
   const optimizedImageProps =
@@ -60,7 +65,7 @@ const BackgroundImageRow = (props) => {
           <div className="row justify-content-center">
             <div className="col-12 col-lg-12">
               <div className="row justify-content-center align-items-center">
-                <div className="col-lg-6">
+                {/* <div className="col-lg-6">
                   <HeadingTag
                     className={`${props.secBgHeadingClass || ""} text-white`}
                     style={{ color: "#ffffff", ...props.sectionBgHeadingStyle }}
@@ -79,7 +84,32 @@ const BackgroundImageRow = (props) => {
                   >
                     {props.sectionBgDescription}
                   </p>
-                </div>
+                </div> */}
+
+                {hasHeading && (
+  <div className="col-lg-6">
+    <HeadingTag
+    className={`${props.secBgHeadingClass || ""} text-white`}
+    style={{ color: "#ffffff", ...props.sectionBgHeadingStyle }}
+  >
+    {props.sectionBgHeading}
+  </HeadingTag>
+  </div>
+)}
+{hasDescription && (
+  <div className={hasHeading ? "col-lg-6" : "col-lg-12"}>
+    <p
+      className={`${props.secBgDesClass || ""} text-light`}
+      style={{
+        fontSize: props.descriptionFontSize,
+        opacity: 0.9,
+        ...props.sectionBgDescriptionStyle,
+      }}
+    >
+      {props.sectionBgDescription}
+    </p>
+  </div>
+)}
               </div>
             </div>
           </div>

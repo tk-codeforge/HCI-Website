@@ -173,12 +173,22 @@ export default async function Services() {
   }
 
   const activeItems = hasCustomContent ? customServices : pageDataList;
-  const bannerHeading =
-    cmsData?.banner?.heading || cmsData?.bannerHeading || "Services";
-  const bannerDesc =
-    cmsData?.banner?.description ||
-    cmsData?.bannerDescription ||
-    "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
+  // const bannerHeading =
+  //   cmsData?.banner?.heading || cmsData?.bannerHeading || "Services";
+
+  const rawBannerHeading = cmsData?.banner?.heading ?? cmsData?.bannerHeading;
+const bannerHeading =
+  typeof rawBannerHeading === "string" ? rawBannerHeading.trim() : "Services";
+  // const bannerDesc =
+  //   cmsData?.banner?.description ||
+  //   cmsData?.bannerDescription ||
+  //   "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
+
+  const rawBannerDesc = cmsData?.banner?.description ?? cmsData?.bannerDescription;
+const bannerDesc =
+  typeof rawBannerDesc === "string"
+    ? rawBannerDesc.trim()
+    : "Every home has potential, and we at High Creation Interior bring it to life with exceptional design—discover our range of interior services crafted for living rooms, bedrooms, kitchens, dining areas, and more, where stylish design meets everyday functionality.";
   const bannerHeadingColor = cmsData?.bannerHeadingColor || "#ffffff";
   const bannerDescriptionColor = cmsData?.bannerDescriptionColor || "#ffffff";
   const bannerHeadingTag = safeTag(cmsData?.bannerHeadingTag, "h1");
@@ -187,7 +197,8 @@ export default async function Services() {
     cmsData?.banner?.image || cmsData?.bg_image || cmsData?.image || recordImage;
   const hasCustomBanner =
     typeof rawBannerImg === "string" && rawBannerImg.trim() !== "";
-  const bannerImageAlt = cmsData?.bg_image_alt?.trim() || bannerHeading;
+  // const bannerImageAlt = cmsData?.bg_image_alt?.trim() || bannerHeading;
+  const bannerImageAlt = cmsData?.bg_image_alt?.trim() || bannerHeading || "Services";
 
   return (
     <MainLayout>
