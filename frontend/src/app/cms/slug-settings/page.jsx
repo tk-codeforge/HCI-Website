@@ -3085,7 +3085,12 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+    useState,
+    useEffect,
+    useCallback,
+    useMemo
+} from "react";
 import { useSelector } from "react-redux";
 import AuthMainLayout from "../../layouts/auth/AuthMainLayout";
 import api from "@/utils/api";
@@ -3729,10 +3734,23 @@ const CmsSlugSettings = () => {
         ? []
         : currentRouteOptions.filter((option) => option.category === oldUrlCategory);
 
-    const galleryRouteOptions = galleryRouteCatalog.map((route) => ({
+    // const galleryRouteOptions = galleryRouteCatalog.map((route) => ({
+    //     ...route,
+    //     currentBasePath: applyActiveParentMappings(route.basePath, routeParentMappings),
+    // })).filter((route) => Boolean(route.currentBasePath));
+
+    // Memoize the derived options so the effect only reacts
+// when the gallery catalogue or parent mappings change.
+const galleryRouteOptions = useMemo(
+    () => galleryRouteCatalog.map((route) => ({
         ...route,
-        currentBasePath: applyActiveParentMappings(route.basePath, routeParentMappings),
-    })).filter((route) => Boolean(route.currentBasePath));
+        currentBasePath: applyActiveParentMappings(
+            route.basePath,
+            routeParentMappings
+        ),
+    })).filter((route) => Boolean(route.currentBasePath)),
+    [galleryRouteCatalog, routeParentMappings]
+);
 
     const selectedGalleryRoute = galleryRouteOptions.find(
         (route) => route.entityType === selectedGalleryType
@@ -3763,8 +3781,7 @@ const CmsSlugSettings = () => {
         selectedMappingId,
         selectedGalleryType,
         galleryItemId,
-        routeParentMappings,
-        galleryRouteCatalog,
+        galleryRouteOptions,
     ]);
 
     const pickOldUrl = (value) => {
