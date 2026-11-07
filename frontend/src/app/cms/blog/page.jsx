@@ -20,6 +20,15 @@ import {
     getPublishWorkflowMessage,
 } from "@/utils/cmsAccess";
 
+// slug is stored without "/blog/"; strip domain, leading "/" and a typed "blog/" prefix
+const cleanBlogSlug = (v = "") =>
+  String(v)
+    .trim()
+    .replace(/^https?:\/\/[^/]+/i, "")
+    .replace(/^\/+/, "")
+    .replace(/^blog\/+/i, "")
+    .replace(/\/+$/, "");
+
 const CKEditorComponent = dynamic(() => import('@/app/components/CKEditorComponent'), { ssr: false });
 
 const initialFormData = {
@@ -325,13 +334,18 @@ const CmsBlog = () => {
             sitemap_priority: String(item?.sitemap_priority ?? DEFAULT_SITEMAP_PRIORITY),
         });
 
-        const path = slug ? `/${slug}` : "";
+        // const path = slug ? `/${slug}` : "";
+        // was: const path = slug ? `/${slug}` : "";
+const path = slug ? `/blog/${slug}` : "";
+const legacyPath = slug ? `/${slug}` : "";
         if (path) {
             try {
                 const { data } = await api.get("/seo-tag", { headers: { Authorization: `Bearer ${authToken}` } });
                 // the row the website reads: newest active match, else newest match
                 const match = (Array.isArray(data) ? data : [])
-                    .filter((r) => normPath(r.page_name) === normPath(path))
+                    // .filter((r) => normPath(r.page_name) === normPath(path))
+                    // was: .filter((r) => normPath(r.page_name) === normPath(path))
+.filter((r) => [normPath(path), normPath(legacyPath)].includes(normPath(r.page_name)))
                     .sort((x, y) =>
                         (y.status === "active") - (x.status === "active") ||
                         new Date(y.updated_at) - new Date(x.updated_at) ||
@@ -342,7 +356,10 @@ const CmsBlog = () => {
                     if (!canPublish && match.status === "active") {
                         toast.info("Editing an active SEO record will save it as inactive until an admin republishes it.");
                     }
-                    setSeoFormData({ ...match, status: nextStatus });
+                    // setSeoFormData({ ...match, status: nextStatus });
+
+                    // was: setSeoFormData({ ...match, status: nextStatus });
+setSeoFormData({ ...match, page_name: path, status: nextStatus });
                     return;
                 }
             } catch (err) {
@@ -468,7 +485,9 @@ const CmsBlog = () => {
     // }
 
         const handleSeoSubmit = async (formattedData) => {
-        const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
+        // const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
+        // was: const slug = slugValue.trim().replace(/^\/+|\/+$/g, "");
+const slug = cleanBlogSlug(slugValue);
         if (!slug) { toast.error("URL slug is required."); return; }
         if ((formattedData.meta_title || "").length > 65) { toast.error("Meta title must be 65 characters or less."); return; }
         if ((formattedData.meta_description || "").length > 160) { toast.error("Meta description must be 160 characters or less."); return; }
@@ -484,7 +503,9 @@ const CmsBlog = () => {
                     `/cms-blog/seo-content/${seoId}`,
                     {
                         ...legacySeo,
-                        canonical_url: legacySeo.canonical_url || formattedData.canonical_url || `https://hcinterior.in/${slug}`,
+                        // canonical_url: legacySeo.canonical_url || formattedData.canonical_url || `https://hcinterior.in/${slug}`,
+                        // was: ... || `https://hcinterior.in/${slug}`,
+canonical_url: legacySeo.canonical_url || formattedData.canonical_url || `https://hcinterior.in/blog/${slug}`,
                         meta_title: legacySeo.meta_title || formattedData.meta_title,
                         meta_description: legacySeo.meta_description || formattedData.meta_description,
                         meta_keywords: legacySeo.meta_keywords || formattedData.keywords || "",
@@ -499,7 +520,10 @@ const CmsBlog = () => {
             }
 
             // 2) all SEO data goes to the global seo_tag table; its Route Path always follows the slug
-            const payload = { ...formattedData, page_name: `/${slug}` };
+            // const payload = { ...formattedData, page_name: `/${slug}` };
+
+            // was: const payload = { ...formattedData, page_name: `/${slug}` };
+const payload = { ...formattedData, page_name: `/blog/${slug}` };
             if (!canPublish && payload.status === "active") {
                 toast.info(getPublishWorkflowMessage("This SEO record"));
             }
@@ -840,10 +864,15 @@ const CmsBlog = () => {
     <div className="mb-4">
         <label className="form-label fw-bold">Slug *</label>
         <div className="input-group">
-            <span className="input-group-text">/</span>
-            <input type="text" className="form-control" placeholder="my-blog-post" value={slugValue} onChange={(e) => setSlugValue(e.target.value)} />
+            {/* <span className="input-group-text">/</span>
+            <input type="text" className="form-control" placeholder="my-blog-post" value={slugValue} onChange={(e) => setSlugValue(e.target.value)} /> */}
+
+            <span className="input-group-text">/blog/</span>
+<input type="text" className="form-control" placeholder="my-blog-post" value={slugValue} onChange={(e) => setSlugValue(cleanBlogSlug(e.target.value))} />
         </div>
-        <small className="text-muted">The SEO record below belongs to /{slugValue.trim() || "your-slug"}. Changing the slug moves the record to the new URL.</small>
+        {/* <small className="text-muted">The SEO record below belongs to /{slugValue.trim() || "your-slug"}. Changing the slug moves the record to the new URL.</small> */}
+
+        <small className="text-muted">The SEO record below belongs to /blog/{slugValue.trim() || "your-slug"}. Changing the slug moves the record to the new URL.</small>
     </div>
     {seoFormData ? (
         <GlobalSeoForm initialData={seoFormData} onSubmit={handleSeoSubmit} canPublish={canPublish} lockPageName />

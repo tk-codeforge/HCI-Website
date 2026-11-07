@@ -69,25 +69,28 @@ export default async function sitemap() {
   allBlogs.filter((b) => b?.seo_content?.slug).map((b) => `/${b.seo_content.slug}`)
 );
 
-const toBlogSeo = (seo = {}) => {
-  const slug = seo?.slug;
-  const c = seo?.canonical_url;
-  if (!slug || !c) return seo;
-  try {
-    const u = new URL(c, SITE_URL);
-    if (u.pathname.replace(/\/+$/, "") === `/${slug}`) {
-      return { ...seo, canonical_url: `${SITE_URL}/blog/${slug}` };
-    }
-  } catch {}
-  return seo;
-};
+// const toBlogSeo = (seo = {}) => {
+//   const slug = seo?.slug;
+//   const c = seo?.canonical_url;
+//   if (!slug || !c) return seo;
+//   try {
+//     const u = new URL(c, SITE_URL);
+//     if (u.pathname.replace(/\/+$/, "") === `/${slug}`) {
+//       return { ...seo, canonical_url: `${SITE_URL}/blog/${slug}` };
+//     }
+//   } catch {}
+//   return seo;
+// };
+
+const withBlogCanonical = (seo = {}) =>
+  seo?.slug ? { ...seo, canonical_url: "", meta_can_tag: "" } : seo;
 
     const pageRoutes = allSeoTags
       .filter(
         (tag) => tag?.status === "active" && shouldIncludeInSitemap(tag)
       )
 
-      .filter((r) => r && !blogSlugPaths.has(new URL(r.url).pathname))
+      // .filter((r) => r && !blogSlugPaths.has(new URL(r.url).pathname))
       .map((tag) =>
         buildSitemapEntry({
           seoData: tag,
@@ -100,7 +103,15 @@ const toBlogSeo = (seo = {}) => {
           defaultPriority:
             tag.page_name === "/" || tag.page_name === SITE_URL ? 1 : 0.8,
         })
-      );
+      )      .filter((r) => {
+        if (!r) return false;
+        try {
+          // drop SEO-tag rows that still point at an old root-level blog URL
+          return !blogSlugPaths.has(new URL(r.url).pathname.replace(/\/+$/, ""));
+        } catch {
+          return true;
+        }
+      });
 
     const blogRoutes = allBlogs
       .filter(
@@ -121,7 +132,8 @@ const toBlogSeo = (seo = {}) => {
 
       .map((blog) =>
   buildSitemapEntry({
-    seoData: toBlogSeo(blog?.seo_content || {}),
+    // seoData: toBlogSeo(blog?.seo_content || {}),
+    seoData: withBlogCanonical(blog?.seo_content || {}),
     fallbackPath: blog?.seo_content?.slug
       ? `/blog/${blog.seo_content.slug}`
       : `/blog-detail?id=${blog.id}`,
