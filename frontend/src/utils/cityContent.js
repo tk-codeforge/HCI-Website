@@ -28,7 +28,7 @@
 //             { iconName: "FaHome", title: "The Grand Handover", titleTag: "h4", description: "A flawless move-in within 45 Days Delivery*. Welcome home." },
 //         ],
 //     },
-//     projects: { title: "Interior Projects in {city}", titleTag: "h2", gallery: [] }, // gallery: unlimited extra photos / testimonial videos
+//     projects: { title: "Interior Projects in {city}", titleTag: "h2", gallery: [] }, // gallery: unlimited photos / videos
 //     blogs: { title: "Design Inspiration", titleTag: "h2" },
 //     stats: {
 //         // false = keep using the global "Excellence Stats" from CMS Content (current behaviour)
@@ -52,6 +52,7 @@
 //     faqs: {
 //         title: "Insights for {city}",
 //         titleTag: "h2",
+//         headingAlign: "left", // "left" (default) | "center" - desktop only
 //         eyebrow: "Good to know",
 //         intro: "",
 //         items: [], // [{ question, answer }] - when empty the legacy pageData.faqs (if any) is used
@@ -146,6 +147,7 @@
 //         faqs: {
 //             title: text(faqs.title, d.faqs.title),
 //             titleTag: tag(faqs.titleTag, d.faqs.titleTag),
+//             headingAlign: faqs.headingAlign === "center" ? "center" : "left",
 //             eyebrow: typeof faqs.eyebrow === "string" ? faqs.eyebrow : d.faqs.eyebrow,
 //             intro: keep(faqs.intro, ""),
 //             items: Array.isArray(faqs.items)
@@ -188,9 +190,14 @@
 // // Understands the video links editors paste into the CMS.
 // // Returns { kind: "youtube" | "vimeo" | "file", embedUrl, poster } or null when the link is not supported.
 // export const parseVideoUrl = (raw) => {
+//     const text = String(raw || "").trim();
+//     // uploaded through the CMS: a site-relative path to a video file
+//     if (text.startsWith("/") && !text.startsWith("//") && /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(text)) {
+//         return { kind: "file", embedUrl: text, poster: "" };
+//     }
 //     let url;
 //     try {
-//         url = new URL(String(raw || "").trim());
+//         url = new URL(text);
 //     } catch {
 //         return null;
 //     }
@@ -223,6 +230,7 @@
 //     if (/\.(mp4|webm|ogg|mov)$/i.test(url.pathname)) return { kind: "file", embedUrl: url.href, poster: "" };
 //     return null;
 // };
+
 
 
 // Shared (admin + public) model for the editable city-page sections.
@@ -313,9 +321,12 @@ const parseObject = (value) => {
 };
 
 // Returns a complete, safe content object; anything missing falls back to the current hard-coded text.
-export const getCityContent = (raw) => {
+// overrides: optional per-section default changes, e.g. { faqs: { title: "FAQ's" } } (used by CMS pages)
+export const getCityContent = (raw, overrides = {}) => {
     const saved = parseObject(raw);
-    const d = DEFAULT_CITY_CONTENT;
+    const d = Object.fromEntries(
+        Object.entries(DEFAULT_CITY_CONTENT).map(([section, value]) => [section, { ...value, ...(overrides[section] || {}) }])
+    );
     const process = parseObject(saved.process);
     const projects = parseObject(saved.projects);
     const blogs = parseObject(saved.blogs);

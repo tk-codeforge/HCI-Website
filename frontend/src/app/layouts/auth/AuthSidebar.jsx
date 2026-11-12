@@ -220,6 +220,7 @@ function AuthSidebar() {
                         {isAdmin && (
                             <>
                                 <Link href="/cms/seo_tag" className={`sub-menu-link ${isActive('/cms/seo_tag')}`}>Global SEO Tags</Link>
+                                <Link href="/cms/global-sitemap" className={`sub-menu-link ${isActive('/cms/global-sitemap')}`}>Global Sitemap</Link>
                                 <Link href="/cms/robots-txt" className={`sub-menu-link ${isActive('/cms/robots-txt')}`}>Robots.txt Editor</Link>
                                 <Link href="/cms/site-setting" className={`sub-menu-link ${isActive('/cms/site-setting')}`}>Global Site Settings</Link>
                                 <Link href="/cms/slug-settings" className={`sub-menu-link ${isActive('/cms/slug-settings')}`}>Slug Settings</Link>

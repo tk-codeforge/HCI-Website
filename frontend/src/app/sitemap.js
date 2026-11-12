@@ -3,6 +3,7 @@ import {
   getCanonicalUrl,
   getSitemapChangeFrequency,
   getSitemapPriority,
+  normalizeBoolean,
   shouldIncludeInSitemap,
 } from "@/utils/seoHelpers";
 
@@ -17,6 +18,29 @@ const CITY_ROUTE_FALLBACKS = {
   dwarka: "/services-detail/dwarka",
 };
 
+// /services-detail/<city> is only a redirect source (see next.config); the real page is the slug URL
+const CITY_SLUG_PATHS = {
+  faridabad: "/best-interior-designers-in-faridabad",
+  gurugram: "/interior-designers-in-gurgaon",
+  greater_noida: "/interior-designers-in-greater-noida",
+};
+
+const toCitySlugPath = (pathname) => {
+  const m = pathname.match(/^\/services-detail\/([^/]+)\/?$/);
+  if (!m) return pathname;
+  return CITY_SLUG_PATHS[m[1]] || `/interior-designers-in-${m[1]}`;
+};
+
+const rewriteCityUrl = (value) => {
+  try {
+    const u = new URL(value);
+    const next = toCitySlugPath(u.pathname);
+    return next === u.pathname ? value : `${u.origin}${next}${u.search}`;
+  } catch {
+    return value;
+  }
+};
+
 function buildSitemapEntry({
   seoData = {},
   fallbackPath = "",
@@ -24,12 +48,21 @@ function buildSitemapEntry({
   defaultChangeFrequency = "monthly",
   defaultPriority = 0.8,
 }) {
-  const url = getCanonicalUrl({
+  // const url = getCanonicalUrl({
+  //   canonicalUrl: seoData?.canonical_url,
+  //   metaCanonicalTag: seoData?.meta_can_tag,
+  //   fallbackPath,
+  //   siteUrl: SITE_URL,
+  // });
+
+  const url = rewriteCityUrl(
+  getCanonicalUrl({
     canonicalUrl: seoData?.canonical_url,
     metaCanonicalTag: seoData?.meta_can_tag,
     fallbackPath,
     siteUrl: SITE_URL,
-  });
+  })
+);
 
   if (!url) {
     return null;
@@ -178,12 +211,182 @@ const withBlogCanonical = (seo = {}) =>
         })
       );
 
+    // const allRoutes = [
+    //   ...pageRoutes,
+    //   ...blogRoutes,
+    //   ...cmsPageRoutes,
+    //   ...cmsCityRoutes,
+    // ].filter(Boolean);
+
+    // return Array.from(new Map(allRoutes.map((item) => [item.url, item])).values());
+
+    // URLs removed in CMS > Global Sitemap (active SEO record with "Include in sitemap" off)
+// const pathOf = (value) => {
+//   try {
+//     return new URL(value, SITE_URL).pathname.replace(/\/+$/, "") || "/";
+//   } catch {
+//     return "";
+//   }
+// };
+// const excludedPaths = new Set();
+// allSeoTags
+//   .filter((tag) => tag?.status === "active" && !normalizeBoolean(tag.include_in_sitemap, true))
+//   .forEach((tag) => {
+//     const p = toCitySlugPath(pathOf(tag.page_name));
+//     if (!p) return;
+//     excludedPaths.add(p);
+//     if (p.startsWith("/blog/")) excludedPaths.add(p.slice(5)); // /blog/x <-> /x
+//     else if (/^\/[^/]+$/.test(p)) excludedPaths.add(`/blog${p}`);
+//   });
+
+// // const allRoutes = [
+// //   ...pageRoutes,
+// //   ...blogRoutes,
+// //   ...cmsPageRoutes,
+// //   ...cmsCityRoutes,
+// // ]
+// //   .filter(Boolean)
+// //   .filter((item) => !excludedPaths.has(pathOf(item.url)));
+
+// // return Array.from(new Map(allRoutes.map((item) => [item.url, item])).values());
+
+// // frequency / priority saved in CMS > Global Sitemap win over the blog / page / city defaults
+// const sitemapOverrides = new Map();
+// allSeoTags
+//   .filter((tag) => tag?.status === "active")
+//   .sort((a, b) => (Date.parse(b.updated_at) || 0) - (Date.parse(a.updated_at) || 0))
+//   .forEach((tag) => {
+//     const p = toCitySlugPath(pathOf(tag.page_name));
+//     if (!p) return;
+//     const keys = [p];
+//     if (p.startsWith("/blog/")) keys.push(p.slice(5));
+//     else if (/^\/[^/]+$/.test(p)) keys.push(`/blog${p}`);
+//     keys.forEach((k) => {
+//       if (!sitemapOverrides.has(k)) sitemapOverrides.set(k, tag);
+//     });
+//   });
+
+// const allRoutes = [
+//   ...pageRoutes,
+//   ...blogRoutes,
+//   ...cmsPageRoutes,
+//   ...cmsCityRoutes,
+// ]
+//   .filter(Boolean)
+//   .filter((item) => !excludedPaths.has(pathOf(item.url)))
+//   .map((item) => {
+//     const tag = sitemapOverrides.get(pathOf(item.url));
+//     if (!tag) return item;
+//     return {
+//       ...item,
+//       changeFrequency: getSitemapChangeFrequency(tag.sitemap_change_frequency, item.changeFrequency),
+//       priority: getSitemapPriority(tag.sitemap_priority, item.priority),
+//     };
+//   });
+
+    // ---- CMS > Global Sitemap ---------------------------------------------
+    const pathOf = (value) => {
+      try {
+        return new URL(value, SITE_URL).pathname.replace(/\/+$/, "") || "/";
+      } catch {
+        return "";
+      }
+    };
+
+    // 1) settings saved on the Global Sitemap page (one hidden record, independent of SEO data)
+    let sitemapConfig = {};
+    try {
+      const cfgRow = allSeoTags.find(
+        (t) => t?.status === "active" && t?.page_name === "__sitemap_manager__"
+      );
+      const raw = typeof cfgRow?.custom_schema === "string" ? JSON.parse(cfgRow.custom_schema) : cfgRow?.custom_schema;
+      sitemapConfig = raw?.urls && typeof raw.urls === "object" ? raw.urls : {};
+    } catch {
+      sitemapConfig = {};
+    }
+    const activeConfig = Object.entries(sitemapConfig).filter(
+      ([, v]) => v && v.status !== "inactive"
+    );
+
+    // 2) URLs switched off via "Include in sitemap" of a Global SEO record
+    const excludedPaths = new Set();
+    allSeoTags
+      .filter((tag) => tag?.status === "active" && !normalizeBoolean(tag.include_in_sitemap, true))
+      .forEach((tag) => {
+        const p = toCitySlugPath(pathOf(tag.page_name));
+        if (!p) return;
+        excludedPaths.add(p);
+        if (p.startsWith("/blog/")) excludedPaths.add(p.slice(5)); // /blog/x <-> /x
+        else if (/^\/[^/]+$/.test(p)) excludedPaths.add(`/blog${p}`);
+      });
+
+    // 3) the Global Sitemap page wins over the SEO records
+    activeConfig.forEach(([path, v]) => {
+      const p = pathOf(path);
+      if (!p) return;
+      if (v.include === false) excludedPaths.add(p);
+      else excludedPaths.delete(p);
+    });
+
+    // custom URLs added on the Global Sitemap page
+    const customRoutes = activeConfig
+      .filter(([, v]) => v.custom && v.include !== false)
+      .map(([path, v]) =>
+        buildSitemapEntry({
+          seoData: { sitemap_change_frequency: v.frequency, sitemap_priority: v.priority },
+          fallbackPath: path,
+          lastModified: v.updated_at,
+          defaultChangeFrequency: "monthly",
+          defaultPriority: 0.8,
+        })
+      );
+
+    // frequency / priority saved on a Global SEO record win over the blog / page / city defaults
+    const sitemapOverrides = new Map();
+    allSeoTags
+      .filter((tag) => tag?.status === "active")
+      .sort((a, b) => (Date.parse(b.updated_at) || 0) - (Date.parse(a.updated_at) || 0))
+      .forEach((tag) => {
+        const p = toCitySlugPath(pathOf(tag.page_name));
+        if (!p) return;
+        const keys = [p];
+        if (p.startsWith("/blog/")) keys.push(p.slice(5));
+        else if (/^\/[^/]+$/.test(p)) keys.push(`/blog${p}`);
+        keys.forEach((k) => {
+          if (!sitemapOverrides.has(k)) sitemapOverrides.set(k, tag);
+        });
+      });
+
     const allRoutes = [
       ...pageRoutes,
       ...blogRoutes,
       ...cmsPageRoutes,
       ...cmsCityRoutes,
-    ].filter(Boolean);
+      ...customRoutes,
+    ]
+      .filter(Boolean)
+      .filter((item) => !excludedPaths.has(pathOf(item.url)))
+      .map((item) => {
+        const p = pathOf(item.url);
+        let next = item;
+        const tag = sitemapOverrides.get(p);
+        if (tag) {
+          next = {
+            ...next,
+            changeFrequency: getSitemapChangeFrequency(tag.sitemap_change_frequency, next.changeFrequency),
+            priority: getSitemapPriority(tag.sitemap_priority, next.priority),
+          };
+        }
+        const v = sitemapConfig[p];
+        if (v && v.status !== "inactive" && v.include !== false) {
+          next = {
+            ...next,
+            changeFrequency: getSitemapChangeFrequency(v.frequency, next.changeFrequency),
+            priority: getSitemapPriority(v.priority, next.priority),
+          };
+        }
+        return next;
+      });
 
     return Array.from(new Map(allRoutes.map((item) => [item.url, item])).values());
   } catch (error) {

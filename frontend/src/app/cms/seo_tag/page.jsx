@@ -26,7 +26,8 @@ const SeoTag = () => {
             const response = await api.get("/seo-tag", {
                 headers: { Authorization: `Bearer ${authToken}` },
             });
-            setQueries(response.data);
+            // setQueries(response.data);
+            setQueries(response.data.filter((r) => r.page_name !== "__sitemap_manager__"));
             setLoading(false);
         } catch (err) {
             setError("Failed to fetch queries form data. Please try again.");
