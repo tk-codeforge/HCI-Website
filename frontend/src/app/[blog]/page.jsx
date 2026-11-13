@@ -1159,6 +1159,4941 @@
 
 
 
+// import MainLayout from "../layouts/MainLayout";
+// import { notFound, permanentRedirect } from "next/navigation";
+// import Image from "next/image"; 
+// import Link from "next/link";
+// import DOMPurify from "isomorphic-dompurify";
+// import { headers } from "next/headers";
+
+// import {
+//   FaMapMarkerAlt, FaArrowRight, FaUser, FaShieldAlt, FaGem, FaClock,
+//   FaStar, FaCheckCircle, FaTools, FaDraftingCompass, FaHardHat, FaHome,
+//   FaPlus, FaSmile, FaCalendarAlt, FaUserCircle, FaFacebookF, FaInstagram,
+//   FaTwitter, FaLinkedin, FaPinterest, FaYoutube
+// } from "react-icons/fa";
+
+// import * as FaIcons from "react-icons/fa";
+
+// import { SidebarForm } from "../services-detail/CityForms";
+// // Shared with the city pages (same components, same look)
+// import ProjectGallery from "../services-detail/ProjectGallery";
+// import MobileSlider from "../services-detail/MobileSlider";
+// import { getCityContent, fillCity, parseVideoUrl, DEFAULT_CITY_CONTENT } from "@/utils/cityContent";
+// import {
+//   splitPageSettings,
+//   getPageSectionOrder,
+//   PAGE_CONTENT_DEFAULTS,
+//   DEFAULT_PROMISE_ITEMS,
+// } from "@/utils/cmsPageSettings";
+
+// import { 
+//   generateOrganizationSchema, 
+//   generateLocalBusinessSchema, 
+//   generateBreadcrumbSchema, 
+//   generateFAQSchema 
+// } from "@/utils/schemaGenerator";
+// import { getCanonicalUrl, getRobotsDirectives, SITE_URL } from "@/utils/seoHelpers";
+
+// import { getPageSEO } from "@/utils/getSEO"; 
+// import { defaultAltText, getBlogHref, getBackendImageUrl } from "@/utils/helper";
+
+// /* Keep this CMS route dynamically rendered. Only the exact one-level paths
+//    present in the CWV PDF opt their API reads into a 60-second data cache. */
+// export const revalidate = 0;
+
+// const cityUrlMap = {
+//   "noida": "/interior-designers-in-noida",
+//   "greater_noida": "/interior-designers-in-greater-noida",
+//   "delhi": "/interior-designers-in-delhi",
+//   "gurugram": "/interior-designers-in-gurgaon",
+//   "faridabad": "/best-interior-designers-in-faridabad",
+//   "ghaziabad": "/interior-designers-in-ghaziabad",
+//   "manesar": "/interior-designers-in-manesar",
+//   "dwarka": "/interior-designers-in-dwarka",
+// };
+
+// const isValidSlug = (slug) => {
+//   if (!slug) return false;
+//   if (slug === "undefined" || slug === "null") return false;
+//   if (slug.includes(".")) return false; 
+//   return true;
+// };
+
+
+// // Only one-level CMS paths present in the attached CWV report opt into data caching.
+// const PDF_CWV_TARGET_SLUGS = new Set([
+//   "creating-the-home-of-your-dreams",
+//   "estimator-for-home",
+//   "how-to-decorate-your-home-for-diwali-under-rs5000",
+//   "thank-you",
+//   "interior-decorators-in-south-delhi",
+//   "interior-designer-in-crossings-republik-ghaziabad",
+//   "interior-designer-in-sector-150-noida",
+//   "contact",
+//   "interior-designer-in-sector-84-faridabad",
+//   "job-application",
+//   "interior-designers-in-noida",
+//   "bedroom-dressing-table-design",
+//   "best-interior-designers-in-faridabad",
+//   "interior-designers-in-gurgaon",
+//   "cozy-living-room-ideas-to-elevate-your-home",
+//   "services",
+//   "interior-designers-in-vaishali-ghaziabad",
+//   "bedroom-wall-design-ideas",
+//   "know-about-lighting-without-false-ceiling",
+//   "experience-center-new-delhi",
+//   "experience-center",
+//   "interior-designer-in-wave-city-ghaziabad",
+//   "how-its-works",
+//   "spacesaving-furniture",
+//   "design-idea",
+//   "top-interior-designer-in-kavi-nagar-ghaziabad",
+//   "interior-designers-in-greater-noida",
+//   "interior-designer-in-sector-82-faridabad",
+//   "interior-designers-in-golf-course-road-gurgaon",
+//   "pista-green-colour-combination",
+//   "staircase-as-per-vastu",
+//   "reclaimed-wood",
+//   "experience-center-faridabad",
+//   "best-interior-designer-in-sector-137-noida",
+//   "user-queries",
+//   "product",
+//   "thankyou",
+//   "furniture",
+//   "interior-designers-in-manesar",
+//   "cancelletion-policy",
+//   "term-and-condition",
+//   "top-wall-moulding-designs",
+//   "interior-designer-in-sector-83-faridabad",
+//   "faq",
+//   "interior-designer-in-greater-faridabad",
+//   "interior-designer-in-noida-extension",
+//   "interior-designers-in-raj-nagar-ghaziabad",
+//   "warranty-assurance",
+//   "luxury-bedroom-interior-design",
+//   "refer-and-earn",
+//   "team",
+//   "blog",
+//   "what-we-offer",
+//   "residential-projects",
+//   "designer-choice",
+//   "statement-mirror-designs",
+//   "interior-designer-in-sector-104-noida",
+//   "ready-togo-design",
+// ]);
+
+// const isPdfCwvTarget = (slug) => PDF_CWV_TARGET_SLUGS.has(slug);
+
+// const getCmsFetchOptions = (slug) =>
+//   isPdfCwvTarget(slug)
+//     ? { next: { revalidate: 60 } }
+//     : {
+//         cache: "no-store",
+//         headers: {
+//           "Cache-Control": "no-cache, no-store, must-revalidate",
+//           Pragma: "no-cache",
+//         },
+//       };
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
+
+// const isDraftStatus = (data) => {
+//   if (!data) return true;
+//   if (data.status === undefined || data.status === null) return false; 
+//   const status = String(data.status).toLowerCase().trim();
+//   return status === "draft" || status === "inactive" || status === "0";
+// };
+
+// async function getRecentBlogs(slug) {
+//   try {
+//     const res = await fetch(`${API_BASE_URL}/cms-blog`, getCmsFetchOptions(slug));
+//     if (!res.ok) return [];
+//     const data = await res.json();
+//     return Array.isArray(data) ? data.slice(0, 4) : [];
+//   } catch (error) { return []; }
+// }
+
+// async function getExcellenceStats(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-content/excellence_stats`,
+//       getCmsFetchOptions(slug)
+//     );
+
+//     if (!res.ok) return null;
+    
+//     const data = await res.json();
+//     const record = Array.isArray(data) ? data[0] : data;
+    
+//     if (record && record.json_content) {
+//       // Safely handle if the API returns a stringified JSON or a direct object
+//       const jsonContent = typeof record.json_content === "string" 
+//         ? JSON.parse(record.json_content) 
+//         : record.json_content;
+        
+//       return jsonContent?.items || null;
+//     }
+//     return null;
+//   } catch (error) { 
+//     console.error("Failed to fetch excellence stats:", error);
+//     return null; 
+//   }
+// }
+
+// async function getBlogData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-blog/blog-slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// async function getCmsPageData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-pages/slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// // export async function generateMetadata({ params }) {
+// //   headers();
+// //   const slug = params.blog;
+
+// // Old blog canonicals are stored as https://hcinterior.in/<slug>; point them to /blog/<slug>.
+// const fixBlogCanonical = (canonical, slug) => {
+//   try {
+//     const u = new URL(canonical, SITE_URL);
+//     if (u.pathname.replace(/\/+$/, "") === `/${slug}`) u.pathname = `/blog/${slug}`;
+//     return u.toString();
+//   } catch {
+//     return `${SITE_URL}/blog/${slug}`;
+//   }
+// };
+
+// export async function buildMetadata(slug, inBlogRoute = false) {
+//   headers();
+
+//   if (!isValidSlug(slug)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   // const [blogData, cmsData, seoData] = await Promise.all([
+//   //   getBlogData(slug).catch(() => null),
+//   //   getCmsPageData(slug).catch(() => null),
+//   //   getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   // ]);
+
+//   // let data = blogData || cmsData;
+
+
+//     const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   const [blogData, cmsData, seoData] = await Promise.all([
+//     getBlogData(slug).catch(() => null),
+//     getCmsPageData(slug).catch(() => null),
+//     getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   ]);
+
+//   let data = inBlogRoute ? blogData : (blogData || cmsData);
+
+//   if (!data || isDraftStatus(data)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+//   // const canonicalUrl = getCanonicalUrl({
+//   //   canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//   //   fallbackPath: `/${slug}`,
+//   // });
+
+//     let canonicalUrl = getCanonicalUrl({
+//     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//     fallbackPath: seoPath,
+//   });
+//   if (inBlogRoute) canonicalUrl = fixBlogCanonical(canonicalUrl, slug);
+
+//     const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+//   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+//   const fallbackImage =
+//   toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+//   const og = seoData?.openGraph;
+//   const ogImages = og?.images?.length
+//     ? og.images
+//     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+//   return {
+//     title,
+//     description,
+//     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+//     alternates: { canonical: canonicalUrl },
+//     robots,
+//     openGraph: {
+//       title: og?.title || title,
+//       description: og?.description || description,
+//       url: canonicalUrl,
+//       siteName: "High Creation Interior",
+//       locale: "en_IN",
+//       type: "website",
+//       images: ogImages,
+//     },
+//     twitter: {
+//       card: "summary_large_image",
+//       title: seoData?.twitter?.title || og?.title || title,
+//       description: seoData?.twitter?.description || og?.description || description,
+//       images: seoData?.twitter?.images?.length
+//         ? seoData.twitter.images
+//         : ogImages.map((i) => i.url),
+//     },
+//   };
+// }
+
+// export async function generateMetadata({ params }) {
+//   return buildMetadata(params.blog);
+// }
+
+// const parseJsonSafe = (data) => {
+//   if (!data) return [];
+//   if (Array.isArray(data)) return data;
+//   try { return JSON.parse(data); } catch (e) { return []; }
+// };
+
+// // --- helpers for the CMS-page layout sections (same behaviour as the city pages) ---
+// const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+// const safeTag = (tag, fallback) => (HEADING_TAGS.includes(tag) ? tag : fallback);
+// const safeInternalHref = (value, fallback = "/contact") => {
+//   const href = String(value || "").trim();
+//   return href.startsWith("/") && !href.startsWith("//") ? href : fallback;
+// };
+// const humanizeCity = (value) => String(value || "").replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+
+// const OWN_HOSTS = "(?:apidev\\.hcinterior\\.in|www\\.hcinterior\\.in|hcinterior\\.in)";
+
+// const forceHttpsHtml = (html) =>
+//   typeof html === "string"
+//     ? html.replace(new RegExp(`http://(${OWN_HOSTS})`, "gi"), "https://$1")
+//     : html;
+
+// const toHttps = (url) =>
+//   typeof url === "string"
+//     ? url.replace(new RegExp(`^http://(${OWN_HOSTS})`, "i"), "https://$1")
+//     : url;
+
+// // Rich-text CMS images are below the page hero. Keep their existing attributes,
+// // but decode asynchronously and lazy-load them when the CMS has not specified
+// // explicit loading behavior. This avoids competing with the hero/LCP image.
+// const addCmsImageLoadingHints = (html) => {
+//   if (typeof html !== "string" || !html.includes("<img")) return html;
+//   return html.replace(/<img\b([^>]*)>/gi, (tag, attributes) => {
+//     let next = attributes;
+//     if (!/\bloading\s*=/i.test(next)) next += ' loading="lazy"';
+//     if (!/\bdecoding\s*=/i.test(next)) next += ' decoding="async"';
+//     return `<img${next}>`;
+//   });
+// };
+
+// // const DynamicRootPage = async ({ params }) => {
+// //   headers();
+// //   const slug = params.blog;
+
+// // signature + first lines
+// const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
+//   headers();
+//   const slug = params.blog;
+//   const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   if (!isValidSlug(slug)) {
+//     notFound();
+//   }
+
+//   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+//   // remove serial network waits on mobile connections.
+//   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+//     await Promise.all([
+//       getBlogData(slug).catch(() => null),
+//       getCmsPageData(slug).catch(() => null),
+//       // getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getRecentBlogs(slug).catch(() => []),
+//       getExcellenceStats(slug).catch(() => null),
+//       (async () => {
+//         try {
+//           const setRes = await fetch(
+//             `${API_BASE_URL}/site-settings`,
+//             getCmsFetchOptions(slug)
+//           );
+//           if (!setRes.ok) return null;
+//           const rawSettings = await setRes.json();
+//           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+//         } catch (error) {
+//           console.error("Settings fetch failed", error);
+//           return null;
+//         }
+//       })(),
+//     ]);
+
+//       // Old root URL of a blog -> new /blog/<slug> URL
+//   if (blogResult && !inBlogRoute) permanentRedirect(`/blog/${slug}`);
+//   // /blog/<anything that is not a blog> -> 404 (CMS/city pages must not duplicate under /blog/)
+//   if (inBlogRoute && !blogResult) notFound();
+
+//   const pageData = blogResult || cmsResult;
+//   const pageType = blogResult ? "blog" : "cms-page";
+
+//   if (!pageData || isDraftStatus(pageData)) {
+//     notFound();
+//   }
+
+//   const seoData = seoResult;
+//   const customSchema = seoData?.customSchema;
+//   const recentBlogs = recentBlogsResult;
+//   const excellenceStats = statsResult;
+//   const siteSettings = settingsResult;
+
+//   let faqs = [];
+//   let accordions = [];
+//   let contentBlocks = [];
+//   // Layout options saved from CMS > Pages > "Page Layout" (stored in one reserved content block)
+//   let pageSettings = {};
+
+//   if (pageType === "cms-page") {
+//     faqs = parseJsonSafe(pageData.faqs);
+//     accordions = parseJsonSafe(pageData.accordions);
+//     const split = splitPageSettings(pageData.content_blocks);
+//     contentBlocks = split.blocks;
+//     pageSettings = split.settings;
+//   }
+
+  
+//   const customSchemaText =
+//     typeof customSchema === "string" ? customSchema : customSchema ? JSON.stringify(customSchema) : "";
+//   const legacySchemaText =
+//     !customSchema && typeof pageData?.seo_content?.custom_code === "string" ? pageData.seo_content.custom_code : "";
+//   const hasInnerCustomFaqSchema = /FAQPage/i.test(customSchemaText) || /FAQPage/i.test(legacySchemaText);
+    
+//   const faqSchema = faqs.length > 0 && !hasInnerCustomFaqSchema ? generateFAQSchema(faqs) : null;
+
+//   const displayCity = slug.split(/-|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+//   // const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
+//   const safeContent = pageData?.content
+//     ? (isPdfCwvTarget(slug)
+//         ? addCmsImageLoadingHints(forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//         : forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//     : "";
+//   const rawDescription = forceHttpsHtml(pageData?.description || "");
+//   const richDescription = isPdfCwvTarget(slug)
+//     ? addCmsImageLoadingHints(rawDescription)
+//     : rawDescription;
+
+//   // ---------------------------------------------------------------------------
+//   // CMS-page layout (same options as the city pages). Every value falls back to
+//   // what the page showed before, so pages without saved layout settings look the same.
+//   // ---------------------------------------------------------------------------
+//   const content = getCityContent(pageSettings.content, PAGE_CONTENT_DEFAULTS);
+//   const t = (value) => fillCity(value, displayCity);
+//   const pickTag = (value, fallback) => safeTag(value, fallback);
+//   const iconOf = (name, Fallback) => FaIcons[name] || Fallback;
+
+//   // Section order (desktop / mobile) - applied with CSS "order"
+//   const sectionOrder = getPageSectionOrder(pageSettings.sectionOrder);
+//   const Block = ({ id, className = "", children }) => (
+//     <div
+//       className={`city-block ${className}`.trim()}
+//       style={{ "--d": sectionOrder.desktop.indexOf(id), "--m": sectionOrder.mobile.indexOf(id) }}
+//     >
+//       {children}
+//     </div>
+//   );
+
+//   const ProcessTitleTag = pickTag(content.process.titleTag, "h2");
+//   const ProjectsTitleTag = pickTag(content.projects.titleTag, "h2");
+//   const BlogsTitleTag = pickTag(content.blogs.titleTag, "h2");
+//   const WhyTitleTag = pickTag(content.whyChoose.titleTag, "h2");
+//   const FaqTitleTag = pickTag(content.faqs.titleTag, "h2");
+
+//   // Stats: page-level custom stats > global Excellence Stats (CMS Content) > built-in defaults
+//   const customStatItems = content.stats.useCustom
+//     ? content.stats.items.filter((stat) => stat.value || stat.label)
+//     : [];
+//   const statItems = customStatItems.length
+//     ? customStatItems.map((stat) => ({ ...stat, color: "#ff914d", size: 40 }))
+//     : (excellenceStats && excellenceStats.length > 0)
+//       ? excellenceStats.map((stat) => ({ ...stat, valueTag: "h3", color: stat.color || "#f5a623" }))
+//       : DEFAULT_CITY_CONTENT.stats.items.map((stat) => ({ ...stat, color: "#ff914d", size: 40 }));
+
+//   // Project photos / testimonial videos (links only on custom pages)
+//   const mediaUrl = (value) => {
+//     const text = String(value || "").trim();
+//     return text.startsWith("/") ? getBackendImageUrl(text) : text;
+//   };
+//   const galleryItems = content.projects.gallery.flatMap((item, index) => {
+//     if (item.type === "video") {
+//       const videoUrl = mediaUrl(item.videoUrl);
+//       if (!videoUrl || !parseVideoUrl(videoUrl)) return [];
+//       return [{
+//         type: "video",
+//         image: item.poster ? mediaUrl(item.poster) : "",
+//         alt: item.alt || `${displayCity} client testimonial video`,
+//         title: item.title,
+//         videoUrl,
+//       }];
+//     }
+//     const image = mediaUrl(item.src);
+//     if (!image) return [];
+//     return [{
+//       type: "image",
+//       image,
+//       alt: item.alt || `${displayCity} interior design project ${index + 1}`,
+//       title: item.title,
+//       optimized: false,
+//     }];
+//   });
+
+//   // FAQs come from the page's FAQs tab; the heading options come from Page Layout
+//   const faqItems = faqs
+//     .filter((faq) => faq && faq.question)
+//     .map((faq) => ({
+//       // removes numbering / "Ans." typed into the API data so the accordion does not repeat it
+//       question: String(faq.question).replace(/^(\d+[\.\)]\s*|Q\d+[\.\)]\s*)/i, ""),
+//       answer: String(faq.answer || "").replace(/^(Ans[\.\:]?\s*)/i, ""),
+//     }));
+
+//   // Sidebar
+//   const siteVisit = pageSettings.siteVisit && typeof pageSettings.siteVisit === "object" ? pageSettings.siteVisit : {};
+//   const visitTitle = siteVisit.title || "Book a Site Visit";
+//   const visitDescription = fillCity(siteVisit.description || "Expert designers will visit your {city} property.", displayCity);
+//   const visitButtonText = siteVisit.buttonText || "Schedule Now";
+//   const visitButtonUrl = safeInternalHref(siteVisit.buttonUrl || "/contact");
+//   const VisitTitleTag = pickTag(siteVisit.titleTag, "h4");
+//   const PromiseTitleTag = pickTag(pageSettings.promiseTitleTag, "h4");
+//   const ServiceAreasTitleTag = pickTag(pageSettings.serviceAreasTitleTag, "h4");
+//   const NearbyTitleTag = pickTag(pageSettings.nearbyCitiesTitleTag, "h2");
+
+//   const savedPromiseItems = (Array.isArray(pageSettings.promiseItems) ? pageSettings.promiseItems : [])
+//     .filter((item) => item && (item.title || item.description));
+//   const activePromiseItems = savedPromiseItems.length ? savedPromiseItems : DEFAULT_PROMISE_ITEMS;
+
+//   const customServiceAreas = (Array.isArray(pageSettings.serviceAreas) ? pageSettings.serviceAreas : [])
+//     .filter((area) => area && area.name && area.url);
+//   const serviceAreas = customServiceAreas.length
+//     ? customServiceAreas.map((area) => ({ name: area.name, url: safeInternalHref(area.url, "/services") }))
+//     : Object.entries(cityUrlMap).map(([key, url]) => ({ name: humanizeCity(key), url }));
+
+//   // "Nearby Cities" strip: shown only when rows were added in the CMS
+//   const nearbyCityCards = (Array.isArray(pageSettings.nearbyCities) ? pageSettings.nearbyCities : [])
+//     .filter((entry) => entry && entry.name && entry.url)
+//     .map((entry) => ({
+//       name: entry.name,
+//       url: safeInternalHref(entry.url, "/services"),
+//       image: entry.image ? mediaUrl(entry.image) : getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg'),
+//     }));
+
+//   // Optional mobile hero banner (CMS > Pages > Basic Info > Mobile Hero Banner)
+//   const mobileHeroBanner = typeof pageSettings.mobileBannerImage === "string" ? mediaUrl(pageSettings.mobileBannerImage) : "";
+
+//   let heroImageSrc = getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg');
+
+//   const normalizedSlug = slug.toLowerCase();
+
+//   if (pageData?.banner_image) {
+//     heroImageSrc = getBackendImageUrl(pageData.banner_image);
+// }
+//   else if (normalizedSlug.includes('sohna')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designers in Sohna.jpg';
+//   } 
+//   else if (normalizedSlug.includes('noida-extension') || normalizedSlug.includes('noida_extension')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designer in Noida Extension.jpg';
+//   }
+
+//   return (
+//     <MainLayout>
+//       {/* <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizSchema) }} />
+//       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} /> */}
+
+//       {customSchema && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{
+//             __html: typeof customSchema === 'string' 
+//               ? customSchema.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') 
+//               : JSON.stringify(customSchema)
+//           }}
+//         />
+//       )}
+
+//       {/* {pageData?.seo_content?.custom_code && ( */}
+//         {!customSchema && pageData?.seo_content?.custom_code && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{ __html: pageData.seo_content.custom_code.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') }}
+//         />
+//       )}
+
+//       <style dangerouslySetInnerHTML={{__html: `
+//         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
+//         .font-outfit { font-family: var(--font-outfit), sans-serif; }
+//         .font-poppins { font-family: var(--font-poppins), sans-serif; }
+//         .text-gradient { background: linear-gradient(135deg, #ff914d 0%, #ff5722 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+//         .lazy-render { content-visibility: auto; contain-intrinsic-size: 1px 800px; }
+
+//         /* Social Buttons */
+//         .social-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+//         .social-btn:hover { transform: translateY(-4px); }
+//         .social-btn.fb:hover { background-color: #1877F2; color: white; box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3); }
+//         .social-btn.ig:hover { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; box-shadow: 0 6px 12px rgba(214, 36, 159, 0.3); }
+//         .social-btn.tw:hover { background-color: #000000; color: white; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); }
+//         .social-btn.in:hover { background-color: #0A66C2; color: white; box-shadow: 0 6px 12px rgba(10, 102, 194, 0.3); }
+//         .social-btn.pi:hover { background-color: #E60023; color: white; box-shadow: 0 6px 12px rgba(230, 0, 35, 0.3); }
+//         .social-btn.yt:hover { background-color:hsl(0, 100.00%, 50.00%); color: white; box-shadow: 0 6px 12px rgba(255, 0, 0, 0.3); }
+
+//         /* Modern City Layout Styles */
+//         .city-hero { height: 55vh; min-height: 450px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #1e293b; }
+//         .city-hero-picture { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+//         .city-hero-picture img { display: block; }
+//         .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.95) 100%); z-index: 1; }
+//         .hero-content { position: relative; z-index: 2; text-align: center; padding-top: 40px; }
+//         .hero-badge { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 24px; border-radius: 30px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: inline-flex; align-items: center; color: #fff; font-weight: 600; }
+//         .hero-main-title { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.1; letter-spacing: -0.02em; }
+        
+//         .city-main-container { margin-top: -80px; position: relative; z-index: 10; }
+//         .premium-card { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.04); padding: 40px; margin-bottom: 40px; border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+        
+//         /* CMS CONTENT PROTECTION & STRICT IMAGE POSITIONING */
+//         .rich-text-content { width: 100%; word-break: break-word; overflow-wrap: anywhere; }
+        
+//         .rich-text-content figure, 
+//         .rich-text-content figure.image { margin: 2rem auto !important; max-width: 100% !important; height: auto !important; display: flex; justify-content: center; }
+//         .rich-text-content img { max-width: 100% !important; height: auto !important; border-radius: 12px; display: block !important; margin: 0 auto !important; object-fit: contain !important; }
+//         .rich-text-content iframe, .rich-text-content video, .rich-text-content table { max-width: 100% !important; overflow-x: auto; display: block !important; margin: 2rem auto !important; }
+
+//         .rich-text-content h2, .rich-text-content h3 { font-family: var(--font-outfit), sans-serif; font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; color: #0f172a; margin-top: 2rem; margin-bottom: 1rem; }
+//         .rich-text-content p { font-family: var(--font-poppins), sans-serif; font-size: 1rem; line-height: 1.8; color: #475569; margin-bottom: 1.2rem; }
+        
+//         /* Bullet point lists for correct CMS rendering */
+//         .rich-text-content ul, .rich-text-content ol { display: flex; flex-direction: column; gap: 1rem; padding: 0; list-style: none; margin: 2rem 0; counter-reset: rtc-counter; }
+//         .rich-text-content ul li, .rich-text-content ol li { background: #fdfdfd; border: 1px solid #f1f5f9; padding: 1.2rem 1.5rem 1.2rem 3rem; border-radius: 12px; display: block; position: relative; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: 0.3s; }
+//         .rich-text-content ul li:hover, .rich-text-content ol li:hover { border-color: var(--hc-primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,145,77,0.1); }
+//         .rich-text-content ul li::before { content: '✦'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.2rem; font-weight: bold; line-height: 1.5; }
+//         .rich-text-content ol li { counter-increment: rtc-counter; }
+//         .rich-text-content ol li::before { content: counter(rtc-counter) '.'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.1rem; font-weight: 700; line-height: 1.5; }
+        
+//         .rich-text-content li img { max-width: 100% !important; height: auto !important; margin: 1rem auto; border-radius: 8px; display: block; }
+
+//         .micro-trust-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; }
+//         .micro-trust-item:last-child { border-bottom: none; padding-bottom: 0; }
+//         .micro-trust-icon { color: #22c55e; font-size: 18px; margin-right: 12px; }
+
+//         /* Premium FAQs */
+//         .faq-premium-item { border: none !important; margin-bottom: 16px; border-radius: 16px !important; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04); background: #ffffff; border: 1px solid #f1f5f9 !important; }
+//         .faq-premium-btn { width: 100%; text-align: left; background: white; border: none; padding: clamp(16px, 4vw, 24px); font-weight: 700; font-size: clamp(1.05rem, 3.5vw, 1.2rem); color: var(--hc-dark); display: flex; justify-content: space-between; align-items: center; box-shadow: none !important; line-height: 1.4; gap: 15px; }
+//         .faq-premium-btn::after { display: none !important; }
+//         .faq-premium-btn:not(.collapsed) { color: var(--hc-primary); background: #fffcf9; }
+//         .faq-icon-toggle { transition: transform 0.3s ease; color: var(--hc-primary); flex-shrink: 0; }
+//         .faq-premium-btn:not(.collapsed) .faq-icon-toggle { transform: rotate(45deg); color: #ff5722; }
+//         .faq-premium-body { padding: 0 clamp(16px, 4vw, 24px) 20px; color: #475569; font-size: clamp(0.95rem, 3vw, 1.05rem); line-height: 1.7; background: #fffcf9; }
+        
+//         .sidebar-blog-card { padding: 12px; border-radius: 12px; transition: all 0.3s ease; border: 1px solid transparent; }
+//         .sidebar-blog-card:hover { background-color: #f8fafc; border-color: #e2e8f0; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
+
+//         .process-step { display: flex; align-items: flex-start; margin-bottom: 30px; position: relative; }
+//         .process-step:last-child { margin-bottom: 0; }
+//         .process-icon { width: 50px; height: 50px; min-width: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 20px; z-index: 2; }
+//         .process-step:not(:last-child)::after { content: ''; position: absolute; left: 24px; top: 50px; bottom: -30px; width: 2px; background: #ffe4d6; z-index: 1; }
+
+//         .excellence-stat { text-align: center; padding: 20px; position: relative; }
+//         @media (min-width: 768px) { .excellence-stat::after { content: ""; position: absolute; right: 0; top: 20%; height: 60%; width: 1px; background: #e2e8f0; } .excellence-stat:last-child::after { display: none; } }
+
+//         .dual-sticky-wrapper { position: sticky; top: 100px; height: max-content; }
+//         .sidebar-widget { background: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 30px; border: 1px solid rgba(0,0,0,0.03); }
+//         .widget-title { font-family: var(--font-outfit), sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 25px; position: relative; padding-bottom: 10px; }
+//         .widget-title::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #ff914d; border-radius: 2px; }
+
+//         .sidebar-cta { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 30px 20px; text-align: center; color: white; margin-bottom: 30px; position: relative; overflow: hidden; }
+//         .nav-city-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 10px; color: #475569; text-decoration: none; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: all 0.2s ease; background: #f8fafc; margin-bottom: 10px; }
+//         .nav-city-link:hover, .nav-city-link.active { background: #ff914d; color: white; transform: translateX(5px); }
+//         .nav-city-link.active { pointer-events: none; }
+//         /* white whatever heading tag (h1-h6) is chosen in the CMS */
+//         .sidebar-cta :is(h1, h2, h3, h4, h5, h6) { color: #ffffff !important; }
+
+//         .modern-card { background: #ffffff; padding: 30px 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s ease; height: 100%; position: relative; overflow: hidden; text-align: center;}
+//         .modern-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #ff914d;}
+//         .modern-card-icon { width: 50px; height: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 20px; transition: transform 0.3s ease;}
+//         .modern-card:hover .modern-card-icon { transform: scale(1.1); background: #ff914d; color: white; }
+
+//         .related-card { overflow: hidden; border-radius: 16px; transition: transform 0.3s ease; border: 1px solid #f1f5f9; }
+//         .related-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+
+//         @media (max-width: 768px) {
+//         main.bg-light {
+//     overflow-x: hidden;
+//   }
+//           .premium-card { padding: 20px !important; margin-bottom: 25px; }
+//           .author-date-social-block { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
+//           .social-links { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+//           .hero-main-title { font-size: 2.2rem !important; }
+          
+//           .mobile-slider-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 0 30px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+//           .mobile-slider-wrapper::-webkit-scrollbar { display: none; }
+//           .mobile-slider-wrapper > div { flex: 0 0 88% !important; scroll-snap-align: center; }
+//           .rich-text-content ul { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 1rem; }
+//           .rich-text-content li { flex: 0 0 85%; }
+
+//           .process-slider > div { 
+//     flex: 0 0 100% !important; /* Shows exactly one card at a time */
+//     padding: 0 10px; /* Optional: adds a little breathing room */
+//   }
+//   .process-slider .process-step { 
+//     flex-direction: column; 
+//     align-items: center; 
+//     text-align: center; 
+//   }
+//   .process-slider .process-icon { 
+//     margin-right: 0; 
+//     margin-bottom: 15px; 
+//   }
+//   .process-slider .process-step::after { 
+//     display: none !important; /* Removes the vertical connecting line */
+//   }
+//           .modern-card-slider > div { 
+//     flex: 0 0 100% !important; /* 👈 Shows exactly 1 card at a time on mobile */
+//   }
+//         }
+
+//         /* --- Admin-controlled section order (CMS > City > Section Order) --- */
+//         .city-col-stack { display: flex; flex-direction: column; }
+//         .city-block { order: var(--d); }
+//         .city-cols > .city-block-bottom { order: 1; }
+//         @media (max-width: 991.98px) {
+//           /* columns stack on tablet/mobile: dissolve the wrappers so blocks from the
+//              main column, sidebar and bottom strip can be interleaved with CSS order */
+//           .row.city-cols { flex-direction: column; flex-wrap: nowrap; margin-top: 0; }
+//           .city-cols > .col-lg-8,
+//           .city-cols > .col-lg-4,
+//           .city-cols .city-col-stack { display: contents; }
+//           .city-cols .city-block { order: var(--m); width: 100%; padding-inline: calc(var(--bs-gutter-x) * .5); }
+//         }
+
+//         /* stats strip: swipe left/right on mobile (dots come from MobileSlider) */
+//         @media (max-width: 768px) {
+//           /* slides always start at the left edge (a centered, overflowing flex row hides its first slide) */
+//           .mobile-slider-wrapper { justify-content: flex-start !important; }
+//           .mobile-slider-wrapper.stats-slider > div { flex: 0 0 100% !important; max-width: 100% !important; }
+//           .premium-card.stats-card { padding: 22px 10px 12px; }
+//         }
+//         @media (min-width: 769px) {
+//           .stats-slider { justify-content: center; }
+//         }
+
+//         /* FAQ accordion (split layout) */
+//         .faq-eyebrow { color: var(--hc-primary); font-weight: 700; font-size: .75rem; letter-spacing: .22em; text-transform: uppercase; margin-bottom: .75rem; }
+//         .faq-split-title { font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: var(--hc-dark); font-size: clamp(1.6rem, 3.2vw, 2.2rem); margin-bottom: 1rem; }
+//         .faq-split-intro { color: #64748b; font-size: .9rem; line-height: 1.7; margin-bottom: 0; }
+//         .faq-split-head { margin-bottom: 1.75rem; }
+//         @media (min-width: 992px) {
+//           .faq-split-head { margin-bottom: 2.25rem; }
+//           .faq-head-center { text-align: center; }
+//           .faq-head-center .faq-split-intro { max-width: 640px; margin-left: auto; margin-right: auto; }
+//         }
+//         .faq-split-list { border-top: 1px solid #f0dccd; }
+//         .faq-split-item { border-bottom: 1px solid #f0dccd; }
+//         .faq-split-q { margin: 0; font-size: inherit; font-weight: inherit; }
+//         .faq-split-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left; background: none; border: 0; padding: 22px 4px; font-weight: 600; font-size: 1rem; line-height: 1.45; color: var(--hc-dark); }
+//         .faq-split-btn:not(.collapsed) { color: var(--hc-primary); }
+//         .faq-split-toggle { width: 28px; height: 28px; border-radius: 50%; background: #fff1e8; color: var(--hc-primary); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; }
+//         .faq-split-btn .faq-minus { display: none; }
+//         .faq-split-btn:not(.collapsed) .faq-minus { display: block; }
+//         .faq-split-btn:not(.collapsed) .faq-plus { display: none; }
+//         .faq-split-body { padding: 0 4px 22px; color: #64748b; font-size: .92rem; line-height: 1.8; white-space: pre-line; }
+
+//         /* mobile sliders inside a Bootstrap .row: no negative side margins */
+//         @media (max-width: 768px) {
+//           .mobile-slider-wrapper { margin-left: 0 !important; margin-right: 0 !important; }
+//         }
+//       `}} />
+
+//       <main className="bg-light pb-5">
+        
+//         {pageType === "blog" && (
+//           <div className="container py-4 py-lg-5 mt-lg-4">
+//             <div className="row g-4 g-lg-5">
+
+//               <div className="col-lg-8 order-1">
+//                 <div className="premium-card bg-white">
+
+//                   <h1 className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: '1.3' }}>
+//                     {pageData.title}
+//                   </h1>
+
+//                   <div className="author-date-social-block d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4">
+//                     <div className="text-muted fst-italic fs-6 mb-3 mb-md-0 d-flex align-items-center font-poppins flex-wrap gap-2">
+//                       <span><FaUserCircle className="me-2 text-secondary" size={20} />
+//                       {pageData.writer_name ? `By ${pageData.writer_name}` : "By HC Team"}</span>
+//                       <span className="mx-2 d-none d-md-inline">•</span>
+//                       <span><FaCalendarAlt className="me-2 text-secondary" size={18} />
+//                       {new Date(pageData.created_at || Date.now()).toLocaleDateString('en-US', {
+//                         year: 'numeric', month: 'long', day: 'numeric'
+//                       })}</span>
+//                     </div>
+
+//                     <div className="social-links d-flex gap-2">
+//                         {siteSettings?.facebook_url && <a href={siteSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="social-btn fb" aria-label="Facebook"><FaFacebookF size={18} /></a>}
+//                         {siteSettings?.instagram_url && <a href={siteSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="social-btn ig" aria-label="Instagram"><FaInstagram size={18} /></a>}
+//                         {siteSettings?.twitter_url && <a href={siteSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="social-btn tw" aria-label="X (Twitter)"><FaTwitter size={18} /></a>}
+//                         {siteSettings?.linkedin_url && <a href={siteSettings.linkedin_url} target="_blank" rel="noopener noreferrer" className="social-btn in" aria-label="LinkedIn"><FaLinkedin size={18} /></a>}
+//                         {siteSettings?.pinterest_url && <a href={siteSettings.pinterest_url} target="_blank" rel="noopener noreferrer" className="social-btn pi" aria-label="Pinterest"><FaPinterest size={18} /></a>}
+//                         {siteSettings?.youtube_url && <a href={siteSettings.youtube_url} target="_blank" rel="noopener noreferrer" className="social-btn yt" aria-label="YouTube"><FaYoutube size={18} /></a>}
+//                     </div>
+//                   </div>
+
+//                   {pageData.image && (
+//                     <div className="w-100 mb-4 mb-lg-5 d-flex justify-content-center">
+//                       <Image
+//                         // src={pageData.image}
+//                         src={toHttps(pageData.image)}
+//                         alt={pageData.image_alt || pageData.title || defaultAltText}
+//                         width={1200}
+//                         height={675}
+//                         priority
+//                         fetchPriority="high"
+//                         sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1199px) 66vw, 760px"
+//                         style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover', borderRadius: '1rem', display: 'block', margin: '0 auto' }}
+//                         className="shadow-sm"
+//                       />
+//                     </div>
+//                   )}
+
+//                  <div className="details font-poppins rich-text-content ck-content">
+//                    {/* <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
+//                    */}
+//                    <div dangerouslySetInnerHTML={{ __html: richDescription }} />
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <div className="col-lg-4 order-2">
+//                 <div className="dual-sticky-wrapper">
+
+//                   <SidebarForm city={slug} />
+
+//                   {recentBlogs && recentBlogs.length > 0 && (
+//                     <div className="sidebar-widget mt-4 lazy-render">
+//                       <h4 className="widget-title">Related Articles</h4>
+//                       <div className="d-flex flex-column gap-2">
+//                         {recentBlogs.map((blog, idx) => (
+//                           // <Link key={idx} 
+//                           // href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+//                           <Link key={idx} 
+//                           href={getBlogHref(blog)} className="text-decoration-none">
+//                             <div className="sidebar-blog-card d-flex align-items-center gap-3">
+//                               <img 
+//                                 // src={blog.image || "/images/default.jpg"} 
+//                                 src={toHttps(blog.image) || "/images/default.jpg"}
+//                                 alt={blog.title}
+//                                 loading="lazy"
+//                                 decoding="async"
+//                                 className="rounded shadow-sm flex-shrink-0" 
+//                                 style={{ width: "70px", height: "70px", objectFit: "contain" }} 
+//                               />
+//                               <div>
+//                                 <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px', lineHeight: '1.4' }}>
+//                                   {blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}
+//                                 </h6>
+//                                 <small className="text-gradient fw-bold" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
+//                                   READ ARTICLE <FaArrowRight size={10} />
+//                                 </small>
+//                               </div>
+//                             </div>
+//                           </Link>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   )}
+
+//                   <div className="sidebar-widget mt-4">
+//                     <h4 className="widget-title">Service Areas</h4>
+//                     <div className="d-flex flex-column">
+//                       {Object.keys(cityUrlMap).map((c, idx) => (
+//                         <Link key={idx} href={cityUrlMap[c]} className="nav-city-link">
+//                           <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
+//                           <FaArrowRight size={12} />
+//                         </Link>
+//                       ))}
+//                     </div>
+//                   </div>
+
+//                 </div>
+//               </div>
+
+//             </div>
+//           </div>
+//         )}
+
+//         {pageType === "cms-page" && (
+//           <>
+//             <div className="city-hero w-100">
+//               <picture className="city-hero-picture">
+//               {mobileHeroBanner && (
+//                 <source media="(max-width: 767px)" srcSet={mobileHeroBanner} />
+//               )}
+//               <Image 
+//                 src={heroImageSrc}
+//                 // alt={`${displayCity} Interior Design`}
+//                 alt={
+//   pageData?.banner_image && pageData?.banner_image_alt?.trim()
+//     ? pageData.banner_image_alt.trim()
+//     : `${displayCity} Interior Design`
+// }
+//               //   fill 
+//               //   priority 
+//               //   sizes="100vw" 
+//               //   style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               // />
+
+//               width={1920}
+//                 height={800}
+//                 priority
+//                 fetchPriority="high"
+//                 sizes="100vw"
+//                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               />
+//               </picture>
+              
+//               <div className="container hero-content font-poppins">
+//                 <div className="hero-badge" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}>
+//                   <FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior ${displayCity}`}
+//                 </div>
+                
+//                 <h1 
+//                   className="hero-main-title fw-bold mb-3 font-outfit text-white" 
+//                   style={{ textShadow: '2px 4px 15px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6)' }}
+//                 >
+//                   {pageData?.banner_title || pageData?.title || `${displayCity}`}
+//                 </h1>
+//               </div>
+//             </div>
+
+//             <div className="container city-main-container">
+//               <div className="row g-5 city-cols">
+//                 <div className="col-lg-8">
+//                   <div className="city-col-stack">
+
+//                     {/* --- MAIN CONTENT --- */}
+//                     <Block id="main">
+//                       <div className="premium-card mb-4">
+//                         <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeContent }} />
+//                       </div>
+//                     </Block>
+
+//                     {/* --- DESIGN PROCESS --- */}
+//                     <Block id="process">
+//                       <div className="lazy-render">
+//                         <div className="premium-card bg-white border-0">
+//                           <ProcessTitleTag className="font-outfit fw-bold h3 mb-4 text-dark text-center text-md-start">{t(content.process.title)}</ProcessTitleTag>
+//                           <MobileSlider label="Design process" className="mobile-slider-wrapper process-slider">
+//                             {content.process.items.map((step, i) => {
+//                               const StepIcon = iconOf(step.iconName, FaIcons.FaCheckCircle);
+//                               const StepTag = pickTag(step.titleTag, "h4");
+//                               return (
+//                                 <div className="process-step" key={i}>
+//                                   <div className="process-icon"><StepIcon /></div>
+//                                   <div>
+//                                     <StepTag className="font-outfit h5 fw-bold mb-1">{i + 1}. {t(step.title)}</StepTag>
+//                                     <p className="text-muted font-poppins small mb-0">{t(step.description)}</p>
+//                                   </div>
+//                                 </div>
+//                               );
+//                             })}
+//                           </MobileSlider>
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                     {/* --- PROJECT PHOTOS & TESTIMONIAL VIDEOS (links added in CMS > Page Layout) --- */}
+//                     {galleryItems.length > 0 && (
+//                       <Block id="projects">
+//                         <section className="lazy-render mb-4" aria-label={`Interior design projects in ${displayCity}`}>
+//                           <div className="premium-card bg-white border-0">
+//                             <ProjectsTitleTag className="font-outfit fw-bold h3 mb-4 text-dark">{t(content.projects.title)}</ProjectsTitleTag>
+//                             <ProjectGallery items={galleryItems} />
+//                           </div>
+//                         </section>
+//                       </Block>
+//                     )}
+
+//                     {/* --- DESIGN INSPIRATION (latest blogs) --- */}
+//                     {recentBlogs.length > 0 && (
+//                       <Block id="blogs">
+//                         <div className="lazy-render">
+//                           <div className="premium-card border-0 px-0 pt-0">
+//                             <BlogsTitleTag className="font-outfit fw-bold h3 mb-4">{t(content.blogs.title)}</BlogsTitleTag>
+//                             <MobileSlider label="Design inspiration" className="row g-4 font-poppins mobile-slider-wrapper">
+//                               {recentBlogs.map((blog, idx) => (
+//                                 <div className="col-md-6" key={idx}>
+//                                   {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+//                                   <Link href={getBlogHref(blog)} className="text-decoration-none">
+//                                     <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
+//                                       <img 
+//                                       // src={blog.image || "/images/default.jpg"}
+//                                       src={toHttps(blog.image) || "/images/default.jpg"}
+//                                       alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" decoding="async" />
+//                                       <div className="ms-3">
+//                                         <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
+//                                         <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
+//                                       </div>
+//                                     </div>
+//                                   </Link>
+//                                 </div>
+//                               ))}
+//                             </MobileSlider>
+//                           </div>
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                     {/* --- EXCELLENCE STATS (CMS icons / custom stats) --- */}
+//                     <Block id="stats">
+//                       <div className="lazy-render">
+//                         <div className="premium-card shadow-sm stats-card" style={{ background: 'linear-gradient(to right, #ffffff, #fff9f5)' }}>
+//                           <MobileSlider label="Statistics" className="row align-items-center mobile-slider-wrapper stats-slider">
+//                             {statItems.map((stat, idx) => {
+//                               const IconComponent = (stat.iconName && FaIcons[stat.iconName])
+//                                 ? FaIcons[stat.iconName]
+//                                 : FaIcons.FaStar;
+//                               const StatTag = pickTag(stat.valueTag, "h3");
+//                               const colWidth = statItems.length <= 3 ? 4 : Math.max(3, Math.floor(12 / statItems.length));
+
+//                               return (
+//                                 <div className={`col-md-${colWidth} excellence-stat d-flex flex-column align-items-center justify-content-center text-center`} key={idx}>
+//                                   {stat.iconType === "image" && stat.image ? (
+//                                     <img
+//                                       src={getBackendImageUrl(stat.image)}
+//                                       alt={stat.label || "Stat Icon"}
+//                                       style={{ width: `${stat.size || 40}px`, height: `${stat.size || 40}px`, objectFit: "contain" }}
+//                                       className="mb-3"
+//                                     />
+//                                   ) : (
+//                                     <IconComponent
+//                                       size={stat.size || 40}
+//                                       color={stat.color || "#f5a623"}
+//                                       className="mb-3"
+//                                     />
+//                                   )}
+//                                   <StatTag className="font-outfit fw-bold h2 mb-1">{stat.value}</StatTag>
+//                                   <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">{stat.label}</p>
+//                                 </div>
+//                               );
+//                             })}
+//                           </MobileSlider>
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                     {/* --- WHY CHOOSE US --- */}
+//                     <Block id="whyChoose">
+//                       <div className="lazy-render">
+//                         <div className="premium-card bg-transparent border-0 shadow-none px-0 py-0 mb-4">
+//                           <div className="text-center mb-4">
+//                             <WhyTitleTag className="font-outfit fw-bold h3 text-dark">{t(content.whyChoose.title)}</WhyTitleTag>
+//                           </div>
+//                           <MobileSlider label="Why choose us" className="row g-4 mobile-slider-wrapper modern-card-slider">
+//                             {content.whyChoose.items.map((item, idx) => {
+//                               const CardIcon = iconOf(item.iconName, FaIcons.FaCheckCircle);
+//                               const CardTag = pickTag(item.titleTag, "h4");
+//                               const cardCols = content.whyChoose.items.length >= 4 ? 3 : content.whyChoose.items.length === 3 ? 4 : 6;
+//                               return (
+//                                 <div className={`col-md-6 col-lg-${cardCols}`} key={idx}>
+//                                   <div className="modern-card">
+//                                     <div className="modern-card-icon"><CardIcon /></div>
+//                                     <CardTag className="font-outfit fw-bold h6">{t(item.title)}</CardTag>
+//                                     <p className="text-muted font-poppins small mb-0">{t(item.description)}</p>
+//                                   </div>
+//                                 </div>
+//                               );
+//                             })}
+//                           </MobileSlider>
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                     {/* --- CONTENT BLOCKS (Content Blocks tab) --- */}
+//                     {contentBlocks.length > 0 && (
+//                       <Block id="contentBlocks">
+//                         <div className="content-blocks-section lazy-render mb-4">
+//                           {contentBlocks.map((block, idx) => (
+//                             <div key={idx} className="premium-card mb-4" style={{ padding: '30px' }}>
+//                               {block.type === 'testimonial' && (
+//                                 <blockquote className="blockquote text-center mb-0">
+//                                   <p className="mb-3 fs-5 font-italic">&quot;{block.data.review}&quot;</p>
+//                                   <footer className="blockquote-footer mt-0 fs-6">
+//                                     {block.data.client_name} <cite title="Source Title">{block.data.designation}</cite>
+//                                   </footer>
+//                                 </blockquote>
+//                               )}
+//                               {block.type === 'service_row' && (
+//                                 <div className="row align-items-center">
+//                                   <div className={block.data.reverse_layout ? 'col-md-6 order-md-2' : 'col-md-6'}>
+//                                     <h3 className="font-outfit fw-bold h4 mb-3">{block.data.heading}</h3>
+//                                     <p className="text-muted font-poppins" style={{ whiteSpace: 'pre-line' }}>{block.data.description}</p>
+//                                   </div>
+//                                   <div className={block.data.reverse_layout ? 'col-md-6 order-md-1 text-center' : 'col-md-6 text-center'}>
+//                                     {block.data.image_url && (
+//                                       <img 
+//                                         // src={block.data.image_url} 
+//                                         src={toHttps(block.data.image_url)}
+//                                         alt={block.data.image_alt || block.data.heading || defaultAltText} 
+//                                         className="img-fluid rounded-4 shadow-sm" 
+//                                         style={{ maxHeight: '350px', objectFit: 'cover', width: '100%' }}
+//                                         loading="lazy"
+//                                         decoding="async" 
+//                                       />
+//                                     )}
+//                                   </div>
+//                                 </div>
+//                               )}
+//                               {block.type === 'counter' && (
+//                                 <div className="text-center p-3">
+//                                   <h2 className="font-outfit fw-bold display-4 mb-2 text-gradient">{block.data.number}</h2>
+//                                   <p className="font-poppins fw-bold text-uppercase text-muted mb-0 tracking-wider">{block.data.label}</p>
+//                                 </div>
+//                               )}
+//                             </div>
+//                           ))}
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                     {/* --- ACCORDIONS (Accordions tab) --- */}
+//                     {accordions.length > 0 && (
+//                       <Block id="accordions">
+//                         <div className="lazy-render mb-4">
+//                           <div className="premium-card border-0 px-0">
+//                             <h2 className="font-outfit fw-bold h3 mb-4">Additional Information</h2>
+//                             <div className="accordion font-poppins" id={`accordion-info-${pageData.id}`}>
+//                               {accordions.map((acc, index) => (
+//                                 <div className="accordion-item faq-premium-item" key={`acc-${index}`}>
+//                                   <h2 className="accordion-header">
+//                                     <button className={`accordion-button faq-premium-btn ${index !== 0 ? 'collapsed' : ''}`} type="button" data-bs-toggle="collapse" data-bs-target={`#acc-collapse${index}`}>
+//                                       <span className="pe-3">{acc.title}</span>
+//                                       <FaPlus className="faq-icon-toggle flex-shrink-0" />
+//                                     </button>
+//                                   </h2>
+//                                   <div id={`acc-collapse${index}`} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent={`#accordion-info-${pageData.id}`}>
+//                                     <div className="accordion-body faq-premium-body" style={{ whiteSpace: 'pre-line' }}>{acc.content}</div>
+//                                   </div>
+//                                 </div>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                     {/* --- FAQs (FAQs tab) shown as an accordion --- */}
+//                     {faqItems.length > 0 && (
+//                       <Block id="faqs">
+//                         <div className="lazy-render mb-5">
+//                           <div className="premium-card border-0 faq-split">
+//                             <div className="faq-split-head">
+//                               {content.faqs.eyebrow && <p className="faq-eyebrow font-poppins">{t(content.faqs.eyebrow)}</p>}
+//                               <FaqTitleTag className="faq-split-title font-outfit">{t(content.faqs.title)}</FaqTitleTag>
+//                               {content.faqs.intro && <p className="faq-split-intro font-poppins">{t(content.faqs.intro)}</p>}
+//                             </div>
+//                             <div className="faq-split-list accordion font-poppins" id={`accordion-faq-${pageData?.id}`}>
+//                               {faqItems.map((faq, index) => (
+//                                 <div className="faq-split-item" key={index}>
+//                                   <h3 className="faq-split-q">
+//                                     <button
+//                                       className={`faq-split-btn ${index !== 0 ? "collapsed" : ""}`}
+//                                       type="button"
+//                                       data-bs-toggle="collapse"
+//                                       data-bs-target={`#city-faq-${pageData?.id}-${index}`}
+//                                       aria-expanded={index === 0 ? "true" : "false"}
+//                                       aria-controls={`city-faq-${pageData?.id}-${index}`}
+//                                     >
+//                                       <span>{faq.question}</span>
+//                                       <span className="faq-split-toggle" aria-hidden="true">
+//                                         <FaPlus className="faq-plus" />
+//                                         <FaIcons.FaMinus className="faq-minus" />
+//                                       </span>
+//                                     </button>
+//                                   </h3>
+//                                   <div
+//                                     id={`city-faq-${pageData?.id}-${index}`}
+//                                     className={`accordion-collapse collapse ${index === 0 ? "show" : ""}`}
+//                                     data-bs-parent={`#accordion-faq-${pageData?.id}`}
+//                                   >
+//                                     <div className="faq-split-body">{faq.answer}</div>
+//                                   </div>
+//                                 </div>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                   </div>
+//                 </div>
+
+//                 <div className="col-lg-4">
+//                   <div className="dual-sticky-wrapper city-col-stack">
+
+//                     <Block id="siteVisit">
+//                       <div className="sidebar-cta shadow-lg mb-4">
+//                         <VisitTitleTag className="font-outfit fw-bold mb-2">{visitTitle}</VisitTitleTag>
+//                         <p className="font-poppins small text-white-50 mb-4">{visitDescription}</p>
+//                         <Link href={visitButtonUrl} className="btn btn-light w-100 fw-bold py-2 rounded-pill">{visitButtonText}</Link>
+//                       </div>
+//                     </Block>
+
+//                     <Block id="sidebarForm">
+//                       <SidebarForm city={slug} />
+//                     </Block>
+
+//                     <Block id="promise">
+//                       <div className="sidebar-widget py-4 font-poppins lazy-render">
+//                         <PromiseTitleTag className="widget-title mb-4">{pageSettings.promiseTitle || "The Promise"}</PromiseTitleTag>
+//                         {activePromiseItems.map((item, index) => {
+//                           const PromiseIcon = (item.iconName && FaIcons[item.iconName]) || (index === 0 ? FaCheckCircle : FaTools);
+//                           const isCheckIcon = item.iconName ? /^FaCheck/.test(item.iconName) : index === 0;
+//                           return (
+//                             <div className="micro-trust-item" key={`${item.title}-${index}`}>
+//                               <PromiseIcon className={`micro-trust-icon${isCheckIcon ? "" : " text-warning"}`} />
+//                               <div>
+//                                 <span className="d-block fw-bold text-dark" style={{ fontSize: '14px' }}>{item.title}</span>
+//                                 <span className="text-muted" style={{ fontSize: '12px' }}>{item.description}</span>
+//                               </div>
+//                             </div>
+//                           );
+//                         })}
+//                       </div>
+//                     </Block>
+
+//                     <Block id="serviceAreas">
+//                       <div className="sidebar-widget">
+//                         <ServiceAreasTitleTag className="widget-title">{pageSettings.serviceAreasTitle || "Service Areas"}</ServiceAreasTitleTag>
+//                         <div className="d-flex flex-column">
+//                           {serviceAreas.map((area, idx) => (
+//                             <Link key={`${area.url}-${idx}`} href={area.url} className={`nav-city-link ${area.url === `/${slug}` ? 'active' : ''}`}>
+//                               <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{area.name}</span></span>
+//                               <FaArrowRight size={12} />
+//                             </Link>
+//                           ))}
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                   </div>
+//                 </div>
+
+//                 {/* --- NEARBY CITIES (only when rows were added in CMS > Page Layout) --- */}
+//                 {nearbyCityCards.length > 0 && (
+//                   <Block id="nearbyCities" className="col-12 city-block-bottom">
+//                     <div className="pt-5 border-top">
+//                       <div className="d-flex justify-content-between align-items-end mb-4">
+//                         <NearbyTitleTag className="font-outfit fw-bold text-dark h3">{pageSettings.nearbyCitiesTitle || "Nearby Cities"}</NearbyTitleTag>
+//                         <Link href="/services" className="text-decoration-none fw-bold small text-gradient">VIEW ALL CITIES <FaArrowRight /></Link>
+//                       </div>
+//                       <MobileSlider label="Nearby cities" className="row g-4 mobile-slider-wrapper">
+//                         {nearbyCityCards.map((entry, idx) => (
+//                           <div className="col-lg-4" key={`${entry.url}-${idx}`}>
+//                             <Link href={entry.url} className="text-decoration-none">
+//                               <div className="related-card bg-white position-relative shadow-sm h-100 rounded-4 overflow-hidden">
+//                                 <div style={{ height: "200px", position: "relative" }}>
+//                                   <img
+//                                     src={entry.image}
+//                                     alt={entry.name}
+//                                     loading="lazy"
+//                                     decoding="async"
+//                                     style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+//                                   />
+//                                   <div className="position-absolute bottom-0 start-0 p-4 w-100 text-white fw-bold" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' }}>
+//                                     <FaMapMarkerAlt className="me-2 text-warning" /> {entry.name.toUpperCase()}
+//                                   </div>
+//                                 </div>
+//                               </div>
+//                             </Link>
+//                           </div>
+//                         ))}
+//                       </MobileSlider>
+//                     </div>
+//                   </Block>
+//                 )}
+
+//               </div>
+//             </div>
+//           </>
+//         )}
+//       </main>
+//     </MainLayout>
+//   );
+// };
+
+// export default DynamicRootPage;
+
+
+
+
+// import MainLayout from "../layouts/MainLayout";
+// import { notFound, permanentRedirect } from "next/navigation";
+// import Image from "next/image"; 
+// import Link from "next/link";
+// import DOMPurify from "isomorphic-dompurify";
+// import { headers } from "next/headers";
+
+// import {
+//   FaMapMarkerAlt, FaArrowRight, FaUser, FaShieldAlt, FaGem, FaClock,
+//   FaStar, FaCheckCircle, FaTools, FaDraftingCompass, FaHardHat, FaHome,
+//   FaPlus, FaSmile, FaCalendarAlt, FaUserCircle, FaFacebookF, FaInstagram,
+//   FaTwitter, FaLinkedin, FaPinterest, FaYoutube
+// } from "react-icons/fa";
+
+// import * as FaIcons from "react-icons/fa";
+
+// import { SidebarForm } from "../services-detail/CityForms";
+
+// import { 
+//   generateOrganizationSchema, 
+//   generateLocalBusinessSchema, 
+//   generateBreadcrumbSchema, 
+//   generateFAQSchema 
+// } from "@/utils/schemaGenerator";
+// import { getCanonicalUrl, getRobotsDirectives, SITE_URL } from "@/utils/seoHelpers";
+
+// import { getPageSEO } from "@/utils/getSEO"; 
+// import { defaultAltText, getBlogHref, getBackendImageUrl } from "@/utils/helper";
+
+// /* Keep this CMS route dynamically rendered. Only the exact one-level paths
+//    present in the CWV PDF opt their API reads into a 60-second data cache. */
+// export const revalidate = 0;
+
+// const cityUrlMap = {
+//   "noida": "/interior-designers-in-noida",
+//   "greater_noida": "/interior-designers-in-greater-noida",
+//   "delhi": "/interior-designers-in-delhi",
+//   "gurugram": "/interior-designers-in-gurgaon",
+//   "faridabad": "/best-interior-designers-in-faridabad",
+//   "ghaziabad": "/interior-designers-in-ghaziabad",
+//   "manesar": "/interior-designers-in-manesar",
+//   "dwarka": "/interior-designers-in-dwarka",
+// };
+
+// const isValidSlug = (slug) => {
+//   if (!slug) return false;
+//   if (slug === "undefined" || slug === "null") return false;
+//   if (slug.includes(".")) return false; 
+//   return true;
+// };
+
+
+// // Only one-level CMS paths present in the attached CWV report opt into data caching.
+// const PDF_CWV_TARGET_SLUGS = new Set([
+//   "creating-the-home-of-your-dreams",
+//   "estimator-for-home",
+//   "how-to-decorate-your-home-for-diwali-under-rs5000",
+//   "thank-you",
+//   "interior-decorators-in-south-delhi",
+//   "interior-designer-in-crossings-republik-ghaziabad",
+//   "interior-designer-in-sector-150-noida",
+//   "contact",
+//   "interior-designer-in-sector-84-faridabad",
+//   "job-application",
+//   "interior-designers-in-noida",
+//   "bedroom-dressing-table-design",
+//   "best-interior-designers-in-faridabad",
+//   "interior-designers-in-gurgaon",
+//   "cozy-living-room-ideas-to-elevate-your-home",
+//   "services",
+//   "interior-designers-in-vaishali-ghaziabad",
+//   "bedroom-wall-design-ideas",
+//   "know-about-lighting-without-false-ceiling",
+//   "experience-center-new-delhi",
+//   "experience-center",
+//   "interior-designer-in-wave-city-ghaziabad",
+//   "how-its-works",
+//   "spacesaving-furniture",
+//   "design-idea",
+//   "top-interior-designer-in-kavi-nagar-ghaziabad",
+//   "interior-designers-in-greater-noida",
+//   "interior-designer-in-sector-82-faridabad",
+//   "interior-designers-in-golf-course-road-gurgaon",
+//   "pista-green-colour-combination",
+//   "staircase-as-per-vastu",
+//   "reclaimed-wood",
+//   "experience-center-faridabad",
+//   "best-interior-designer-in-sector-137-noida",
+//   "user-queries",
+//   "product",
+//   "thankyou",
+//   "furniture",
+//   "interior-designers-in-manesar",
+//   "cancelletion-policy",
+//   "term-and-condition",
+//   "top-wall-moulding-designs",
+//   "interior-designer-in-sector-83-faridabad",
+//   "faq",
+//   "interior-designer-in-greater-faridabad",
+//   "interior-designer-in-noida-extension",
+//   "interior-designers-in-raj-nagar-ghaziabad",
+//   "warranty-assurance",
+//   "luxury-bedroom-interior-design",
+//   "refer-and-earn",
+//   "team",
+//   "blog",
+//   "what-we-offer",
+//   "residential-projects",
+//   "designer-choice",
+//   "statement-mirror-designs",
+//   "interior-designer-in-sector-104-noida",
+//   "ready-togo-design",
+// ]);
+
+// const isPdfCwvTarget = (slug) => PDF_CWV_TARGET_SLUGS.has(slug);
+
+// const getCmsFetchOptions = (slug) =>
+//   isPdfCwvTarget(slug)
+//     ? { next: { revalidate: 60 } }
+//     : {
+//         cache: "no-store",
+//         headers: {
+//           "Cache-Control": "no-cache, no-store, must-revalidate",
+//           Pragma: "no-cache",
+//         },
+//       };
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
+
+// const isDraftStatus = (data) => {
+//   if (!data) return true;
+//   if (data.status === undefined || data.status === null) return false; 
+//   const status = String(data.status).toLowerCase().trim();
+//   return status === "draft" || status === "inactive" || status === "0";
+// };
+
+// async function getRecentBlogs(slug) {
+//   try {
+//     const res = await fetch(`${API_BASE_URL}/cms-blog`, getCmsFetchOptions(slug));
+//     if (!res.ok) return [];
+//     const data = await res.json();
+//     return Array.isArray(data) ? data.slice(0, 4) : [];
+//   } catch (error) { return []; }
+// }
+
+// async function getExcellenceStats(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-content/excellence_stats`,
+//       getCmsFetchOptions(slug)
+//     );
+
+//     if (!res.ok) return null;
+    
+//     const data = await res.json();
+//     const record = Array.isArray(data) ? data[0] : data;
+    
+//     if (record && record.json_content) {
+//       // Safely handle if the API returns a stringified JSON or a direct object
+//       const jsonContent = typeof record.json_content === "string" 
+//         ? JSON.parse(record.json_content) 
+//         : record.json_content;
+        
+//       return jsonContent?.items || null;
+//     }
+//     return null;
+//   } catch (error) { 
+//     console.error("Failed to fetch excellence stats:", error);
+//     return null; 
+//   }
+// }
+
+// async function getBlogData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-blog/blog-slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// async function getCmsPageData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-pages/slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// // export async function generateMetadata({ params }) {
+// //   headers();
+// //   const slug = params.blog;
+
+// //   if (!isValidSlug(slug)) {
+// //     return { title: "Not Found", robots: { index: false, follow: true } };
+// //   }
+
+// //   const [blogData, cmsData, seoData] = await Promise.all([
+// //     getBlogData(slug).catch(() => null),
+// //     getCmsPageData(slug).catch(() => null),
+// //     getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+// //   ]);
+
+// //   let data = blogData || cmsData;
+
+// //   if (!data || isDraftStatus(data)) {
+// //     return { title: "Not Found", robots: { index: false, follow: true } };
+// //   }
+
+// //   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+// //   const canonicalUrl = getCanonicalUrl({
+// //     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+// //     fallbackPath: `/${slug}`,
+// //   });
+
+// //     const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+// //   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+// //   const fallbackImage =
+// //   toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+// //   const og = seoData?.openGraph;
+// //   const ogImages = og?.images?.length
+// //     ? og.images
+// //     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+// //   return {
+// //     title,
+// //     description,
+// //     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+// //     alternates: { canonical: canonicalUrl },
+// //     robots,
+// //     openGraph: {
+// //       title: og?.title || title,
+// //       description: og?.description || description,
+// //       url: canonicalUrl,
+// //       siteName: "High Creation Interior",
+// //       locale: "en_IN",
+// //       type: "website",
+// //       images: ogImages,
+// //     },
+// //     twitter: {
+// //       card: "summary_large_image",
+// //       title: seoData?.twitter?.title || og?.title || title,
+// //       description: seoData?.twitter?.description || og?.description || description,
+// //       images: seoData?.twitter?.images?.length
+// //         ? seoData.twitter.images
+// //         : ogImages.map((i) => i.url),
+// //     },
+// //   };
+// // }
+
+
+// // Old blog canonicals are stored as https://hcinterior.in/<slug>; point them to /blog/<slug>.
+// // Any other custom canonical (different path / external domain) is left untouched.
+// const fixBlogCanonical = (canonical, slug) => {
+//   try {
+//     const u = new URL(canonical, SITE_URL);
+//     if (u.pathname.replace(/\/+$/, "") === `/${slug}`) u.pathname = `/blog/${slug}`;
+//     return u.toString();
+//   } catch {
+//     return `${SITE_URL}/blog/${slug}`;
+//   }
+// };
+
+// export async function buildMetadata(slug, inBlogRoute = false) {
+//   headers();
+
+//   if (!isValidSlug(slug)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   const [blogData, cmsData, seoData] = await Promise.all([
+//     getBlogData(slug).catch(() => null),
+//     getCmsPageData(slug).catch(() => null),
+//     getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   ]);
+
+//   // /blog/<slug> serves blogs only; the root route keeps serving CMS pages (and redirects blogs).
+//   let data = inBlogRoute ? blogData : (blogData || cmsData);
+
+//   if (!data || isDraftStatus(data)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+//   let canonicalUrl = getCanonicalUrl({
+//     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//     fallbackPath: seoPath,
+//   });
+//   if (inBlogRoute) canonicalUrl = fixBlogCanonical(canonicalUrl, slug);
+
+//   const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+//   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+//   const fallbackImage =
+//     toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+//   const og = seoData?.openGraph;
+//   const ogImages = og?.images?.length
+//     ? og.images
+//     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+//   return {
+//     title,
+//     description,
+//     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+//     alternates: { canonical: canonicalUrl },
+//     robots,
+//     openGraph: {
+//       title: og?.title || title,
+//       description: og?.description || description,
+//       url: canonicalUrl,
+//       siteName: "High Creation Interior",
+//       locale: "en_IN",
+//       type: "website",
+//       images: ogImages,
+//     },
+//     twitter: {
+//       card: "summary_large_image",
+//       title: seoData?.twitter?.title || og?.title || title,
+//       description: seoData?.twitter?.description || og?.description || description,
+//       images: seoData?.twitter?.images?.length
+//         ? seoData.twitter.images
+//         : ogImages.map((i) => i.url),
+//     },
+//   };
+// }
+
+// export async function generateMetadata({ params }) {
+//   return buildMetadata(params.blog);
+// }
+
+// const parseJsonSafe = (data) => {
+//   if (!data) return [];
+//   if (Array.isArray(data)) return data;
+//   try { return JSON.parse(data); } catch (e) { return []; }
+// };
+
+// const OWN_HOSTS = "(?:apidev\\.hcinterior\\.in|www\\.hcinterior\\.in|hcinterior\\.in)";
+
+// const forceHttpsHtml = (html) =>
+//   typeof html === "string"
+//     ? html.replace(new RegExp(`http://(${OWN_HOSTS})`, "gi"), "https://$1")
+//     : html;
+
+// const toHttps = (url) =>
+//   typeof url === "string"
+//     ? url.replace(new RegExp(`^http://(${OWN_HOSTS})`, "i"), "https://$1")
+//     : url;
+
+// // Rich-text CMS images are below the page hero. Keep their existing attributes,
+// // but decode asynchronously and lazy-load them when the CMS has not specified
+// // explicit loading behavior. This avoids competing with the hero/LCP image.
+// const addCmsImageLoadingHints = (html) => {
+//   if (typeof html !== "string" || !html.includes("<img")) return html;
+//   return html.replace(/<img\b([^>]*)>/gi, (tag, attributes) => {
+//     let next = attributes;
+//     if (!/\bloading\s*=/i.test(next)) next += ' loading="lazy"';
+//     if (!/\bdecoding\s*=/i.test(next)) next += ' decoding="async"';
+//     return `<img${next}>`;
+//   });
+// };
+
+// // const DynamicRootPage = async ({ params }) => {
+// //   headers();
+// //   const slug = params.blog;
+
+// //   if (!isValidSlug(slug)) {
+// //     notFound();
+// //   }
+
+// //   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+// //   // remove serial network waits on mobile connections.
+// //   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+// //     await Promise.all([
+// //       getBlogData(slug).catch(() => null),
+// //       getCmsPageData(slug).catch(() => null),
+// //       getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+// //       getRecentBlogs(slug).catch(() => []),
+// //       getExcellenceStats(slug).catch(() => null),
+// //       (async () => {
+// //         try {
+// //           const setRes = await fetch(
+// //             `${API_BASE_URL}/site-settings`,
+// //             getCmsFetchOptions(slug)
+// //           );
+// //           if (!setRes.ok) return null;
+// //           const rawSettings = await setRes.json();
+// //           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+// //         } catch (error) {
+// //           console.error("Settings fetch failed", error);
+// //           return null;
+// //         }
+// //       })(),
+// //     ]);
+
+// //   const pageData = blogResult || cmsResult;
+// //   const pageType = blogResult ? "blog" : "cms-page";
+
+
+// const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
+//   headers();
+//   const slug = params.blog;
+//   const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   if (!isValidSlug(slug)) {
+//     notFound();
+//   }
+
+//   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+//   // remove serial network waits on mobile connections.
+//   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+//     await Promise.all([
+//       getBlogData(slug).catch(() => null),
+//       getCmsPageData(slug).catch(() => null),
+//       getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getRecentBlogs(slug).catch(() => []),
+//       getExcellenceStats(slug).catch(() => null),
+//       (async () => {
+//         try {
+//           const setRes = await fetch(
+//             `${API_BASE_URL}/site-settings`,
+//             getCmsFetchOptions(slug)
+//           );
+//           if (!setRes.ok) return null;
+//           const rawSettings = await setRes.json();
+//           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+//         } catch (error) {
+//           console.error("Settings fetch failed", error);
+//           return null;
+//         }
+//       })(),
+//     ]);
+
+//   // Old root URL of a blog -> new /blog/<slug> URL
+//   if (blogResult && !inBlogRoute) permanentRedirect(`/blog/${slug}`);
+//   // /blog/<anything that is not a blog> -> 404 (CMS/city pages must not duplicate under /blog/)
+//   if (inBlogRoute && !blogResult) notFound();
+
+//   const pageData = blogResult || cmsResult;
+//   const pageType = blogResult ? "blog" : "cms-page";
+
+//   if (!pageData || isDraftStatus(pageData)) {
+//     notFound();
+//   }
+
+//   const seoData = seoResult;
+//   const customSchema = seoData?.customSchema;
+//   const recentBlogs = recentBlogsResult;
+//   const excellenceStats = statsResult;
+//   const siteSettings = settingsResult;
+
+//   let faqs = [];
+//   let accordions = [];
+//   let contentBlocks = [];
+
+//   if (pageType === "cms-page") {
+//     faqs = parseJsonSafe(pageData.faqs);
+//     accordions = parseJsonSafe(pageData.accordions);
+//     contentBlocks = parseJsonSafe(pageData.content_blocks);
+//   }
+
+  
+//   const customSchemaText =
+//     typeof customSchema === "string" ? customSchema : customSchema ? JSON.stringify(customSchema) : "";
+//   const legacySchemaText =
+//     !customSchema && typeof pageData?.seo_content?.custom_code === "string" ? pageData.seo_content.custom_code : "";
+//   const hasInnerCustomFaqSchema = /FAQPage/i.test(customSchemaText) || /FAQPage/i.test(legacySchemaText);
+    
+//   const faqSchema = faqs.length > 0 && !hasInnerCustomFaqSchema ? generateFAQSchema(faqs) : null;
+
+//   const displayCity = slug.split(/-|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+//   // const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
+//   const safeContent = pageData?.content
+//     ? (isPdfCwvTarget(slug)
+//         ? addCmsImageLoadingHints(forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//         : forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//     : "";
+//   const rawDescription = forceHttpsHtml(pageData?.description || "");
+//   const richDescription = isPdfCwvTarget(slug)
+//     ? addCmsImageLoadingHints(rawDescription)
+//     : rawDescription;
+
+//   let heroImageSrc = getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg');
+
+//   const normalizedSlug = slug.toLowerCase();
+
+//   if (pageData?.banner_image) {
+//     heroImageSrc = getBackendImageUrl(pageData.banner_image);
+// }
+//   else if (normalizedSlug.includes('sohna')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designers in Sohna.jpg';
+//   } 
+//   else if (normalizedSlug.includes('noida-extension') || normalizedSlug.includes('noida_extension')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designer in Noida Extension.jpg';
+//   }
+
+//   return (
+//     <MainLayout>
+//       {/* <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizSchema) }} />
+//       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} /> */}
+
+//       {customSchema && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{
+//             __html: typeof customSchema === 'string' 
+//               ? customSchema.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') 
+//               : JSON.stringify(customSchema)
+//           }}
+//         />
+//       )}
+
+//       {/* {pageData?.seo_content?.custom_code && ( */}
+//         {!customSchema && pageData?.seo_content?.custom_code && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{ __html: pageData.seo_content.custom_code.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') }}
+//         />
+//       )}
+
+//       <style dangerouslySetInnerHTML={{__html: `
+//         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
+//         .font-outfit { font-family: var(--font-outfit), sans-serif; }
+//         .font-poppins { font-family: var(--font-poppins), sans-serif; }
+//         .text-gradient { background: linear-gradient(135deg, #ff914d 0%, #ff5722 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+//         .lazy-render { content-visibility: auto; contain-intrinsic-size: 1px 800px; }
+
+//         /* Social Buttons */
+//         .social-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+//         .social-btn:hover { transform: translateY(-4px); }
+//         .social-btn.fb:hover { background-color: #1877F2; color: white; box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3); }
+//         .social-btn.ig:hover { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; box-shadow: 0 6px 12px rgba(214, 36, 159, 0.3); }
+//         .social-btn.tw:hover { background-color: #000000; color: white; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); }
+//         .social-btn.in:hover { background-color: #0A66C2; color: white; box-shadow: 0 6px 12px rgba(10, 102, 194, 0.3); }
+//         .social-btn.pi:hover { background-color: #E60023; color: white; box-shadow: 0 6px 12px rgba(230, 0, 35, 0.3); }
+//         .social-btn.yt:hover { background-color:hsl(0, 100.00%, 50.00%); color: white; box-shadow: 0 6px 12px rgba(255, 0, 0, 0.3); }
+
+//         /* Modern City Layout Styles */
+//         .city-hero { height: 55vh; min-height: 450px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #1e293b; }
+//         .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.95) 100%); z-index: 1; }
+//         .hero-content { position: relative; z-index: 2; text-align: center; padding-top: 40px; }
+//         .hero-badge { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 24px; border-radius: 30px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: inline-flex; align-items: center; color: #fff; font-weight: 600; }
+//         .hero-main-title { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.1; letter-spacing: -0.02em; }
+        
+//         .city-main-container { margin-top: -80px; position: relative; z-index: 10; }
+//         .premium-card { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.04); padding: 40px; margin-bottom: 40px; border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+        
+//         /* CMS CONTENT PROTECTION & STRICT IMAGE POSITIONING */
+//         .rich-text-content { width: 100%; word-break: break-word; overflow-wrap: anywhere; }
+        
+//         .rich-text-content figure, 
+//         .rich-text-content figure.image { margin: 2rem auto !important; max-width: 100% !important; height: auto !important; display: flex; justify-content: center; }
+//         .rich-text-content img { max-width: 100% !important; height: auto !important; border-radius: 12px; display: block !important; margin: 0 auto !important; object-fit: contain !important; }
+//         .rich-text-content iframe, .rich-text-content video, .rich-text-content table { max-width: 100% !important; overflow-x: auto; display: block !important; margin: 2rem auto !important; }
+
+//         .rich-text-content h2, .rich-text-content h3 { font-family: var(--font-outfit), sans-serif; font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; color: #0f172a; margin-top: 2rem; margin-bottom: 1rem; }
+//         .rich-text-content p { font-family: var(--font-poppins), sans-serif; font-size: 1rem; line-height: 1.8; color: #475569; margin-bottom: 1.2rem; }
+        
+//         /* Bullet point lists for correct CMS rendering */
+//         .rich-text-content ul, .rich-text-content ol { display: flex; flex-direction: column; gap: 1rem; padding: 0; list-style: none; margin: 2rem 0; counter-reset: rtc-counter; }
+//         .rich-text-content ul li, .rich-text-content ol li { background: #fdfdfd; border: 1px solid #f1f5f9; padding: 1.2rem 1.5rem 1.2rem 3rem; border-radius: 12px; display: block; position: relative; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: 0.3s; }
+//         .rich-text-content ul li:hover, .rich-text-content ol li:hover { border-color: var(--hc-primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,145,77,0.1); }
+//         .rich-text-content ul li::before { content: '✦'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.2rem; font-weight: bold; line-height: 1.5; }
+//         .rich-text-content ol li { counter-increment: rtc-counter; }
+//         .rich-text-content ol li::before { content: counter(rtc-counter) '.'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.1rem; font-weight: 700; line-height: 1.5; }
+        
+//         .rich-text-content li img { max-width: 100% !important; height: auto !important; margin: 1rem auto; border-radius: 8px; display: block; }
+
+//         .micro-trust-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; }
+//         .micro-trust-item:last-child { border-bottom: none; padding-bottom: 0; }
+//         .micro-trust-icon { color: #22c55e; font-size: 18px; margin-right: 12px; }
+
+//         /* Premium FAQs */
+//         .faq-premium-item { border: none !important; margin-bottom: 16px; border-radius: 16px !important; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04); background: #ffffff; border: 1px solid #f1f5f9 !important; }
+//         .faq-premium-btn { width: 100%; text-align: left; background: white; border: none; padding: clamp(16px, 4vw, 24px); font-weight: 700; font-size: clamp(1.05rem, 3.5vw, 1.2rem); color: var(--hc-dark); display: flex; justify-content: space-between; align-items: center; box-shadow: none !important; line-height: 1.4; gap: 15px; }
+//         .faq-premium-btn::after { display: none !important; }
+//         .faq-premium-btn:not(.collapsed) { color: var(--hc-primary); background: #fffcf9; }
+//         .faq-icon-toggle { transition: transform 0.3s ease; color: var(--hc-primary); flex-shrink: 0; }
+//         .faq-premium-btn:not(.collapsed) .faq-icon-toggle { transform: rotate(45deg); color: #ff5722; }
+//         .faq-premium-body { padding: 0 clamp(16px, 4vw, 24px) 20px; color: #475569; font-size: clamp(0.95rem, 3vw, 1.05rem); line-height: 1.7; background: #fffcf9; }
+        
+//         .sidebar-blog-card { padding: 12px; border-radius: 12px; transition: all 0.3s ease; border: 1px solid transparent; }
+//         .sidebar-blog-card:hover { background-color: #f8fafc; border-color: #e2e8f0; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
+
+//         .process-step { display: flex; align-items: flex-start; margin-bottom: 30px; position: relative; }
+//         .process-step:last-child { margin-bottom: 0; }
+//         .process-icon { width: 50px; height: 50px; min-width: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 20px; z-index: 2; }
+//         .process-step:not(:last-child)::after { content: ''; position: absolute; left: 24px; top: 50px; bottom: -30px; width: 2px; background: #ffe4d6; z-index: 1; }
+
+//         .excellence-stat { text-align: center; padding: 20px; position: relative; }
+//         @media (min-width: 768px) { .excellence-stat::after { content: ""; position: absolute; right: 0; top: 20%; height: 60%; width: 1px; background: #e2e8f0; } .excellence-stat:last-child::after { display: none; } }
+
+//         .dual-sticky-wrapper { position: sticky; top: 100px; height: max-content; }
+//         .sidebar-widget { background: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 30px; border: 1px solid rgba(0,0,0,0.03); }
+//         .widget-title { font-family: var(--font-outfit), sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 25px; position: relative; padding-bottom: 10px; }
+//         .widget-title::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #ff914d; border-radius: 2px; }
+
+//         .sidebar-cta { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 30px 20px; text-align: center; color: white; margin-bottom: 30px; position: relative; overflow: hidden; }
+//         .nav-city-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 10px; color: #475569; text-decoration: none; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: all 0.2s ease; background: #f8fafc; margin-bottom: 10px; }
+//         .nav-city-link:hover, .nav-city-link.active { background: #ff914d; color: white; transform: translateX(5px); }
+//         .nav-city-link.active { pointer-events: none; }
+//         .sidebar-cta h4 { color: #ffffff !important; }
+
+//         .modern-card { background: #ffffff; padding: 30px 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s ease; height: 100%; position: relative; overflow: hidden; text-align: center;}
+//         .modern-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #ff914d;}
+//         .modern-card-icon { width: 50px; height: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 20px; transition: transform 0.3s ease;}
+//         .modern-card:hover .modern-card-icon { transform: scale(1.1); background: #ff914d; color: white; }
+
+//         @media (max-width: 768px) {
+//         main.bg-light {
+//     overflow-x: hidden;
+//   }
+//           .premium-card { padding: 20px !important; margin-bottom: 25px; }
+//           .author-date-social-block { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
+//           .social-links { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+//           .hero-main-title { font-size: 2.2rem !important; }
+          
+//           .mobile-slider-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 0 30px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+//           .mobile-slider-wrapper::-webkit-scrollbar { display: none; }
+//           .mobile-slider-wrapper > div { flex: 0 0 88% !important; scroll-snap-align: center; }
+//           .rich-text-content ul { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 1rem; }
+//           .rich-text-content li { flex: 0 0 85%; }
+
+//           .process-slider > div { 
+//     flex: 0 0 100% !important; /* Shows exactly one card at a time */
+//     padding: 0 10px; /* Optional: adds a little breathing room */
+//   }
+//   .process-slider .process-step { 
+//     flex-direction: column; 
+//     align-items: center; 
+//     text-align: center; 
+//   }
+//   .process-slider .process-icon { 
+//     margin-right: 0; 
+//     margin-bottom: 15px; 
+//   }
+//   .process-slider .process-step::after { 
+//     display: none !important; /* Removes the vertical connecting line */
+//   }
+//           .modern-card-slider > div { 
+//     flex: 0 0 100% !important; /* 👈 Shows exactly 1 card at a time on mobile */
+//   }
+//         }
+          
+//       `}} />
+
+//       <main className="bg-light pb-5">
+        
+//         {pageType === "blog" && (
+//           <div className="container py-4 py-lg-5 mt-lg-4">
+//             <div className="row g-4 g-lg-5">
+
+//               <div className="col-lg-8 order-1">
+//                 <div className="premium-card bg-white">
+
+//                   <h1 className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: '1.3' }}>
+//                     {pageData.title}
+//                   </h1>
+
+//                   <div className="author-date-social-block d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4">
+//                     <div className="text-muted fst-italic fs-6 mb-3 mb-md-0 d-flex align-items-center font-poppins flex-wrap gap-2">
+//                       <span><FaUserCircle className="me-2 text-secondary" size={20} />
+//                       {pageData.writer_name ? `By ${pageData.writer_name}` : "By HC Team"}</span>
+//                       <span className="mx-2 d-none d-md-inline">•</span>
+//                       <span><FaCalendarAlt className="me-2 text-secondary" size={18} />
+//                       {new Date(pageData.created_at || Date.now()).toLocaleDateString('en-US', {
+//                         year: 'numeric', month: 'long', day: 'numeric'
+//                       })}</span>
+//                     </div>
+
+//                     <div className="social-links d-flex gap-2">
+//                         {siteSettings?.facebook_url && <a href={siteSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="social-btn fb" aria-label="Facebook"><FaFacebookF size={18} /></a>}
+//                         {siteSettings?.instagram_url && <a href={siteSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="social-btn ig" aria-label="Instagram"><FaInstagram size={18} /></a>}
+//                         {siteSettings?.twitter_url && <a href={siteSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="social-btn tw" aria-label="X (Twitter)"><FaTwitter size={18} /></a>}
+//                         {siteSettings?.linkedin_url && <a href={siteSettings.linkedin_url} target="_blank" rel="noopener noreferrer" className="social-btn in" aria-label="LinkedIn"><FaLinkedin size={18} /></a>}
+//                         {siteSettings?.pinterest_url && <a href={siteSettings.pinterest_url} target="_blank" rel="noopener noreferrer" className="social-btn pi" aria-label="Pinterest"><FaPinterest size={18} /></a>}
+//                         {siteSettings?.youtube_url && <a href={siteSettings.youtube_url} target="_blank" rel="noopener noreferrer" className="social-btn yt" aria-label="YouTube"><FaYoutube size={18} /></a>}
+//                     </div>
+//                   </div>
+
+//                   {pageData.image && (
+//                     <div className="w-100 mb-4 mb-lg-5 d-flex justify-content-center">
+//                       <Image
+//                         // src={pageData.image}
+//                         src={toHttps(pageData.image)}
+//                         alt={pageData.image_alt || pageData.title || defaultAltText}
+//                         width={1200}
+//                         height={675}
+//                         priority
+//                         fetchPriority="high"
+//                         sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1199px) 66vw, 760px"
+//                         style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover', borderRadius: '1rem', display: 'block', margin: '0 auto' }}
+//                         className="shadow-sm"
+//                       />
+//                     </div>
+//                   )}
+
+//                  <div className="details font-poppins rich-text-content ck-content">
+//                    {/* <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
+//                    */}
+//                    <div dangerouslySetInnerHTML={{ __html: richDescription }} />
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <div className="col-lg-4 order-2">
+//                 <div className="dual-sticky-wrapper">
+
+//                   <SidebarForm city={slug} />
+
+//                   {recentBlogs && recentBlogs.length > 0 && (
+//                     <div className="sidebar-widget mt-4 lazy-render">
+//                       <h4 className="widget-title">Related Articles</h4>
+//                       <div className="d-flex flex-column gap-2">
+//                         {recentBlogs.map((blog, idx) => (
+//                           // <Link key={idx} href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+//                           <Link key={idx} href={getBlogHref(blog)} className="text-decoration-none">  
+//                             <div className="sidebar-blog-card d-flex align-items-center gap-3">
+//                               <img 
+//                                 // src={blog.image || "/images/default.jpg"} 
+//                                 src={toHttps(blog.image) || "/images/default.jpg"}
+//                                 alt={blog.title}
+//                                 loading="lazy"
+//                                 decoding="async"
+//                                 className="rounded shadow-sm flex-shrink-0" 
+//                                 style={{ width: "70px", height: "70px", objectFit: "contain" }} 
+//                               />
+//                               <div>
+//                                 <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px', lineHeight: '1.4' }}>
+//                                   {blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}
+//                                 </h6>
+//                                 <small className="text-gradient fw-bold" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
+//                                   READ ARTICLE <FaArrowRight size={10} />
+//                                 </small>
+//                               </div>
+//                             </div>
+//                           </Link>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   )}
+
+//                   <div className="sidebar-widget mt-4">
+//                     <h4 className="widget-title">Service Areas</h4>
+//                     <div className="d-flex flex-column">
+//                       {Object.keys(cityUrlMap).map((c, idx) => (
+//                         <Link key={idx} href={cityUrlMap[c]} className="nav-city-link">
+//                           <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
+//                           <FaArrowRight size={12} />
+//                         </Link>
+//                       ))}
+//                     </div>
+//                   </div>
+
+//                 </div>
+//               </div>
+
+//             </div>
+//           </div>
+//         )}
+
+//         {pageType === "cms-page" && (
+//           <>
+//             <div className="city-hero w-100">
+//               <Image 
+//                 src={heroImageSrc}
+//                 // alt={`${displayCity} Interior Design`}
+//                 alt={
+//   pageData?.banner_image && pageData?.banner_image_alt?.trim()
+//     ? pageData.banner_image_alt.trim()
+//     : `${displayCity} Interior Design`
+// }
+//               //   fill 
+//               //   priority 
+//               //   sizes="100vw" 
+//               //   style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               // />
+
+//               width={1920}
+//                 height={800}
+//                 priority
+//                 fetchPriority="high"
+//                 sizes="100vw"
+//                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               />
+              
+//               <div className="container hero-content font-poppins">
+//                 <div className="hero-badge" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}>
+//                   <FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior ${displayCity}`}
+//                 </div>
+                
+//                 <h1 
+//                   className="hero-main-title fw-bold mb-3 font-outfit text-white" 
+//                   style={{ textShadow: '2px 4px 15px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6)' }}
+//                 >
+//                   {pageData?.banner_title || pageData?.title || `${displayCity}`}
+//                 </h1>
+//               </div>
+//             </div>
+
+//             <div className="container city-main-container">
+//               <div className="row g-5">
+//                 <div className="col-lg-8">
+//                   {/* <div className="dual-sticky-wrapper"> */}
+                    
+//                     <div className="premium-card mb-4">
+//                       {/* <h2 className="font-outfit fw-bold h3 mb-4 text-dark">
+//                          {displayCity}
+//                       </h2> */}
+//                       <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeContent }} />
+//                     </div>
+
+//                     <div className="lazy-render">
+//                       <div className="premium-card bg-white border-0">
+//                         <h2 className="font-outfit fw-bold h3 mb-4 text-dark text-center text-md-start">Our Proven Design Process</h2>
+//                         <div className="mobile-slider-wrapper process-slider">
+//                           {[
+//                             { icon: <FaUser />, title: "Consultation & Ideation", desc: `We meet at your ${displayCity} property to understand your vision.` },
+//                             { icon: <FaDraftingCompass />, title: "3D Concept & Planning", desc: "Walking through your home with detailed 3D renders before we build." },
+//                             { icon: <FaHardHat />, title: "Precision Execution", desc: "Expert execution with 150+ quality checks and zero compromises." },
+//                             { icon: <FaHome />, title: "The Grand Handover", desc: "A flawless move-in within 45 Days Delivery*. Welcome home." }
+//                           ].map((step, i) => (
+//                             <div className="process-step" key={i}>
+//                               <div className="process-icon">{step.icon}</div>
+//                               <div>
+//                                 <h4 className="font-outfit h5 fw-bold mb-1">{i + 1}. {step.title}</h4>
+//                                 <p className="text-muted font-poppins small mb-0">{step.desc}</p>
+//                               </div>
+//                             </div>
+//                           ))}
+//                         </div>
+//                       {/* </div> */}
+//                     </div>
+
+//                     {recentBlogs.length > 0 && (
+//                       <div className="lazy-render">
+//                         <div className="premium-card border-0 px-0 pt-0">
+//                           <h2 className="font-outfit fw-bold h3 mb-4">Design Inspiration</h2>
+//                           <div className="row g-4 font-poppins mobile-slider-wrapper">
+//                             {recentBlogs.map((blog, idx) => (
+//                               <div className="col-md-6" key={idx}>
+//                                 {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+//                                 <Link href={getBlogHref(blog)} className="text-decoration-none">
+//                                   <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
+//                                     <img 
+//                                     // src={blog.image || "/images/default.jpg"}
+//                                     src={toHttps(blog.image) || "/images/default.jpg"}
+//                                     alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" decoding="async" />
+//                                     <div className="ms-3">
+//                                       <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
+//                                       <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
+//                                     </div>
+//                                   </div>
+//                                 </Link>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )}
+
+//                     {/* --- EXCELLENCE STATS (Dynamic CMS Icons) --- */}
+//                     <div className="lazy-render">
+//                       <div className="premium-card shadow-sm" style={{ background: 'linear-gradient(to right, #ffffff, #fff9f5)' }}>
+//                         <div className="row align-items-center justify-content-center mobile-slider-wrapper">
+                          
+//                           {excellenceStats && excellenceStats.length > 0 ? (
+//                             excellenceStats.map((stat, idx) => {
+//                               const IconComponent = stat.iconName && FaIcons[stat.iconName] ? FaIcons[stat.iconName] : FaIcons.FaStar;
+//                               const colWidth = excellenceStats.length <= 3 ? 4 : Math.max(3, Math.floor(12 / excellenceStats.length));
+
+//                               return (
+//                                 <div className={`col-md-${colWidth} excellence-stat d-flex flex-column align-items-center justify-content-center text-center`} key={idx}>
+//                                   {stat.iconType === "image" && stat.image ? (
+//                                     <img 
+//                                       src={getBackendImageUrl(stat.image)} 
+//                                       alt={stat.label || "Stat Icon"} 
+//                                       style={{ width: `${stat.size || 40}px`, height: `${stat.size || 40}px`, objectFit: "contain" }} 
+//                                       className="mb-3"
+//                                     />
+//                                   ) : (
+//                                     <IconComponent 
+//                                       size={stat.size || 40} 
+//                                       color={stat.color || "#f5a623"} 
+//                                       className="mb-3" 
+//                                     />
+//                                   )}
+//                                   <h3 className="font-outfit fw-bold h2 mb-1">{stat.value}</h3>
+//                                   <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">{stat.label}</p>
+//                                 </div>
+//                               );
+//                             })
+//                           ) : (
+//                             /* Fallback Default Stats */
+//                             <>
+//                               <div className="col-md-4 excellence-stat d-flex flex-column align-items-center justify-content-center text-center">
+//                                 <FaHome size={40} color="#ff914d" className="mb-3" />
+//                                 <h3 className="font-outfit fw-bold h2 mb-1">2680+</h3>
+//                                 <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">HOME RENOVATIONS</p>
+//                               </div>
+//                               <div className="col-md-4 excellence-stat d-flex flex-column align-items-center justify-content-center text-center">
+//                                 <FaSmile size={40} color="#ff914d" className="mb-3" />
+//                                 <h3 className="font-outfit fw-bold h2 mb-1">2660+</h3>
+//                                 <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">HAPPY CUSTOMERS</p>
+//                               </div>
+//                               <div className="col-md-4 excellence-stat d-flex flex-column align-items-center justify-content-center text-center">
+//                                 <FaStar size={40} color="#ff914d" className="mb-3" />
+//                                 <h3 className="font-outfit fw-bold h2 mb-1">4.8/5</h3>
+//                                 <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">CLIENT RATINGS</p>
+//                               </div>
+//                             </>
+//                           )}
+
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="lazy-render">
+//                       <div className="premium-card bg-transparent border-0 shadow-none px-0 py-0 mb-4">
+//                         <div className="text-center mb-4">
+//                             <h2 className="font-outfit fw-bold h3 text-dark">What makes us the best choice for your project.</h2>
+//                         </div>
+//                         <div className="row g-4 mobile-slider-wrapper modern-card-slider">
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaShieldAlt /></div>
+//                               <h4 className="font-outfit fw-bold h6">10-Year Warranty*</h4>
+//                               <p className="text-muted font-poppins small mb-0">India&apos;s only full-home coverage guarantee.</p>
+//                             </div>
+//                           </div>
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaGem /></div>
+//                               <h4 className="font-outfit fw-bold h6">Elite Finishes</h4>
+//                               <p className="text-muted font-poppins small mb-0">Sourcing luxury materials that stand the test of time.</p>
+//                             </div>
+//                           </div>
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaClock /></div>
+//                               <h4 className="font-outfit fw-bold h6">45-Day Delivery*</h4>
+//                               <p className="text-muted font-poppins small mb-0">Swift, on-time installation of storage & kitchens.</p>
+//                             </div>
+//                           </div>
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaTools /></div>
+//                               <h4 className="font-outfit fw-bold h6">Expert Team</h4>
+//                               <p className="text-muted font-poppins small mb-0">Highly skilled professionals handling your project end-to-end.</p>
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     {contentBlocks.length > 0 && (
+//                       <div className="content-blocks-section lazy-render mb-4">
+//                         {contentBlocks.map((block, idx) => (
+//                           <div key={idx} className="premium-card mb-4" style={{ padding: '30px' }}>
+//                             {block.type === 'testimonial' && (
+//                               <blockquote className="blockquote text-center mb-0">
+//                                 <p className="mb-3 fs-5 font-italic">&quot;{block.data.review}&quot;</p>
+//                                 <footer className="blockquote-footer mt-0 fs-6">
+//                                   {block.data.client_name} <cite title="Source Title">{block.data.designation}</cite>
+//                                 </footer>
+//                               </blockquote>
+//                             )}
+//                             {block.type === 'service_row' && (
+//                               <div className="row align-items-center">
+//                                 <div className={block.data.reverse_layout ? 'col-md-6 order-md-2' : 'col-md-6'}>
+//                                   <h3 className="font-outfit fw-bold h4 mb-3">{block.data.heading}</h3>
+//                                   <p className="text-muted font-poppins" style={{ whiteSpace: 'pre-line' }}>{block.data.description}</p>
+//                                 </div>
+//                                 <div className={block.data.reverse_layout ? 'col-md-6 order-md-1 text-center' : 'col-md-6 text-center'}>
+//                                   {block.data.image_url && (
+//                                     <img 
+//                                       // src={block.data.image_url} 
+//                                       src={toHttps(block.data.image_url)}
+//                                       alt={block.data.image_alt || block.data.heading || defaultAltText} 
+//                                       className="img-fluid rounded-4 shadow-sm" 
+//                                       style={{ maxHeight: '350px', objectFit: 'cover', width: '100%' }}
+//                                       loading="lazy"
+//                                       decoding="async" 
+//                                     />
+//                                   )}
+//                                 </div>
+//                               </div>
+//                             )}
+//                             {block.type === 'counter' && (
+//                               <div className="text-center p-3">
+//                                 <h2 className="font-outfit fw-bold display-4 mb-2 text-gradient">{block.data.number}</h2>
+//                                 <p className="font-poppins fw-bold text-uppercase text-muted mb-0 tracking-wider">{block.data.label}</p>
+//                               </div>
+//                             )}
+//                           </div>
+//                         ))}
+//                       </div>
+//                     )}
+
+//                     {accordions.length > 0 && (
+//                       <div className="lazy-render mb-4">
+//                         <div className="premium-card border-0 px-0">
+//                           <h2 className="font-outfit fw-bold h3 mb-4">Additional Information</h2>
+//                           <div className="accordion font-poppins" id={`accordion-info-${pageData.id}`}>
+//                             {accordions.map((acc, index) => (
+//                               <div className="accordion-item faq-premium-item" key={`acc-${index}`}>
+//                                 <h2 className="accordion-header">
+//                                   <button className={`accordion-button faq-premium-btn ${index !== 0 ? 'collapsed' : ''}`} type="button" data-bs-toggle="collapse" data-bs-target={`#acc-collapse${index}`}>
+//                                     <span className="pe-3">{acc.title}</span>
+//                                     <FaPlus className="faq-icon-toggle flex-shrink-0" />
+//                                   </button>
+//                                 </h2>
+//                                 <div id={`acc-collapse${index}`} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent={`#accordion-info-${pageData.id}`}>
+//                                   <div className="accordion-body faq-premium-body" style={{ whiteSpace: 'pre-line' }}>{acc.content}</div>
+//                                 </div>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )}
+
+//                     {/* {faqs.length > 0 && (
+//                       <div className="lazy-render">
+//                         <div className="premium-card border-0">
+//                           <h2 className="font-outfit fw-bold h3 mb-4">Insights for {displayCity}</h2>
+//                           <div className="accordion font-poppins" id={`accordion-faq-${pageData?.id}`}>
+//                             {faqs.map((faq, index) => (
+//                               <div className="accordion-item faq-premium-item mb-4 shadow-sm" style={{ borderRadius: '16px', border: '1px solid #f1f5f9' }} key={index}>
+//                                 <h2 className="accordion-header">
+//                                   <button className={`accordion-button faq-premium-btn py-4 px-4 ${index !== 0 ? 'collapsed' : ''}`} type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${index}`}>
+//                                     <span className="pe-3" style={{ lineHeight: '1.6' }}>{faq.question}</span>
+//                                     <FaPlus className="faq-icon-toggle flex-shrink-0" />
+//                                   </button>
+//                                 </h2>
+//                                 <div id={`collapse${index}`} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent={`#accordion-faq-${pageData?.id}`}>
+//                                   <div className="accordion-body faq-premium-body px-4 pb-4" style={{ whiteSpace: 'pre-line', lineHeight: '1.8' }}>
+//                                     {faq.answer}
+//                                   </div>
+//                                 </div>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )} */}
+
+//                     {faqs.length > 0 && (
+//   <div className="lazy-render mb-5">
+//     {/* Restored card padding (p-4 p-md-5) to fix the left/right overflow */}
+//     <div className="premium-card p-4 p-md-5 bg-white shadow-sm rounded-4">
+//       <h2 className="font-outfit fw-bold display-6 mb-4 text-dark">FAQ&apos;s</h2>
+//       <div className="font-poppins">
+//         {faqs.map((faq, index) => {
+//           // Removes duplicate numbers (e.g., "1. ") coming from API data
+//           const cleanQuestion = faq.question.replace(/^(\d+[\.\)]\s*|Q\d+[\.\)]\s*)/i, "");
+//           // Removes duplicate "Ans:" or "Ans." coming from API data
+//           const cleanAnswer = faq.answer.replace(/^(Ans[\.\:]?\s*)/i, "");
+
+//           return (
+//             <div key={index} className="mb-4 pb-2">
+//               {/* Increased margin-bottom (mb-3) for spacing between Question and Answer */}
+//               <p className="fw-bold mb-3 text-dark fs-6" style={{ color: "#1e293b", lineHeight: "1.5" }}>
+//                 Q{index + 1}. {cleanQuestion}
+//               </p>
+//               <p className="mb-0 text-secondary" style={{ whiteSpace: "pre-line", lineHeight: "1.8", fontSize: "0.98rem" }}>
+//                 <span className="fw-bold text-dark">Ans.</span> {cleanAnswer}
+//               </p>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   </div>
+// )}
+
+//                   </div>
+//                 </div>
+
+//                 <div className="col-lg-4">
+//                   <div className="dual-sticky-wrapper">
+                    
+//                     <div className="sidebar-cta shadow-lg mb-4">
+//                       <h4 className="font-outfit fw-bold mb-2">Book a Site Visit</h4>
+//                       <p className="font-poppins small text-white-50 mb-4">Expert designers will visit your {displayCity} property.</p>
+//                       <Link href="/contact" className="btn btn-light w-100 fw-bold py-2 rounded-pill">Schedule Now</Link>
+//                     </div>
+
+//                     <SidebarForm city={slug} />
+
+//                     <div className="sidebar-widget py-4 font-poppins lazy-render">
+//                       <h4 className="widget-title mb-4">The Promise</h4>
+//                       <div className="micro-trust-item">
+//                         <FaCheckCircle className="micro-trust-icon" />
+//                         <div>
+//                           <span className="d-block fw-bold text-dark" style={{ fontSize: '14px' }}>Transparent Pricing</span>
+//                           <span className="text-muted" style={{ fontSize: '12px' }}>No hidden costs, ever.</span>
+//                         </div>
+//                       </div>
+//                       <div className="micro-trust-item">
+//                         <FaTools className="micro-trust-icon text-warning" />
+//                         <div>
+//                           <span className="d-block fw-bold text-dark" style={{ fontSize: '14px' }}>In-House Execution</span>
+//                           <span className="text-muted" style={{ fontSize: '12px' }}>No third-party contractors involved.</span>
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="sidebar-widget">
+//                       <h4 className="widget-title">Service Areas</h4>
+//                       <div className="d-flex flex-column">
+//                         {Object.keys(cityUrlMap).map((c, idx) => (
+//                           <Link key={idx} href={cityUrlMap[c]} className={`nav-city-link ${c === slug ? 'active' : ''}`}>
+//                             <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
+//                             <FaArrowRight size={12} />
+//                           </Link>
+//                         ))}
+//                       </div>
+//                     </div>
+
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </>
+//         )}
+//       </main>
+//     </MainLayout>
+//   );
+// };
+
+// export default DynamicRootPage;
+
+
+
+
+
+// import MainLayout from "../layouts/MainLayout";
+// import { notFound, permanentRedirect } from "next/navigation";
+// import Image from "next/image"; 
+// import Link from "next/link";
+// import DOMPurify from "isomorphic-dompurify";
+// import { headers } from "next/headers";
+
+// import {
+//   FaMapMarkerAlt, FaArrowRight, FaUser, FaShieldAlt, FaGem, FaClock,
+//   FaStar, FaCheckCircle, FaTools, FaDraftingCompass, FaHardHat, FaHome,
+//   FaPlus, FaSmile, FaCalendarAlt, FaUserCircle, FaFacebookF, FaInstagram,
+//   FaTwitter, FaLinkedin, FaPinterest, FaYoutube
+// } from "react-icons/fa";
+
+// import * as FaIcons from "react-icons/fa";
+
+// import { SidebarForm } from "../services-detail/CityForms";
+// // Shared with the city pages (same components, same look)
+// import ProjectGallery from "../services-detail/ProjectGallery";
+// import MobileSlider from "../services-detail/MobileSlider";
+// import { getCityContent, fillCity, parseVideoUrl, DEFAULT_CITY_CONTENT } from "@/utils/cityContent";
+// import {
+//   splitPageSettings,
+//   getPageSectionOrder,
+//   PAGE_CONTENT_DEFAULTS,
+//   DEFAULT_PROMISE_ITEMS,
+// } from "@/utils/cmsPageSettings";
+
+// import { 
+//   generateOrganizationSchema, 
+//   generateLocalBusinessSchema, 
+//   generateBreadcrumbSchema, 
+//   generateFAQSchema 
+// } from "@/utils/schemaGenerator";
+// import { getCanonicalUrl, getRobotsDirectives, SITE_URL } from "@/utils/seoHelpers";
+
+// import { getPageSEO } from "@/utils/getSEO"; 
+// import { defaultAltText, getBlogHref, getBackendImageUrl } from "@/utils/helper";
+
+// /* Keep this CMS route dynamically rendered. Only the exact one-level paths
+//    present in the CWV PDF opt their API reads into a 60-second data cache. */
+// export const revalidate = 0;
+
+// const cityUrlMap = {
+//   "noida": "/interior-designers-in-noida",
+//   "greater_noida": "/interior-designers-in-greater-noida",
+//   "delhi": "/interior-designers-in-delhi",
+//   "gurugram": "/interior-designers-in-gurgaon",
+//   "faridabad": "/best-interior-designers-in-faridabad",
+//   "ghaziabad": "/interior-designers-in-ghaziabad",
+//   "manesar": "/interior-designers-in-manesar",
+//   "dwarka": "/interior-designers-in-dwarka",
+// };
+
+// const isValidSlug = (slug) => {
+//   if (!slug) return false;
+//   if (slug === "undefined" || slug === "null") return false;
+//   if (slug.includes(".")) return false; 
+//   return true;
+// };
+
+
+// // Only one-level CMS paths present in the attached CWV report opt into data caching.
+// const PDF_CWV_TARGET_SLUGS = new Set([
+//   "creating-the-home-of-your-dreams",
+//   "estimator-for-home",
+//   "how-to-decorate-your-home-for-diwali-under-rs5000",
+//   "thank-you",
+//   "interior-decorators-in-south-delhi",
+//   "interior-designer-in-crossings-republik-ghaziabad",
+//   "interior-designer-in-sector-150-noida",
+//   "contact",
+//   "interior-designer-in-sector-84-faridabad",
+//   "job-application",
+//   "interior-designers-in-noida",
+//   "bedroom-dressing-table-design",
+//   "best-interior-designers-in-faridabad",
+//   "interior-designers-in-gurgaon",
+//   "cozy-living-room-ideas-to-elevate-your-home",
+//   "services",
+//   "interior-designers-in-vaishali-ghaziabad",
+//   "bedroom-wall-design-ideas",
+//   "know-about-lighting-without-false-ceiling",
+//   "experience-center-new-delhi",
+//   "experience-center",
+//   "interior-designer-in-wave-city-ghaziabad",
+//   "how-its-works",
+//   "spacesaving-furniture",
+//   "design-idea",
+//   "top-interior-designer-in-kavi-nagar-ghaziabad",
+//   "interior-designers-in-greater-noida",
+//   "interior-designer-in-sector-82-faridabad",
+//   "interior-designers-in-golf-course-road-gurgaon",
+//   "pista-green-colour-combination",
+//   "staircase-as-per-vastu",
+//   "reclaimed-wood",
+//   "experience-center-faridabad",
+//   "best-interior-designer-in-sector-137-noida",
+//   "user-queries",
+//   "product",
+//   "thankyou",
+//   "furniture",
+//   "interior-designers-in-manesar",
+//   "cancelletion-policy",
+//   "term-and-condition",
+//   "top-wall-moulding-designs",
+//   "interior-designer-in-sector-83-faridabad",
+//   "faq",
+//   "interior-designer-in-greater-faridabad",
+//   "interior-designer-in-noida-extension",
+//   "interior-designers-in-raj-nagar-ghaziabad",
+//   "warranty-assurance",
+//   "luxury-bedroom-interior-design",
+//   "refer-and-earn",
+//   "team",
+//   "blog",
+//   "what-we-offer",
+//   "residential-projects",
+//   "designer-choice",
+//   "statement-mirror-designs",
+//   "interior-designer-in-sector-104-noida",
+//   "ready-togo-design",
+// ]);
+
+// const isPdfCwvTarget = (slug) => PDF_CWV_TARGET_SLUGS.has(slug);
+
+// const getCmsFetchOptions = (slug) =>
+//   isPdfCwvTarget(slug)
+//     ? { next: { revalidate: 60 } }
+//     : {
+//         cache: "no-store",
+//         headers: {
+//           "Cache-Control": "no-cache, no-store, must-revalidate",
+//           Pragma: "no-cache",
+//         },
+//       };
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
+
+// const isDraftStatus = (data) => {
+//   if (!data) return true;
+//   if (data.status === undefined || data.status === null) return false; 
+//   const status = String(data.status).toLowerCase().trim();
+//   return status === "draft" || status === "inactive" || status === "0";
+// };
+
+// async function getRecentBlogs(slug) {
+//   try {
+//     const res = await fetch(`${API_BASE_URL}/cms-blog`, getCmsFetchOptions(slug));
+//     if (!res.ok) return [];
+//     const data = await res.json();
+//     // the full list (not only 4) so the blogs ticked in CMS > Pages > Page Layout can be found
+//     return Array.isArray(data) ? data.slice(0, 100) : [];
+//   } catch (error) { return []; }
+// }
+
+// async function getExcellenceStats(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-content/excellence_stats`,
+//       getCmsFetchOptions(slug)
+//     );
+
+//     if (!res.ok) return null;
+    
+//     const data = await res.json();
+//     const record = Array.isArray(data) ? data[0] : data;
+    
+//     if (record && record.json_content) {
+//       // Safely handle if the API returns a stringified JSON or a direct object
+//       const jsonContent = typeof record.json_content === "string" 
+//         ? JSON.parse(record.json_content) 
+//         : record.json_content;
+        
+//       return jsonContent?.items || null;
+//     }
+//     return null;
+//   } catch (error) { 
+//     console.error("Failed to fetch excellence stats:", error);
+//     return null; 
+//   }
+// }
+
+// async function getBlogData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-blog/blog-slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// async function getCmsPageData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-pages/slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// // export async function generateMetadata({ params }) {
+// //   headers();
+// //   const slug = params.blog;
+
+// // Old blog canonicals are stored as https://hcinterior.in/<slug>; point them to /blog/<slug>.
+// const fixBlogCanonical = (canonical, slug) => {
+//   try {
+//     const u = new URL(canonical, SITE_URL);
+//     if (u.pathname.replace(/\/+$/, "") === `/${slug}`) u.pathname = `/blog/${slug}`;
+//     return u.toString();
+//   } catch {
+//     return `${SITE_URL}/blog/${slug}`;
+//   }
+// };
+
+// export async function buildMetadata(slug, inBlogRoute = false) {
+//   headers();
+
+//   if (!isValidSlug(slug)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   // const [blogData, cmsData, seoData] = await Promise.all([
+//   //   getBlogData(slug).catch(() => null),
+//   //   getCmsPageData(slug).catch(() => null),
+//   //   getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   // ]);
+
+//   // let data = blogData || cmsData;
+
+
+//     const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   const [blogData, cmsData, seoData] = await Promise.all([
+//     getBlogData(slug).catch(() => null),
+//     getCmsPageData(slug).catch(() => null),
+//     getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   ]);
+
+//   let data = inBlogRoute ? blogData : (blogData || cmsData);
+
+//   if (!data || isDraftStatus(data)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+//   // const canonicalUrl = getCanonicalUrl({
+//   //   canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//   //   fallbackPath: `/${slug}`,
+//   // });
+
+//     let canonicalUrl = getCanonicalUrl({
+//     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//     fallbackPath: seoPath,
+//   });
+//   if (inBlogRoute) canonicalUrl = fixBlogCanonical(canonicalUrl, slug);
+
+//     const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+//   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+//   const fallbackImage =
+//   toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+//   const og = seoData?.openGraph;
+//   const ogImages = og?.images?.length
+//     ? og.images
+//     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+//   return {
+//     title,
+//     description,
+//     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+//     alternates: { canonical: canonicalUrl },
+//     robots,
+//     openGraph: {
+//       title: og?.title || title,
+//       description: og?.description || description,
+//       url: canonicalUrl,
+//       siteName: "High Creation Interior",
+//       locale: "en_IN",
+//       type: "website",
+//       images: ogImages,
+//     },
+//     twitter: {
+//       card: "summary_large_image",
+//       title: seoData?.twitter?.title || og?.title || title,
+//       description: seoData?.twitter?.description || og?.description || description,
+//       images: seoData?.twitter?.images?.length
+//         ? seoData.twitter.images
+//         : ogImages.map((i) => i.url),
+//     },
+//   };
+// }
+
+// export async function generateMetadata({ params }) {
+//   return buildMetadata(params.blog);
+// }
+
+// const parseJsonSafe = (data) => {
+//   if (!data) return [];
+//   if (Array.isArray(data)) return data;
+//   try { return JSON.parse(data); } catch (e) { return []; }
+// };
+
+// // --- helpers for the CMS-page layout sections (same behaviour as the city pages) ---
+// const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"];
+// const safeTag = (tag, fallback) => (HEADING_TAGS.includes(tag) ? tag : fallback);
+// const safeInternalHref = (value, fallback = "/contact") => {
+//   const href = String(value || "").trim();
+//   return href.startsWith("/") && !href.startsWith("//") ? href : fallback;
+// };
+// const humanizeCity = (value) => String(value || "").replace(/_/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+
+// const OWN_HOSTS = "(?:apidev\\.hcinterior\\.in|www\\.hcinterior\\.in|hcinterior\\.in)";
+
+// const forceHttpsHtml = (html) =>
+//   typeof html === "string"
+//     ? html.replace(new RegExp(`http://(${OWN_HOSTS})`, "gi"), "https://$1")
+//     : html;
+
+// const toHttps = (url) =>
+//   typeof url === "string"
+//     ? url.replace(new RegExp(`^http://(${OWN_HOSTS})`, "i"), "https://$1")
+//     : url;
+
+// // Rich-text CMS images are below the page hero. Keep their existing attributes,
+// // but decode asynchronously and lazy-load them when the CMS has not specified
+// // explicit loading behavior. This avoids competing with the hero/LCP image.
+// const addCmsImageLoadingHints = (html) => {
+//   if (typeof html !== "string" || !html.includes("<img")) return html;
+//   return html.replace(/<img\b([^>]*)>/gi, (tag, attributes) => {
+//     let next = attributes;
+//     if (!/\bloading\s*=/i.test(next)) next += ' loading="lazy"';
+//     if (!/\bdecoding\s*=/i.test(next)) next += ' decoding="async"';
+//     return `<img${next}>`;
+//   });
+// };
+
+// // const DynamicRootPage = async ({ params }) => {
+// //   headers();
+// //   const slug = params.blog;
+
+// // signature + first lines
+// const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
+//   headers();
+//   const slug = params.blog;
+//   const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   if (!isValidSlug(slug)) {
+//     notFound();
+//   }
+
+//   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+//   // remove serial network waits on mobile connections.
+//   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+//     await Promise.all([
+//       getBlogData(slug).catch(() => null),
+//       getCmsPageData(slug).catch(() => null),
+//       // getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getRecentBlogs(slug).catch(() => []),
+//       getExcellenceStats(slug).catch(() => null),
+//       (async () => {
+//         try {
+//           const setRes = await fetch(
+//             `${API_BASE_URL}/site-settings`,
+//             getCmsFetchOptions(slug)
+//           );
+//           if (!setRes.ok) return null;
+//           const rawSettings = await setRes.json();
+//           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+//         } catch (error) {
+//           console.error("Settings fetch failed", error);
+//           return null;
+//         }
+//       })(),
+//     ]);
+
+//       // Old root URL of a blog -> new /blog/<slug> URL
+//   if (blogResult && !inBlogRoute) permanentRedirect(`/blog/${slug}`);
+//   // /blog/<anything that is not a blog> -> 404 (CMS/city pages must not duplicate under /blog/)
+//   if (inBlogRoute && !blogResult) notFound();
+
+//   const pageData = blogResult || cmsResult;
+//   const pageType = blogResult ? "blog" : "cms-page";
+
+//   if (!pageData || isDraftStatus(pageData)) {
+//     notFound();
+//   }
+
+//   const seoData = seoResult;
+//   const customSchema = seoData?.customSchema;
+//   const allBlogs = Array.isArray(recentBlogsResult) ? recentBlogsResult : [];
+//   const recentBlogs = allBlogs.slice(0, 4);
+//   const excellenceStats = statsResult;
+//   const siteSettings = settingsResult;
+
+//   let faqs = [];
+//   let accordions = [];
+//   let contentBlocks = [];
+//   // Layout options saved from CMS > Pages > "Page Layout" (stored in one reserved content block)
+//   let pageSettings = {};
+
+//   if (pageType === "cms-page") {
+//     faqs = parseJsonSafe(pageData.faqs);
+//     accordions = parseJsonSafe(pageData.accordions);
+//     const split = splitPageSettings(pageData.content_blocks);
+//     contentBlocks = split.blocks;
+//     pageSettings = split.settings;
+//   }
+
+  
+//   const customSchemaText =
+//     typeof customSchema === "string" ? customSchema : customSchema ? JSON.stringify(customSchema) : "";
+//   const legacySchemaText =
+//     !customSchema && typeof pageData?.seo_content?.custom_code === "string" ? pageData.seo_content.custom_code : "";
+//   const hasInnerCustomFaqSchema = /FAQPage/i.test(customSchemaText) || /FAQPage/i.test(legacySchemaText);
+    
+//   const faqSchema = faqs.length > 0 && !hasInnerCustomFaqSchema ? generateFAQSchema(faqs) : null;
+
+//   const displayCity = slug.split(/-|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+//   // const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
+//   const safeContent = pageData?.content
+//     ? (isPdfCwvTarget(slug)
+//         ? addCmsImageLoadingHints(forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//         : forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//     : "";
+//   const rawDescription = forceHttpsHtml(pageData?.description || "");
+//   const richDescription = isPdfCwvTarget(slug)
+//     ? addCmsImageLoadingHints(rawDescription)
+//     : rawDescription;
+
+//   // ---------------------------------------------------------------------------
+//   // CMS-page layout (same options as the city pages). Every value falls back to
+//   // what the page showed before, so pages without saved layout settings look the same.
+//   // ---------------------------------------------------------------------------
+//   const content = getCityContent(pageSettings.content, PAGE_CONTENT_DEFAULTS);
+//   const t = (value) => fillCity(value, displayCity);
+//   const pickTag = (value, fallback) => safeTag(value, fallback);
+//   const iconOf = (name, Fallback) => FaIcons[name] || Fallback;
+
+//   // Section order (desktop / mobile) - applied with CSS "order"
+//   const sectionOrder = getPageSectionOrder(pageSettings.sectionOrder);
+//   const Block = ({ id, className = "", children }) => (
+//     <div
+//       className={`city-block ${className}`.trim()}
+//       style={{ "--d": sectionOrder.desktop.indexOf(id), "--m": sectionOrder.mobile.indexOf(id) }}
+//     >
+//       {children}
+//     </div>
+//   );
+
+//   const ProcessTitleTag = pickTag(content.process.titleTag, "h2");
+//   const ProjectsTitleTag = pickTag(content.projects.titleTag, "h2");
+//   const BlogsTitleTag = pickTag(content.blogs.titleTag, "h2");
+//   const WhyTitleTag = pickTag(content.whyChoose.titleTag, "h2");
+//   const FaqTitleTag = pickTag(content.faqs.titleTag, "h2");
+
+//   // Design Inspiration: the blogs ticked in CMS > Pages > Page Layout, otherwise the latest four (as before)
+//   const savedBlogIds = (Array.isArray(pageSettings.designInspirationBlogIds) ? pageSettings.designInspirationBlogIds : [])
+//     .map((id) => String(id));
+//   const selectedBlogs = savedBlogIds
+//     .map((id) => allBlogs.find((blog) => String(blog.id) === id))
+//     .filter(Boolean);
+//   const designInspirationBlogs = selectedBlogs.length ? selectedBlogs : recentBlogs;
+
+//   // Stats: page-level custom stats > global Excellence Stats (CMS Content) > built-in defaults
+//   const customStatItems = content.stats.useCustom
+//     ? content.stats.items.filter((stat) => stat.value || stat.label)
+//     : [];
+//   const statItems = customStatItems.length
+//     ? customStatItems.map((stat) => ({ ...stat, color: "#ff914d", size: 40 }))
+//     : (excellenceStats && excellenceStats.length > 0)
+//       ? excellenceStats.map((stat) => ({ ...stat, valueTag: "h3", color: stat.color || "#f5a623" }))
+//       : DEFAULT_CITY_CONTENT.stats.items.map((stat) => ({ ...stat, color: "#ff914d", size: 40 }));
+
+//   // Project photos / testimonial videos (links only on custom pages)
+//   const mediaUrl = (value) => {
+//     const text = String(value || "").trim();
+//     return text.startsWith("/") ? getBackendImageUrl(text) : text;
+//   };
+//   const galleryItems = content.projects.gallery.flatMap((item, index) => {
+//     if (item.type === "video") {
+//       const videoUrl = mediaUrl(item.videoUrl);
+//       if (!videoUrl || !parseVideoUrl(videoUrl)) return [];
+//       return [{
+//         type: "video",
+//         image: item.poster ? mediaUrl(item.poster) : "",
+//         alt: item.alt || `${displayCity} client testimonial video`,
+//         title: item.title,
+//         videoUrl,
+//       }];
+//     }
+//     const image = mediaUrl(item.src);
+//     if (!image) return [];
+//     return [{
+//       type: "image",
+//       image,
+//       alt: item.alt || `${displayCity} interior design project ${index + 1}`,
+//       title: item.title,
+//       optimized: false,
+//     }];
+//   });
+
+//   // FAQs come from the page's FAQs tab; the heading options come from Page Layout
+//   const faqItems = faqs
+//     .filter((faq) => faq && faq.question)
+//     .map((faq) => ({
+//       // removes numbering / "Ans." typed into the API data so the accordion does not repeat it
+//       question: String(faq.question).replace(/^(\d+[\.\)]\s*|Q\d+[\.\)]\s*)/i, ""),
+//       answer: String(faq.answer || "").replace(/^(Ans[\.\:]?\s*)/i, ""),
+//     }));
+
+//   // Sidebar
+//   const siteVisit = pageSettings.siteVisit && typeof pageSettings.siteVisit === "object" ? pageSettings.siteVisit : {};
+//   const visitTitle = siteVisit.title || "Book a Site Visit";
+//   const visitDescription = fillCity(siteVisit.description || "Expert designers will visit your {city} property.", displayCity);
+//   const visitButtonText = siteVisit.buttonText || "Schedule Now";
+//   const visitButtonUrl = safeInternalHref(siteVisit.buttonUrl || "/contact");
+//   const VisitTitleTag = pickTag(siteVisit.titleTag, "h4");
+//   const PromiseTitleTag = pickTag(pageSettings.promiseTitleTag, "h4");
+//   const ServiceAreasTitleTag = pickTag(pageSettings.serviceAreasTitleTag, "h4");
+//   const NearbyTitleTag = pickTag(pageSettings.nearbyCitiesTitleTag, "h2");
+
+//   const savedPromiseItems = (Array.isArray(pageSettings.promiseItems) ? pageSettings.promiseItems : [])
+//     .filter((item) => item && (item.title || item.description));
+//   const activePromiseItems = savedPromiseItems.length ? savedPromiseItems : DEFAULT_PROMISE_ITEMS;
+
+//   const customServiceAreas = (Array.isArray(pageSettings.serviceAreas) ? pageSettings.serviceAreas : [])
+//     .filter((area) => area && area.name && area.url);
+//   const serviceAreas = customServiceAreas.length
+//     ? customServiceAreas.map((area) => ({ name: area.name, url: safeInternalHref(area.url, "/services") }))
+//     : Object.entries(cityUrlMap).map(([key, url]) => ({ name: humanizeCity(key), url }));
+
+//   // "Nearby Cities" strip: shown only when rows were added in the CMS
+//   const nearbyCityCards = (Array.isArray(pageSettings.nearbyCities) ? pageSettings.nearbyCities : [])
+//     .filter((entry) => entry && entry.name && entry.url)
+//     .map((entry) => ({
+//       name: entry.name,
+//       url: safeInternalHref(entry.url, "/services"),
+//       image: entry.image ? mediaUrl(entry.image) : getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg'),
+//     }));
+
+//   // Optional mobile hero banner (CMS > Pages > Basic Info > Mobile Hero Banner)
+//   const mobileHeroBanner = typeof pageSettings.mobileBannerImage === "string" ? mediaUrl(pageSettings.mobileBannerImage) : "";
+
+//   let heroImageSrc = getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg');
+
+//   const normalizedSlug = slug.toLowerCase();
+
+//   if (pageData?.banner_image) {
+//     heroImageSrc = getBackendImageUrl(pageData.banner_image);
+// }
+//   else if (normalizedSlug.includes('sohna')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designers in Sohna.jpg';
+//   } 
+//   else if (normalizedSlug.includes('noida-extension') || normalizedSlug.includes('noida_extension')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designer in Noida Extension.jpg';
+//   }
+
+//   return (
+//     <MainLayout>
+//       {/* <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizSchema) }} />
+//       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} /> */}
+
+//       {customSchema && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{
+//             __html: typeof customSchema === 'string' 
+//               ? customSchema.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') 
+//               : JSON.stringify(customSchema)
+//           }}
+//         />
+//       )}
+
+//       {/* {pageData?.seo_content?.custom_code && ( */}
+//         {!customSchema && pageData?.seo_content?.custom_code && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{ __html: pageData.seo_content.custom_code.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') }}
+//         />
+//       )}
+
+//       <style dangerouslySetInnerHTML={{__html: `
+//         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
+//         .font-outfit { font-family: var(--font-outfit), sans-serif; }
+//         .font-poppins { font-family: var(--font-poppins), sans-serif; }
+//         .text-gradient { background: linear-gradient(135deg, #ff914d 0%, #ff5722 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+//         .lazy-render { content-visibility: auto; contain-intrinsic-size: 1px 800px; }
+
+//         /* Social Buttons */
+//         .social-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+//         .social-btn:hover { transform: translateY(-4px); }
+//         .social-btn.fb:hover { background-color: #1877F2; color: white; box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3); }
+//         .social-btn.ig:hover { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; box-shadow: 0 6px 12px rgba(214, 36, 159, 0.3); }
+//         .social-btn.tw:hover { background-color: #000000; color: white; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); }
+//         .social-btn.in:hover { background-color: #0A66C2; color: white; box-shadow: 0 6px 12px rgba(10, 102, 194, 0.3); }
+//         .social-btn.pi:hover { background-color: #E60023; color: white; box-shadow: 0 6px 12px rgba(230, 0, 35, 0.3); }
+//         .social-btn.yt:hover { background-color:hsl(0, 100.00%, 50.00%); color: white; box-shadow: 0 6px 12px rgba(255, 0, 0, 0.3); }
+
+//         /* Modern City Layout Styles */
+//         .city-hero { height: 55vh; min-height: 450px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #1e293b; }
+//         .city-hero-picture { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+//         .city-hero-picture img { display: block; }
+//         .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.95) 100%); z-index: 1; }
+//         .hero-content { position: relative; z-index: 2; text-align: center; padding-top: 40px; }
+//         .hero-badge { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 24px; border-radius: 30px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: inline-flex; align-items: center; color: #fff; font-weight: 600; }
+//         .hero-main-title { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.1; letter-spacing: -0.02em; }
+        
+//         .city-main-container { margin-top: -80px; position: relative; z-index: 10; }
+//         .premium-card { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.04); padding: 40px; margin-bottom: 40px; border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+//         .city-project-card { position: relative; overflow: hidden; border-radius: 16px; background: #f1f5f9; aspect-ratio: 4 / 3; }
+//         .city-project-card img, .city-project-card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+//         .city-project-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 36px 16px 14px; color: #fff; font-weight: 600; background: linear-gradient(transparent, rgba(15,23,42,.78)); }
+        
+//         /* CMS CONTENT PROTECTION & STRICT IMAGE POSITIONING */
+//         .rich-text-content { width: 100%; word-break: break-word; overflow-wrap: anywhere; }
+        
+//         .rich-text-content figure, 
+//         .rich-text-content figure.image { margin: 2rem auto !important; max-width: 100% !important; height: auto !important; display: flex; justify-content: center; }
+//         .rich-text-content img { max-width: 100% !important; height: auto !important; border-radius: 12px; display: block !important; margin: 0 auto !important; object-fit: contain !important; }
+//         .rich-text-content iframe, .rich-text-content video, .rich-text-content table { max-width: 100% !important; overflow-x: auto; display: block !important; margin: 2rem auto !important; }
+
+//         .rich-text-content h2, .rich-text-content h3 { font-family: var(--font-outfit), sans-serif; font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; color: #0f172a; margin-top: 2rem; margin-bottom: 1rem; }
+//         .rich-text-content p { font-family: var(--font-poppins), sans-serif; font-size: 1rem; line-height: 1.8; color: #475569; margin-bottom: 1.2rem; }
+        
+//         /* Bullet point lists for correct CMS rendering */
+//         .rich-text-content ul, .rich-text-content ol { display: flex; flex-direction: column; gap: 1rem; padding: 0; list-style: none; margin: 2rem 0; counter-reset: rtc-counter; }
+//         .rich-text-content ul li, .rich-text-content ol li { background: #fdfdfd; border: 1px solid #f1f5f9; padding: 1.2rem 1.5rem 1.2rem 3rem; border-radius: 12px; display: block; position: relative; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: 0.3s; }
+//         .rich-text-content ul li:hover, .rich-text-content ol li:hover { border-color: var(--hc-primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,145,77,0.1); }
+//         .rich-text-content ul li::before { content: '✦'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.2rem; font-weight: bold; line-height: 1.5; }
+//         .rich-text-content ol li { counter-increment: rtc-counter; }
+//         .rich-text-content ol li::before { content: counter(rtc-counter) '.'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.1rem; font-weight: 700; line-height: 1.5; }
+        
+//         .rich-text-content li img { max-width: 100% !important; height: auto !important; margin: 1rem auto; border-radius: 8px; display: block; }
+
+//         .micro-trust-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; }
+//         .micro-trust-item:last-child { border-bottom: none; padding-bottom: 0; }
+//         .micro-trust-icon { color: #22c55e; font-size: 18px; margin-right: 12px; }
+
+//         /* Premium FAQs */
+//         .faq-premium-item { border: none !important; margin-bottom: 16px; border-radius: 16px !important; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04); background: #ffffff; border: 1px solid #f1f5f9 !important; }
+//         .faq-premium-btn { width: 100%; text-align: left; background: white; border: none; padding: clamp(16px, 4vw, 24px); font-weight: 700; font-size: clamp(1.05rem, 3.5vw, 1.2rem); color: var(--hc-dark); display: flex; justify-content: space-between; align-items: center; box-shadow: none !important; line-height: 1.4; gap: 15px; }
+//         .faq-premium-btn::after { display: none !important; }
+//         .faq-premium-btn:not(.collapsed) { color: var(--hc-primary); background: #fffcf9; }
+//         .faq-icon-toggle { transition: transform 0.3s ease; color: var(--hc-primary); flex-shrink: 0; }
+//         .faq-premium-btn:not(.collapsed) .faq-icon-toggle { transform: rotate(45deg); color: #ff5722; }
+//         .faq-premium-body { padding: 0 clamp(16px, 4vw, 24px) 20px; color: #475569; font-size: clamp(0.95rem, 3vw, 1.05rem); line-height: 1.7; background: #fffcf9; }
+        
+//         .sidebar-blog-card { padding: 12px; border-radius: 12px; transition: all 0.3s ease; border: 1px solid transparent; }
+//         .sidebar-blog-card:hover { background-color: #f8fafc; border-color: #e2e8f0; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
+
+//         .process-step { display: flex; align-items: flex-start; margin-bottom: 30px; position: relative; }
+//         .process-step:last-child { margin-bottom: 0; }
+//         .process-icon { width: 50px; height: 50px; min-width: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 20px; z-index: 2; }
+//         .process-step:not(:last-child)::after { content: ''; position: absolute; left: 24px; top: 50px; bottom: -30px; width: 2px; background: #ffe4d6; z-index: 1; }
+
+//         .excellence-stat { text-align: center; padding: 20px; position: relative; }
+//         @media (min-width: 768px) { .excellence-stat::after { content: ""; position: absolute; right: 0; top: 20%; height: 60%; width: 1px; background: #e2e8f0; } .excellence-stat:last-child::after { display: none; } }
+
+//         .dual-sticky-wrapper { position: sticky; top: 100px; height: max-content; }
+//         .sidebar-widget { background: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 30px; border: 1px solid rgba(0,0,0,0.03); }
+//         .widget-title { font-family: var(--font-outfit), sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 25px; position: relative; padding-bottom: 10px; }
+//         .widget-title::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #ff914d; border-radius: 2px; }
+
+//         .sidebar-cta { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 30px 20px; text-align: center; color: white; margin-bottom: 30px; position: relative; overflow: hidden; }
+//         .nav-city-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 10px; color: #475569; text-decoration: none; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: all 0.2s ease; background: #f8fafc; margin-bottom: 10px; }
+//         .nav-city-link:hover, .nav-city-link.active { background: #ff914d; color: white; transform: translateX(5px); }
+//         .nav-city-link.active { pointer-events: none; }
+//         /* white whatever heading tag (h1-h6) is chosen in the CMS */
+//         .sidebar-cta :is(h1, h2, h3, h4, h5, h6) { color: #ffffff !important; }
+
+//         .modern-card { background: #ffffff; padding: 30px 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s ease; height: 100%; position: relative; overflow: hidden; text-align: center;}
+//         .modern-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #ff914d;}
+//         .modern-card-icon { width: 50px; height: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 20px; transition: transform 0.3s ease;}
+//         .modern-card:hover .modern-card-icon { transform: scale(1.1); background: #ff914d; color: white; }
+
+//         .related-card { overflow: hidden; border-radius: 16px; transition: transform 0.3s ease; border: 1px solid #f1f5f9; }
+//         .related-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+
+//         @media (max-width: 768px) {
+//         main.bg-light {
+//     overflow-x: hidden;
+//   }
+//           .premium-card { padding: 20px !important; margin-bottom: 25px; }
+//           .author-date-social-block { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
+//           .social-links { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+//           .hero-main-title { font-size: 2.2rem !important; }
+          
+//           .mobile-slider-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 0 30px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+//           .mobile-slider-wrapper::-webkit-scrollbar { display: none; }
+//           .mobile-slider-wrapper > div { flex: 0 0 88% !important; scroll-snap-align: center; }
+//           .rich-text-content ul { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 1rem; }
+//           .rich-text-content li { flex: 0 0 85%; }
+
+//           .process-slider > div { 
+//     flex: 0 0 100% !important; /* Shows exactly one card at a time */
+//     padding: 0 10px; /* Optional: adds a little breathing room */
+//   }
+//   .process-slider .process-step { 
+//     flex-direction: column; 
+//     align-items: center; 
+//     text-align: center; 
+//   }
+//   .process-slider .process-icon { 
+//     margin-right: 0; 
+//     margin-bottom: 15px; 
+//   }
+//   .process-slider .process-step::after { 
+//     display: none !important; /* Removes the vertical connecting line */
+//   }
+//           .modern-card-slider > div { 
+//     flex: 0 0 100% !important; /* 👈 Shows exactly 1 card at a time on mobile */
+//   }
+//         }
+
+//         /* --- Admin-controlled section order (CMS > City > Section Order) --- */
+//         .city-col-stack { display: flex; flex-direction: column; }
+//         .city-block { order: var(--d); }
+//         .city-cols > .city-block-bottom { order: 1; }
+//         @media (max-width: 991.98px) {
+//           /* columns stack on tablet/mobile: dissolve the wrappers so blocks from the
+//              main column, sidebar and bottom strip can be interleaved with CSS order */
+//           .row.city-cols { flex-direction: column; flex-wrap: nowrap; margin-top: 0; }
+//           .city-cols > .col-lg-8,
+//           .city-cols > .col-lg-4,
+//           .city-cols .city-col-stack { display: contents; }
+//           .city-cols .city-block { order: var(--m); width: 100%; padding-inline: calc(var(--bs-gutter-x) * .5); }
+//         }
+
+//         /* stats strip: swipe left/right on mobile (dots come from MobileSlider) */
+//         @media (max-width: 768px) {
+//           /* slides always start at the left edge (a centered, overflowing flex row hides its first slide) */
+//           .mobile-slider-wrapper { justify-content: flex-start !important; }
+//           .mobile-slider-wrapper.stats-slider > div { flex: 0 0 100% !important; max-width: 100% !important; }
+//           .premium-card.stats-card { padding: 22px 10px 12px; }
+//         }
+//         @media (min-width: 769px) {
+//           .stats-slider { justify-content: center; }
+//         }
+
+//         /* FAQ accordion (split layout) */
+//         .faq-eyebrow { color: var(--hc-primary); font-weight: 700; font-size: .75rem; letter-spacing: .22em; text-transform: uppercase; margin-bottom: .75rem; }
+//         .faq-split-title { font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; color: var(--hc-dark); font-size: clamp(1.6rem, 3.2vw, 2.2rem); margin-bottom: 1rem; }
+//         .faq-split-intro { color: #64748b; font-size: .9rem; line-height: 1.7; margin-bottom: 0; }
+//         .faq-split-head { margin-bottom: 1.75rem; }
+//         @media (min-width: 992px) {
+//           .faq-split-head { margin-bottom: 2.25rem; }
+//           .faq-head-center { text-align: center; }
+//           .faq-head-center .faq-split-intro { max-width: 640px; margin-left: auto; margin-right: auto; }
+//         }
+//         .faq-split-list { border-top: 1px solid #f0dccd; }
+//         .faq-split-item { border-bottom: 1px solid #f0dccd; }
+//         .faq-split-q { margin: 0; font-size: inherit; font-weight: inherit; }
+//         .faq-split-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left; background: none; border: 0; padding: 22px 4px; font-weight: 600; font-size: 1rem; line-height: 1.45; color: var(--hc-dark); }
+//         .faq-split-btn:not(.collapsed) { color: var(--hc-primary); }
+//         .faq-split-toggle { width: 28px; height: 28px; border-radius: 50%; background: #fff1e8; color: var(--hc-primary); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; }
+//         .faq-split-btn .faq-minus { display: none; }
+//         .faq-split-btn:not(.collapsed) .faq-minus { display: block; }
+//         .faq-split-btn:not(.collapsed) .faq-plus { display: none; }
+//         .faq-split-body { padding: 0 4px 22px; color: #64748b; font-size: .92rem; line-height: 1.8; white-space: pre-line; }
+
+//         /* mobile sliders inside a Bootstrap .row: no negative side margins */
+//         @media (max-width: 768px) {
+//           .mobile-slider-wrapper { margin-left: 0 !important; margin-right: 0 !important; }
+//         }
+//       `}} />
+
+//       <main className="bg-light pb-5">
+        
+//         {pageType === "blog" && (
+//           <div className="container py-4 py-lg-5 mt-lg-4">
+//             <div className="row g-4 g-lg-5">
+
+//               <div className="col-lg-8 order-1">
+//                 <div className="premium-card bg-white">
+
+//                   <h1 className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: '1.3' }}>
+//                     {pageData.title}
+//                   </h1>
+
+//                   <div className="author-date-social-block d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4">
+//                     <div className="text-muted fst-italic fs-6 mb-3 mb-md-0 d-flex align-items-center font-poppins flex-wrap gap-2">
+//                       <span><FaUserCircle className="me-2 text-secondary" size={20} />
+//                       {pageData.writer_name ? `By ${pageData.writer_name}` : "By HC Team"}</span>
+//                       <span className="mx-2 d-none d-md-inline">•</span>
+//                       <span><FaCalendarAlt className="me-2 text-secondary" size={18} />
+//                       {new Date(pageData.created_at || Date.now()).toLocaleDateString('en-US', {
+//                         year: 'numeric', month: 'long', day: 'numeric'
+//                       })}</span>
+//                     </div>
+
+//                     <div className="social-links d-flex gap-2">
+//                         {siteSettings?.facebook_url && <a href={siteSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="social-btn fb" aria-label="Facebook"><FaFacebookF size={18} /></a>}
+//                         {siteSettings?.instagram_url && <a href={siteSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="social-btn ig" aria-label="Instagram"><FaInstagram size={18} /></a>}
+//                         {siteSettings?.twitter_url && <a href={siteSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="social-btn tw" aria-label="X (Twitter)"><FaTwitter size={18} /></a>}
+//                         {siteSettings?.linkedin_url && <a href={siteSettings.linkedin_url} target="_blank" rel="noopener noreferrer" className="social-btn in" aria-label="LinkedIn"><FaLinkedin size={18} /></a>}
+//                         {siteSettings?.pinterest_url && <a href={siteSettings.pinterest_url} target="_blank" rel="noopener noreferrer" className="social-btn pi" aria-label="Pinterest"><FaPinterest size={18} /></a>}
+//                         {siteSettings?.youtube_url && <a href={siteSettings.youtube_url} target="_blank" rel="noopener noreferrer" className="social-btn yt" aria-label="YouTube"><FaYoutube size={18} /></a>}
+//                     </div>
+//                   </div>
+
+//                   {pageData.image && (
+//                     <div className="w-100 mb-4 mb-lg-5 d-flex justify-content-center">
+//                       <Image
+//                         // src={pageData.image}
+//                         src={toHttps(pageData.image)}
+//                         alt={pageData.image_alt || pageData.title || defaultAltText}
+//                         width={1200}
+//                         height={675}
+//                         priority
+//                         fetchPriority="high"
+//                         sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1199px) 66vw, 760px"
+//                         style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover', borderRadius: '1rem', display: 'block', margin: '0 auto' }}
+//                         className="shadow-sm"
+//                       />
+//                     </div>
+//                   )}
+
+//                  <div className="details font-poppins rich-text-content ck-content">
+//                    {/* <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
+//                    */}
+//                    <div dangerouslySetInnerHTML={{ __html: richDescription }} />
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <div className="col-lg-4 order-2">
+//                 <div className="dual-sticky-wrapper">
+
+//                   <SidebarForm city={slug} />
+
+//                   {recentBlogs && recentBlogs.length > 0 && (
+//                     <div className="sidebar-widget mt-4 lazy-render">
+//                       <h4 className="widget-title">Related Articles</h4>
+//                       <div className="d-flex flex-column gap-2">
+//                         {recentBlogs.map((blog, idx) => (
+//                           // <Link key={idx} 
+//                           // href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+//                           <Link key={idx} 
+//                           href={getBlogHref(blog)} className="text-decoration-none">
+//                             <div className="sidebar-blog-card d-flex align-items-center gap-3">
+//                               <img 
+//                                 // src={blog.image || "/images/default.jpg"} 
+//                                 src={toHttps(blog.image) || "/images/default.jpg"}
+//                                 alt={blog.title}
+//                                 loading="lazy"
+//                                 decoding="async"
+//                                 className="rounded shadow-sm flex-shrink-0" 
+//                                 style={{ width: "70px", height: "70px", objectFit: "contain" }} 
+//                               />
+//                               <div>
+//                                 <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px', lineHeight: '1.4' }}>
+//                                   {blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}
+//                                 </h6>
+//                                 <small className="text-gradient fw-bold" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
+//                                   READ ARTICLE <FaArrowRight size={10} />
+//                                 </small>
+//                               </div>
+//                             </div>
+//                           </Link>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   )}
+
+//                   <div className="sidebar-widget mt-4">
+//                     <h4 className="widget-title">Service Areas</h4>
+//                     <div className="d-flex flex-column">
+//                       {Object.keys(cityUrlMap).map((c, idx) => (
+//                         <Link key={idx} href={cityUrlMap[c]} className="nav-city-link">
+//                           <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
+//                           <FaArrowRight size={12} />
+//                         </Link>
+//                       ))}
+//                     </div>
+//                   </div>
+
+//                 </div>
+//               </div>
+
+//             </div>
+//           </div>
+//         )}
+
+//         {pageType === "cms-page" && (
+//           <>
+//             <div className="city-hero w-100">
+//               <picture className="city-hero-picture">
+//               {mobileHeroBanner && (
+//                 <source media="(max-width: 767px)" srcSet={mobileHeroBanner} />
+//               )}
+//               <Image 
+//                 src={heroImageSrc}
+//                 // alt={`${displayCity} Interior Design`}
+//                 alt={
+//   pageData?.banner_image && pageData?.banner_image_alt?.trim()
+//     ? pageData.banner_image_alt.trim()
+//     : `${displayCity} Interior Design`
+// }
+//               //   fill 
+//               //   priority 
+//               //   sizes="100vw" 
+//               //   style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               // />
+
+//               width={1920}
+//                 height={800}
+//                 priority
+//                 fetchPriority="high"
+//                 sizes="100vw"
+//                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               />
+//               </picture>
+              
+//               <div className="container hero-content font-poppins">
+//                 <div className="hero-badge" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}>
+//                   <FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior ${displayCity}`}
+//                 </div>
+                
+//                 <h1 
+//                   className="hero-main-title fw-bold mb-3 font-outfit text-white" 
+//                   style={{ textShadow: '2px 4px 15px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6)' }}
+//                 >
+//                   {pageData?.banner_title || pageData?.title || `${displayCity}`}
+//                 </h1>
+//               </div>
+//             </div>
+
+//             <div className="container city-main-container">
+//               <div className="row g-5 city-cols">
+//                 <div className="col-lg-8">
+//                   <div className="city-col-stack">
+
+//                     {/* --- MAIN CONTENT --- */}
+//                     <Block id="main">
+//                       <div className="premium-card mb-4">
+//                         <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeContent }} />
+//                       </div>
+//                     </Block>
+
+//                     {/* --- DESIGN PROCESS --- */}
+//                     <Block id="process">
+//                       <div className="lazy-render">
+//                         <div className="premium-card bg-white border-0">
+//                           <ProcessTitleTag className="font-outfit fw-bold h3 mb-4 text-dark text-center text-md-start">{t(content.process.title)}</ProcessTitleTag>
+//                           <MobileSlider label="Design process" className="mobile-slider-wrapper process-slider">
+//                             {content.process.items.map((step, i) => {
+//                               const StepIcon = iconOf(step.iconName, FaIcons.FaCheckCircle);
+//                               const StepTag = pickTag(step.titleTag, "h4");
+//                               return (
+//                                 <div className="process-step" key={i}>
+//                                   <div className="process-icon"><StepIcon /></div>
+//                                   <div>
+//                                     <StepTag className="font-outfit h5 fw-bold mb-1">{i + 1}. {t(step.title)}</StepTag>
+//                                     <p className="text-muted font-poppins small mb-0">{t(step.description)}</p>
+//                                   </div>
+//                                 </div>
+//                               );
+//                             })}
+//                           </MobileSlider>
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                     {/* --- PROJECT PHOTOS & TESTIMONIAL VIDEOS (links added in CMS > Page Layout) --- */}
+//                     {galleryItems.length > 0 && (
+//                       <Block id="projects">
+//                         <section className="lazy-render mb-4" aria-label={`Interior design projects in ${displayCity}`}>
+//                           <div className="premium-card bg-white border-0">
+//                             <ProjectsTitleTag className="font-outfit fw-bold h3 mb-4 text-dark">{t(content.projects.title)}</ProjectsTitleTag>
+//                             <ProjectGallery items={galleryItems} />
+//                           </div>
+//                         </section>
+//                       </Block>
+//                     )}
+
+//                     {/* --- DESIGN INSPIRATION (blogs ticked in the CMS, else the latest four) --- */}
+//                     {designInspirationBlogs.length > 0 && (
+//                       <Block id="blogs">
+//                         <div className="lazy-render">
+//                           <div className="premium-card border-0 px-0 pt-0">
+//                             <BlogsTitleTag className="font-outfit fw-bold h3 mb-4">{t(content.blogs.title)}</BlogsTitleTag>
+//                             <MobileSlider label="Design inspiration" className="row g-4 font-poppins mobile-slider-wrapper">
+//                               {designInspirationBlogs.map((blog, idx) => (
+//                                 <div className="col-md-6" key={idx}>
+//                                   {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+//                                   <Link href={getBlogHref(blog)} className="text-decoration-none">
+//                                     <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
+//                                       <img 
+//                                       // src={blog.image || "/images/default.jpg"}
+//                                       src={toHttps(blog.image) || "/images/default.jpg"}
+//                                       alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" decoding="async" />
+//                                       <div className="ms-3">
+//                                         <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
+//                                         <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
+//                                       </div>
+//                                     </div>
+//                                   </Link>
+//                                 </div>
+//                               ))}
+//                             </MobileSlider>
+//                           </div>
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                     {/* --- EXCELLENCE STATS (CMS icons / custom stats) --- */}
+//                     <Block id="stats">
+//                       <div className="lazy-render">
+//                         <div className="premium-card shadow-sm stats-card" style={{ background: 'linear-gradient(to right, #ffffff, #fff9f5)' }}>
+//                           <MobileSlider label="Statistics" className="row align-items-center mobile-slider-wrapper stats-slider">
+//                             {statItems.map((stat, idx) => {
+//                               const IconComponent = (stat.iconName && FaIcons[stat.iconName])
+//                                 ? FaIcons[stat.iconName]
+//                                 : FaIcons.FaStar;
+//                               const StatTag = pickTag(stat.valueTag, "h3");
+//                               const colWidth = statItems.length <= 3 ? 4 : Math.max(3, Math.floor(12 / statItems.length));
+
+//                               return (
+//                                 <div className={`col-md-${colWidth} excellence-stat d-flex flex-column align-items-center justify-content-center text-center`} key={idx}>
+//                                   {stat.iconType === "image" && stat.image ? (
+//                                     <img
+//                                       src={getBackendImageUrl(stat.image)}
+//                                       alt={stat.label || "Stat Icon"}
+//                                       style={{ width: `${stat.size || 40}px`, height: `${stat.size || 40}px`, objectFit: "contain" }}
+//                                       className="mb-3"
+//                                     />
+//                                   ) : (
+//                                     <IconComponent
+//                                       size={stat.size || 40}
+//                                       color={stat.color || "#f5a623"}
+//                                       className="mb-3"
+//                                     />
+//                                   )}
+//                                   <StatTag className="font-outfit fw-bold h2 mb-1">{stat.value}</StatTag>
+//                                   <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">{stat.label}</p>
+//                                 </div>
+//                               );
+//                             })}
+//                           </MobileSlider>
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                     {/* --- WHY CHOOSE US --- */}
+//                     <Block id="whyChoose">
+//                       <div className="lazy-render">
+//                         <div className="premium-card bg-transparent border-0 shadow-none px-0 py-0 mb-4">
+//                           <div className="text-center mb-4">
+//                             <WhyTitleTag className="font-outfit fw-bold h3 text-dark">{t(content.whyChoose.title)}</WhyTitleTag>
+//                           </div>
+//                           <MobileSlider label="Why choose us" className="row g-4 mobile-slider-wrapper modern-card-slider">
+//                             {content.whyChoose.items.map((item, idx) => {
+//                               const CardIcon = iconOf(item.iconName, FaIcons.FaCheckCircle);
+//                               const CardTag = pickTag(item.titleTag, "h4");
+//                               const cardCols = content.whyChoose.items.length >= 4 ? 3 : content.whyChoose.items.length === 3 ? 4 : 6;
+//                               return (
+//                                 <div className={`col-md-6 col-lg-${cardCols}`} key={idx}>
+//                                   <div className="modern-card">
+//                                     <div className="modern-card-icon"><CardIcon /></div>
+//                                     <CardTag className="font-outfit fw-bold h6">{t(item.title)}</CardTag>
+//                                     <p className="text-muted font-poppins small mb-0">{t(item.description)}</p>
+//                                   </div>
+//                                 </div>
+//                               );
+//                             })}
+//                           </MobileSlider>
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                     {/* --- CONTENT BLOCKS (Content Blocks tab) --- */}
+//                     {contentBlocks.length > 0 && (
+//                       <Block id="contentBlocks">
+//                         <div className="content-blocks-section lazy-render mb-4">
+//                           {contentBlocks.map((block, idx) => (
+//                             <div key={idx} className="premium-card mb-4" style={{ padding: '30px' }}>
+//                               {block.type === 'testimonial' && (
+//                                 <blockquote className="blockquote text-center mb-0">
+//                                   <p className="mb-3 fs-5 font-italic">&quot;{block.data.review}&quot;</p>
+//                                   <footer className="blockquote-footer mt-0 fs-6">
+//                                     {block.data.client_name} <cite title="Source Title">{block.data.designation}</cite>
+//                                   </footer>
+//                                 </blockquote>
+//                               )}
+//                               {block.type === 'service_row' && (
+//                                 <div className="row align-items-center">
+//                                   <div className={block.data.reverse_layout ? 'col-md-6 order-md-2' : 'col-md-6'}>
+//                                     <h3 className="font-outfit fw-bold h4 mb-3">{block.data.heading}</h3>
+//                                     <p className="text-muted font-poppins" style={{ whiteSpace: 'pre-line' }}>{block.data.description}</p>
+//                                   </div>
+//                                   <div className={block.data.reverse_layout ? 'col-md-6 order-md-1 text-center' : 'col-md-6 text-center'}>
+//                                     {block.data.image_url && (
+//                                       <img 
+//                                         // src={block.data.image_url} 
+//                                         src={toHttps(block.data.image_url)}
+//                                         alt={block.data.image_alt || block.data.heading || defaultAltText} 
+//                                         className="img-fluid rounded-4 shadow-sm" 
+//                                         style={{ maxHeight: '350px', objectFit: 'cover', width: '100%' }}
+//                                         loading="lazy"
+//                                         decoding="async" 
+//                                       />
+//                                     )}
+//                                   </div>
+//                                 </div>
+//                               )}
+//                               {block.type === 'counter' && (
+//                                 <div className="text-center p-3">
+//                                   <h2 className="font-outfit fw-bold display-4 mb-2 text-gradient">{block.data.number}</h2>
+//                                   <p className="font-poppins fw-bold text-uppercase text-muted mb-0 tracking-wider">{block.data.label}</p>
+//                                 </div>
+//                               )}
+//                             </div>
+//                           ))}
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                     {/* --- ACCORDIONS (Accordions tab) --- */}
+//                     {accordions.length > 0 && (
+//                       <Block id="accordions">
+//                         <div className="lazy-render mb-4">
+//                           <div className="premium-card border-0 px-0">
+//                             <h2 className="font-outfit fw-bold h3 mb-4">Additional Information</h2>
+//                             <div className="accordion font-poppins" id={`accordion-info-${pageData.id}`}>
+//                               {accordions.map((acc, index) => (
+//                                 <div className="accordion-item faq-premium-item" key={`acc-${index}`}>
+//                                   <h2 className="accordion-header">
+//                                     <button className={`accordion-button faq-premium-btn ${index !== 0 ? 'collapsed' : ''}`} type="button" data-bs-toggle="collapse" data-bs-target={`#acc-collapse${index}`}>
+//                                       <span className="pe-3">{acc.title}</span>
+//                                       <FaPlus className="faq-icon-toggle flex-shrink-0" />
+//                                     </button>
+//                                   </h2>
+//                                   <div id={`acc-collapse${index}`} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent={`#accordion-info-${pageData.id}`}>
+//                                     <div className="accordion-body faq-premium-body" style={{ whiteSpace: 'pre-line' }}>{acc.content}</div>
+//                                   </div>
+//                                 </div>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                     {/* --- FAQs (FAQs tab) shown as an accordion --- */}
+//                     {faqItems.length > 0 && (
+//                       <Block id="faqs">
+//                         <div className="lazy-render mb-5">
+//                           <div className="premium-card border-0 faq-split">
+//                             <div className="faq-split-head">
+//                               {content.faqs.eyebrow && <p className="faq-eyebrow font-poppins">{t(content.faqs.eyebrow)}</p>}
+//                               <FaqTitleTag className="faq-split-title font-outfit">{t(content.faqs.title)}</FaqTitleTag>
+//                               {content.faqs.intro && <p className="faq-split-intro font-poppins">{t(content.faqs.intro)}</p>}
+//                             </div>
+//                             <div className="faq-split-list accordion font-poppins" id={`accordion-faq-${pageData?.id}`}>
+//                               {faqItems.map((faq, index) => (
+//                                 <div className="faq-split-item" key={index}>
+//                                   <h3 className="faq-split-q">
+//                                     <button
+//                                       className={`faq-split-btn ${index !== 0 ? "collapsed" : ""}`}
+//                                       type="button"
+//                                       data-bs-toggle="collapse"
+//                                       data-bs-target={`#city-faq-${pageData?.id}-${index}`}
+//                                       aria-expanded={index === 0 ? "true" : "false"}
+//                                       aria-controls={`city-faq-${pageData?.id}-${index}`}
+//                                     >
+//                                       <span>{faq.question}</span>
+//                                       <span className="faq-split-toggle" aria-hidden="true">
+//                                         <FaPlus className="faq-plus" />
+//                                         <FaIcons.FaMinus className="faq-minus" />
+//                                       </span>
+//                                     </button>
+//                                   </h3>
+//                                   <div
+//                                     id={`city-faq-${pageData?.id}-${index}`}
+//                                     className={`accordion-collapse collapse ${index === 0 ? "show" : ""}`}
+//                                     data-bs-parent={`#accordion-faq-${pageData?.id}`}
+//                                   >
+//                                     <div className="faq-split-body">{faq.answer}</div>
+//                                   </div>
+//                                 </div>
+//                               ))}
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </Block>
+//                     )}
+
+//                   </div>
+//                 </div>
+
+//                 <div className="col-lg-4">
+//                   <div className="dual-sticky-wrapper city-col-stack">
+
+//                     <Block id="siteVisit">
+//                       <div className="sidebar-cta shadow-lg mb-4">
+//                         <VisitTitleTag className="font-outfit fw-bold mb-2">{visitTitle}</VisitTitleTag>
+//                         <p className="font-poppins small text-white-50 mb-4">{visitDescription}</p>
+//                         <Link href={visitButtonUrl} className="btn btn-light w-100 fw-bold py-2 rounded-pill">{visitButtonText}</Link>
+//                       </div>
+//                     </Block>
+
+//                     <Block id="sidebarForm">
+//                       <SidebarForm city={slug} />
+//                     </Block>
+
+//                     <Block id="promise">
+//                       <div className="sidebar-widget py-4 font-poppins lazy-render">
+//                         <PromiseTitleTag className="widget-title mb-4">{pageSettings.promiseTitle || "The Promise"}</PromiseTitleTag>
+//                         {activePromiseItems.map((item, index) => {
+//                           const PromiseIcon = (item.iconName && FaIcons[item.iconName]) || (index === 0 ? FaCheckCircle : FaTools);
+//                           const isCheckIcon = item.iconName ? /^FaCheck/.test(item.iconName) : index === 0;
+//                           return (
+//                             <div className="micro-trust-item" key={`${item.title}-${index}`}>
+//                               <PromiseIcon className={`micro-trust-icon${isCheckIcon ? "" : " text-warning"}`} />
+//                               <div>
+//                                 <span className="d-block fw-bold text-dark" style={{ fontSize: '14px' }}>{item.title}</span>
+//                                 <span className="text-muted" style={{ fontSize: '12px' }}>{item.description}</span>
+//                               </div>
+//                             </div>
+//                           );
+//                         })}
+//                       </div>
+//                     </Block>
+
+//                     <Block id="serviceAreas">
+//                       <div className="sidebar-widget">
+//                         <ServiceAreasTitleTag className="widget-title">{pageSettings.serviceAreasTitle || "Service Areas"}</ServiceAreasTitleTag>
+//                         <div className="d-flex flex-column">
+//                           {serviceAreas.map((area, idx) => (
+//                             <Link key={`${area.url}-${idx}`} href={area.url} className={`nav-city-link ${area.url === `/${slug}` ? 'active' : ''}`}>
+//                               <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{area.name}</span></span>
+//                               <FaArrowRight size={12} />
+//                             </Link>
+//                           ))}
+//                         </div>
+//                       </div>
+//                     </Block>
+
+//                   </div>
+//                 </div>
+
+//                 {/* --- NEARBY CITIES (only when rows were added in CMS > Page Layout) --- */}
+//                 {nearbyCityCards.length > 0 && (
+//                   <Block id="nearbyCities" className="col-12 city-block-bottom">
+//                     <div className="pt-5 border-top">
+//                       <div className="d-flex justify-content-between align-items-end mb-4">
+//                         <NearbyTitleTag className="font-outfit fw-bold text-dark h3">{pageSettings.nearbyCitiesTitle || "Nearby Cities"}</NearbyTitleTag>
+//                         <Link href="/services" className="text-decoration-none fw-bold small text-gradient">VIEW ALL CITIES <FaArrowRight /></Link>
+//                       </div>
+//                       <MobileSlider label="Nearby cities" className="row g-4 mobile-slider-wrapper">
+//                         {nearbyCityCards.map((entry, idx) => (
+//                           <div className="col-lg-4" key={`${entry.url}-${idx}`}>
+//                             <Link href={entry.url} className="text-decoration-none">
+//                               <div className="related-card bg-white position-relative shadow-sm h-100 rounded-4 overflow-hidden">
+//                                 <div style={{ height: "200px", position: "relative" }}>
+//                                   <img
+//                                     src={entry.image}
+//                                     alt={entry.name}
+//                                     loading="lazy"
+//                                     decoding="async"
+//                                     style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+//                                   />
+//                                   <div className="position-absolute bottom-0 start-0 p-4 w-100 text-white fw-bold" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' }}>
+//                                     <FaMapMarkerAlt className="me-2 text-warning" /> {entry.name.toUpperCase()}
+//                                   </div>
+//                                 </div>
+//                               </div>
+//                             </Link>
+//                           </div>
+//                         ))}
+//                       </MobileSlider>
+//                     </div>
+//                   </Block>
+//                 )}
+
+//               </div>
+//             </div>
+//           </>
+//         )}
+//       </main>
+//     </MainLayout>
+//   );
+// };
+
+// export default DynamicRootPage;
+
+
+
+
+// import MainLayout from "../layouts/MainLayout";
+// import { notFound, permanentRedirect } from "next/navigation";
+// import Image from "next/image"; 
+// import Link from "next/link";
+// import DOMPurify from "isomorphic-dompurify";
+// import { headers } from "next/headers";
+
+// import {
+//   FaMapMarkerAlt, FaArrowRight, FaUser, FaShieldAlt, FaGem, FaClock,
+//   FaStar, FaCheckCircle, FaTools, FaDraftingCompass, FaHardHat, FaHome,
+//   FaPlus, FaSmile, FaCalendarAlt, FaUserCircle, FaFacebookF, FaInstagram,
+//   FaTwitter, FaLinkedin, FaPinterest, FaYoutube
+// } from "react-icons/fa";
+
+// import * as FaIcons from "react-icons/fa";
+
+// import { SidebarForm } from "../services-detail/CityForms";
+
+// import { 
+//   generateOrganizationSchema, 
+//   generateLocalBusinessSchema, 
+//   generateBreadcrumbSchema, 
+//   generateFAQSchema 
+// } from "@/utils/schemaGenerator";
+// import { getCanonicalUrl, getRobotsDirectives, SITE_URL } from "@/utils/seoHelpers";
+
+// import { getPageSEO } from "@/utils/getSEO"; 
+// import { defaultAltText, getBlogHref, getBackendImageUrl } from "@/utils/helper";
+
+// /* Keep this CMS route dynamically rendered. Only the exact one-level paths
+//    present in the CWV PDF opt their API reads into a 60-second data cache. */
+// export const revalidate = 0;
+
+// const cityUrlMap = {
+//   "noida": "/interior-designers-in-noida",
+//   "greater_noida": "/interior-designers-in-greater-noida",
+//   "delhi": "/interior-designers-in-delhi",
+//   "gurugram": "/interior-designers-in-gurgaon",
+//   "faridabad": "/best-interior-designers-in-faridabad",
+//   "ghaziabad": "/interior-designers-in-ghaziabad",
+//   "manesar": "/interior-designers-in-manesar",
+//   "dwarka": "/interior-designers-in-dwarka",
+// };
+
+// const isValidSlug = (slug) => {
+//   if (!slug) return false;
+//   if (slug === "undefined" || slug === "null") return false;
+//   if (slug.includes(".")) return false; 
+//   return true;
+// };
+
+
+// // Only one-level CMS paths present in the attached CWV report opt into data caching.
+// const PDF_CWV_TARGET_SLUGS = new Set([
+//   "creating-the-home-of-your-dreams",
+//   "estimator-for-home",
+//   "how-to-decorate-your-home-for-diwali-under-rs5000",
+//   "thank-you",
+//   "interior-decorators-in-south-delhi",
+//   "interior-designer-in-crossings-republik-ghaziabad",
+//   "interior-designer-in-sector-150-noida",
+//   "contact",
+//   "interior-designer-in-sector-84-faridabad",
+//   "job-application",
+//   "interior-designers-in-noida",
+//   "bedroom-dressing-table-design",
+//   "best-interior-designers-in-faridabad",
+//   "interior-designers-in-gurgaon",
+//   "cozy-living-room-ideas-to-elevate-your-home",
+//   "services",
+//   "interior-designers-in-vaishali-ghaziabad",
+//   "bedroom-wall-design-ideas",
+//   "know-about-lighting-without-false-ceiling",
+//   "experience-center-new-delhi",
+//   "experience-center",
+//   "interior-designer-in-wave-city-ghaziabad",
+//   "how-its-works",
+//   "spacesaving-furniture",
+//   "design-idea",
+//   "top-interior-designer-in-kavi-nagar-ghaziabad",
+//   "interior-designers-in-greater-noida",
+//   "interior-designer-in-sector-82-faridabad",
+//   "interior-designers-in-golf-course-road-gurgaon",
+//   "pista-green-colour-combination",
+//   "staircase-as-per-vastu",
+//   "reclaimed-wood",
+//   "experience-center-faridabad",
+//   "best-interior-designer-in-sector-137-noida",
+//   "user-queries",
+//   "product",
+//   "thankyou",
+//   "furniture",
+//   "interior-designers-in-manesar",
+//   "cancelletion-policy",
+//   "term-and-condition",
+//   "top-wall-moulding-designs",
+//   "interior-designer-in-sector-83-faridabad",
+//   "faq",
+//   "interior-designer-in-greater-faridabad",
+//   "interior-designer-in-noida-extension",
+//   "interior-designers-in-raj-nagar-ghaziabad",
+//   "warranty-assurance",
+//   "luxury-bedroom-interior-design",
+//   "refer-and-earn",
+//   "team",
+//   "blog",
+//   "what-we-offer",
+//   "residential-projects",
+//   "designer-choice",
+//   "statement-mirror-designs",
+//   "interior-designer-in-sector-104-noida",
+//   "ready-togo-design",
+// ]);
+
+// const isPdfCwvTarget = (slug) => PDF_CWV_TARGET_SLUGS.has(slug);
+
+// const getCmsFetchOptions = (slug) =>
+//   isPdfCwvTarget(slug)
+//     ? { next: { revalidate: 60 } }
+//     : {
+//         cache: "no-store",
+//         headers: {
+//           "Cache-Control": "no-cache, no-store, must-revalidate",
+//           Pragma: "no-cache",
+//         },
+//       };
+
+// const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://apidev.hcinterior.in";
+
+// const isDraftStatus = (data) => {
+//   if (!data) return true;
+//   if (data.status === undefined || data.status === null) return false; 
+//   const status = String(data.status).toLowerCase().trim();
+//   return status === "draft" || status === "inactive" || status === "0";
+// };
+
+// async function getRecentBlogs(slug) {
+//   try {
+//     const res = await fetch(`${API_BASE_URL}/cms-blog`, getCmsFetchOptions(slug));
+//     if (!res.ok) return [];
+//     const data = await res.json();
+//     return Array.isArray(data) ? data.slice(0, 4) : [];
+//   } catch (error) { return []; }
+// }
+
+// async function getExcellenceStats(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-content/excellence_stats`,
+//       getCmsFetchOptions(slug)
+//     );
+
+//     if (!res.ok) return null;
+    
+//     const data = await res.json();
+//     const record = Array.isArray(data) ? data[0] : data;
+    
+//     if (record && record.json_content) {
+//       // Safely handle if the API returns a stringified JSON or a direct object
+//       const jsonContent = typeof record.json_content === "string" 
+//         ? JSON.parse(record.json_content) 
+//         : record.json_content;
+        
+//       return jsonContent?.items || null;
+//     }
+//     return null;
+//   } catch (error) { 
+//     console.error("Failed to fetch excellence stats:", error);
+//     return null; 
+//   }
+// }
+
+// async function getBlogData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-blog/blog-slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// async function getCmsPageData(slug) {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/cms-pages/slug/${encodeURIComponent(slug)}`,
+//       getCmsFetchOptions(slug)
+//     );
+//     if (!res.ok) return null;
+//     let data = await res.json();
+//     if (!data || data.success === false) return null;
+//     if (Array.isArray(data)) {
+//         if (data.length === 0) return null;
+//         data = data[0]; 
+//     }
+//     return data;
+//   } catch (error) {
+//     return null;
+//   }
+// }
+
+// // export async function generateMetadata({ params }) {
+// //   headers();
+// //   const slug = params.blog;
+
+// //   if (!isValidSlug(slug)) {
+// //     return { title: "Not Found", robots: { index: false, follow: true } };
+// //   }
+
+// //   const [blogData, cmsData, seoData] = await Promise.all([
+// //     getBlogData(slug).catch(() => null),
+// //     getCmsPageData(slug).catch(() => null),
+// //     getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+// //   ]);
+
+// //   let data = blogData || cmsData;
+
+// //   if (!data || isDraftStatus(data)) {
+// //     return { title: "Not Found", robots: { index: false, follow: true } };
+// //   }
+
+// //   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+// //   const canonicalUrl = getCanonicalUrl({
+// //     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+// //     fallbackPath: `/${slug}`,
+// //   });
+
+// //     const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+// //   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+// //   const fallbackImage =
+// //   toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+// //   const og = seoData?.openGraph;
+// //   const ogImages = og?.images?.length
+// //     ? og.images
+// //     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+// //   return {
+// //     title,
+// //     description,
+// //     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+// //     alternates: { canonical: canonicalUrl },
+// //     robots,
+// //     openGraph: {
+// //       title: og?.title || title,
+// //       description: og?.description || description,
+// //       url: canonicalUrl,
+// //       siteName: "High Creation Interior",
+// //       locale: "en_IN",
+// //       type: "website",
+// //       images: ogImages,
+// //     },
+// //     twitter: {
+// //       card: "summary_large_image",
+// //       title: seoData?.twitter?.title || og?.title || title,
+// //       description: seoData?.twitter?.description || og?.description || description,
+// //       images: seoData?.twitter?.images?.length
+// //         ? seoData.twitter.images
+// //         : ogImages.map((i) => i.url),
+// //     },
+// //   };
+// // }
+
+
+// // Old blog canonicals are stored as https://hcinterior.in/<slug>; point them to /blog/<slug>.
+// // Any other custom canonical (different path / external domain) is left untouched.
+// const fixBlogCanonical = (canonical, slug) => {
+//   try {
+//     const u = new URL(canonical, SITE_URL);
+//     if (u.pathname.replace(/\/+$/, "") === `/${slug}`) u.pathname = `/blog/${slug}`;
+//     return u.toString();
+//   } catch {
+//     return `${SITE_URL}/blog/${slug}`;
+//   }
+// };
+
+// export async function buildMetadata(slug, inBlogRoute = false) {
+//   headers();
+
+//   if (!isValidSlug(slug)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   const [blogData, cmsData, seoData] = await Promise.all([
+//     getBlogData(slug).catch(() => null),
+//     getCmsPageData(slug).catch(() => null),
+//     getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null)
+//   ]);
+
+//   // /blog/<slug> serves blogs only; the root route keeps serving CMS pages (and redirects blogs).
+//   let data = inBlogRoute ? blogData : (blogData || cmsData);
+
+//   if (!data || isDraftStatus(data)) {
+//     return { title: "Not Found", robots: { index: false, follow: true } };
+//   }
+
+//   const robots = seoData?.robots || getRobotsDirectives(data?.seo_content);
+//   let canonicalUrl = getCanonicalUrl({
+//     canonicalUrl: seoData?.alternates?.canonical || data?.seo_content?.canonical_url,
+//     fallbackPath: seoPath,
+//   });
+//   if (inBlogRoute) canonicalUrl = fixBlogCanonical(canonicalUrl, slug);
+
+//   const title = seoData?.title || data?.seo_content?.meta_title || data?.title || "HC Interior";
+//   const description = seoData?.description || data?.seo_content?.meta_description || "";
+
+//   const fallbackImage =
+//     toHttps(data?.image) || (data?.banner_image ? getBackendImageUrl(data.banner_image) : "");
+//   const og = seoData?.openGraph;
+//   const ogImages = og?.images?.length
+//     ? og.images
+//     : [{ url: fallbackImage || "/images/new_hc_logo.png" }];
+
+//   return {
+//     title,
+//     description,
+//     keywords: seoData?.keywords || data?.seo_content?.meta_keywords || "",
+//     alternates: { canonical: canonicalUrl },
+//     robots,
+//     openGraph: {
+//       title: og?.title || title,
+//       description: og?.description || description,
+//       url: canonicalUrl,
+//       siteName: "High Creation Interior",
+//       locale: "en_IN",
+//       type: "website",
+//       images: ogImages,
+//     },
+//     twitter: {
+//       card: "summary_large_image",
+//       title: seoData?.twitter?.title || og?.title || title,
+//       description: seoData?.twitter?.description || og?.description || description,
+//       images: seoData?.twitter?.images?.length
+//         ? seoData.twitter.images
+//         : ogImages.map((i) => i.url),
+//     },
+//   };
+// }
+
+// export async function generateMetadata({ params }) {
+//   return buildMetadata(params.blog);
+// }
+
+// const parseJsonSafe = (data) => {
+//   if (!data) return [];
+//   if (Array.isArray(data)) return data;
+//   try { return JSON.parse(data); } catch (e) { return []; }
+// };
+
+// const OWN_HOSTS = "(?:apidev\\.hcinterior\\.in|www\\.hcinterior\\.in|hcinterior\\.in)";
+
+// const forceHttpsHtml = (html) =>
+//   typeof html === "string"
+//     ? html.replace(new RegExp(`http://(${OWN_HOSTS})`, "gi"), "https://$1")
+//     : html;
+
+// const toHttps = (url) =>
+//   typeof url === "string"
+//     ? url.replace(new RegExp(`^http://(${OWN_HOSTS})`, "i"), "https://$1")
+//     : url;
+
+// // Rich-text CMS images are below the page hero. Keep their existing attributes,
+// // but decode asynchronously and lazy-load them when the CMS has not specified
+// // explicit loading behavior. This avoids competing with the hero/LCP image.
+// const addCmsImageLoadingHints = (html) => {
+//   if (typeof html !== "string" || !html.includes("<img")) return html;
+//   return html.replace(/<img\b([^>]*)>/gi, (tag, attributes) => {
+//     let next = attributes;
+//     if (!/\bloading\s*=/i.test(next)) next += ' loading="lazy"';
+//     if (!/\bdecoding\s*=/i.test(next)) next += ' decoding="async"';
+//     return `<img${next}>`;
+//   });
+// };
+
+// // const DynamicRootPage = async ({ params }) => {
+// //   headers();
+// //   const slug = params.blog;
+
+// //   if (!isValidSlug(slug)) {
+// //     notFound();
+// //   }
+
+// //   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+// //   // remove serial network waits on mobile connections.
+// //   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+// //     await Promise.all([
+// //       getBlogData(slug).catch(() => null),
+// //       getCmsPageData(slug).catch(() => null),
+// //       getPageSEO(`/${slug}`, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+// //       getRecentBlogs(slug).catch(() => []),
+// //       getExcellenceStats(slug).catch(() => null),
+// //       (async () => {
+// //         try {
+// //           const setRes = await fetch(
+// //             `${API_BASE_URL}/site-settings`,
+// //             getCmsFetchOptions(slug)
+// //           );
+// //           if (!setRes.ok) return null;
+// //           const rawSettings = await setRes.json();
+// //           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+// //         } catch (error) {
+// //           console.error("Settings fetch failed", error);
+// //           return null;
+// //         }
+// //       })(),
+// //     ]);
+
+// //   const pageData = blogResult || cmsResult;
+// //   const pageType = blogResult ? "blog" : "cms-page";
+
+
+// const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
+//   headers();
+//   const slug = params.blog;
+//   const seoPath = inBlogRoute ? `/blog/${slug}` : `/${slug}`;
+
+//   if (!isValidSlug(slug)) {
+//     notFound();
+//   }
+
+//   // Resolve blog/CMS content and independent sidebar/SEO data concurrently to
+//   // remove serial network waits on mobile connections.
+//   const [blogResult, cmsResult, seoResult, recentBlogsResult, statsResult, settingsResult] =
+//     await Promise.all([
+//       getBlogData(slug).catch(() => null),
+//       getCmsPageData(slug).catch(() => null),
+//       getPageSEO(seoPath, isPdfCwvTarget(slug) ? { revalidate: 60 } : undefined).catch(() => null),
+//       getRecentBlogs(slug).catch(() => []),
+//       getExcellenceStats(slug).catch(() => null),
+//       (async () => {
+//         try {
+//           const setRes = await fetch(
+//             `${API_BASE_URL}/site-settings`,
+//             getCmsFetchOptions(slug)
+//           );
+//           if (!setRes.ok) return null;
+//           const rawSettings = await setRes.json();
+//           return Array.isArray(rawSettings) ? rawSettings[0] : rawSettings;
+//         } catch (error) {
+//           console.error("Settings fetch failed", error);
+//           return null;
+//         }
+//       })(),
+//     ]);
+
+//   // Old root URL of a blog -> new /blog/<slug> URL
+//   if (blogResult && !inBlogRoute) permanentRedirect(`/blog/${slug}`);
+//   // /blog/<anything that is not a blog> -> 404 (CMS/city pages must not duplicate under /blog/)
+//   if (inBlogRoute && !blogResult) notFound();
+
+//   const pageData = blogResult || cmsResult;
+//   const pageType = blogResult ? "blog" : "cms-page";
+
+//   if (!pageData || isDraftStatus(pageData)) {
+//     notFound();
+//   }
+
+//   const seoData = seoResult;
+//   const customSchema = seoData?.customSchema;
+//   const recentBlogs = recentBlogsResult;
+//   const excellenceStats = statsResult;
+//   const siteSettings = settingsResult;
+
+//   let faqs = [];
+//   let accordions = [];
+//   let contentBlocks = [];
+
+//   if (pageType === "cms-page") {
+//     faqs = parseJsonSafe(pageData.faqs);
+//     accordions = parseJsonSafe(pageData.accordions);
+//     contentBlocks = parseJsonSafe(pageData.content_blocks);
+//   }
+
+  
+//   const customSchemaText =
+//     typeof customSchema === "string" ? customSchema : customSchema ? JSON.stringify(customSchema) : "";
+//   const legacySchemaText =
+//     !customSchema && typeof pageData?.seo_content?.custom_code === "string" ? pageData.seo_content.custom_code : "";
+//   const hasInnerCustomFaqSchema = /FAQPage/i.test(customSchemaText) || /FAQPage/i.test(legacySchemaText);
+    
+//   const faqSchema = faqs.length > 0 && !hasInnerCustomFaqSchema ? generateFAQSchema(faqs) : null;
+
+//   const displayCity = slug.split(/-|_/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+//   // const safeContent = pageData?.content ? DOMPurify.sanitize(pageData.content) : "";
+//   const safeContent = pageData?.content
+//     ? (isPdfCwvTarget(slug)
+//         ? addCmsImageLoadingHints(forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//         : forceHttpsHtml(DOMPurify.sanitize(pageData.content)))
+//     : "";
+//   const rawDescription = forceHttpsHtml(pageData?.description || "");
+//   const richDescription = isPdfCwvTarget(slug)
+//     ? addCmsImageLoadingHints(rawDescription)
+//     : rawDescription;
+
+//   let heroImageSrc = getBackendImageUrl('/parent-child/wework_bgImage.94f57400.jpg');
+
+//   const normalizedSlug = slug.toLowerCase();
+
+//   if (pageData?.banner_image) {
+//     heroImageSrc = getBackendImageUrl(pageData.banner_image);
+// }
+//   else if (normalizedSlug.includes('sohna')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designers in Sohna.jpg';
+//   } 
+//   else if (normalizedSlug.includes('noida-extension') || normalizedSlug.includes('noida_extension')) {
+//     heroImageSrc = '/images/Serving Area/Interior Designer in Noida Extension.jpg';
+//   }
+
+//   return (
+//     <MainLayout>
+//       {/* <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizSchema) }} />
+//       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} /> */}
+
+//       {customSchema && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{
+//             __html: typeof customSchema === 'string' 
+//               ? customSchema.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') 
+//               : JSON.stringify(customSchema)
+//           }}
+//         />
+//       )}
+
+//       {/* {pageData?.seo_content?.custom_code && ( */}
+//         {!customSchema && pageData?.seo_content?.custom_code && (
+//         <script
+//           type="application/ld+json"
+//           dangerouslySetInnerHTML={{ __html: pageData.seo_content.custom_code.replace(/<script[^>]*>/gi, '').replace(/<\/script>/gi, '') }}
+//         />
+//       )}
+
+//       <style dangerouslySetInnerHTML={{__html: `
+//         :root { --hc-primary: #ff914d; --hc-dark: #0f172a; }
+//         .font-outfit { font-family: var(--font-outfit), sans-serif; }
+//         .font-poppins { font-family: var(--font-poppins), sans-serif; }
+//         .text-gradient { background: linear-gradient(135deg, #ff914d 0%, #ff5722 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+//         .lazy-render { content-visibility: auto; contain-intrinsic-size: 1px 800px; }
+
+//         /* Social Buttons */
+//         .social-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background-color: #f1f5f9; color: #475569; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+//         .social-btn:hover { transform: translateY(-4px); }
+//         .social-btn.fb:hover { background-color: #1877F2; color: white; box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3); }
+//         .social-btn.ig:hover { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: white; box-shadow: 0 6px 12px rgba(214, 36, 159, 0.3); }
+//         .social-btn.tw:hover { background-color: #000000; color: white; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); }
+//         .social-btn.in:hover { background-color: #0A66C2; color: white; box-shadow: 0 6px 12px rgba(10, 102, 194, 0.3); }
+//         .social-btn.pi:hover { background-color: #E60023; color: white; box-shadow: 0 6px 12px rgba(230, 0, 35, 0.3); }
+//         .social-btn.yt:hover { background-color:hsl(0, 100.00%, 50.00%); color: white; box-shadow: 0 6px 12px rgba(255, 0, 0, 0.3); }
+
+//         /* Modern City Layout Styles */
+//         .city-hero { height: 55vh; min-height: 450px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #1e293b; }
+//         .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(15,23,42,0.6) 0%, rgba(15,23,42,0.95) 100%); z-index: 1; }
+//         .hero-content { position: relative; z-index: 2; text-align: center; padding-top: 40px; }
+//         .hero-badge { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 24px; border-radius: 30px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: inline-flex; align-items: center; color: #fff; font-weight: 600; }
+//         .hero-main-title { font-size: clamp(2.4rem, 5vw, 3.8rem); line-height: 1.1; letter-spacing: -0.02em; }
+        
+//         .city-main-container { margin-top: -80px; position: relative; z-index: 10; }
+//         .premium-card { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.04); padding: 40px; margin-bottom: 40px; border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+        
+//         /* CMS CONTENT PROTECTION & STRICT IMAGE POSITIONING */
+//         .rich-text-content { width: 100%; word-break: break-word; overflow-wrap: anywhere; }
+        
+//         .rich-text-content figure, 
+//         .rich-text-content figure.image { margin: 2rem auto !important; max-width: 100% !important; height: auto !important; display: flex; justify-content: center; }
+//         .rich-text-content img { max-width: 100% !important; height: auto !important; border-radius: 12px; display: block !important; margin: 0 auto !important; object-fit: contain !important; }
+//         .rich-text-content iframe, .rich-text-content video, .rich-text-content table { max-width: 100% !important; overflow-x: auto; display: block !important; margin: 2rem auto !important; }
+
+//         .rich-text-content h2, .rich-text-content h3 { font-family: var(--font-outfit), sans-serif; font-size: clamp(1.4rem, 3vw, 1.8rem); font-weight: 700; color: #0f172a; margin-top: 2rem; margin-bottom: 1rem; }
+//         .rich-text-content p { font-family: var(--font-poppins), sans-serif; font-size: 1rem; line-height: 1.8; color: #475569; margin-bottom: 1.2rem; }
+        
+//         /* Bullet point lists for correct CMS rendering */
+//         .rich-text-content ul, .rich-text-content ol { display: flex; flex-direction: column; gap: 1rem; padding: 0; list-style: none; margin: 2rem 0; counter-reset: rtc-counter; }
+//         .rich-text-content ul li, .rich-text-content ol li { background: #fdfdfd; border: 1px solid #f1f5f9; padding: 1.2rem 1.5rem 1.2rem 3rem; border-radius: 12px; display: block; position: relative; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: 0.3s; }
+//         .rich-text-content ul li:hover, .rich-text-content ol li:hover { border-color: var(--hc-primary); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,145,77,0.1); }
+//         .rich-text-content ul li::before { content: '✦'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.2rem; font-weight: bold; line-height: 1.5; }
+//         .rich-text-content ol li { counter-increment: rtc-counter; }
+//         .rich-text-content ol li::before { content: counter(rtc-counter) '.'; color: var(--hc-primary); position: absolute; left: 1.2rem; top: 1.2rem; font-size: 1.1rem; font-weight: 700; line-height: 1.5; }
+        
+//         .rich-text-content li img { max-width: 100% !important; height: auto !important; margin: 1rem auto; border-radius: 8px; display: block; }
+
+//         .micro-trust-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; }
+//         .micro-trust-item:last-child { border-bottom: none; padding-bottom: 0; }
+//         .micro-trust-icon { color: #22c55e; font-size: 18px; margin-right: 12px; }
+
+//         /* Premium FAQs */
+//         .faq-premium-item { border: none !important; margin-bottom: 16px; border-radius: 16px !important; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04); background: #ffffff; border: 1px solid #f1f5f9 !important; }
+//         .faq-premium-btn { width: 100%; text-align: left; background: white; border: none; padding: clamp(16px, 4vw, 24px); font-weight: 700; font-size: clamp(1.05rem, 3.5vw, 1.2rem); color: var(--hc-dark); display: flex; justify-content: space-between; align-items: center; box-shadow: none !important; line-height: 1.4; gap: 15px; }
+//         .faq-premium-btn::after { display: none !important; }
+//         .faq-premium-btn:not(.collapsed) { color: var(--hc-primary); background: #fffcf9; }
+//         .faq-icon-toggle { transition: transform 0.3s ease; color: var(--hc-primary); flex-shrink: 0; }
+//         .faq-premium-btn:not(.collapsed) .faq-icon-toggle { transform: rotate(45deg); color: #ff5722; }
+//         .faq-premium-body { padding: 0 clamp(16px, 4vw, 24px) 20px; color: #475569; font-size: clamp(0.95rem, 3vw, 1.05rem); line-height: 1.7; background: #fffcf9; }
+        
+//         .sidebar-blog-card { padding: 12px; border-radius: 12px; transition: all 0.3s ease; border: 1px solid transparent; }
+//         .sidebar-blog-card:hover { background-color: #f8fafc; border-color: #e2e8f0; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
+
+//         .process-step { display: flex; align-items: flex-start; margin-bottom: 30px; position: relative; }
+//         .process-step:last-child { margin-bottom: 0; }
+//         .process-icon { width: 50px; height: 50px; min-width: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-right: 20px; z-index: 2; }
+//         .process-step:not(:last-child)::after { content: ''; position: absolute; left: 24px; top: 50px; bottom: -30px; width: 2px; background: #ffe4d6; z-index: 1; }
+
+//         .excellence-stat { text-align: center; padding: 20px; position: relative; }
+//         @media (min-width: 768px) { .excellence-stat::after { content: ""; position: absolute; right: 0; top: 20%; height: 60%; width: 1px; background: #e2e8f0; } .excellence-stat:last-child::after { display: none; } }
+
+//         .dual-sticky-wrapper { position: sticky; top: 100px; height: max-content; }
+//         .sidebar-widget { background: #ffffff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 30px; border: 1px solid rgba(0,0,0,0.03); }
+//         .widget-title { font-family: var(--font-outfit), sans-serif; font-weight: 700; font-size: 20px; margin-bottom: 25px; position: relative; padding-bottom: 10px; }
+//         .widget-title::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40px; height: 3px; background: #ff914d; border-radius: 2px; }
+
+//         .sidebar-cta { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; padding: 30px 20px; text-align: center; color: white; margin-bottom: 30px; position: relative; overflow: hidden; }
+//         .nav-city-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-radius: 10px; color: #475569; text-decoration: none; font-weight: 500; font-family: var(--font-poppins), sans-serif; transition: all 0.2s ease; background: #f8fafc; margin-bottom: 10px; }
+//         .nav-city-link:hover, .nav-city-link.active { background: #ff914d; color: white; transform: translateX(5px); }
+//         .nav-city-link.active { pointer-events: none; }
+//         .sidebar-cta h4 { color: #ffffff !important; }
+
+//         .modern-card { background: #ffffff; padding: 30px 25px; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.02); transition: all 0.3s ease; height: 100%; position: relative; overflow: hidden; text-align: center;}
+//         .modern-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #ff914d;}
+//         .modern-card-icon { width: 50px; height: 50px; background: #fff4ed; color: #ff914d; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 20px; transition: transform 0.3s ease;}
+//         .modern-card:hover .modern-card-icon { transform: scale(1.1); background: #ff914d; color: white; }
+
+//         @media (max-width: 768px) {
+//         main.bg-light {
+//     overflow-x: hidden;
+//   }
+//           .premium-card { padding: 20px !important; margin-bottom: 25px; }
+//           .author-date-social-block { flex-direction: column !important; align-items: flex-start !important; gap: 15px; }
+//           .social-links { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+//           .hero-main-title { font-size: 2.2rem !important; }
+          
+//           .mobile-slider-wrapper { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; scroll-snap-type: x mandatory; gap: 15px; padding: 10px 0 30px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+//           .mobile-slider-wrapper::-webkit-scrollbar { display: none; }
+//           .mobile-slider-wrapper > div { flex: 0 0 88% !important; scroll-snap-align: center; }
+//           .rich-text-content ul { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 1rem; }
+//           .rich-text-content li { flex: 0 0 85%; }
+
+//           .process-slider > div { 
+//     flex: 0 0 100% !important; /* Shows exactly one card at a time */
+//     padding: 0 10px; /* Optional: adds a little breathing room */
+//   }
+//   .process-slider .process-step { 
+//     flex-direction: column; 
+//     align-items: center; 
+//     text-align: center; 
+//   }
+//   .process-slider .process-icon { 
+//     margin-right: 0; 
+//     margin-bottom: 15px; 
+//   }
+//   .process-slider .process-step::after { 
+//     display: none !important; /* Removes the vertical connecting line */
+//   }
+//           .modern-card-slider > div { 
+//     flex: 0 0 100% !important; /* 👈 Shows exactly 1 card at a time on mobile */
+//   }
+//         }
+          
+//       `}} />
+
+//       <main className="bg-light pb-5">
+        
+//         {pageType === "blog" && (
+//           <div className="container py-4 py-lg-5 mt-lg-4">
+//             <div className="row g-4 g-lg-5">
+
+//               <div className="col-lg-8 order-1">
+//                 <div className="premium-card bg-white">
+
+//                   <h1 className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: '1.3' }}>
+//                     {pageData.title}
+//                   </h1>
+
+//                   <div className="author-date-social-block d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-4">
+//                     <div className="text-muted fst-italic fs-6 mb-3 mb-md-0 d-flex align-items-center font-poppins flex-wrap gap-2">
+//                       <span><FaUserCircle className="me-2 text-secondary" size={20} />
+//                       {pageData.writer_name ? `By ${pageData.writer_name}` : "By HC Team"}</span>
+//                       <span className="mx-2 d-none d-md-inline">•</span>
+//                       <span><FaCalendarAlt className="me-2 text-secondary" size={18} />
+//                       {new Date(pageData.created_at || Date.now()).toLocaleDateString('en-US', {
+//                         year: 'numeric', month: 'long', day: 'numeric'
+//                       })}</span>
+//                     </div>
+
+//                     <div className="social-links d-flex gap-2">
+//                         {siteSettings?.facebook_url && <a href={siteSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="social-btn fb" aria-label="Facebook"><FaFacebookF size={18} /></a>}
+//                         {siteSettings?.instagram_url && <a href={siteSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="social-btn ig" aria-label="Instagram"><FaInstagram size={18} /></a>}
+//                         {siteSettings?.twitter_url && <a href={siteSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="social-btn tw" aria-label="X (Twitter)"><FaTwitter size={18} /></a>}
+//                         {siteSettings?.linkedin_url && <a href={siteSettings.linkedin_url} target="_blank" rel="noopener noreferrer" className="social-btn in" aria-label="LinkedIn"><FaLinkedin size={18} /></a>}
+//                         {siteSettings?.pinterest_url && <a href={siteSettings.pinterest_url} target="_blank" rel="noopener noreferrer" className="social-btn pi" aria-label="Pinterest"><FaPinterest size={18} /></a>}
+//                         {siteSettings?.youtube_url && <a href={siteSettings.youtube_url} target="_blank" rel="noopener noreferrer" className="social-btn yt" aria-label="YouTube"><FaYoutube size={18} /></a>}
+//                     </div>
+//                   </div>
+
+//                   {pageData.image && (
+//                     <div className="w-100 mb-4 mb-lg-5 d-flex justify-content-center">
+//                       <Image
+//                         // src={pageData.image}
+//                         src={toHttps(pageData.image)}
+//                         alt={pageData.image_alt || pageData.title || defaultAltText}
+//                         width={1200}
+//                         height={675}
+//                         priority
+//                         fetchPriority="high"
+//                         sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1199px) 66vw, 760px"
+//                         style={{ maxWidth: '100%', height: 'auto', objectFit: 'cover', borderRadius: '1rem', display: 'block', margin: '0 auto' }}
+//                         className="shadow-sm"
+//                       />
+//                     </div>
+//                   )}
+
+//                  <div className="details font-poppins rich-text-content ck-content">
+//                    {/* <div dangerouslySetInnerHTML={{ __html: pageData.description }} />
+//                    */}
+//                    <div dangerouslySetInnerHTML={{ __html: richDescription }} />
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <div className="col-lg-4 order-2">
+//                 <div className="dual-sticky-wrapper">
+
+//                   <SidebarForm city={slug} />
+
+//                   {recentBlogs && recentBlogs.length > 0 && (
+//                     <div className="sidebar-widget mt-4 lazy-render">
+//                       <h4 className="widget-title">Related Articles</h4>
+//                       <div className="d-flex flex-column gap-2">
+//                         {recentBlogs.map((blog, idx) => (
+//                           // <Link key={idx} href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
+//                           <Link key={idx} href={getBlogHref(blog)} className="text-decoration-none">  
+//                             <div className="sidebar-blog-card d-flex align-items-center gap-3">
+//                               <img 
+//                                 // src={blog.image || "/images/default.jpg"} 
+//                                 src={toHttps(blog.image) || "/images/default.jpg"}
+//                                 alt={blog.title}
+//                                 loading="lazy"
+//                                 decoding="async"
+//                                 className="rounded shadow-sm flex-shrink-0" 
+//                                 style={{ width: "70px", height: "70px", objectFit: "contain" }} 
+//                               />
+//                               <div>
+//                                 <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px', lineHeight: '1.4' }}>
+//                                   {blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}
+//                                 </h6>
+//                                 <small className="text-gradient fw-bold" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
+//                                   READ ARTICLE <FaArrowRight size={10} />
+//                                 </small>
+//                               </div>
+//                             </div>
+//                           </Link>
+//                         ))}
+//                       </div>
+//                     </div>
+//                   )}
+
+//                   <div className="sidebar-widget mt-4">
+//                     <h4 className="widget-title">Service Areas</h4>
+//                     <div className="d-flex flex-column">
+//                       {Object.keys(cityUrlMap).map((c, idx) => (
+//                         <Link key={idx} href={cityUrlMap[c]} className="nav-city-link">
+//                           <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
+//                           <FaArrowRight size={12} />
+//                         </Link>
+//                       ))}
+//                     </div>
+//                   </div>
+
+//                 </div>
+//               </div>
+
+//             </div>
+//           </div>
+//         )}
+
+//         {pageType === "cms-page" && (
+//           <>
+//             <div className="city-hero w-100">
+//               <Image 
+//                 src={heroImageSrc}
+//                 // alt={`${displayCity} Interior Design`}
+//                 alt={
+//   pageData?.banner_image && pageData?.banner_image_alt?.trim()
+//     ? pageData.banner_image_alt.trim()
+//     : `${displayCity} Interior Design`
+// }
+//               //   fill 
+//               //   priority 
+//               //   sizes="100vw" 
+//               //   style={{ objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               // />
+
+//               width={1920}
+//                 height={800}
+//                 priority
+//                 fetchPriority="high"
+//                 sizes="100vw"
+//                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 0 }}
+//               />
+              
+//               <div className="container hero-content font-poppins">
+//                 <div className="hero-badge" style={{ textShadow: '1px 1px 4px rgba(0,0,0,0.5)' }}>
+//                   <FaMapMarkerAlt className="me-2" /> {pageData?.banner_subtitle || `High Creation Interior ${displayCity}`}
+//                 </div>
+                
+//                 <h1 
+//                   className="hero-main-title fw-bold mb-3 font-outfit text-white" 
+//                   style={{ textShadow: '2px 4px 15px rgba(0,0,0,0.8), 0 0 40px rgba(0,0,0,0.6)' }}
+//                 >
+//                   {pageData?.banner_title || pageData?.title || `${displayCity}`}
+//                 </h1>
+//               </div>
+//             </div>
+
+//             <div className="container city-main-container">
+//               <div className="row g-5">
+//                 <div className="col-lg-8">
+//                   {/* <div className="dual-sticky-wrapper"> */}
+                    
+//                     <div className="premium-card mb-4">
+//                       {/* <h2 className="font-outfit fw-bold h3 mb-4 text-dark">
+//                          {displayCity}
+//                       </h2> */}
+//                       <div className="rich-text-content ck-content" dangerouslySetInnerHTML={{ __html: safeContent }} />
+//                     </div>
+
+//                     <div className="lazy-render">
+//                       <div className="premium-card bg-white border-0">
+//                         <h2 className="font-outfit fw-bold h3 mb-4 text-dark text-center text-md-start">Our Proven Design Process</h2>
+//                         <div className="mobile-slider-wrapper process-slider">
+//                           {[
+//                             { icon: <FaUser />, title: "Consultation & Ideation", desc: `We meet at your ${displayCity} property to understand your vision.` },
+//                             { icon: <FaDraftingCompass />, title: "3D Concept & Planning", desc: "Walking through your home with detailed 3D renders before we build." },
+//                             { icon: <FaHardHat />, title: "Precision Execution", desc: "Expert execution with 150+ quality checks and zero compromises." },
+//                             { icon: <FaHome />, title: "The Grand Handover", desc: "A flawless move-in within 45 Days Delivery*. Welcome home." }
+//                           ].map((step, i) => (
+//                             <div className="process-step" key={i}>
+//                               <div className="process-icon">{step.icon}</div>
+//                               <div>
+//                                 <h4 className="font-outfit h5 fw-bold mb-1">{i + 1}. {step.title}</h4>
+//                                 <p className="text-muted font-poppins small mb-0">{step.desc}</p>
+//                               </div>
+//                             </div>
+//                           ))}
+//                         </div>
+//                       {/* </div> */}
+//                     </div>
+
+//                     {recentBlogs.length > 0 && (
+//                       <div className="lazy-render">
+//                         <div className="premium-card border-0 px-0 pt-0">
+//                           <h2 className="font-outfit fw-bold h3 mb-4">Design Inspiration</h2>
+//                           <div className="row g-4 font-poppins mobile-slider-wrapper">
+//                             {recentBlogs.map((blog, idx) => (
+//                               <div className="col-md-6" key={idx}>
+//                                 {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
+//                                 <Link href={getBlogHref(blog)} className="text-decoration-none">
+//                                   <div className="d-flex align-items-center border p-3 rounded-4 bg-white shadow-sm h-100 transition-all hover:shadow-md">
+//                                     <img 
+//                                     // src={blog.image || "/images/default.jpg"}
+//                                     src={toHttps(blog.image) || "/images/default.jpg"}
+//                                     alt={blog.title} className="rounded" style={{ width: "80px", height: "80px", objectFit: "contain" }} loading="lazy" decoding="async" />
+//                                     <div className="ms-3">
+//                                       <h6 className="text-dark fw-bold mb-1" style={{ fontSize: '14px' }}>{blog.title.length > 45 ? `${blog.title.substring(0, 45)}...` : blog.title}</h6>
+//                                       <small className="text-gradient fw-bold">READ ARTICLE <FaArrowRight size={10} /></small>
+//                                     </div>
+//                                   </div>
+//                                 </Link>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )}
+
+//                     {/* --- EXCELLENCE STATS (Dynamic CMS Icons) --- */}
+//                     <div className="lazy-render">
+//                       <div className="premium-card shadow-sm" style={{ background: 'linear-gradient(to right, #ffffff, #fff9f5)' }}>
+//                         <div className="row align-items-center justify-content-center mobile-slider-wrapper">
+                          
+//                           {excellenceStats && excellenceStats.length > 0 ? (
+//                             excellenceStats.map((stat, idx) => {
+//                               const IconComponent = stat.iconName && FaIcons[stat.iconName] ? FaIcons[stat.iconName] : FaIcons.FaStar;
+//                               const colWidth = excellenceStats.length <= 3 ? 4 : Math.max(3, Math.floor(12 / excellenceStats.length));
+
+//                               return (
+//                                 <div className={`col-md-${colWidth} excellence-stat d-flex flex-column align-items-center justify-content-center text-center`} key={idx}>
+//                                   {stat.iconType === "image" && stat.image ? (
+//                                     <img 
+//                                       src={getBackendImageUrl(stat.image)} 
+//                                       alt={stat.label || "Stat Icon"} 
+//                                       style={{ width: `${stat.size || 40}px`, height: `${stat.size || 40}px`, objectFit: "contain" }} 
+//                                       className="mb-3"
+//                                     />
+//                                   ) : (
+//                                     <IconComponent 
+//                                       size={stat.size || 40} 
+//                                       color={stat.color || "#f5a623"} 
+//                                       className="mb-3" 
+//                                     />
+//                                   )}
+//                                   <h3 className="font-outfit fw-bold h2 mb-1">{stat.value}</h3>
+//                                   <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">{stat.label}</p>
+//                                 </div>
+//                               );
+//                             })
+//                           ) : (
+//                             /* Fallback Default Stats */
+//                             <>
+//                               <div className="col-md-4 excellence-stat d-flex flex-column align-items-center justify-content-center text-center">
+//                                 <FaHome size={40} color="#ff914d" className="mb-3" />
+//                                 <h3 className="font-outfit fw-bold h2 mb-1">2680+</h3>
+//                                 <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">HOME RENOVATIONS</p>
+//                               </div>
+//                               <div className="col-md-4 excellence-stat d-flex flex-column align-items-center justify-content-center text-center">
+//                                 <FaSmile size={40} color="#ff914d" className="mb-3" />
+//                                 <h3 className="font-outfit fw-bold h2 mb-1">2660+</h3>
+//                                 <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">HAPPY CUSTOMERS</p>
+//                               </div>
+//                               <div className="col-md-4 excellence-stat d-flex flex-column align-items-center justify-content-center text-center">
+//                                 <FaStar size={40} color="#ff914d" className="mb-3" />
+//                                 <h3 className="font-outfit fw-bold h2 mb-1">4.8/5</h3>
+//                                 <p className="font-poppins text-muted small fw-bold text-uppercase mb-0">CLIENT RATINGS</p>
+//                               </div>
+//                             </>
+//                           )}
+
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="lazy-render">
+//                       <div className="premium-card bg-transparent border-0 shadow-none px-0 py-0 mb-4">
+//                         <div className="text-center mb-4">
+//                             <h2 className="font-outfit fw-bold h3 text-dark">What makes us the best choice for your project.</h2>
+//                         </div>
+//                         <div className="row g-4 mobile-slider-wrapper modern-card-slider">
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaShieldAlt /></div>
+//                               <h4 className="font-outfit fw-bold h6">10-Year Warranty*</h4>
+//                               <p className="text-muted font-poppins small mb-0">India&apos;s only full-home coverage guarantee.</p>
+//                             </div>
+//                           </div>
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaGem /></div>
+//                               <h4 className="font-outfit fw-bold h6">Elite Finishes</h4>
+//                               <p className="text-muted font-poppins small mb-0">Sourcing luxury materials that stand the test of time.</p>
+//                             </div>
+//                           </div>
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaClock /></div>
+//                               <h4 className="font-outfit fw-bold h6">45-Day Delivery*</h4>
+//                               <p className="text-muted font-poppins small mb-0">Swift, on-time installation of storage & kitchens.</p>
+//                             </div>
+//                           </div>
+//                           <div className="col-md-6 col-lg-3">
+//                             <div className="modern-card">
+//                               <div className="modern-card-icon"><FaTools /></div>
+//                               <h4 className="font-outfit fw-bold h6">Expert Team</h4>
+//                               <p className="text-muted font-poppins small mb-0">Highly skilled professionals handling your project end-to-end.</p>
+//                             </div>
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     {contentBlocks.length > 0 && (
+//                       <div className="content-blocks-section lazy-render mb-4">
+//                         {contentBlocks.map((block, idx) => (
+//                           <div key={idx} className="premium-card mb-4" style={{ padding: '30px' }}>
+//                             {block.type === 'testimonial' && (
+//                               <blockquote className="blockquote text-center mb-0">
+//                                 <p className="mb-3 fs-5 font-italic">&quot;{block.data.review}&quot;</p>
+//                                 <footer className="blockquote-footer mt-0 fs-6">
+//                                   {block.data.client_name} <cite title="Source Title">{block.data.designation}</cite>
+//                                 </footer>
+//                               </blockquote>
+//                             )}
+//                             {block.type === 'service_row' && (
+//                               <div className="row align-items-center">
+//                                 <div className={block.data.reverse_layout ? 'col-md-6 order-md-2' : 'col-md-6'}>
+//                                   <h3 className="font-outfit fw-bold h4 mb-3">{block.data.heading}</h3>
+//                                   <p className="text-muted font-poppins" style={{ whiteSpace: 'pre-line' }}>{block.data.description}</p>
+//                                 </div>
+//                                 <div className={block.data.reverse_layout ? 'col-md-6 order-md-1 text-center' : 'col-md-6 text-center'}>
+//                                   {block.data.image_url && (
+//                                     <img 
+//                                       // src={block.data.image_url} 
+//                                       src={toHttps(block.data.image_url)}
+//                                       alt={block.data.image_alt || block.data.heading || defaultAltText} 
+//                                       className="img-fluid rounded-4 shadow-sm" 
+//                                       style={{ maxHeight: '350px', objectFit: 'cover', width: '100%' }}
+//                                       loading="lazy"
+//                                       decoding="async" 
+//                                     />
+//                                   )}
+//                                 </div>
+//                               </div>
+//                             )}
+//                             {block.type === 'counter' && (
+//                               <div className="text-center p-3">
+//                                 <h2 className="font-outfit fw-bold display-4 mb-2 text-gradient">{block.data.number}</h2>
+//                                 <p className="font-poppins fw-bold text-uppercase text-muted mb-0 tracking-wider">{block.data.label}</p>
+//                               </div>
+//                             )}
+//                           </div>
+//                         ))}
+//                       </div>
+//                     )}
+
+//                     {accordions.length > 0 && (
+//                       <div className="lazy-render mb-4">
+//                         <div className="premium-card border-0 px-0">
+//                           <h2 className="font-outfit fw-bold h3 mb-4">Additional Information</h2>
+//                           <div className="accordion font-poppins" id={`accordion-info-${pageData.id}`}>
+//                             {accordions.map((acc, index) => (
+//                               <div className="accordion-item faq-premium-item" key={`acc-${index}`}>
+//                                 <h2 className="accordion-header">
+//                                   <button className={`accordion-button faq-premium-btn ${index !== 0 ? 'collapsed' : ''}`} type="button" data-bs-toggle="collapse" data-bs-target={`#acc-collapse${index}`}>
+//                                     <span className="pe-3">{acc.title}</span>
+//                                     <FaPlus className="faq-icon-toggle flex-shrink-0" />
+//                                   </button>
+//                                 </h2>
+//                                 <div id={`acc-collapse${index}`} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent={`#accordion-info-${pageData.id}`}>
+//                                   <div className="accordion-body faq-premium-body" style={{ whiteSpace: 'pre-line' }}>{acc.content}</div>
+//                                 </div>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )}
+
+//                     {/* {faqs.length > 0 && (
+//                       <div className="lazy-render">
+//                         <div className="premium-card border-0">
+//                           <h2 className="font-outfit fw-bold h3 mb-4">Insights for {displayCity}</h2>
+//                           <div className="accordion font-poppins" id={`accordion-faq-${pageData?.id}`}>
+//                             {faqs.map((faq, index) => (
+//                               <div className="accordion-item faq-premium-item mb-4 shadow-sm" style={{ borderRadius: '16px', border: '1px solid #f1f5f9' }} key={index}>
+//                                 <h2 className="accordion-header">
+//                                   <button className={`accordion-button faq-premium-btn py-4 px-4 ${index !== 0 ? 'collapsed' : ''}`} type="button" data-bs-toggle="collapse" data-bs-target={`#collapse${index}`}>
+//                                     <span className="pe-3" style={{ lineHeight: '1.6' }}>{faq.question}</span>
+//                                     <FaPlus className="faq-icon-toggle flex-shrink-0" />
+//                                   </button>
+//                                 </h2>
+//                                 <div id={`collapse${index}`} className={`accordion-collapse collapse ${index === 0 ? 'show' : ''}`} data-bs-parent={`#accordion-faq-${pageData?.id}`}>
+//                                   <div className="accordion-body faq-premium-body px-4 pb-4" style={{ whiteSpace: 'pre-line', lineHeight: '1.8' }}>
+//                                     {faq.answer}
+//                                   </div>
+//                                 </div>
+//                               </div>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     )} */}
+
+//                     {faqs.length > 0 && (
+//   <div className="lazy-render mb-5">
+//     {/* Restored card padding (p-4 p-md-5) to fix the left/right overflow */}
+//     <div className="premium-card p-4 p-md-5 bg-white shadow-sm rounded-4">
+//       <h2 className="font-outfit fw-bold display-6 mb-4 text-dark">FAQ&apos;s</h2>
+//       <div className="font-poppins">
+//         {faqs.map((faq, index) => {
+//           // Removes duplicate numbers (e.g., "1. ") coming from API data
+//           const cleanQuestion = faq.question.replace(/^(\d+[\.\)]\s*|Q\d+[\.\)]\s*)/i, "");
+//           // Removes duplicate "Ans:" or "Ans." coming from API data
+//           const cleanAnswer = faq.answer.replace(/^(Ans[\.\:]?\s*)/i, "");
+
+//           return (
+//             <div key={index} className="mb-4 pb-2">
+//               {/* Increased margin-bottom (mb-3) for spacing between Question and Answer */}
+//               <p className="fw-bold mb-3 text-dark fs-6" style={{ color: "#1e293b", lineHeight: "1.5" }}>
+//                 Q{index + 1}. {cleanQuestion}
+//               </p>
+//               <p className="mb-0 text-secondary" style={{ whiteSpace: "pre-line", lineHeight: "1.8", fontSize: "0.98rem" }}>
+//                 <span className="fw-bold text-dark">Ans.</span> {cleanAnswer}
+//               </p>
+//             </div>
+//           );
+//         })}
+//       </div>
+//     </div>
+//   </div>
+// )}
+
+//                   </div>
+//                 </div>
+
+//                 <div className="col-lg-4">
+//                   <div className="dual-sticky-wrapper">
+                    
+//                     <div className="sidebar-cta shadow-lg mb-4">
+//                       <h4 className="font-outfit fw-bold mb-2">Book a Site Visit</h4>
+//                       <p className="font-poppins small text-white-50 mb-4">Expert designers will visit your {displayCity} property.</p>
+//                       <Link href="/contact" className="btn btn-light w-100 fw-bold py-2 rounded-pill">Schedule Now</Link>
+//                     </div>
+
+//                     <SidebarForm city={slug} />
+
+//                     <div className="sidebar-widget py-4 font-poppins lazy-render">
+//                       <h4 className="widget-title mb-4">The Promise</h4>
+//                       <div className="micro-trust-item">
+//                         <FaCheckCircle className="micro-trust-icon" />
+//                         <div>
+//                           <span className="d-block fw-bold text-dark" style={{ fontSize: '14px' }}>Transparent Pricing</span>
+//                           <span className="text-muted" style={{ fontSize: '12px' }}>No hidden costs, ever.</span>
+//                         </div>
+//                       </div>
+//                       <div className="micro-trust-item">
+//                         <FaTools className="micro-trust-icon text-warning" />
+//                         <div>
+//                           <span className="d-block fw-bold text-dark" style={{ fontSize: '14px' }}>In-House Execution</span>
+//                           <span className="text-muted" style={{ fontSize: '12px' }}>No third-party contractors involved.</span>
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="sidebar-widget">
+//                       <h4 className="widget-title">Service Areas</h4>
+//                       <div className="d-flex flex-column">
+//                         {Object.keys(cityUrlMap).map((c, idx) => (
+//                           <Link key={idx} href={cityUrlMap[c]} className={`nav-city-link ${c === slug ? 'active' : ''}`}>
+//                             <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
+//                             <FaArrowRight size={12} />
+//                           </Link>
+//                         ))}
+//                       </div>
+//                     </div>
+
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </>
+//         )}
+//       </main>
+//     </MainLayout>
+//   );
+// };
+
+// export default DynamicRootPage;
+
+
+
+
+
 import MainLayout from "../layouts/MainLayout";
 import { notFound, permanentRedirect } from "next/navigation";
 import Image from "next/image"; 
@@ -1186,6 +6121,11 @@ import {
   PAGE_CONTENT_DEFAULTS,
   DEFAULT_PROMISE_ITEMS,
 } from "@/utils/cmsPageSettings";
+import {
+  splitBlogSettings,
+  getBlogSectionOrder,
+  BLOG_CONTENT_DEFAULTS,
+} from "@/utils/blogSettings";
 
 import { 
   generateOrganizationSchema, 
@@ -1310,7 +6250,8 @@ async function getRecentBlogs(slug) {
     const res = await fetch(`${API_BASE_URL}/cms-blog`, getCmsFetchOptions(slug));
     if (!res.ok) return [];
     const data = await res.json();
-    return Array.isArray(data) ? data.slice(0, 4) : [];
+    // the full list (not only 4) so the blogs ticked in CMS > Pages > Page Layout can be found
+    return Array.isArray(data) ? data.slice(0, 100) : [];
   } catch (error) { return []; }
 }
 
@@ -1353,6 +6294,11 @@ async function getBlogData(slug) {
     if (Array.isArray(data)) {
         if (data.length === 0) return null;
         data = data[0]; 
+    }
+    // FAQs / sidebar settings saved in CMS > Blog travel inside the description as a hidden comment
+    if (data && typeof data.description === "string") {
+      const { html, settings } = splitBlogSettings(data.description);
+      data = { ...data, description: html, blog_settings: settings };
     }
     return data;
   } catch (error) {
@@ -1570,7 +6516,8 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
 
   const seoData = seoResult;
   const customSchema = seoData?.customSchema;
-  const recentBlogs = recentBlogsResult;
+  const allBlogs = Array.isArray(recentBlogsResult) ? recentBlogsResult : [];
+  const recentBlogs = allBlogs.slice(0, 4);
   const excellenceStats = statsResult;
   const siteSettings = settingsResult;
 
@@ -1579,6 +6526,8 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
   let contentBlocks = [];
   // Layout options saved from CMS > Pages > "Page Layout" (stored in one reserved content block)
   let pageSettings = {};
+  // Layout options saved from CMS > Blog (FAQs, sidebar blocks, section order)
+  let blogSettings = {};
 
   if (pageType === "cms-page") {
     faqs = parseJsonSafe(pageData.faqs);
@@ -1586,6 +6535,11 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
     const split = splitPageSettings(pageData.content_blocks);
     contentBlocks = split.blocks;
     pageSettings = split.settings;
+  } else if (pageType === "blog") {
+    blogSettings = pageData.blog_settings && typeof pageData.blog_settings === "object" ? pageData.blog_settings : {};
+    // FAQs of the blog also feed the FAQ structured data
+    faqs = getCityContent({ faqs: blogSettings.faqs }, BLOG_CONTENT_DEFAULTS).faqs.items
+      .filter((faq) => faq.question.trim() && faq.answer.trim());
   }
 
   
@@ -1634,6 +6588,45 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
   const BlogsTitleTag = pickTag(content.blogs.titleTag, "h2");
   const WhyTitleTag = pickTag(content.whyChoose.titleTag, "h2");
   const FaqTitleTag = pickTag(content.faqs.titleTag, "h2");
+
+  // Design Inspiration: the blogs ticked in CMS > Pages > Page Layout, otherwise the latest four (as before)
+  const savedBlogIds = (Array.isArray(pageSettings.designInspirationBlogIds) ? pageSettings.designInspirationBlogIds : [])
+    .map((id) => String(id));
+  const selectedBlogs = savedBlogIds
+    .map((id) => allBlogs.find((blog) => String(blog.id) === id))
+    .filter(Boolean);
+  const designInspirationBlogs = selectedBlogs.length ? selectedBlogs : recentBlogs;
+
+  // ---------------------------------------------------------------------------
+  // Blog post layout (CMS > Blog > "FAQs, Sidebar & Layout"). Everything falls back to what the
+  // blog page showed before, so blogs without saved settings look exactly the same.
+  // ---------------------------------------------------------------------------
+  const blogOrder = getBlogSectionOrder(blogSettings.sectionOrder);
+  const BlogBlock = ({ id, children }) => (
+    <div
+      className="city-block"
+      style={{ "--d": blogOrder.desktop.indexOf(id), "--m": blogOrder.mobile.indexOf(id) }}
+    >
+      {children}
+    </div>
+  );
+  const blogFaqContent = getCityContent({ faqs: blogSettings.faqs }, BLOG_CONTENT_DEFAULTS).faqs;
+  const blogFaqItems = blogFaqContent.items.filter((faq) => faq.question.trim() && faq.answer.trim());
+  const BlogFaqTitleTag = pickTag(blogFaqContent.titleTag, "h2");
+
+  const BlogRelatedTitleTag = pickTag(blogSettings.relatedTitleTag, "h4");
+  // sidebar blogs: the ones ticked in CMS > Blog, otherwise the latest four (as before)
+  const savedRelatedIds = (Array.isArray(blogSettings.relatedBlogIds) ? blogSettings.relatedBlogIds : []).map((id) => String(id));
+  const pickedRelatedBlogs = savedRelatedIds
+    .map((id) => allBlogs.find((blog) => String(blog.id) === id))
+    .filter(Boolean);
+  const sidebarBlogs = pickedRelatedBlogs.length ? pickedRelatedBlogs : recentBlogs;
+  const BlogServiceAreasTitleTag = pickTag(blogSettings.serviceAreasTitleTag, "h4");
+  const customBlogServiceAreas = (Array.isArray(blogSettings.serviceAreas) ? blogSettings.serviceAreas : [])
+    .filter((area) => area && area.name && area.url);
+  const blogServiceAreas = customBlogServiceAreas.length
+    ? customBlogServiceAreas.map((area) => ({ name: area.name, url: safeInternalHref(area.url, "/services") }))
+    : Object.entries(cityUrlMap).map(([key, url]) => ({ name: humanizeCity(key), url }));
 
   // Stats: page-level custom stats > global Excellence Stats (CMS Content) > built-in defaults
   const customStatItems = content.stats.useCustom
@@ -1782,6 +6775,9 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
         
         .city-main-container { margin-top: -80px; position: relative; z-index: 10; }
         .premium-card { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.04); padding: 40px; margin-bottom: 40px; border: 1px solid rgba(0,0,0,0.02); overflow: hidden; }
+        .city-project-card { position: relative; overflow: hidden; border-radius: 16px; background: #f1f5f9; aspect-ratio: 4 / 3; }
+        .city-project-card img, .city-project-card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .city-project-card figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 36px 16px 14px; color: #fff; font-weight: 600; background: linear-gradient(transparent, rgba(15,23,42,.78)); }
         
         /* CMS CONTENT PROTECTION & STRICT IMAGE POSITIONING */
         .rich-text-content { width: 100%; word-break: break-word; overflow-wrap: anywhere; }
@@ -1940,9 +6936,11 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
         
         {pageType === "blog" && (
           <div className="container py-4 py-lg-5 mt-lg-4">
-            <div className="row g-4 g-lg-5">
+            <div className="row g-4 g-lg-5 city-cols">
 
               <div className="col-lg-8 order-1">
+                <div className="city-col-stack">
+                <BlogBlock id="main">
                 <div className="premium-card bg-white">
 
                   <h1 className="font-outfit fw-bold text-dark mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', lineHeight: '1.3' }}>
@@ -1993,18 +6991,67 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
                    <div dangerouslySetInnerHTML={{ __html: richDescription }} />
                   </div>
                 </div>
+                </BlogBlock>
+
+                {/* --- FAQs (CMS > Blog > FAQs) shown as an accordion --- */}
+                {blogFaqItems.length > 0 && (
+                  <BlogBlock id="faqs">
+                    <div className="lazy-render mb-5">
+                      <div className="premium-card border-0 faq-split">
+                        <div className="faq-split-head">
+                          {blogFaqContent.eyebrow && <p className="faq-eyebrow font-poppins">{t(blogFaqContent.eyebrow)}</p>}
+                          <BlogFaqTitleTag className="faq-split-title font-outfit">{t(blogFaqContent.title)}</BlogFaqTitleTag>
+                          {blogFaqContent.intro && <p className="faq-split-intro font-poppins">{t(blogFaqContent.intro)}</p>}
+                        </div>
+                        <div className="faq-split-list accordion font-poppins" id={`accordion-faq-${pageData?.id}`}>
+                          {blogFaqItems.map((faq, index) => (
+                            <div className="faq-split-item" key={index}>
+                              <h3 className="faq-split-q">
+                                <button
+                                  className={`faq-split-btn ${index !== 0 ? "collapsed" : ""}`}
+                                  type="button"
+                                  data-bs-toggle="collapse"
+                                  data-bs-target={`#blog-faq-${pageData?.id}-${index}`}
+                                  aria-expanded={index === 0 ? "true" : "false"}
+                                  aria-controls={`blog-faq-${pageData?.id}-${index}`}
+                                >
+                                  <span>{faq.question}</span>
+                                  <span className="faq-split-toggle" aria-hidden="true">
+                                    <FaPlus className="faq-plus" />
+                                    <FaIcons.FaMinus className="faq-minus" />
+                                  </span>
+                                </button>
+                              </h3>
+                              <div
+                                id={`blog-faq-${pageData?.id}-${index}`}
+                                className={`accordion-collapse collapse ${index === 0 ? "show" : ""}`}
+                                data-bs-parent={`#accordion-faq-${pageData?.id}`}
+                              >
+                                <div className="faq-split-body">{faq.answer}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </BlogBlock>
+                )}
+                </div>
               </div>
 
               <div className="col-lg-4 order-2">
-                <div className="dual-sticky-wrapper">
+                <div className="dual-sticky-wrapper city-col-stack">
 
-                  <SidebarForm city={slug} />
+                  <BlogBlock id="sidebarForm">
+                    <SidebarForm city={slug} />
+                  </BlogBlock>
 
-                  {recentBlogs && recentBlogs.length > 0 && (
-                    <div className="sidebar-widget mt-4 lazy-render">
-                      <h4 className="widget-title">Related Articles</h4>
-                      <div className="d-flex flex-column gap-2">
-                        {recentBlogs.map((blog, idx) => (
+                  {sidebarBlogs.length > 0 && (
+                    <BlogBlock id="related">
+                      <div className="sidebar-widget mt-4 lazy-render">
+                        <BlogRelatedTitleTag className="widget-title">{blogSettings.relatedTitle || "Related Articles"}</BlogRelatedTitleTag>
+                        <div className="d-flex flex-column gap-2">
+                        {sidebarBlogs.map((blog, idx) => (
                           // <Link key={idx} 
                           // href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none">
                           <Link key={idx} 
@@ -2031,20 +7078,23 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
                           </Link>
                         ))}
                       </div>
-                    </div>
+                      </div>
+                    </BlogBlock>
                   )}
 
-                  <div className="sidebar-widget mt-4">
-                    <h4 className="widget-title">Service Areas</h4>
-                    <div className="d-flex flex-column">
-                      {Object.keys(cityUrlMap).map((c, idx) => (
-                        <Link key={idx} href={cityUrlMap[c]} className="nav-city-link">
-                          <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{c.replace('_', ' ')}</span></span>
-                          <FaArrowRight size={12} />
-                        </Link>
-                      ))}
+                  <BlogBlock id="serviceAreas">
+                    <div className="sidebar-widget mt-4">
+                      <BlogServiceAreasTitleTag className="widget-title">{blogSettings.serviceAreasTitle || "Service Areas"}</BlogServiceAreasTitleTag>
+                      <div className="d-flex flex-column">
+                        {blogServiceAreas.map((area, idx) => (
+                          <Link key={`${area.url}-${idx}`} href={area.url} className="nav-city-link">
+                            <span><FaMapMarkerAlt className="me-2" size={14} /> <span className="text-capitalize">{area.name}</span></span>
+                            <FaArrowRight size={12} />
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  </BlogBlock>
 
                 </div>
               </div>
@@ -2145,14 +7195,14 @@ const DynamicRootPage = async ({ params, inBlogRoute = false }) => {
                       </Block>
                     )}
 
-                    {/* --- DESIGN INSPIRATION (latest blogs) --- */}
-                    {recentBlogs.length > 0 && (
+                    {/* --- DESIGN INSPIRATION (blogs ticked in the CMS, else the latest four) --- */}
+                    {designInspirationBlogs.length > 0 && (
                       <Block id="blogs">
                         <div className="lazy-render">
                           <div className="premium-card border-0 px-0 pt-0">
                             <BlogsTitleTag className="font-outfit fw-bold h3 mb-4">{t(content.blogs.title)}</BlogsTitleTag>
                             <MobileSlider label="Design inspiration" className="row g-4 font-poppins mobile-slider-wrapper">
-                              {recentBlogs.map((blog, idx) => (
+                              {designInspirationBlogs.map((blog, idx) => (
                                 <div className="col-md-6" key={idx}>
                                   {/* <Link href={`/${blog.seo_content?.slug || `blog-detail?id=${blog.id}`}`} className="text-decoration-none"> */}
                                   <Link href={getBlogHref(blog)} className="text-decoration-none">
