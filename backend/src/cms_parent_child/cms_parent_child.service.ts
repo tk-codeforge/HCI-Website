@@ -462,11 +462,23 @@ export class CmsParentChildService {
   async create(createCmsParentChildDto: CreateCmsParentChildDto): Promise<CmsParentChild> {
     const imagePath = createCmsParentChildDto.image ? basename(createCmsParentChildDto.image) : 'default.png';
 
-    const defaultImageCount = 
-      createCmsParentChildDto.page_type === 'experience_center' || 
-      createCmsParentChildDto.page_type === 'experience_center_gurugram' 
-        ? 3 
-        : 10;
+    // const defaultImageCount = 
+    //   createCmsParentChildDto.page_type === 'experience_center' || 
+    //   createCmsParentChildDto.page_type === 'experience_center_gurugram' 
+    //     ? 3 
+    //     : 10;
+
+        const THREE_IMAGE_TYPES = [
+      'experience_center',
+      'experience_center_gurugram',
+      'experience_center_faridabad',
+      'experience_center_noida_extension',
+      'experience_center_new_delhi',
+    ];
+
+    const defaultImageCount = THREE_IMAGE_TYPES.includes(createCmsParentChildDto.page_type)
+      ? 3
+      : 10;
 
     const childImages = Array.from({ length: defaultImageCount }, () => ({ image: 'default.png' }));
 

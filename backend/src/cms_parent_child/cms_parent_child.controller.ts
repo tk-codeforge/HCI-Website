@@ -105,6 +105,7 @@ export class CmsParentChildController {
     const createData = {
       page_type: createCmsParentChildDto.page_type,
       title: createCmsParentChildDto.title,
+      title_tag: createCmsParentChildDto.title_tag,
       description: createCmsParentChildDto.description,
       image: imagePath,
     };
