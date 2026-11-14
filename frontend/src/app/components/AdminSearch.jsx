@@ -438,7 +438,8 @@ const loadSitemapItems = async () => {
                 key: `sitemap-${path}`,
                 name: safeDecode(path),
                 url: loc,
-                group: "Site URL",
+                group: "Sitemap URL",
+                groupNotSearchable: true, // typing "sitemap" must find the Global Sitemap page, not every URL
                 target: "/cms/global-sitemap",
                 highlight: path,
                 adminOnly: true,
@@ -648,7 +649,7 @@ const AdminSearch = () => {
                 (i) =>
                     normalize(i.name).includes(q) ||
                     normalize(i.url).includes(q) ||
-                    normalize(i.group).includes(q) ||
+                    (!i.groupNotSearchable && normalize(i.group).includes(q)) ||
                     normalize(i.extra).includes(q)
             )
             .sort((a, b) => {
